@@ -3,7 +3,7 @@ package form
 object DSL {
   def form[T](rows: (Row[T])*) = ???
 
-  def field[T, U](field: T => U)(options: FieldOption[T, U]*): Field[T, U] = ???
+  def field[T, U](field: T => U, options: FieldOption[T, U]*): Field[T, U] = ???
 
   def row[T](fields: (Field[T, _])*): Row[T] = ???
 
@@ -19,15 +19,15 @@ class Row[T] {}
 class Field[T, U] extends Row[T] /*extends FieldValidations*/ {
 }
 
-class SuplerValidator[T, U] extends FieldOption[T, U] {
+class SuplerValidator[T, -U] extends FieldOption[T, U] {
 
 }
 
-class DataProvider[T, U] extends FieldOption[T, U] {
+class DataProvider[T, -U] extends FieldOption[T, U] {
 
 }
 
-trait FieldOption[T, U] {
+trait FieldOption[T, -U] {
 
 }
 
