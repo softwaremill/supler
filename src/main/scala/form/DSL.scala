@@ -23,8 +23,6 @@ class Row[T] {
 class Field[T, U] extends Row[T] {
   def validate(validator: SuplerValidator[T, U]*): Field[T, U] = ???
   def use(dataProvider: DataProvider[T, U]): Field[T, U] = ???
-
-  def ~ (field: Field[T, U]): Row[T] = ???
 }
 
 class SuplerValidator[T, U]
