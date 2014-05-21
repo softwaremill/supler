@@ -17,7 +17,7 @@ class DSL[T] {
 }
 
 class Row[T] {
-  def ~ (field: Field[T, _]): Row[T] = ???
+  def || (field: Field[T, _]): Row[T] = ???
 }
 
 class Field[T, U] extends Row[T] {

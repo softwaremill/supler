@@ -8,7 +8,7 @@ object PersonForm {
 
   val personForm = form[Person](f => List(
     f.field(_.name).validate(length(10), custom((entity, value) => value != null)).use(dataProvider(_ => List("a"))),
-    f.field(_.lastName) ~ f.field(_.lastName) ~ f.field(_.shoeNumber).validate(custom((entity, value) => value > 10)),
+    f.field(_.lastName) || f.field(_.lastName) || f.field(_.shoeNumber).validate(custom((entity, value) => value > 10)),
     f.field(_.shoeNumber),
     takieSobiePoleOdCzapy
   ))
