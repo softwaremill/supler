@@ -16,9 +16,17 @@ class Row[T] {
   def || (field: Field[T, _]): Row[T] = ???
 }
 
-class Field[T, U] extends Row[T] {
-  def validate(validator: Validator[T, U]*): Field[T, U] = ???
-  def use(dataProvider: DataProvider[T, U]): Field[T, U] = ???
+case class Field[T, U](
+  get: T => U,
+  set: T => U,
+  validators: List[Validator[T, U]],
+  dataProvider: Option[DataProvider[T, U]]) extends Row[T] {
+
+  def validate(validators: Validator[T, U]*): Field[T, U] = this.copy(validators = this.validators ++ validators)
+  def use(dataProvider: DataProvider[T, U]): Field[T, U] = this.dataProvider match {
+    case Some(_) => throw new IllegalStateException("A data provider is already defined!")
+    case None => this.copy(dataProvider = Some(dataProvider))
+  }
 }
 
 class DataProvider[T, U]
