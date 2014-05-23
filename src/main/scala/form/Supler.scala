@@ -1,15 +1,15 @@
 package form
 
-object DSL extends Validators {
-  def form[T](rows: DSL[T] => List[Row[T]]) = ???
+object Supler extends Validators {
+  def form[T](rows: Supler[T] => List[Row[T]]) = ???
 
   def field[T, U](field: T => U): Field[T, U]  = ???
 
   def dataProvider[T, U](provider: T => List[U]): DataProvider[T, U] = ???
 }
 
-class DSL[T] {
-  def field[U](field: T => U): Field[T, U]  = DSL.field(field)
+class Supler[T] extends Validators {
+  def field[U](field: T => U): Field[T, U]  = Supler.field(field)
 }
 
 class Row[T] {

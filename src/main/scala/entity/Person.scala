@@ -1,8 +1,13 @@
 package entity
 
-class Person {
-  var name: String = null
-  var lastName: String = null
-  var shoeNumber: Int = 0
+import form.Supler
 
+class Person {
+  var name: String = "" // require, default
+  var lastName: Option[String] = None // optional
+  var shoeNumber: Int = 0
+}
+
+object PersonMeta extends Supler[Person] {
+  val shoeNumberField = field(_.shoeNumber).validate(le(48))
 }

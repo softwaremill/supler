@@ -1,7 +1,7 @@
 package form
 
 import entity.Person
-import DSL._
+import Supler._
 
 object PersonForm {
   val takieSobiePoleOdCzapy = field[Person, Int](_.shoeNumber)
