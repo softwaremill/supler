@@ -23,7 +23,6 @@ object Supler extends Validators {
 
   def field_impl[T, U](c: Context)(param: c.Expr[T => U]): c.Expr[Field[T, U]] = {
     import c.universe._
-    println(showRaw(param))
 
     val fieldName = param match {
       case Expr(
@@ -39,9 +38,7 @@ object Supler extends Validators {
     val paramRepTree = Literal(Constant(fieldName))
     val paramRepExpr = c.Expr[String](paramRepTree)
 
-    // TODO get the proper field name from inside
     reify {
-      println(paramRepExpr.splice)
       newField(paramRepExpr.splice)
     }
   }
