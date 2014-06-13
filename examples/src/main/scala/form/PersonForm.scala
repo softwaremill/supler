@@ -4,9 +4,10 @@ import entity.Person
 import form.Supler._
 
 object PersonForm extends App {
-  // todo do wymyslenia
-//  val takieSobiePoleOdCzapy = field[Person, Int](_.shoeNumber)
-//    .validate(custom((e, v) => v == 10, (e, v) => ValidationError("Żle!")))
+  val takieSobiePoleOdCzapy = field[Person, Int](_.shoeNumber)
+    .validate(custom((e, v) => v == 10, (e, v) => ValidationError("Żle!")))
+
+  val person = new Person
 
   val personForm = form[Person](f => List(
     f.field(_.name)
@@ -15,6 +16,7 @@ object PersonForm extends App {
         custom((e, v) => v != null, (e, v) => ValidationError("null!")))
       .use(dataProvider(_ => List("a"))),
     f.field(_.lastName) || f.field(_.lastName),
-    f.field(_.shoeNumber).validate(ge(3))
+    f.field(_.shoeNumber).validate(ge(3)),
+    takieSobiePoleOdCzapy
   ))
 }
