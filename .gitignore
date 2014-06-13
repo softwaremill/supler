@@ -18,3 +18,7 @@ project/plugins/project/
 
 #idea
 .idea
+
+**/*.iml
+*.iml
+.idea_modules
