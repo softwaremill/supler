@@ -1,15 +1,35 @@
 package form
 
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox.Context
+
 object Supler extends Validators {
   def form[T](rows: Supler[T] => List[Row[T]]) = ???
 
-  def field[T, U](field: T => U): Field[T, U]  = ???
+  def newField[T, U](fieldName: String): Field[T, U]  = {
+    println(s"Running field $fieldName")
+    Field[T,U](fieldName, List(), None)
+  }
 
   def dataProvider[T, U](provider: T => List[U]): DataProvider[T, U] = ???
+
+  def field_impl[T, U](c: Context)(param: c.Expr[T => U]): c.Expr[Field[T, U]] = {
+    import c.universe._
+    val paramRep = show(param.tree)
+    val paramRepTree = Literal(Constant(paramRep))
+    val paramRepExpr = c.Expr[String](paramRepTree)
+
+    reify {
+      println (paramRepExpr.splice)
+      newField(paramRepExpr.splice)
+    }
+  }
 }
 
 class Supler[T] extends Validators {
-  def field[U](field: T => U): Field[T, U]  = Supler.field(field)
+  def newField[U](fieldName: String): Field[T, U]  = Supler.newField(fieldName)
+
+  def field[U](param: T => U): Field[T,U] = macro Supler.field_impl[T, U]
 }
 
 class Row[T] {
@@ -17,8 +37,7 @@ class Row[T] {
 }
 
 case class Field[T, U](
-  get: T => U,
-  set: T => U,
+  name: String,
   validators: List[Validator[T, U]],
   dataProvider: Option[DataProvider[T, U]]) extends Row[T] {
 

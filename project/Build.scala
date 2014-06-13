@@ -23,20 +23,20 @@ object SuplerBuild extends Build {
     "root",
     file("."),
     settings = buildSettings
-  ) aggregate(macros, supler)
-
-  lazy val macros: Project = Project(
-    "macros",
-    file("macros"),
-    settings = buildSettings ++ Seq(
-      libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _))
-  )
+  ) aggregate(supler, examples)
 
   lazy val supler: Project = Project(
     "supler",
     file("supler"),
     settings = buildSettings ++ Seq(
+      libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _))
+  )
+
+  lazy val examples: Project = Project(
+    "examples",
+    file("examples"),
+    settings = buildSettings ++ Seq(
       libraryDependencies += scalaTest
     )
-  ) dependsOn(macros)
+  ) dependsOn(supler)
 }
