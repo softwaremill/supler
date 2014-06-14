@@ -19,4 +19,6 @@ object PersonForm extends App {
     f.field(_.shoeNumber).validate(ge(3)),
     takieSobiePoleOdCzapy
   ))
+
+  println (jsonSchema.toString())
 }

@@ -3,7 +3,12 @@ package form
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
+import schema.{JsonProperty, JsonType, JsonSchema}
+
 object Supler extends Validators {
+
+  var jsonSchema = JsonSchema("Example Schema", JsonType.Object, Nil)
+
   def form[T](rows: Supler[T] => List[Row[T]]) = {
     println(s"new form with rows: rows")
     rows(new Supler[T])
@@ -11,6 +16,8 @@ object Supler extends Validators {
 
   def newField[T, U](fieldName: String): Field[T, U] = {
     println(s"Running field $fieldName")
+    jsonSchema = jsonSchema.addProperty(JsonProperty(fieldName, JsonType.String, Some("some description")))
+
     Field[T, U](fieldName, List(), None)
   }
 
