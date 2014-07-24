@@ -63,7 +63,7 @@ object Supler extends Validators {
       Function(List(
         ValDef(Modifiers(Flag.PARAM), TermName("obj"), TypeTree(), EmptyTree),
         ValDef(Modifiers(Flag.PARAM), TermName("v"), TypeTree(), EmptyTree)),
-        Apply(Select(Ident(TermName("obj")), TermName("copy")), copyParams)) //Ident(TermName("x$11")), Ident(TermName("x$10"))
+        Apply(Select(Ident(TermName("obj")), TermName("copy")), copyParams))
     } else {
       // (obj, v) => obj.[fieldName] = v; obj
       Function(List(
