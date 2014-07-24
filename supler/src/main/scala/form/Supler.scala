@@ -27,7 +27,7 @@ object Supler extends Validators {
 
   def field[T, U](param: T => U): Field[T, U] = macro Supler.field_impl[T, U]
 
-  def field_impl[T, U](c: Context)(param: c.Expr[T => U]): c.Expr[Field[T, U]] = {
+  def field_impl[T: c.WeakTypeTag , U](c: Context)(param: c.Expr[T => U]): c.Expr[Field[T, U]] = {
     import c.universe._
 
     val fieldName = param match {
@@ -47,13 +47,36 @@ object Supler extends Validators {
       Select(Ident(TermName("obj")), TermName(fieldName)))
     val readFieldValueExpr = c.Expr[T => U](readFieldValueTree)
 
-    // (obj, v) => obj.[fieldName] = v; obj
-    val writeFieldValueTree = Function(List(
-      ValDef(Modifiers(Flag.PARAM), TermName("obj"), TypeTree(), EmptyTree),
-      ValDef(Modifiers(Flag.PARAM), TermName("v"), TypeTree(), EmptyTree)),
-      Block(
-        List(Apply(Select(Ident(TermName("obj")), TermName(fieldName + "_$eq")), List(Ident(TermName("v"))))),
-        Ident(TermName("obj"))))
+    val classSymbol = implicitly[WeakTypeTag[T]].tpe.typeSymbol.asClass
+    val isCaseClass = classSymbol.isCaseClass
+
+    val writeFieldValueTree = if (isCaseClass) {
+      // constructors can have only one param list
+      val ctorParams = classSymbol.primaryConstructor.asMethod.paramLists(0)
+
+      val copyParams = ctorParams.map { param =>
+        if (param.name.decodedName.toString == fieldName) {
+          Ident(TermName("v"))
+        } else {
+          Select(Ident(TermName("obj")), param.name)
+        }
+      }
+
+      // (obj, v) => obj.copy(obj.otherField1, ..., v, ..., obj.otherFieldN)
+      Function(List(
+        ValDef(Modifiers(Flag.PARAM), TermName("obj"), TypeTree(), EmptyTree),
+        ValDef(Modifiers(Flag.PARAM), TermName("v"), TypeTree(), EmptyTree)),
+        Apply(Select(Ident(TermName("obj")), TermName("copy")), copyParams)) //Ident(TermName("x$11")), Ident(TermName("x$10"))
+    } else {
+      // (obj, v) => obj.[fieldName] = v; obj
+      Function(List(
+        ValDef(Modifiers(Flag.PARAM), TermName("obj"), TypeTree(), EmptyTree),
+        ValDef(Modifiers(Flag.PARAM), TermName("v"), TypeTree(), EmptyTree)),
+        Block(
+          List(Apply(Select(Ident(TermName("obj")), TermName(fieldName + "_$eq")), List(Ident(TermName("v"))))),
+          Ident(TermName("obj"))))
+    }
+
     val writeFieldValueExpr = c.Expr[(T, U) => T](writeFieldValueTree)
 
     reify {
