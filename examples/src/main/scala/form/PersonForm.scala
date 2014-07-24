@@ -28,5 +28,6 @@ object PersonForm extends App {
 
   println(personForm.doValidate(p))
 
-  println(personForm.generateSchema)
+  println(personForm.generateJSONSchema)
+  println(personForm.generateJSONValues(p))
 }

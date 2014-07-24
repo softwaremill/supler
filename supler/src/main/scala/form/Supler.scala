@@ -1,5 +1,8 @@
 package form
 
+import org.json4s.JsonAST.JString
+import org.json4s.{JField, JObject}
+
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
@@ -66,7 +69,8 @@ trait Supler[T] extends Validators {
 case class FieldValidationError(field: Field[_, _], key: String, params: Any*)
 
 trait Row[T] {
-  def generateSchema: List[JsonProperty]
+  def generateJSONSchema: List[JsonProperty]
+  def generateJSONValues(obj : T): List[JField]
 
   def ||(field: Field[T, _]): Row[T]
   def doValidate(obj: T): List[FieldValidationError]
@@ -75,8 +79,15 @@ trait Row[T] {
 case class Form[T](rows: List[Row[T]]) {
   def doValidate(obj: T): List[FieldValidationError] = rows.flatMap(_.doValidate(obj))
 
-  def generateSchema = {
-    new JsonSchema("Form", JsonType.Object, rows.flatMap(_.generateSchema))
+  def generateJSONSchema = {
+    new JsonSchema("Form", JsonType.Object, rows.flatMap(_.generateJSONSchema))
+  }
+  
+  def generateJSONValues(obj: T) = {
+    import org.json4s.native._
+    prettyJson(renderJValue(new JObject(
+      rows.flatMap(_.generateJSONValues(obj))
+    )))
   }
 }
 
@@ -104,14 +115,18 @@ case class Field[T, U](
     validators.flatMap(_.doValidate(obj, v)).map(ve => FieldValidationError(this, ve.key, ve.params: _*))
   }
 
-  override def generateSchema = List(new JsonProperty(name, JsonType.String, label))
+  override def generateJSONSchema = List(new JsonProperty(name, JsonType.String, label))
+
+  override def generateJSONValues(obj: T) = List(JField(name, JString(read(obj).toString)))
 }
 
 case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   def ||(field: Field[T, _]): Row[T] = MultiFieldRow(fields ++ List(field))
   def doValidate(obj: T): List[FieldValidationError] = fields.flatMap(_.doValidate(obj))
 
-  override def generateSchema = fields.flatMap(_.generateSchema)
+  override def generateJSONSchema = fields.flatMap(_.generateJSONSchema)
+
+  override def generateJSONValues(obj: T) = fields.flatMap(_.generateJSONValues(obj))
 }
 
 class DataProvider[T, U](provider: T => List[U])
