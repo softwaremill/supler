@@ -67,11 +67,8 @@ class Supler[T] extends Validators {
   def field[U](param: T => U): Field[T, U] = macro Supler.field_impl[T, U]
 }
 
-class Row[T] {
-  def ||(field: Field[T, _]): Row[T] = {
-    println(s"new row with field $field")
-    this
-  }
+trait Row[T] {
+  def ||(field: Field[T, _]): Row[T]
 }
 
 case class Form[T](rows: List[Row[T]])
@@ -89,6 +86,12 @@ case class Field[T, U](
     case Some(_) => throw new IllegalStateException("A data provider is already defined!")
     case None => this.copy(dataProvider = Some(dataProvider))
   }
+
+  def ||(field: Field[T, _]): Row[T] = MultiFieldRow(this :: field :: Nil)
+}
+
+case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
+  def ||(field: Field[T, _]): Row[T] = MultiFieldRow(fields ++ List(field))
 }
 
 class DataProvider[T, U](provider: T => List[U])
