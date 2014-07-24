@@ -32,14 +32,12 @@ object SuplerBuild extends Build {
     file("supler"),
     settings = buildSettings ++ Seq(
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _),
-      libraryDependencies += json4sNative)
+      libraryDependencies ++= Seq(json4sNative, scalaTest))
   )
 
   lazy val examples: Project = Project(
     "examples",
     file("examples"),
-    settings = buildSettings ++ Seq(
-      libraryDependencies += scalaTest
-    )
+    settings = buildSettings
   ) dependsOn (supler)
 }
