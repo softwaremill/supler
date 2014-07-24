@@ -14,8 +14,8 @@ object Supler extends Validators {
     Form(rows(new Supler[T] {}))
   }
 
-  def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T): Field[T, U] = {
-    Field[T, U](fieldName, read, write, List(), None, None)
+  def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean): Field[T, U] = {
+    Field[T, U](fieldName, read, write, List(), None, None, required)
   }
 
   def dataProvider[T, U](provider: T => List[U]): DataProvider[T, U] = {
@@ -24,7 +24,7 @@ object Supler extends Validators {
 
   def field[T, U](param: T => U): Field[T, U] = macro Supler.field_impl[T, U]
 
-  def field_impl[T: c.WeakTypeTag , U](c: Context)(param: c.Expr[T => U]): c.Expr[Field[T, U]] = {
+  def field_impl[T: c.WeakTypeTag , U: c.WeakTypeTag](c: Context)(param: c.Expr[T => U]): c.Expr[Field[T, U]] = {
     import c.universe._
 
     val fieldName = param match {
@@ -76,8 +76,11 @@ object Supler extends Validators {
 
     val writeFieldValueExpr = c.Expr[(T, U) => T](writeFieldValueTree)
 
+    val isOption = implicitly[WeakTypeTag[U]].tpe.typeSymbol.asClass.fullName == "scala.Option"
+    val isRequiredExpr = c.Expr[Boolean](Literal(Constant(!isOption)))
+
     reify {
-      newField(paramRepExpr.splice, readFieldValueExpr.splice, writeFieldValueExpr.splice)
+      newField(paramRepExpr.splice, readFieldValueExpr.splice, writeFieldValueExpr.splice, isRequiredExpr.splice)
     }
   }
 }
@@ -117,7 +120,8 @@ case class Field[T, U](
   write: (T, U) => T,
   validators: List[Validator[T, U]],
   dataProvider: Option[DataProvider[T, U]],
-  label: Option[String]) extends Row[T] {
+  label: Option[String],
+  required: Boolean) extends Row[T] {
 
   def label(newLabel: String) = this.copy(label = Some(newLabel))
   
