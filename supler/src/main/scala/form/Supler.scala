@@ -7,8 +7,6 @@ import schema.{JsonProperty, JsonType, JsonSchema}
 
 object Supler extends Validators {
 
-  var jsonSchema = JsonSchema("Example Schema", JsonType.Object, Nil)
-
   def form[T](rows: Supler[T] => List[Row[T]]) = {
     println(s"new form with rows: rows")
     Form(rows(new Supler[T] {}))
@@ -16,9 +14,7 @@ object Supler extends Validators {
 
   def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T): Field[T, U] = {
     println(s"Running field $fieldName")
-    jsonSchema = jsonSchema.addProperty(JsonProperty(fieldName, JsonType.String, Some("some description")))
-
-    Field[T, U](fieldName, read, write, List(), None)
+    Field[T, U](fieldName, read, write, List(), None, None)
   }
 
   def dataProvider[T, U](provider: T => List[U]): DataProvider[T, U] = {
@@ -70,12 +66,18 @@ trait Supler[T] extends Validators {
 case class FieldValidationError(field: Field[_, _], key: String, params: Any*)
 
 trait Row[T] {
+  def generateSchema: List[JsonProperty]
+
   def ||(field: Field[T, _]): Row[T]
   def doValidate(obj: T): List[FieldValidationError]
 }
 
 case class Form[T](rows: List[Row[T]]) {
   def doValidate(obj: T): List[FieldValidationError] = rows.flatMap(_.doValidate(obj))
+
+  def generateSchema = {
+    new JsonSchema("Form", JsonType.Object, rows.flatMap(_.generateSchema))
+  }
 }
 
 case class Field[T, U](
@@ -83,8 +85,11 @@ case class Field[T, U](
   read: T => U,
   write: (T, U) => T,
   validators: List[Validator[T, U]],
-  dataProvider: Option[DataProvider[T, U]]) extends Row[T] {
+  dataProvider: Option[DataProvider[T, U]],
+  label: Option[String]) extends Row[T] {
 
+  def label(newLabel: String) = this.copy(label = Some(newLabel))
+  
   def validate(validators: Validator[T, U]*): Field[T, U] = this.copy(validators = this.validators ++ validators)
 
   def use(dataProvider: DataProvider[T, U]): Field[T, U] = this.dataProvider match {
@@ -98,11 +103,15 @@ case class Field[T, U](
     val v = read(obj)
     validators.flatMap(_.doValidate(obj, v)).map(ve => FieldValidationError(this, ve.key, ve.params: _*))
   }
+
+  override def generateSchema = List(new JsonProperty(name, JsonType.String, label))
 }
 
 case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   def ||(field: Field[T, _]): Row[T] = MultiFieldRow(fields ++ List(field))
   def doValidate(obj: T): List[FieldValidationError] = fields.flatMap(_.doValidate(obj))
+
+  override def generateSchema = fields.flatMap(_.generateSchema)
 }
 
 class DataProvider[T, U](provider: T => List[U])

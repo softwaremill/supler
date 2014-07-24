@@ -1,5 +1,6 @@
 package schema
 
+import org.json4s.JsonAST._
 import schema.JsonType.JsonType
 
 case class JsonSchema(title: String, jsonType: JsonType, properties: List[JsonProperty]) {
@@ -7,33 +8,31 @@ case class JsonSchema(title: String, jsonType: JsonType, properties: List[JsonPr
     this.copy(properties = property :: properties)
   }
 
-  override def toString(): String = {
-    val sb = new StringBuffer()
-    sb.append("{\n")
-    .append(s"\t'title': '$title',\n")
-    .append(s"\t'type': '${jsonType.toString}',\n")
-    .append(s"\t'properties': {\n")
+  def toJValue: JValue = {
+    JObject(
+      List(
+        JField("title", JString(title)),
+        JField("type", JString(jsonType.toString)),
+        JField("properties", JObject(properties.map(_.toJValue)))
+      )
+    )
+  }
 
-    properties.foreach(jp => sb.append(jp.toString()))
-
-    sb.append(s"\t}\n")
-    sb.append(s"}\n")
-
-    sb.toString
+  override def toString = {
+    import org.json4s.native._
+    prettyJson(renderJValue(toJValue))
   }
 }
 
 case class JsonProperty(name: String, jsonType: JsonType, description: Option[String]) {
-  override def toString(): String = {
-    val sb = new StringBuffer()
-    sb.append(s"\t\t'$name': {\n")
-      .append(s"\t\t\t'type': '${jsonType.toString}',\n")
-
-    description.map(s => sb.append(s"\t\t\t'description': '$s',\n"))
-
-    sb.append(s"\t\t}\n")
-
-    sb.toString
+  def toJValue: JField = {
+    JField(name, JObject(
+        List(
+          JField("type", JString(jsonType.toString)),
+          JField("description", JString(description.getOrElse("")))
+        )
+      )
+    )
   }
 }
 
