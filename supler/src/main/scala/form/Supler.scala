@@ -14,16 +14,16 @@ object Supler extends Validators {
     rows(new Supler[T])
   }
 
-  def newField[T, U](fieldName: String): Field[T, U] = {
+  def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T): Field[T, U] = {
     println(s"Running field $fieldName")
     jsonSchema = jsonSchema.addProperty(JsonProperty(fieldName, JsonType.String, Some("some description")))
 
-    Field[T, U](fieldName, List(), None)
+    Field[T, U](fieldName, read, write, List(), None)
   }
 
   def dataProvider[T, U](provider: T => List[U]): DataProvider[T, U] = {
     println(s"New data provider $provider")
-    new DataProvider[T, U]
+    new DataProvider[T, U](provider)
   }
 
   def field[T, U](param: T => U): Field[T, U] = macro Supler.field_impl[T, U]
@@ -35,18 +35,30 @@ object Supler extends Validators {
       case Expr(
       Function(
       List(ValDef(Modifiers(_), TermName(termDef: String), TypeTree(), EmptyTree)),
-      Select(Ident(TermName(termUse: String)), TermName(field: String)))) =>
-        if (termDef == termUse) {
+      Select(Ident(TermName(termUse: String)), TermName(field: String)))) if termDef == termUse =>
           field
-        }
       case _ => throw new IllegalArgumentException("Illegal field reference " + show(param.tree) + "; please use _.fieldName instead")
     }
 
     val paramRepTree = Literal(Constant(fieldName))
     val paramRepExpr = c.Expr[String](paramRepTree)
 
+    // obj => obj.[fieldName]
+    val readFieldValueTree = Function(List(ValDef(Modifiers(Flag.PARAM), TermName("obj"), TypeTree(), EmptyTree)),
+      Select(Ident(TermName("obj")), TermName(fieldName)))
+    val readFieldValueExpr = c.Expr[T => U](readFieldValueTree)
+
+    // (obj, v) => obj.[fieldName] = v; obj
+    val writeFieldValueTree = Function(List(
+      ValDef(Modifiers(Flag.PARAM), TermName("obj"), TypeTree(), EmptyTree),
+      ValDef(Modifiers(Flag.PARAM), TermName("v"), TypeTree(), EmptyTree)),
+      Block(
+        List(Apply(Select(Ident(TermName("obj")), TermName(fieldName + "_$eq")), List(Ident(TermName("v"))))),
+        Ident(TermName("obj"))))
+    val writeFieldValueExpr = c.Expr[(T, U) => T](writeFieldValueTree)
+
     reify {
-      newField(paramRepExpr.splice)
+      newField(paramRepExpr.splice, readFieldValueExpr.splice, writeFieldValueExpr.splice)
     }
   }
 }
@@ -63,9 +75,11 @@ class Row[T] {
 }
 
 case class Field[T, U](
-                        name: String,
-                        validators: List[Validator[T, U]],
-                        dataProvider: Option[DataProvider[T, U]]) extends Row[T] {
+  name: String,
+  read: T => U,
+  write: (T, U) => T,
+  validators: List[Validator[T, U]],
+  dataProvider: Option[DataProvider[T, U]]) extends Row[T] {
 
   def validate(validators: Validator[T, U]*): Field[T, U] = this.copy(validators = this.validators ++ validators)
 
@@ -75,5 +89,5 @@ case class Field[T, U](
   }
 }
 
-class DataProvider[T, U]
+class DataProvider[T, U](provider: T => List[U])
 

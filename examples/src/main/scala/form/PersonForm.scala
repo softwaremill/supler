@@ -20,5 +20,10 @@ object PersonForm extends App {
     takieSobiePoleOdCzapy
   ))
 
-  println (jsonSchema.toString())
+  val p = new Person()
+  p.shoeNumber = 10
+  println(takieSobiePoleOdCzapy.read(p))
+  println(takieSobiePoleOdCzapy.write(p, 20).shoeNumber)
+
+  println(jsonSchema.toString())
 }
