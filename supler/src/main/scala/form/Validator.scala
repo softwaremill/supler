@@ -26,7 +26,7 @@ trait Validators {
 
   private def fieldValidator[T, U](test: U => Boolean)(createError: U => ValidationError) = new Validator[T, U] {
     override def doValidate(objValue: T, fieldValue: U) = {
-      if (test(fieldValue)) {
+      if (!test(fieldValue)) {
         List(createError(fieldValue))
       } else {
         Nil

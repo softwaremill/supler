@@ -67,13 +67,15 @@ trait Supler[T] extends Validators {
   def field[U](param: T => U): Field[T, U] = macro Supler.field_impl[T, U]
 }
 
+case class FieldValidationError(field: Field[_, _], key: String, params: Any*)
+
 trait Row[T] {
   def ||(field: Field[T, _]): Row[T]
-  def doValidate(obj: T): List[ValidationError]
+  def doValidate(obj: T): List[FieldValidationError]
 }
 
 case class Form[T](rows: List[Row[T]]) {
-  def doValidate(obj: T): List[ValidationError] = rows.flatMap(_.doValidate(obj)) 
+  def doValidate(obj: T): List[FieldValidationError] = rows.flatMap(_.doValidate(obj))
 }
 
 case class Field[T, U](
@@ -92,15 +94,15 @@ case class Field[T, U](
 
   def ||(field: Field[T, _]): Row[T] = MultiFieldRow(this :: field :: Nil)
   
-  def doValidate(obj: T): List[ValidationError] = {
+  def doValidate(obj: T): List[FieldValidationError] = {
     val v = read(obj)
-    validators.flatMap(_.doValidate(obj, v))
+    validators.flatMap(_.doValidate(obj, v)).map(ve => FieldValidationError(this, ve.key, ve.params: _*))
   }
 }
 
 case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   def ||(field: Field[T, _]): Row[T] = MultiFieldRow(fields ++ List(field))
-  def doValidate(obj: T): List[ValidationError] = fields.flatMap(_.doValidate(obj))
+  def doValidate(obj: T): List[FieldValidationError] = fields.flatMap(_.doValidate(obj))
 }
 
 class DataProvider[T, U](provider: T => List[U])
