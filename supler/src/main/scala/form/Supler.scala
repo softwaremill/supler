@@ -69,9 +69,12 @@ class Supler[T] extends Validators {
 
 trait Row[T] {
   def ||(field: Field[T, _]): Row[T]
+  def doValidate(obj: T): List[ValidationError]
 }
 
-case class Form[T](rows: List[Row[T]])
+case class Form[T](rows: List[Row[T]]) {
+  def doValidate(obj: T): List[ValidationError] = rows.flatMap(_.doValidate(obj)) 
+}
 
 case class Field[T, U](
   name: String,
@@ -88,10 +91,16 @@ case class Field[T, U](
   }
 
   def ||(field: Field[T, _]): Row[T] = MultiFieldRow(this :: field :: Nil)
+  
+  def doValidate(obj: T): List[ValidationError] = {
+    val v = read(obj)
+    validators.flatMap(_.doValidate(obj, v))
+  }
 }
 
 case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   def ||(field: Field[T, _]): Row[T] = MultiFieldRow(fields ++ List(field))
+  def doValidate(obj: T): List[ValidationError] = fields.flatMap(_.doValidate(obj))
 }
 
 class DataProvider[T, U](provider: T => List[U])
