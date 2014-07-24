@@ -11,17 +11,14 @@ import schema.{JsonProperty, JsonType, JsonSchema}
 object Supler extends Validators {
 
   def form[T](rows: Supler[T] => List[Row[T]]) = {
-    println(s"new form with rows: rows")
     Form(rows(new Supler[T] {}))
   }
 
   def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T): Field[T, U] = {
-    println(s"Running field $fieldName")
     Field[T, U](fieldName, read, write, List(), None, None)
   }
 
   def dataProvider[T, U](provider: T => List[U]): DataProvider[T, U] = {
-    println(s"New data provider $provider")
     new DataProvider[T, U](provider)
   }
 
