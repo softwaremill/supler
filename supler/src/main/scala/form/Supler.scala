@@ -11,7 +11,7 @@ object Supler extends Validators {
 
   def form[T](rows: Supler[T] => List[Row[T]]) = {
     println(s"new form with rows: rows")
-    Form(rows(new Supler[T]))
+    Form(rows(new Supler[T] {}))
   }
 
   def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T): Field[T, U] = {
@@ -63,7 +63,7 @@ object Supler extends Validators {
   }
 }
 
-class Supler[T] extends Validators {
+trait Supler[T] extends Validators {
   def field[U](param: T => U): Field[T, U] = macro Supler.field_impl[T, U]
 }
 
