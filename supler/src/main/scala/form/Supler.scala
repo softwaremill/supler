@@ -11,7 +11,7 @@ object Supler extends Validators {
 
   def form[T](rows: Supler[T] => List[Row[T]]) = {
     println(s"new form with rows: rows")
-    rows(new Supler[T])
+    Form(rows(new Supler[T]))
   }
 
   def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T): Field[T, U] = {
@@ -73,6 +73,8 @@ class Row[T] {
     this
   }
 }
+
+case class Form[T](rows: List[Row[T]])
 
 case class Field[T, U](
   name: String,
