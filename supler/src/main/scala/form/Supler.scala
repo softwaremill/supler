@@ -12,7 +12,7 @@ object Supler extends Validators {
     Form(rows(new Supler[T] {}))
   }
 
-  def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean, fieldType: FieldType): Field[T, U] = {
+  def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean, fieldType: FieldType[U]): Field[T, U] = {
     Field[T, U](fieldName, read, write, List(), None, None, required, fieldType)
   }
 
@@ -78,7 +78,7 @@ object Supler extends Validators {
     val isRequiredExpr = c.Expr[Boolean](Literal(Constant(!isOption)))
 
     val fieldTypeTree = computeFieldType(c)(implicitly[WeakTypeTag[U]].tpe)
-    val fieldTypeExpr = c.Expr[FieldType](fieldTypeTree)
+    val fieldTypeExpr = c.Expr[FieldType[U]](fieldTypeTree)
 
     reify {
       newField(paramRepExpr.splice,
@@ -94,14 +94,19 @@ object Supler extends Validators {
 
     if (fieldTpe <:< c.typeOf[String]) {
       q"_root_.form.StringFieldType"
-    } else if (fieldTpe <:< c.typeOf[Int] || fieldTpe <:< c.typeOf[Long]) {
-      q"_root_.form.IntegerFieldType"
-    } else if (fieldTpe <:< c.typeOf[Double] || fieldTpe <:< c.typeOf[Float]) {
-      q"_root_.form.RealFieldType"
+    } else if (fieldTpe <:< c.typeOf[Int]) {
+      q"_root_.form.IntFieldType"
+    } else if (fieldTpe <:< c.typeOf[Long]) {
+      q"_root_.form.LongFieldType"
+    } else if (fieldTpe <:< c.typeOf[Double]) {
+      q"_root_.form.DoubleFieldType"
+    } else if (fieldTpe <:< c.typeOf[Float]) {
+      q"_root_.form.FloatFieldType"
     } else if (fieldTpe <:< c.typeOf[Boolean]) {
       q"_root_.form.BooleanFieldType"
     } else if (fieldTpe <:< c.typeOf[Option[_]]) {
-      computeFieldType(c)(fieldTpe.typeArgs(0))
+      val innerTree = computeFieldType(c)(fieldTpe.typeArgs(0))
+      q"new _root_.form.OptionalFieldType($innerTree)"
     } else {
       throw new IllegalArgumentException(s"Fields of type $fieldTpe are not supported")
     }
@@ -126,22 +131,17 @@ case class Form[T](rows: List[Row[T]]) {
   def doValidate(obj: T): List[FieldValidationError] = rows.flatMap(_.doValidate(obj))
 
   def generateJSONSchema = {
-    render(JObject(
+    JObject(
       JField("title", JString("Form")),
       JField("type", JString("object")),
       JField("properties", JObject(rows.flatMap(_.generateJSONSchema)))
-    ))
+    )
   }
 
   def generateJSONValues(obj: T) = {
-    render(new JObject(
+    new JObject(
       rows.flatMap(_.generateJSONValues(obj))
-    ))
-  }
-
-  private def render(jvalue: JValue) = {
-    import org.json4s.native._
-    prettyJson(renderJValue(jvalue))
+    )
   }
 }
 
@@ -153,7 +153,7 @@ case class Field[T, U](
   dataProvider: Option[DataProvider[T, U]],
   label: Option[String],
   required: Boolean,
-  fieldType: FieldType) extends Row[T] {
+  fieldType: FieldType[U]) extends Row[T] {
 
   def label(newLabel: String) = this.copy(label = Some(newLabel))
 
@@ -178,7 +178,13 @@ case class Field[T, U](
     ))
   )
 
-  override def generateJSONValues(obj: T) = List(JField(name, JString(read(obj).toString)))
+  override def generateJSONValues(obj: T) = {
+    val value = read(obj)
+    fieldType
+      .toJValue(value)
+      .map(JField(name, _))
+      .toList
+  }
 }
 
 case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
