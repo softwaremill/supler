@@ -143,6 +143,9 @@ case class Form[T](rows: List[Row[T]]) {
       rows.flatMap(_.generateJSONValues(obj))
     )
   }
+
+  def +(row: Row[T]) = ++(List(row))
+  def ++(moreRows: List[Row[T]]) = Form(rows ++ moreRows)
 }
 
 case class Field[T, U](

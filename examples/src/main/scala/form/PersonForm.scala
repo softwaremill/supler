@@ -19,9 +19,11 @@ object PersonForm extends App {
         custom((e, v) => v != null, (e, v) => ValidationError("null!")))
       .use(dataProvider(_ => List("a"))),
     f.field(_.lastName).label("Last Name") || f.field(_.lastName).label("Second Last Name"),
-    f.field(_.shoeNumber).label("Shoe Number").validate(ge(3)),
-    takieSobiePoleOdCzapy
+    f.field(_.shoeNumber).label("Shoe Number").validate(ge(3))
   ))
+
+  val pf2 = personForm + takieSobiePoleOdCzapy
+  val pf3 = personForm ++ List(takieSobiePoleOdCzapy, takieSobiePoleOdCzapy)
 
   def renderJson(jvalue: JValue) = {
     import org.json4s.native._
