@@ -12,8 +12,8 @@ object Supler extends Validators {
     Form(rows(new Supler[T] {}))
   }
 
-  def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean): Field[T, U] = {
-    Field[T, U](fieldName, read, write, List(), None, None, required)
+  def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean, fieldType: FieldType): Field[T, U] = {
+    Field[T, U](fieldName, read, write, List(), None, None, required, fieldType)
   }
 
   def dataProvider[T, U](provider: T => List[U]): DataProvider[T, U] = {
@@ -77,8 +77,33 @@ object Supler extends Validators {
     val isOption = implicitly[WeakTypeTag[U]].tpe.typeSymbol.asClass.fullName == "scala.Option"
     val isRequiredExpr = c.Expr[Boolean](Literal(Constant(!isOption)))
 
+    val fieldTypeTree = computeFieldType(c)(implicitly[WeakTypeTag[U]].tpe)
+    val fieldTypeExpr = c.Expr[FieldType](fieldTypeTree)
+
     reify {
-      newField(paramRepExpr.splice, readFieldValueExpr.splice, writeFieldValueExpr.splice, isRequiredExpr.splice)
+      newField(paramRepExpr.splice,
+        readFieldValueExpr.splice,
+        writeFieldValueExpr.splice,
+        isRequiredExpr.splice,
+        fieldTypeExpr.splice)
+    }
+  }
+
+  private def computeFieldType(c: Context)(fieldTpe: c.Type): c.Tree = {
+    import c.universe._
+
+    if (fieldTpe <:< c.typeOf[String]) {
+      q"_root_.form.StringFieldType"
+    } else if (fieldTpe <:< c.typeOf[Int] || fieldTpe <:< c.typeOf[Long]) {
+      q"_root_.form.IntegerFieldType"
+    } else if (fieldTpe <:< c.typeOf[Double] || fieldTpe <:< c.typeOf[Float]) {
+      q"_root_.form.RealFieldType"
+    } else if (fieldTpe <:< c.typeOf[Boolean]) {
+      q"_root_.form.BooleanFieldType"
+    } else if (fieldTpe <:< c.typeOf[Option[_]]) {
+      computeFieldType(c)(fieldTpe.typeArgs(0))
+    } else {
+      throw new IllegalArgumentException(s"Fields of type $fieldTpe are not supported")
     }
   }
 }
@@ -127,7 +152,8 @@ case class Field[T, U](
   validators: List[Validator[T, U]],
   dataProvider: Option[DataProvider[T, U]],
   label: Option[String],
-  required: Boolean) extends Row[T] {
+  required: Boolean,
+  fieldType: FieldType) extends Row[T] {
 
   def label(newLabel: String) = this.copy(label = Some(newLabel))
 
