@@ -1,9 +1,10 @@
 package org.supler.demo
 
 import akka.actor.ActorSystem
-import spray.http.MediaTypes
+import spray.http.{StatusCodes, MediaTypes}
 import spray.httpx.Json4sSupport
 import spray.routing.SimpleRoutingApp
+import StatusCodes._
 
 object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
   implicit val actorSystem = ActorSystem()
@@ -15,17 +16,23 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
     pathPrefix("form1") {
       get {
         respondWithMediaType(MediaTypes.`application/json`) {
-          path("schema") {
+          path("schema.json") {
             complete {
               Form1.form1.generateJSONSchema
             }
-          } ~ path("data") {
+          } ~ path("data.json") {
             complete {
               Form1.form1.generateJSONValues(person)
             }
           }
         }
       }
+    } ~
+    pathPrefix("site") {
+      getFromResourceDirectory("")
+    } ~
+    path("") {
+      redirect("/site/index.html", Found)
     }
   }
 }
