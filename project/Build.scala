@@ -14,6 +14,12 @@ object BuildSettings {
 object Dependencies {
   val scalaTest = "org.scalatest" %% "scalatest" % "2.1.6" % "test"
   val json4sNative = "org.json4s" %% "json4s-native" % "3.2.10"
+  val akka = "com.typesafe.akka" %% "akka-actor" % "2.3.4"
+
+  val sprayVersion = "1.3.1"
+  val sprayCan = "io.spray" %% "spray-can" % sprayVersion
+  val sprayRouting = "io.spray" %% "spray-routing" % sprayVersion
+  val sprayHttpx = "io.spray" %% "spray-httpx" % sprayVersion
 }
 
 object SuplerBuild extends Build {
@@ -38,6 +44,7 @@ object SuplerBuild extends Build {
   lazy val examples: Project = Project(
     "examples",
     file("examples"),
-    settings = buildSettings
+    settings = buildSettings ++ Seq(
+      libraryDependencies ++= Seq(akka, sprayCan, sprayRouting, sprayHttpx))
   ) dependsOn (supler)
 }

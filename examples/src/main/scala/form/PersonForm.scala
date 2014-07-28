@@ -2,6 +2,7 @@ package form
 
 import entity.Person
 import form.Supler._
+import org.json4s._
 
 object PersonForm extends App {
   val takieSobiePoleOdCzapy = field[Person, Int](_.shoeNumber).label("Od Czapy")
@@ -21,6 +22,11 @@ object PersonForm extends App {
     takieSobiePoleOdCzapy
   ))
 
+  def renderJson(jvalue: JValue) = {
+    import org.json4s.native._
+    prettyJson(renderJValue(jvalue))
+  }
+
   val p = new Person()
   p.shoeNumber = 10
   println(takieSobiePoleOdCzapy.read(p))
@@ -28,6 +34,6 @@ object PersonForm extends App {
 
   println(personForm.doValidate(p))
 
-  println(personForm.generateJSONSchema)
-  println(personForm.generateJSONValues(p))
+  println(renderJson(personForm.generateJSONSchema))
+  println(renderJson(personForm.generateJSONValues(p)))
 }
