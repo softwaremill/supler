@@ -1,6 +1,6 @@
 package entity
 
-import form.Supler
+import org.supler.Supler
 
 class Person {
   var name: String = "" // require, default

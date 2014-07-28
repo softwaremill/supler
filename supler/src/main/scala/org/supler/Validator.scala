@@ -1,4 +1,4 @@
-package form
+package org.supler
 
 trait Validator[T, U] {
   def doValidate(objValue: T, fieldValue: U): List[ValidationError]

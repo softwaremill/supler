@@ -1,4 +1,4 @@
-package form
+package org.supler
 
 import org.json4s.JsonAST.{JField, JObject, JString}
 import org.json4s._
@@ -93,20 +93,20 @@ object Supler extends Validators {
     import c.universe._
 
     if (fieldTpe <:< c.typeOf[String]) {
-      q"_root_.form.StringFieldType"
+      q"_root_.org.supler.StringFieldType"
     } else if (fieldTpe <:< c.typeOf[Int]) {
-      q"_root_.form.IntFieldType"
+      q"_root_.org.supler.IntFieldType"
     } else if (fieldTpe <:< c.typeOf[Long]) {
-      q"_root_.form.LongFieldType"
+      q"_root_.org.supler.LongFieldType"
     } else if (fieldTpe <:< c.typeOf[Double]) {
-      q"_root_.form.DoubleFieldType"
+      q"_root_.org.supler.DoubleFieldType"
     } else if (fieldTpe <:< c.typeOf[Float]) {
-      q"_root_.form.FloatFieldType"
+      q"_root_.org.supler.FloatFieldType"
     } else if (fieldTpe <:< c.typeOf[Boolean]) {
-      q"_root_.form.BooleanFieldType"
+      q"_root_.org.supler.BooleanFieldType"
     } else if (fieldTpe <:< c.typeOf[Option[_]]) {
       val innerTree = computeFieldType(c)(fieldTpe.typeArgs(0))
-      q"new _root_.form.OptionalFieldType($innerTree)"
+      q"new _root_.org.supler.OptionalFieldType($innerTree)"
     } else {
       throw new IllegalArgumentException(s"Fields of type $fieldTpe are not supported")
     }

@@ -1,7 +1,8 @@
 package form
 
 import entity.Person
-import form.Supler._
+import org.supler.{ValidationError, Supler}
+import Supler._
 import org.json4s._
 
 object PersonForm extends App {

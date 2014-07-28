@@ -1,4 +1,4 @@
-package form
+package org.supler
 
 import org.json4s.JValue
 import org.json4s.JsonAST.{JDouble, JBool, JInt, JString}

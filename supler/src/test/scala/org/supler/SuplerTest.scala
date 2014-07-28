@@ -1,6 +1,6 @@
-package form
+package org.supler
 
-import org.json4s.JsonAST.{JBool, JInt, JField, JString}
+import org.json4s.JsonAST.{JBool, JField, JInt, JString}
 import org.scalatest.{FlatSpec, ShouldMatchers}
 
 class SuplerTest extends FlatSpec with ShouldMatchers {

@@ -1,6 +1,7 @@
 package org.supler.demo
 
-import form.Supler._
+import org.supler.Supler
+import Supler._
 
 object Form1 {
   val form1 = form[Person](f => List(
