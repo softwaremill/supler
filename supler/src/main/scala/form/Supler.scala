@@ -173,7 +173,7 @@ case class Field[T, U](
 
   override def generateJSONSchema = List(
     JField(name, JObject(
-      JField("type", JString("string")),
+      JField("type", JString(fieldType.jsonSchemaName)),
       JField("description", JString(label.getOrElse("")))
     ))
   )
