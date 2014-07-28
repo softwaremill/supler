@@ -1,12 +1,10 @@
 package form
 
-import org.json4s.JsonAST.JString
-import org.json4s.{JField, JObject}
+import org.json4s.JsonAST.{JField, JObject, JString}
+import org.json4s._
 
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
-
-import schema.{JsonProperty, JsonType, JsonSchema}
 
 object Supler extends Validators {
 
@@ -32,7 +30,7 @@ object Supler extends Validators {
       Function(
       List(ValDef(Modifiers(_), TermName(termDef: String), TypeTree(), EmptyTree)),
       Select(Ident(TermName(termUse: String)), TermName(field: String)))) if termDef == termUse =>
-          field
+        field
       case _ => throw new IllegalArgumentException("Illegal field reference " + show(param.tree) + "; please use _.fieldName instead")
     }
 
@@ -92,7 +90,7 @@ trait Supler[T] extends Validators {
 case class FieldValidationError(field: Field[_, _], key: String, params: Any*)
 
 trait Row[T] {
-  def generateJSONSchema: List[JsonProperty]
+  def generateJSONSchema: List[JField]
   def generateJSONValues(obj : T): List[JField]
 
   def ||(field: Field[T, _]): Row[T]
@@ -103,14 +101,22 @@ case class Form[T](rows: List[Row[T]]) {
   def doValidate(obj: T): List[FieldValidationError] = rows.flatMap(_.doValidate(obj))
 
   def generateJSONSchema = {
-    new JsonSchema("Form", JsonType.Object, rows.flatMap(_.generateJSONSchema))
+    render(JObject(
+      JField("title", JString("Form")),
+      JField("type", JString("object")),
+      JField("properties", JObject(rows.flatMap(_.generateJSONSchema)))
+    ))
   }
-  
+
   def generateJSONValues(obj: T) = {
-    import org.json4s.native._
-    prettyJson(renderJValue(new JObject(
+    render(new JObject(
       rows.flatMap(_.generateJSONValues(obj))
-    )))
+    ))
+  }
+
+  private def render(jvalue: JValue) = {
+    import org.json4s.native._
+    prettyJson(renderJValue(jvalue))
   }
 }
 
@@ -124,7 +130,7 @@ case class Field[T, U](
   required: Boolean) extends Row[T] {
 
   def label(newLabel: String) = this.copy(label = Some(newLabel))
-  
+
   def validate(validators: Validator[T, U]*): Field[T, U] = this.copy(validators = this.validators ++ validators)
 
   def use(dataProvider: DataProvider[T, U]): Field[T, U] = this.dataProvider match {
@@ -133,13 +139,18 @@ case class Field[T, U](
   }
 
   def ||(field: Field[T, _]): Row[T] = MultiFieldRow(this :: field :: Nil)
-  
+
   def doValidate(obj: T): List[FieldValidationError] = {
     val v = read(obj)
     validators.flatMap(_.doValidate(obj, v)).map(ve => FieldValidationError(this, ve.key, ve.params: _*))
   }
 
-  override def generateJSONSchema = List(new JsonProperty(name, JsonType.String, label))
+  override def generateJSONSchema = List(
+    JField(name, JObject(
+      JField("type", JString("string")),
+      JField("description", JString(label.getOrElse("")))
+    ))
+  )
 
   override def generateJSONValues(obj: T) = List(JField(name, JString(read(obj).toString)))
 }
