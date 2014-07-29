@@ -26,9 +26,21 @@ function try_show_form() {
   }
 }
 
-$("#submit").click(function() {
-  $.post('http://localhost:8080/form1/data.json', editor.getValue(), function(data) {
-    alert(data);
+var feedback = $('#feedback')
+feedback.hide();
+
+$('#submit').click(function() {
+  $.ajax({
+    url: 'http://localhost:8080/form1/data.json',
+    type: 'POST',
+    data: JSON.stringify(editor.getValue()),
+    dataType: 'json',
+    contentType: 'application/json; charset=utf-8',
+    success: function(data) {
+      feedback.html(data);
+      feedback.show();
+    }
   })
+
   return false;
 });

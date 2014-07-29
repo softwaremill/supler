@@ -1,6 +1,7 @@
 package org.supler.demo
 
 import akka.actor.ActorSystem
+import org.json4s.JValue
 import spray.http.{StatusCodes, MediaTypes}
 import spray.httpx.Json4sSupport
 import spray.routing.SimpleRoutingApp
@@ -10,7 +11,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
   implicit val actorSystem = ActorSystem()
   implicit val json4sFormats = org.json4s.DefaultFormats
 
-  val person = Person("Adam", "", 10, None, None)
+  var person = Person("Adam", "", 10, None, None)
 
   startServer(interface = "localhost", port = 8080) {
     pathPrefix("form1") {
@@ -29,8 +30,18 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
       } ~
       post {
         path("data.json") {
-          complete {
-            "Not yet implemented!"
+          entity(as[JValue]) { jvalue =>
+            complete {
+              val newPerson = Form1.form1.applyJSONValues(person, jvalue)
+              val result = Form1.form1.doValidate(newPerson) match {
+                case Nil =>
+                  person = newPerson
+                  "Persisted: " + person
+                case l => "Validation errors: " + l.map(fve => s"${fve.field}: ${fve.key}").mkString(", ")
+              }
+
+              result
+            }
           }
         }
       }
