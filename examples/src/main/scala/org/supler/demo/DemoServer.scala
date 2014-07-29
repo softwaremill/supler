@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import org.json4s.JValue
 import spray.http.{StatusCodes, MediaTypes}
 import spray.httpx.Json4sSupport
-import spray.routing.SimpleRoutingApp
+import spray.routing.{Route, SimpleRoutingApp}
 import StatusCodes._
 
 object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
@@ -13,23 +13,24 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
 
   var person = Person("Adam", "", 10, None, None)
 
+  def getJson(route: Route) = get { respondWithMediaType(MediaTypes.`application/json`) { route } }
+
   startServer(interface = "localhost", port = 8080) {
     pathPrefix("form1") {
-      get {
-        respondWithMediaType(MediaTypes.`application/json`) {
-          path("schema.json") {
-            complete {
-              Form1.form1.generateJSONSchema
-            }
-          } ~ path("data.json") {
-            complete {
-              Form1.form1.generateJSONValues(person)
-            }
+      path("schema.json") {
+        getJson {
+          complete {
+            Form1.form1.generateJSONSchema
           }
         }
       } ~
-      post {
-        path("data.json") {
+      path("data.json") {
+        getJson {
+          complete {
+            Form1.form1.generateJSONValues(person)
+          }
+        } ~
+        post {
           entity(as[JValue]) { jvalue =>
             complete {
               val newPerson = Form1.form1.applyJSONValues(person, jvalue)
