@@ -6,12 +6,14 @@ sealed trait FieldType[U] {
   def jsonSchemaName: String
   def toJValue(value: U): Option[JValue]
   def fromJValue: PartialFunction[JValue, U]
+  def valuePresent(value: U): Boolean = true
 }
 
 case object StringFieldType extends FieldType[String] {
   val jsonSchemaName = "string"
   def toJValue(value: String) = Some(JString(value))
   def fromJValue = { case JString(v) => v }
+  override def valuePresent(value: String): Boolean = value != ""
 }
 
 case object IntFieldType extends FieldType[Int] {
@@ -53,4 +55,5 @@ case class OptionalFieldType[U](inner: FieldType[U]) extends FieldType[Option[U]
     case JString("") => None
     case jvalue if inner.fromJValue.isDefinedAt(jvalue) => inner.fromJValue.lift(jvalue)
   }
+  override def valuePresent(value: Option[U]): Boolean = value.isDefined
 }

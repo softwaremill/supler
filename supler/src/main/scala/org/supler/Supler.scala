@@ -181,7 +181,13 @@ case class Field[T, U](
 
   override def doValidate(obj: T): List[FieldValidationError] = {
     val v = read(obj)
-    validators.flatMap(_.doValidate(obj, v)).map(ve => FieldValidationError(this, ve.key, ve.params: _*))
+    val fves = validators.flatMap(_.doValidate(obj, v)).map(ve => FieldValidationError(this, ve.key, ve.params: _*))
+
+    if (required && !fieldType.valuePresent(v)) {
+      FieldValidationError(this, "Value is required") :: fves
+    } else {
+      fves
+    }
   }
 
   override def generateJSONSchema = List(

@@ -38,7 +38,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
                 case Nil =>
                   person = newPerson
                   "Persisted: " + person
-                case l => "Validation errors: " + l.map(fve => s"${fve.field}: ${fve.key}").mkString(", ")
+                case l => "Validation errors: " + l.map(fve => s"${fve.field.name}: ${fve.key}").mkString(", ")
               }
 
               result
