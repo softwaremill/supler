@@ -1,10 +1,10 @@
 package org.supler
 
-import org.json4s.JsonAST.{JBool, JField, JInt, JString}
+import org.json4s.JsonAST._
 import org.scalatest.{FlatSpec, ShouldMatchers}
 
 class SuplerTest extends FlatSpec with ShouldMatchers {
-  it should "create a field representation for a variable field" in {
+  "field" should "create a variable field representation" in {
     // given
     class Person {
       var f1: String = ""
@@ -44,7 +44,7 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     f2Field.generateJSONValues(p2) should be (List(JField("f2", JInt(20))))
   }
 
-  it should "create a field representation for a case class field" in {
+  "field" should "create a case class field representation" in {
     // given
     case class Person(f1: String, f2: Option[Int], f3: Boolean, f4: String)
 
@@ -101,5 +101,28 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     f4Field.fieldType should be (StringFieldType)
     f4Field.generateJSONValues(p1) should be (List(JField("f4", JString("x1"))))
     f4Field.generateJSONValues(p2) should be (List(JField("f4", JString("x2"))))
+  }
+
+  "form" should "generate json values basing on the entity passed" in {
+    // given
+    case class Person(f1: String, f2: Option[Int], f3: Boolean)
+
+    val form = Supler.form[Person](f => List(
+      f.field(_.f1),
+      f.field(_.f2),
+      f.field(_.f3)
+    ))
+
+    val p = Person("John", Some(10), f3 = true)
+
+    // when
+    val json = form.generateJSONValues(p)
+
+    // then
+    json should be (JObject(
+      JField("f1", JString("John")),
+      JField("f2", JInt(10)),
+      JField("f3", JBool(value = true))
+    ))
   }
 }
