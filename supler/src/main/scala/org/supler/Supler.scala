@@ -120,7 +120,7 @@ trait Supler[T] extends Validators {
 case class FieldValidationError(field: Field[_, _], key: String, params: Any*)
 
 trait Row[T] {
-  def generateJSONSchema: List[JField]
+  def generateJSONSchema(obj: T): List[JField]
   def generateJSONValues(obj: T): List[JField]
 
   def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T
@@ -132,11 +132,11 @@ trait Row[T] {
 case class Form[T](rows: List[Row[T]]) {
   def doValidate(obj: T): List[FieldValidationError] = rows.flatMap(_.doValidate(obj))
 
-  def generateJSONSchema = {
+  def generateJSONSchema(obj: T) = {
     JObject(
       JField("title", JString("Form")),
       JField("type", JString("object")),
-      JField("properties", JObject(rows.flatMap(_.generateJSONSchema)))
+      JField("properties", JObject(rows.flatMap(_.generateJSONSchema(obj))))
     )
   }
 
@@ -192,10 +192,14 @@ case class Field[T, U](
     }
   }
 
-  override def generateJSONSchema = List(
+  override def generateJSONSchema(obj: T)  = List(
     JField(name, JObject(
-      JField("type", JString(fieldType.jsonSchemaName)),
-      JField("description", JString(label.getOrElse("")))
+      JField("type", JString(fieldType.jsonSchemaName)) ::
+      JField("description", JString(label.getOrElse(""))) ::
+        (dataProvider match {
+          case Some(dp) => JField("enum", JArray(dp.provider(obj).flatMap(fieldType.toJValue))) :: Nil
+          case None => Nil
+        })
     ))
   )
 
@@ -221,7 +225,7 @@ case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   override def ||(field: Field[T, _]): Row[T] = MultiFieldRow(fields ++ List(field))
   override def doValidate(obj: T): List[FieldValidationError] = fields.flatMap(_.doValidate(obj))
 
-  override def generateJSONSchema = fields.flatMap(_.generateJSONSchema)
+  override def generateJSONSchema(obj: T) = fields.flatMap(_.generateJSONSchema(obj))
   override def generateJSONValues(obj: T) = fields.flatMap(_.generateJSONValues(obj))
 
   override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {
@@ -229,5 +233,5 @@ case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   }
 }
 
-class DataProvider[T, U](provider: T => List[U])
+case class DataProvider[T, U](provider: T => List[U])
 

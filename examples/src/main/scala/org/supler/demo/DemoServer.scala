@@ -11,7 +11,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
   implicit val actorSystem = ActorSystem()
   implicit val json4sFormats = org.json4s.DefaultFormats
 
-  var person = Person("Adam", "", 10, None, None)
+  var person = Person("Adam", "", 10, None, None, "")
 
   def getJson(route: Route) = get { respondWithMediaType(MediaTypes.`application/json`) { route } }
 
@@ -20,7 +20,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
       path("schema.json") {
         getJson {
           complete {
-            Form1.form1.generateJSONSchema
+            Form1.form1.generateJSONSchema(person)
           }
         }
       } ~

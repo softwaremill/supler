@@ -16,10 +16,10 @@ object PersonForm extends App {
       .label("Name")
       .validate(
         minLength(10),
-        custom((e, v) => v != null, (e, v) => ValidationError("null!")))
-      .use(dataProvider(_ => List("a"))),
+        custom((e, v) => v != null, (e, v) => ValidationError("null!"))),
     f.field(_.lastName).label("Last Name") || f.field(_.lastName).label("Second Last Name"),
-    f.field(_.shoeNumber).label("Shoe Number").validate(ge(3))
+    f.field(_.shoeNumber).label("Shoe Number").validate(ge(3)),
+    f.field(_.gender).label("Gender").use(dataProvider(_ => List("Male", "Female")))
   ))
 
   val pf2 = personForm + takieSobiePoleOdCzapy
@@ -37,6 +37,6 @@ object PersonForm extends App {
 
   println(personForm.doValidate(p))
 
-  println(renderJson(personForm.generateJSONSchema))
+  println(renderJson(personForm.generateJSONSchema(p)))
   println(renderJson(personForm.generateJSONValues(p)))
 }
