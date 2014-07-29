@@ -183,7 +183,9 @@ case class Field[T, U](
     val v = read(obj)
     val fves = validators.flatMap(_.doValidate(obj, v)).map(ve => FieldValidationError(this, ve.key, ve.params: _*))
 
-    if (required && !fieldType.valuePresent(v)) {
+    def valueMissing = v == null || !fieldType.valuePresent(v)
+
+    if (required && valueMissing) {
       FieldValidationError(this, "Value is required") :: fves
     } else {
       fves

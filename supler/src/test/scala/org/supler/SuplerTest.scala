@@ -124,6 +124,7 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
 
     val p1 = Person("s1", Some("x1"), 10, Some(11))
     val p2 = Person("", None, 12, None)
+    val p3 = Person(null, null, 12, null)
 
     // when
     object PersonMeta extends Supler[Person] {
@@ -138,15 +139,19 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
 
     f1Field.doValidate(p1).size should be (0)
     f1Field.doValidate(p2).size should be (1)
+    f1Field.doValidate(p3).size should be (1)
 
     f2Field.doValidate(p1).size should be (0)
     f2Field.doValidate(p2).size should be (0)
+    f2Field.doValidate(p3).size should be (0)
 
     f3Field.doValidate(p1).size should be (0)
     f3Field.doValidate(p2).size should be (0)
+    f3Field.doValidate(p3).size should be (0)
 
     f4Field.doValidate(p1).size should be (0)
     f4Field.doValidate(p2).size should be (0)
+    f4Field.doValidate(p3).size should be (0)
   }
 
   "form" should "generate json values basing on the entity passed" in {
