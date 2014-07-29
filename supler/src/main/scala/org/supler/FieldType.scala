@@ -50,6 +50,7 @@ case class OptionalFieldType[U](inner: FieldType[U]) extends FieldType[Option[U]
   def fromJValue = {
     case JNothing => None
     case JNull => None
+    case JString("") => None
     case jvalue if inner.fromJValue.isDefinedAt(jvalue) => inner.fromJValue.lift(jvalue)
   }
 }
