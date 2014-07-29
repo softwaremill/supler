@@ -14,9 +14,10 @@ $(document).ready(function() {
 });
 
 var editor_holder = document.getElementById('editor_holder');
+var editor = null;
 function try_show_form() {
   if (schema !== null && initial_data !== null) {
-    var editor = new JSONEditor(editor_holder, {
+    editor = new JSONEditor(editor_holder, {
       theme: 'bootstrap3',
       schema: schema,
       startval: initial_data,
@@ -25,3 +26,9 @@ function try_show_form() {
   }
 }
 
+$("#submit").click(function() {
+  $.post('http://localhost:8080/form1/data.json', editor.getValue(), function(data) {
+    alert(data);
+  })
+  return false;
+});

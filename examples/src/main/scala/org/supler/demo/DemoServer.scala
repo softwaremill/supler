@@ -26,6 +26,13 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
             }
           }
         }
+      } ~
+      post {
+        path("data.json") {
+          complete {
+            "Not yet implemented!"
+          }
+        }
       }
     } ~
     pathPrefix("site") {
