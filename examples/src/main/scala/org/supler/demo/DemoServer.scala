@@ -37,6 +37,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
               val result = Form1.form1.doValidate(newPerson) match {
                 case Nil =>
                   person = newPerson
+                  println(s"Persisted: $person")
                   "Persisted: " + person
                 case l => "Validation errors: " + l.map(fve => s"${fve.field.name}: ${fve.key}").mkString(", ")
               }
@@ -54,4 +55,6 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
       redirect("/site/index.html", Found)
     }
   }
+
+  println("Server strating... open http://localhost:8080")
 }
