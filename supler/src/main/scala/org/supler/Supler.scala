@@ -121,7 +121,9 @@ case class FieldValidationError(field: Field[_, _], key: String, params: Any*)
 
 trait Row[T] {
   def generateJSONSchema: List[JField]
-  def generateJSONValues(obj : T): List[JField]
+  def generateJSONValues(obj: T): List[JField]
+
+  def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T
 
   def ||(field: Field[T, _]): Row[T]
   def doValidate(obj: T): List[FieldValidationError]
@@ -142,6 +144,14 @@ case class Form[T](rows: List[Row[T]]) {
     new JObject(
       rows.flatMap(_.generateJSONValues(obj))
     )
+  }
+
+  def applyJSONValues(obj: T, jvalue: JValue): T = {
+    jvalue match {
+      case JObject(jsonFields) =>
+        rows.foldLeft(obj)((currentObj, row) => row.applyJSONValues(currentObj, jsonFields.toMap))
+      case _ => obj
+    }
   }
 
   def +(row: Row[T]) = ++(List(row))
@@ -167,9 +177,9 @@ case class Field[T, U](
     case None => this.copy(dataProvider = Some(dataProvider))
   }
 
-  def ||(field: Field[T, _]): Row[T] = MultiFieldRow(this :: field :: Nil)
+  override def ||(field: Field[T, _]): Row[T] = MultiFieldRow(this :: field :: Nil)
 
-  def doValidate(obj: T): List[FieldValidationError] = {
+  override def doValidate(obj: T): List[FieldValidationError] = {
     val v = read(obj)
     validators.flatMap(_.doValidate(obj, v)).map(ve => FieldValidationError(this, ve.key, ve.params: _*))
   }
@@ -188,15 +198,27 @@ case class Field[T, U](
       .map(JField(name, _))
       .toList
   }
+
+  override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {
+    (for {
+      jsonValue <- jsonFields.get(name)
+      value <- fieldType.fromJValue.lift(jsonValue)
+    } yield {
+      write(obj, value)
+    }).getOrElse(obj)
+  }
 }
 
 case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
-  def ||(field: Field[T, _]): Row[T] = MultiFieldRow(fields ++ List(field))
-  def doValidate(obj: T): List[FieldValidationError] = fields.flatMap(_.doValidate(obj))
+  override def ||(field: Field[T, _]): Row[T] = MultiFieldRow(fields ++ List(field))
+  override def doValidate(obj: T): List[FieldValidationError] = fields.flatMap(_.doValidate(obj))
 
   override def generateJSONSchema = fields.flatMap(_.generateJSONSchema)
-
   override def generateJSONValues(obj: T) = fields.flatMap(_.generateJSONValues(obj))
+
+  override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {
+    fields.foldLeft(obj)((currentObj, field) => field.applyJSONValues(currentObj, jsonFields))
+  }
 }
 
 class DataProvider[T, U](provider: T => List[U])

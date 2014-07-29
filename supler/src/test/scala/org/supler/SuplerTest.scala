@@ -125,4 +125,44 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
       JField("f3", JBool(value = true))
     ))
   }
+
+  "form" should "apply json values to the entity given" in {
+    // given
+    case class Person(f1: String, f2: Option[Int], f3: Boolean)
+
+    val form = Supler.form[Person](f => List(
+      f.field(_.f1),
+      f.field(_.f2),
+      f.field(_.f3)
+    ))
+
+    val jsonInOrder = JObject(
+      JField("f1", JString("John")),
+      JField("f2", JInt(10)),
+      JField("f3", JBool(value = true))
+    )
+
+    val jsonOutOfOrder = JObject(
+      JField("f3", JBool(value = true)),
+      JField("f2", JInt(10)),
+      JField("f1", JString("John"))
+    )
+
+    val jsonPartial = JObject(
+      JField("f1", JString("John")),
+      JField("f2", JInt(10))
+    )
+
+    val p = Person("Mary", None, f3 = false)
+
+    // when
+    val p1 = form.applyJSONValues(p, jsonInOrder)
+    val p2 = form.applyJSONValues(p, jsonOutOfOrder)
+    val p3 = form.applyJSONValues(p, jsonPartial)
+
+    // then
+    p1 should be (Person("John", Some(10), f3 = true))
+    p2 should be (Person("John", Some(10), f3 = true))
+    p3 should be (Person("John", Some(10), f3 = false))
+  }
 }
