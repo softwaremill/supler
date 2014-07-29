@@ -20,21 +20,21 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
       path("schema.json") {
         getJson {
           complete {
-            Form1.form1.generateJSONSchema(person)
+            PersonForm.form1.generateJSONSchema(person)
           }
         }
       } ~
       path("data.json") {
         getJson {
           complete {
-            Form1.form1.generateJSONValues(person)
+            PersonForm.form1.generateJSONValues(person)
           }
         } ~
         post {
           entity(as[JValue]) { jvalue =>
             complete {
-              val newPerson = Form1.form1.applyJSONValues(person, jvalue)
-              val result = Form1.form1.doValidate(newPerson) match {
+              val newPerson = PersonForm.form1.applyJSONValues(person, jvalue)
+              val result = PersonForm.form1.doValidate(newPerson) match {
                 case Nil =>
                   person = newPerson
                   println(s"Persisted: $person")

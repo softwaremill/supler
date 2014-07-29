@@ -3,7 +3,7 @@ package org.supler.demo
 import org.supler.{ValidationError, Supler}
 import Supler._
 
-object Form2 {
+object RegisterDataForm {
   form[RegisterData](f => List(
     f.field(_.login)
       .label("Login")

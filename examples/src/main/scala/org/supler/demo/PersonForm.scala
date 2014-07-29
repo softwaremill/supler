@@ -3,7 +3,7 @@ package org.supler.demo
 import org.supler.Supler
 import Supler._
 
-object Form1 {
+object PersonForm {
   val form1 = form[Person](f => List(
     f.field(_.firstName).label("First name"),
     f.field(_.lastName).label("Last name"),
@@ -13,6 +13,8 @@ object Form1 {
     f.field(_.gender).label("Gender").use(dataProvider(_ => List("Male", "Female")))
   ))
 }
+
+
 
 case class Person(
   firstName: String,
