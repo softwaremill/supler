@@ -197,7 +197,7 @@ case class Field[T, U](
       JField("type", JString(fieldType.jsonSchemaName)) ::
       JField("description", JString(label.getOrElse(""))) ::
         (dataProvider match {
-          case Some(dp) => JField("enum", JArray(dp.provider(obj).flatMap(fieldType.toJValue))) :: Nil
+          case Some(dp) => JField("enum", JArray(JString("") :: dp.provider(obj).flatMap(fieldType.toJValue))) :: Nil
           case None => Nil
         })
     ))
