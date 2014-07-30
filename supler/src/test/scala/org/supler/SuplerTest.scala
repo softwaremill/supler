@@ -247,4 +247,40 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     carsField.write(p1, Nil).cars should be (Nil)
     carsField.write(p2, List(Car("m3", 30))).cars should be (List(Car("m3", 30)))
   }
+
+  "form with a table" should "apply json values to the entity given" in {
+    // given
+    case class Car(make: String, age: Int)
+    case class Person(name: String, cars: List[Car])
+
+    import Supler._
+    val carForm = form[Car](f => List(
+      f.field(_.make),
+      f.field(_.age)
+    ))
+    val personForm = form[Person](f => List(
+      f.field(_.name),
+      f.table(_.cars, carForm)
+    ))
+
+    val jsonInOrder = JObject(
+      JField("cars", JArray(List(
+        JObject(
+          JField("make", JString("m1")),
+          JField("age", JInt(10))
+        ),
+        JObject(
+          JField("age", JInt(20)),
+          JField("make", JString("m2"))
+        )
+      ))),
+      JField("name", JString("John"))
+    )
+
+    // when
+    val p = personForm.applyJSONValues(Person("", Nil), jsonInOrder)
+
+    // then
+    p should be (Person("John", List(Car("m1", 10), Car("m2", 20))))
+  }
 }
