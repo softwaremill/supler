@@ -220,6 +220,53 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     p3 should be (Person("John", Some(10), f3 = false, Some("Nothing")))
   }
 
+  "form" should "create a new entity based on the json" in {
+    case class Person(f1: String, f2: Option[Int], f3: Boolean, f4: Option[String])
+
+    val form = Supler.form[Person](f => List(
+      f.field(_.f1),
+      f.field(_.f2),
+      f.field(_.f3),
+      f.field(_.f4)
+    ))
+
+    val jsonInOrder = JObject(
+      JField("f1", JString("John")),
+      JField("f2", JInt(10)),
+      JField("f3", JBool(value = true)),
+      JField("f4", JString("Something"))
+    )
+
+    val jsonOutOfOrder = JObject(
+      JField("f3", JBool(value = true)),
+      JField("f2", JInt(10)),
+      JField("f4", JString("")),
+      JField("f1", JString("John"))
+    )
+
+    val jsonPartial1 = JObject(
+      JField("f1", JString("John")),
+      JField("f2", JInt(10))
+    )
+
+    val jsonPartial2 = JObject(
+      JField("f1", JString("John")),
+      JField("f3", JBool(value = true))
+    )
+
+    // when
+    val p1 = form.createFromJSONValues(jsonInOrder)
+    val p2 = form.createFromJSONValues(jsonOutOfOrder)
+    val p3 = form.createFromJSONValues(jsonPartial1)
+    val p4 = form.createFromJSONValues(jsonPartial2)
+
+    // then
+    p1 should be (Right(Person("John", Some(10), f3 = true, Some("Something"))))
+    p2 should be (Right(Person("John", Some(10), f3 = true, Some("Something"))))
+    p3.left.map(_.size) should be (Left(1))
+    p4 should be (Right(Person("John", None, f3 = true, None)))
+  }
+
   "table" should "create a case class field representation" in {
     // given
     case class Car(make: String, age: Int)

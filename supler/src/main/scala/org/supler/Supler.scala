@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicLong
 import org.json4s.JsonAST.{JField, JObject, JString}
 import org.json4s._
 
-import scala.concurrent.forkjoin.ThreadLocalRandom
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
@@ -205,6 +204,10 @@ case class Form[T](rows: List[Row[T]]) {
         rows.foldLeft(obj)((currentObj, row) => row.applyJSONValues(currentObj, jsonFields.toMap))
       case _ => obj
     }
+  }
+
+  def createFromJSONValues(jObject: JObject): Either[List[FieldValidationError], T] = {
+    ???
   }
 
   def +(row: Row[T]) = ++(List(row))
