@@ -1,8 +1,11 @@
 package org.supler
 
+import java.util.concurrent.atomic.AtomicLong
+
 import org.json4s.JsonAST.{JField, JObject, JString}
 import org.json4s._
 
+import scala.concurrent.forkjoin.ThreadLocalRandom
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
@@ -166,7 +169,7 @@ trait Supler[T] extends Validators {
 case class FieldValidationError(field: Field[_, _], key: String, params: Any*)
 
 trait Row[T] {
-  def generateJSONSchema(obj: T): List[JField]
+  def generateJSONSchema(formId: String): List[JField]
 
   def generateJSONValues(obj: T): List[JField]
 
@@ -180,11 +183,13 @@ trait Row[T] {
 case class Form[T](rows: List[Row[T]]) {
   def doValidate(obj: T): List[FieldValidationError] = rows.flatMap(_.doValidate(obj))
 
-  def generateJSONSchema(obj: T) = {
+  def generateJSONSchema = {
+    val formId = IdGenerator.nextId()
     JObject(
       JField("title", JString("Form")),
       JField("type", JString("object")),
-      JField("properties", JObject(rows.flatMap(_.generateJSONSchema(obj))))
+      JField("id", JString(formId)),
+      JField("properties", JObject(rows.flatMap(_.generateJSONSchema(formId))))
     )
   }
 
@@ -245,16 +250,68 @@ case class PrimitiveField[T, U](
     }
   }
 
-  override def generateJSONSchema(obj: T) = List(
-    JField(name, JObject(
-      JField("type", JString(fieldType.jsonSchemaName)) ::
-        JField("description", JString(label.getOrElse(""))) ::
-        (dataProvider match {
-          case Some(dp) => JField("enum", JArray(JString("") :: dp.provider(obj).flatMap(fieldType.toJValue))) :: Nil
-          case None => Nil
-        })
-    ))
-  )
+  override def generateJSONSchema(formId: String) = {
+    dataProvider match {
+      case Some(dp) =>
+        /*
+        json to generate:
+        {
+          "type": "object",
+          "id": "[formId]",
+          "properties": {
+            "[choicesFieldName]": {
+              "type": "array",
+              "options": {
+                "hidden": true
+              },
+              "items": {
+                "type": "[field type]"
+              }
+            },
+            "primary_color": {
+              "type": "[field type]",
+              "watch": {
+                "[choicesFieldAlias]": "[formId].[choicesFieldName]"
+              },
+              "enumSource": [
+                {
+                  "source": "[choicesFieldAlias]",
+                  "title": "{{item}}",
+                  "value": "{{item}}"
+                }
+              ]
+            }
+          }
+        }
+        */
+        val choicesFieldName = name + "_choices_" + IdGenerator.nextId()
+        val choicesFieldAlias = "choices_alias_" + IdGenerator.nextId()
+        List(
+          JField(choicesFieldName, JObject(
+            JField("type", JString("array")),
+            JField("options", JObject(JField("hidden", JBool(value = true)))),
+            JField("items", JObject(JField("type", JString(fieldType.jsonSchemaName))))
+          )),
+          JField(name, JObject(
+            JField("type", JString(fieldType.jsonSchemaName)),
+            JField("description", JString(label.getOrElse(""))),
+            JField("watch", JObject(JField(choicesFieldAlias, JString(s"$formId.$choicesFieldName")))),
+            JField("enumSource", JArray(List(JObject(
+              JField("source", JString(choicesFieldAlias)),
+              JField("title", JString("{{item}}")),
+              JField("value", JString("{{item}}"))
+            ))))
+          ))
+        )
+      case None =>
+        List(
+          JField(name, JObject(
+            JField("type", JString(fieldType.jsonSchemaName)),
+            JField("description", JString(label.getOrElse("")))
+          ))
+        )
+    }
+  }
 
   override def generateJSONValues(obj: T) = {
     val value = read(obj)
@@ -279,7 +336,7 @@ case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
 
   override def doValidate(obj: T): List[FieldValidationError] = fields.flatMap(_.doValidate(obj))
 
-  override def generateJSONSchema(obj: T) = fields.flatMap(_.generateJSONSchema(obj))
+  override def generateJSONSchema(formId: String) = fields.flatMap(_.generateJSONSchema(formId))
 
   override def generateJSONValues(obj: T) = fields.flatMap(_.generateJSONValues(obj))
 
@@ -297,12 +354,12 @@ case class TableField[T, U](
 
   def label(newLabel: String) = this.copy(label = Some(newLabel))
 
-  override def generateJSONSchema(obj: T) = List(JField(name, JObject(
+  override def generateJSONSchema(formId: String) = List(JField(name, JObject(
     JField("type", JString("array")),
     JField("format", JString("table")),
     JField("title", JString(label.getOrElse(""))),
-    JField("uniqueItems", JBool(true)),
-    JField("items", embeddedForm.generateJSONSchema(read(obj).head))
+    JField("uniqueItems", JBool(value = true)),
+    JField("items", embeddedForm.generateJSONSchema)
   )))
 
   override def generateJSONValues(obj: T) = List(JField(name, JArray(
@@ -316,3 +373,7 @@ case class TableField[T, U](
 
 case class DataProvider[T, U](provider: T => List[U])
 
+object IdGenerator {
+  private val counter = new AtomicLong(0)
+  def nextId() = "ID" + counter.getAndIncrement
+}

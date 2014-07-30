@@ -20,7 +20,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
       path("schema.json") {
         getJson {
           complete {
-            PersonForm.personForm.generateJSONSchema(person)
+            PersonForm.personForm.generateJSONSchema
           }
         }
       } ~
