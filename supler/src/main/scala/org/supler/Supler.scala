@@ -12,17 +12,19 @@ object Supler extends Validators {
     Form(rows(new Supler[T] {}))
   }
 
-  def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean, fieldType: FieldType[U]): Field[T, U] = {
-    Field[T, U](fieldName, read, write, List(), None, None, required, fieldType)
+  def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean, fieldType: FieldType[U]): PrimitiveField[T, U] = {
+    PrimitiveField[T, U](fieldName, read, write, List(), None, None, required, fieldType)
   }
 
   def dataProvider[T, U](provider: T => List[U]): DataProvider[T, U] = {
     new DataProvider[T, U](provider)
   }
 
-  def field[T, U](param: T => U): Field[T, U] = macro Supler.field_impl[T, U]
+  def field[T, U](param: T => U): PrimitiveField[T, U] = macro Supler.field_impl[T, U]
 
-  def field_impl[T: c.WeakTypeTag , U: c.WeakTypeTag](c: Context)(param: c.Expr[T => U]): c.Expr[Field[T, U]] = {
+  def table[T, U](param: T => List[U], form: Form[U]) = macro Supler.table_impl[T, U]
+
+  def field_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: Context)(param: c.Expr[T => U]): c.Expr[PrimitiveField[T, U]] = {
     import c.universe._
 
     val fieldName = param match {
@@ -89,6 +91,10 @@ object Supler extends Validators {
     }
   }
 
+  def table_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: Context)(param: c.Expr[T => U]): c.Expr[TableField[T, U]] = {
+
+  }
+
   private def computeFieldType(c: Context)(fieldTpe: c.Type): c.Tree = {
     import c.universe._
 
@@ -114,18 +120,20 @@ object Supler extends Validators {
 }
 
 trait Supler[T] extends Validators {
-  def field[U](param: T => U): Field[T, U] = macro Supler.field_impl[T, U]
+  def field[U](param: T => U): PrimitiveField[T, U] = macro Supler.field_impl[T, U]
 }
 
 case class FieldValidationError(field: Field[_, _], key: String, params: Any*)
 
 trait Row[T] {
   def generateJSONSchema(obj: T): List[JField]
+
   def generateJSONValues(obj: T): List[JField]
 
   def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T
 
   def ||(field: Field[T, _]): Row[T]
+
   def doValidate(obj: T): List[FieldValidationError]
 }
 
@@ -155,29 +163,32 @@ case class Form[T](rows: List[Row[T]]) {
   }
 
   def +(row: Row[T]) = ++(List(row))
+
   def ++(moreRows: List[Row[T]]) = Form(rows ++ moreRows)
 }
 
-case class Field[T, U](
-  name: String,
-  read: T => U,
-  write: (T, U) => T,
-  validators: List[Validator[T, U]],
-  dataProvider: Option[DataProvider[T, U]],
-  label: Option[String],
-  required: Boolean,
-  fieldType: FieldType[U]) extends Row[T] {
+trait Field[T, U] extends Row[T] {
+  override def ||(field: Field[T, _]): Row[T] = MultiFieldRow(this :: field :: Nil)
+}
+
+case class PrimitiveField[T, U](
+                                 name: String,
+                                 read: T => U,
+                                 write: (T, U) => T,
+                                 validators: List[Validator[T, U]],
+                                 dataProvider: Option[DataProvider[T, U]],
+                                 label: Option[String],
+                                 required: Boolean,
+                                 fieldType: FieldType[U]) extends Field[T, U] {
 
   def label(newLabel: String) = this.copy(label = Some(newLabel))
 
-  def validate(validators: Validator[T, U]*): Field[T, U] = this.copy(validators = this.validators ++ validators)
+  def validate(validators: Validator[T, U]*): PrimitiveField[T, U] = this.copy(validators = this.validators ++ validators)
 
-  def use(dataProvider: DataProvider[T, U]): Field[T, U] = this.dataProvider match {
+  def use(dataProvider: DataProvider[T, U]): PrimitiveField[T, U] = this.dataProvider match {
     case Some(_) => throw new IllegalStateException("A data provider is already defined!")
     case None => this.copy(dataProvider = Some(dataProvider))
   }
-
-  override def ||(field: Field[T, _]): Row[T] = MultiFieldRow(this :: field :: Nil)
 
   override def doValidate(obj: T): List[FieldValidationError] = {
     val v = read(obj)
@@ -192,10 +203,10 @@ case class Field[T, U](
     }
   }
 
-  override def generateJSONSchema(obj: T)  = List(
+  override def generateJSONSchema(obj: T) = List(
     JField(name, JObject(
       JField("type", JString(fieldType.jsonSchemaName)) ::
-      JField("description", JString(label.getOrElse(""))) ::
+        JField("description", JString(label.getOrElse(""))) ::
         (dataProvider match {
           case Some(dp) => JField("enum", JArray(JString("") :: dp.provider(obj).flatMap(fieldType.toJValue))) :: Nil
           case None => Nil
@@ -223,14 +234,39 @@ case class Field[T, U](
 
 case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   override def ||(field: Field[T, _]): Row[T] = MultiFieldRow(fields ++ List(field))
+
   override def doValidate(obj: T): List[FieldValidationError] = fields.flatMap(_.doValidate(obj))
 
   override def generateJSONSchema(obj: T) = fields.flatMap(_.generateJSONSchema(obj))
+
   override def generateJSONValues(obj: T) = fields.flatMap(_.generateJSONValues(obj))
 
   override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {
     fields.foldLeft(obj)((currentObj, field) => field.applyJSONValues(currentObj, jsonFields))
   }
+}
+
+case class TableField[T, U](
+  name: String,
+  read: T => List[U],
+  write: (T, List[U]) => T,
+  label: Option[String],
+  embeddedForm: Form[U]) extends Field[T, List[U]] {
+  override def generateJSONSchema(obj: T) = List(JField(name, JObject(
+    JField("type", JString("array")),
+    JField("format", JString("table")),
+    JField("title", JString(label.getOrElse(""))),
+    JField("uniqueItems", JBool(true)),
+    JField("items", embeddedForm.generateJSONSchema(read(obj).head))
+  )))
+
+  override def generateJSONValues(obj: T) = List(JField(name, JArray(
+    read(obj).map(embeddedForm.generateJSONValues)
+  )))
+
+  override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]) = obj
+
+  override def doValidate(obj: T) = Nil
 }
 
 case class DataProvider[T, U](provider: T => List[U])
