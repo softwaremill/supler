@@ -219,4 +219,32 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     p2 should be (Person("John", Some(10), f3 = true, None))
     p3 should be (Person("John", Some(10), f3 = false, Some("Nothing")))
   }
+
+  "table" should "create a case class field representation" in {
+    // given
+    case class Car(make: String, age: Int)
+    case class Person(name: String, cars: List[Car])
+
+    val p1 = Person("p1", List(Car("m1", 10), Car("m2", 20)))
+    val p2 = Person("p2", Nil)
+
+    // when
+    import Supler._
+    val carForm = form[Car](f => List(
+      f.field(_.make),
+      f.field(_.age)
+    ))
+    object PersonMeta extends Supler[Person] {
+      val carsField = table(_.cars, carForm)
+    }
+
+    // then
+    import PersonMeta.carsField
+
+    carsField.name should be ("cars")
+    carsField.read(p1) should be (List(Car("m1", 10), Car("m2", 20)))
+    carsField.read(p2) should be (Nil)
+    carsField.write(p1, Nil).cars should be (Nil)
+    carsField.write(p2, List(Car("m3", 30))).cars should be (List(Car("m3", 30)))
+  }
 }
