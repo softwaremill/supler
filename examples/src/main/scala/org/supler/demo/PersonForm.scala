@@ -10,6 +10,7 @@ object PersonForm {
     "KIA" -> List("Picanto", "Venga", "cee'd", "sport c'eed", "Carens", "Sportage"),
     "Lada" -> List("Niva")
   )
+
   val carForm = form[Car](f => List(
     f.field(_.make).use(dataProvider(_ => carMakesAndModels.keys.toList)),
     f.field(_.model).use(dataProvider(car => carMakesAndModels(car.make))),

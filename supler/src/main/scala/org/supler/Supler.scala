@@ -12,8 +12,12 @@ object Supler extends Validators {
     Form(rows(new Supler[T] {}))
   }
 
-  def newField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean, fieldType: FieldType[U]): PrimitiveField[T, U] = {
+  def newPrimitiveField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean, fieldType: FieldType[U]): PrimitiveField[T, U] = {
     PrimitiveField[T, U](fieldName, read, write, List(), None, None, required, fieldType)
+  }
+
+  def newTableField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T, embeddedForm: Form[U]): TableField[T, U] = {
+    TableField[T, U](fieldName, read, write, None, embeddedForm)
   }
 
   def dataProvider[T, U](provider: T => List[U]): DataProvider[T, U] = {
@@ -21,12 +25,55 @@ object Supler extends Validators {
   }
 
   def field[T, U](param: T => U): PrimitiveField[T, U] = macro Supler.field_impl[T, U]
-
-  def table[T, U](param: T => List[U], form: Form[U]) = macro Supler.table_impl[T, U]
+  def table[T, U](param: T => List[U], form: Form[U]): TableField[T, U] = macro Supler.table_impl[T, U]
 
   def field_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: Context)(param: c.Expr[T => U]): c.Expr[PrimitiveField[T, U]] = {
     import c.universe._
 
+    val (fieldName, paramRepExpr) = extractFieldName(c)(param)
+
+    val readFieldValueExpr = generateFieldRead[T, U](c)(fieldName)
+
+    val classSymbol = implicitly[WeakTypeTag[T]].tpe.typeSymbol.asClass
+
+    val writeFieldValueExpr = generateFieldWrite[T, U](c)(fieldName, classSymbol)
+
+    val isOption = implicitly[WeakTypeTag[U]].tpe.typeSymbol.asClass.fullName == "scala.Option"
+    val isRequiredExpr = c.Expr[Boolean](Literal(Constant(!isOption)))
+
+    val fieldTypeTree = generateFieldType(c)(implicitly[WeakTypeTag[U]].tpe)
+    val fieldTypeExpr = c.Expr[FieldType[U]](fieldTypeTree)
+
+    reify {
+      newPrimitiveField(paramRepExpr.splice,
+        readFieldValueExpr.splice,
+        writeFieldValueExpr.splice,
+        isRequiredExpr.splice,
+        fieldTypeExpr.splice)
+    }
+  }
+
+  def table_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: Context)(param: c.Expr[T => List[U]], form: c.Expr[Form[U]]): c.Expr[TableField[T, U]] = {
+    import c.universe._
+
+    val (fieldName, paramRepExpr) = extractFieldName(c)(param)
+
+    val readFieldValueExpr = generateFieldRead[T, List[U]](c)(fieldName)
+
+    val classSymbol = implicitly[WeakTypeTag[T]].tpe.typeSymbol.asClass
+
+    val writeFieldValueExpr = generateFieldWrite[T, List[U]](c)(fieldName, classSymbol)
+
+    reify {
+      newTableField(paramRepExpr.splice,
+        readFieldValueExpr.splice,
+        writeFieldValueExpr.splice,
+        form.splice)
+    }
+  }
+
+  private def extractFieldName(c: Context)(param: c.Expr[_]): (String, c.Expr[String]) = {
+    import c.universe._
     val fieldName = param match {
       case Expr(
       Function(
@@ -39,12 +86,22 @@ object Supler extends Validators {
     val paramRepTree = Literal(Constant(fieldName))
     val paramRepExpr = c.Expr[String](paramRepTree)
 
+    (fieldName, paramRepExpr)
+  }
+
+  private def generateFieldRead[T, U](c: Context)(fieldName: String): c.Expr[T => U] = {
+    import c.universe._
+
     // obj => obj.[fieldName]
     val readFieldValueTree = Function(List(ValDef(Modifiers(Flag.PARAM), TermName("obj"), TypeTree(), EmptyTree)),
       Select(Ident(TermName("obj")), TermName(fieldName)))
-    val readFieldValueExpr = c.Expr[T => U](readFieldValueTree)
 
-    val classSymbol = implicitly[WeakTypeTag[T]].tpe.typeSymbol.asClass
+    c.Expr[T => U](readFieldValueTree)
+  }
+
+  private def generateFieldWrite[T, U](c: Context)(fieldName: String, classSymbol: c.universe.ClassSymbol): c.Expr[(T, U) => T] = {
+    import c.universe._
+
     val isCaseClass = classSymbol.isCaseClass
 
     val writeFieldValueTree = if (isCaseClass) {
@@ -74,28 +131,10 @@ object Supler extends Validators {
           Ident(TermName("obj"))))
     }
 
-    val writeFieldValueExpr = c.Expr[(T, U) => T](writeFieldValueTree)
-
-    val isOption = implicitly[WeakTypeTag[U]].tpe.typeSymbol.asClass.fullName == "scala.Option"
-    val isRequiredExpr = c.Expr[Boolean](Literal(Constant(!isOption)))
-
-    val fieldTypeTree = computeFieldType(c)(implicitly[WeakTypeTag[U]].tpe)
-    val fieldTypeExpr = c.Expr[FieldType[U]](fieldTypeTree)
-
-    reify {
-      newField(paramRepExpr.splice,
-        readFieldValueExpr.splice,
-        writeFieldValueExpr.splice,
-        isRequiredExpr.splice,
-        fieldTypeExpr.splice)
-    }
+    c.Expr[(T, U) => T](writeFieldValueTree)
   }
 
-  def table_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: Context)(param: c.Expr[T => U]): c.Expr[TableField[T, U]] = {
-
-  }
-
-  private def computeFieldType(c: Context)(fieldTpe: c.Type): c.Tree = {
+  private def generateFieldType(c: Context)(fieldTpe: c.Type): c.Tree = {
     import c.universe._
 
     if (fieldTpe <:< c.typeOf[String]) {
@@ -111,7 +150,7 @@ object Supler extends Validators {
     } else if (fieldTpe <:< c.typeOf[Boolean]) {
       q"_root_.org.supler.BooleanFieldType"
     } else if (fieldTpe <:< c.typeOf[Option[_]]) {
-      val innerTree = computeFieldType(c)(fieldTpe.typeArgs(0))
+      val innerTree = generateFieldType(c)(fieldTpe.typeArgs(0))
       q"new _root_.org.supler.OptionalFieldType($innerTree)"
     } else {
       throw new IllegalArgumentException(s"Fields of type $fieldTpe are not supported")
@@ -121,6 +160,7 @@ object Supler extends Validators {
 
 trait Supler[T] extends Validators {
   def field[U](param: T => U): PrimitiveField[T, U] = macro Supler.field_impl[T, U]
+  def table[U](param: T => List[U], form: Form[U]): TableField[T, U] = macro Supler.table_impl[T, U]
 }
 
 case class FieldValidationError(field: Field[_, _], key: String, params: Any*)
@@ -168,18 +208,20 @@ case class Form[T](rows: List[Row[T]]) {
 }
 
 trait Field[T, U] extends Row[T] {
+  def name: String
+
   override def ||(field: Field[T, _]): Row[T] = MultiFieldRow(this :: field :: Nil)
 }
 
 case class PrimitiveField[T, U](
-                                 name: String,
-                                 read: T => U,
-                                 write: (T, U) => T,
-                                 validators: List[Validator[T, U]],
-                                 dataProvider: Option[DataProvider[T, U]],
-                                 label: Option[String],
-                                 required: Boolean,
-                                 fieldType: FieldType[U]) extends Field[T, U] {
+  name: String,
+  read: T => U,
+  write: (T, U) => T,
+  validators: List[Validator[T, U]],
+  dataProvider: Option[DataProvider[T, U]],
+  label: Option[String],
+  required: Boolean,
+  fieldType: FieldType[U]) extends Field[T, U] {
 
   def label(newLabel: String) = this.copy(label = Some(newLabel))
 
@@ -252,6 +294,9 @@ case class TableField[T, U](
   write: (T, List[U]) => T,
   label: Option[String],
   embeddedForm: Form[U]) extends Field[T, List[U]] {
+
+  def label(newLabel: String) = this.copy(label = Some(newLabel))
+
   override def generateJSONSchema(obj: T) = List(JField(name, JObject(
     JField("type", JString("array")),
     JField("format", JString("table")),
