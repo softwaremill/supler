@@ -18,8 +18,9 @@ object Supler extends Validators {
     PrimitiveField[T, U](fieldName, read, write, List(), None, None, required, fieldType)
   }
 
-  def newTableField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T, embeddedForm: Form[U]): TableField[T, U] = {
-    TableField[T, U](fieldName, read, write, None, embeddedForm)
+  def newTableField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T,
+    embeddedForm: Form[U], createEmpty: () => U): TableField[T, U] = {
+    TableField[T, U](fieldName, read, write, None, embeddedForm, createEmpty)
   }
 
   def dataProvider[T, U](provider: T => List[U]): DataProvider[T, U] = {
@@ -27,7 +28,7 @@ object Supler extends Validators {
   }
 
   def field[T, U](param: T => U): PrimitiveField[T, U] = macro Supler.field_impl[T, U]
-  def table[T, U](param: T => List[U], form: Form[U]): TableField[T, U] = macro Supler.table_impl[T, U]
+  def table[T, U](param: T => List[U], form: Form[U], createEmpty: => U): TableField[T, U] = macro Supler.table_impl[T, U]
 
   def field_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: Context)(param: c.Expr[T => U]): c.Expr[PrimitiveField[T, U]] = {
     import c.universe._
@@ -55,7 +56,8 @@ object Supler extends Validators {
     }
   }
 
-  def table_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: Context)(param: c.Expr[T => List[U]], form: c.Expr[Form[U]]): c.Expr[TableField[T, U]] = {
+  def table_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: Context)(param: c.Expr[T => List[U]],
+    form: c.Expr[Form[U]], createEmpty: c.Tree): c.Expr[TableField[T, U]] = {
     import c.universe._
 
     val (fieldName, paramRepExpr) = extractFieldName(c)(param)
@@ -66,11 +68,14 @@ object Supler extends Validators {
 
     val writeFieldValueExpr = generateFieldWrite[T, List[U]](c)(fieldName, classSymbol)
 
+    val createEmptyExpr = c.Expr[() => U](q"() => $createEmpty")
+
     reify {
       newTableField(paramRepExpr.splice,
         readFieldValueExpr.splice,
         writeFieldValueExpr.splice,
-        form.splice)
+        form.splice,
+        createEmptyExpr.splice)
     }
   }
 
@@ -162,7 +167,7 @@ object Supler extends Validators {
 
 trait Supler[T] extends Validators {
   def field[U](param: T => U): PrimitiveField[T, U] = macro Supler.field_impl[T, U]
-  def table[U](param: T => List[U], form: Form[U]): TableField[T, U] = macro Supler.table_impl[T, U]
+  def table[U](param: T => List[U], form: Form[U], createEmpty: => U): TableField[T, U] = macro Supler.table_impl[T, U]
 }
 
 case class FieldValidationError(field: Field[_, _], key: String, params: Any*)
@@ -204,10 +209,6 @@ case class Form[T](rows: List[Row[T]]) {
         rows.foldLeft(obj)((currentObj, row) => row.applyJSONValues(currentObj, jsonFields.toMap))
       case _ => obj
     }
-  }
-
-  def createFromJSONValues(jObject: JObject): Either[List[FieldValidationError], T] = {
-    ???
   }
 
   def +(row: Row[T]) = ++(List(row))
@@ -353,7 +354,8 @@ case class TableField[T, U](
   read: T => List[U],
   write: (T, List[U]) => T,
   label: Option[String],
-  embeddedForm: Form[U]) extends Field[T, List[U]] {
+  embeddedForm: Form[U],
+  createEmpty: () => U) extends Field[T, List[U]] {
 
   def label(newLabel: String) = this.copy(label = Some(newLabel))
 
@@ -369,7 +371,16 @@ case class TableField[T, U](
     read(obj).map(embeddedForm.generateJSONValues)
   )))
 
-  override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]) = obj
+  override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]) = {
+    val vs = for {
+      JArray(formJValues) <- jsonFields.get(name).toList
+      formJValue <- formJValues
+    } yield {
+      embeddedForm.applyJSONValues(createEmpty(), formJValue)
+    }
+
+    write(obj, vs)
+  }
 
   override def doValidate(obj: T) = Nil
 }
