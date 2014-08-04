@@ -395,7 +395,7 @@ case class TableField[T, U](
     write(obj, vs)
   }
 
-  override def doValidate(obj: T) = Nil
+  override def doValidate(obj: T) = read(obj).flatMap(embeddedForm.doValidate)
 }
 
 case class DataProvider[T, U](provider: T => List[U])
