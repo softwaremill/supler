@@ -13,7 +13,7 @@ object PersonForm {
 
   val carForm = form[Car](f => List(
     f.field(_.make).use(dataProvider(_ => carMakesAndModels.keys.toList)),
-    f.field(_.model).use(dataProvider(car => carMakesAndModels(car.make))),
+    //f.field(_.model).use(dataProvider(car => carMakesAndModels(car.make))),
     f.field(_.year)
   ))
 
@@ -24,7 +24,7 @@ object PersonForm {
     f.field(_.address1).label("Address 1"),
     f.field(_.address2).label("Address 2"),
     f.field(_.gender).label("Gender").use(dataProvider(_ => List("Male", "Female"))),
-    f.table(_.cars, carForm, Car(null, null, 0)).label("Cars")
+    f.table(_.cars, carForm, Car(null, 0)).label("Cars")
   ))
 }
 
@@ -39,6 +39,6 @@ case class Person(
 
 case class Car(
   make: String,
-  model: String,
+  //model: String,
   year: Int
 )

@@ -255,6 +255,9 @@ case class PrimitiveField[T, U](
   }
 
   override def generateJSONSchema(formId: String) = {
+    // TODO: Until https://github.com/jdorn/json-editor/issues/208 is fixed, supporting only enums not depending on
+    // TODO: the entity
+    /*
     dataProvider match {
       case Some(dp) =>
         /*
@@ -315,6 +318,16 @@ case class PrimitiveField[T, U](
           ))
         )
     }
+    */
+
+    List(JField(name, JObject(
+      JField("type", JString(fieldType.jsonSchemaName)) ::
+        JField("description", JString(label.getOrElse(""))) ::
+        (dataProvider match {
+          case Some(dp) => JField("enum", JArray(JString("") :: dp.provider(null.asInstanceOf[T]).flatMap(fieldType.toJValue))) :: Nil
+          case None => Nil
+        })
+    )))
   }
 
   override def generateJSONValues(obj: T) = {
