@@ -1,6 +1,6 @@
 package org.supler.demo
 
-import org.supler.Supler
+import org.supler.{ValidationError, Supler}
 import Supler._
 
 object PersonForm {
@@ -14,12 +14,13 @@ object PersonForm {
   val carForm = form[Car](f => List(
     f.field(_.make).use(dataProvider(_ => carMakesAndModels.keys.toList)),
     //f.field(_.model).use(dataProvider(car => carMakesAndModels(car.make))),
-    f.field(_.year)
+    f.field(_.year).validate(gt(1900))
   ))
 
   val personForm = form[Person](f => List(
     f.field(_.firstName).label("First name"),
-    f.field(_.lastName).label("Last name"),
+    f.field(_.lastName).label("Last name")
+      .validate(custom((e, v) => v.length > e.firstName.length, (e, v) => ValidationError("Last name must be longer than first name!"))),
     f.field(_.age).label("Age"),
     f.field(_.address1).label("Address 1"),
     f.field(_.address2).label("Address 2"),

@@ -255,6 +255,8 @@ case class PrimitiveField[T, U](
   }
 
   override def generateJSONSchema(formId: String) = {
+    val validationSchema = JField("optional", JBool(value = !required)) :: validators.flatMap(_.generateJSONSchema)
+
     // TODO: Until https://github.com/jdorn/json-editor/issues/208 is fixed, supporting only enums not depending on
     // TODO: the entity
     /*
@@ -323,10 +325,11 @@ case class PrimitiveField[T, U](
     List(JField(name, JObject(
       JField("type", JString(fieldType.jsonSchemaName)) ::
         JField("description", JString(label.getOrElse(""))) ::
+        JField("options", JObject(JField("hidden", JBool(value = false)))) ::
         (dataProvider match {
           case Some(dp) => JField("enum", JArray(JString("") :: dp.provider(null.asInstanceOf[T]).flatMap(fieldType.toJValue))) :: Nil
           case None => Nil
-        })
+        }) ++ validationSchema
     )))
   }
 
@@ -376,7 +379,6 @@ case class TableField[T, U](
     JField("type", JString("array")),
     JField("format", JString("table")),
     JField("title", JString(label.getOrElse(""))),
-    JField("uniqueItems", JBool(value = true)),
     JField("items", embeddedForm.generateJSONSchema)
   )))
 

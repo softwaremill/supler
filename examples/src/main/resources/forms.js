@@ -20,8 +20,7 @@ function try_show_form() {
     editor = new JSONEditor(editor_holder, {
       theme: 'bootstrap3',
       schema: schema,
-      startval: initial_data,
-      required_by_default: true
+      startval: initial_data
     });
   }
 }
@@ -30,17 +29,25 @@ var feedback = $('#feedback')
 feedback.hide();
 
 $('#submit').click(function() {
-  $.ajax({
-    url: 'http://localhost:8080/form1/data.json',
-    type: 'POST',
-    data: JSON.stringify(editor.getValue()),
-    dataType: 'json',
-    contentType: 'application/json; charset=utf-8',
-    success: function(data) {
-      feedback.html(data);
-      feedback.show();
-    }
-  })
+  var errors = editor.validate();
+
+  if (errors.length) {
+  console.log(errors);
+    feedback.html("Client-side validation errors: " + errors);
+    feedback.show();
+  } else {
+    $.ajax({
+      url: 'http://localhost:8080/form1/data.json',
+      type: 'POST',
+      data: JSON.stringify(editor.getValue()),
+      dataType: 'json',
+      contentType: 'application/json; charset=utf-8',
+      success: function(data) {
+        feedback.html(data);
+        feedback.show();
+      }
+    })
+  }
 
   return false;
 });
