@@ -8,7 +8,8 @@ Basing on that description, a form is rendered
   "fields": {
     "field1": {
       "label": "...",
-      "type": "text" / "email" / "password" / "integer"
+      "type": "text" / "integer" / "real" / "boolean",
+      // optional fields 
       "validate": {
         "required": true,
         "minLength": 10,
@@ -17,19 +18,21 @@ Basing on that description, a form is rendered
           "msg": "xxx"
         }
       },
-      "render_hint": "textarea" / "radio" / "checkbox" / "dropdown" / "spinner" / "slider" / etc.,
+      "multiple": false 
+      "render_hint": "textarea" / "radio" / "checkbox" / "slider" / etc.,
       "placeholder": "...",
       "possible_values": [ "...", "...", "..." ],
-      "value": ...
+      "value": ... // an array if multiple
     },
     "field2": {
       "label": "...",
-      "type": "list",
+      "type": "subform",
+      "multiple": true
       "value": [
         {
         // recursive
         }, ...
-      ]
+      ] // or a single form if not multiple
     }
   }
 }
@@ -73,21 +76,21 @@ How each form fragment is rendered can be customized via options.
 
 ````json
 // possible options
-
 fieldOrder: ["x", "y", "z"]
-validationTextTransform: function(str, params) {} // i18n
+validationTextTransform: function(str) {} // i18n
 renderFieldTemplate: function(renderLabel, renderInput, renderValidation) {}
 renderFieldValidationTemplate: function(validationText) {}
 renderLabelTemplate: function(label) {}
 // for each supported type and rendering hint
-renderTextField: function(name, value, placeholder, length) {}
-renderRadio: function(name, values) {}
-renderCheckboxes: function(name, values) {}
-renderSelect: function(name, values) {}
+renderTextField: function(name, value, attrs) {}
+renderRadioField: function(name, values) {}
+renderCheckboxField: function(name, values) {}
+renderSelectField: function(name, values) {}
+...
 // rendering HTML elements (invoked by the above)
-renderInputHTML: function(name, value, placeholder) {}
+renderInputHTML: function(name, value, attrs) {}
+renderTextareaHTML: function(name, value, attrs) {}
 ````
-
 
 Customizing vis HTML
 --------------------
@@ -130,8 +133,8 @@ Use-cases:
 ````html
 <div id="form-container">
   <supler:renderFieldTypeAs fieldType="[field type name]">
-      // must contain an element with the name attr set to "suplerName" - will be replaced
-    </supler:renderFieldAs>
+    // must contain an element with the name attr set to "suplerName" - will be replaced
+  </supler:renderFieldAs>
 </div>
 ````
 
