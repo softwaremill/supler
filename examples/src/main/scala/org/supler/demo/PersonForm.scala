@@ -12,7 +12,7 @@ object PersonForm {
   )
 
   val carForm = form[Car](f => List(
-    f.field(_.make).use(dataProvider(_ => carMakesAndModels.keys.toList)),
+    f.field(_.make).use(dataProvider(_ => carMakesAndModels.keys.toList)).label("Make"),
     //f.field(_.model).use(dataProvider(car => carMakesAndModels(car.make))),
     f.field(_.year).validate(gt(1900))
   ))

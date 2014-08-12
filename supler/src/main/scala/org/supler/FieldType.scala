@@ -33,13 +33,13 @@ case object LongFieldType extends FieldType[Long] {
 }
 
 case object FloatFieldType extends FieldType[Float] {
-  val jsonSchemaName = "number"
+  val jsonSchemaName = "double"
   def toNonNullJValue(value: Float) = Some(JDouble(value))
   def fromJValue = { case JDouble(v) => v.toFloat }
 }
 
 case object DoubleFieldType extends FieldType[Double] {
-  val jsonSchemaName = "number"
+  val jsonSchemaName = "double"
   def toNonNullJValue(value: Double) = Some(JDouble(value))
   def fromJValue = { case JDouble(v) => v }
 }

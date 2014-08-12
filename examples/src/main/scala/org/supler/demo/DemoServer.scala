@@ -16,34 +16,25 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
   def getJson(route: Route) = get { respondWithMediaType(MediaTypes.`application/json`) { route } }
 
   startServer(interface = "localhost", port = 8080) {
-    pathPrefix("form1") {
-      path("schema.json") {
-        getJson {
-          complete {
-            PersonForm.personForm.generateJSONSchema
-          }
+    path("form1.json") {
+      getJson {
+        complete {
+          PersonForm.personForm.generateJSON(person)
         }
       } ~
-      path("data.json") {
-        getJson {
+      post {
+        entity(as[JValue]) { jvalue =>
           complete {
-            PersonForm.personForm.generateJSONValues(person)
-          }
-        } ~
-        post {
-          entity(as[JValue]) { jvalue =>
-            complete {
-              val newPerson = PersonForm.personForm.applyJSONValues(person, jvalue)
-              val result = PersonForm.personForm.doValidate(newPerson) match {
-                case Nil =>
-                  person = newPerson
-                  println(s"Persisted: $person")
-                  "Persisted: " + person
-                case l => "Server-side validation errors: " + l.map(fve => s"${fve.field.name}: ${fve.key}").mkString(", ")
-              }
-
-              result
+            val newPerson = PersonForm.personForm.applyJSONValues(person, jvalue)
+            val result = PersonForm.personForm.doValidate(newPerson) match {
+              case Nil =>
+                person = newPerson
+                println(s"Persisted: $person")
+                "Persisted: " + person
+              case l => "Server-side validation errors: " + l.map(fve => s"${fve.field.name}: ${fve.key}").mkString(", ")
             }
+
+            result
           }
         }
       }

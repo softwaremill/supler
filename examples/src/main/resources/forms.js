@@ -1,53 +1,40 @@
-var schema = null;
-var initial_data = null;
-
 $(document).ready(function() {
-  $.get('http://localhost:8080/form1/schema.json', function(data) {
-    schema = data;
-    try_show_form();
-  });
-
-  $.get('http://localhost:8080/form1/data.json', function(data) {
-    initial_data = data;
-    try_show_form();
+  $.get("http://localhost:8080/form1.json", function(data) {
+    showForm(data);
   });
 });
 
-var editor_holder = document.getElementById('editor_holder');
-var editor = null;
-function try_show_form() {
-  if (schema !== null && initial_data !== null) {
-    editor = new JSONEditor(editor_holder, {
-      theme: 'bootstrap3',
-      schema: schema,
-      startval: initial_data
-    });
-  }
+var formContainer = document.getElementById("form-container");
+var form = null;
+
+function showForm(formJson) {
+    form = new SuplerForm(formContainer, {});
+    form.render(formJson);
 }
 
-var feedback = $('#feedback')
+var feedback = $("#feedback")
 feedback.hide();
 
-$('#submit').click(function() {
-  var errors = editor.validate();
+$("#submit").click(function() {
+  /*var errors = form.validate();
 
   if (errors.length) {
-  console.log(errors);
+    console.log(errors);
     feedback.html("Client-side validation errors: " + errors);
     feedback.show();
-  } else {
+  } else {*/
     $.ajax({
-      url: 'http://localhost:8080/form1/data.json',
-      type: 'POST',
-      data: JSON.stringify(editor.getValue()),
-      dataType: 'json',
-      contentType: 'application/json; charset=utf-8',
+      url: "http://localhost:8080/form1.json",
+      type: "POST",
+      data: JSON.stringify(form.getValue()),
+      dataType: "json",
+      contentType: "application/json; charset=utf-8",
       success: function(data) {
         feedback.html(data);
         feedback.show();
       }
     })
-  }
+  /*}  */
 
   return false;
 });
