@@ -244,7 +244,9 @@ case class PrimitiveField[T, U](
 
   override def generateJSON(obj: T) = {
     val valueJSON = fieldType.toJValue(read(obj)).map(JField("value", _))
-    val validationJSON = Nil
+    val validationJSON = List(JField("validate", JObject(
+      JField("required", JBool(required)) :: validators.flatMap(_.generateJSON)
+    )))
     val possibleValuesJSON = dataProvider match {
       case Some(dp) =>
         val possibilities = dp.provider(obj).flatMap(fieldType.toJValue)

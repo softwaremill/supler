@@ -1,11 +1,11 @@
 package org.supler
 
 import org.json4s.JField
-import org.json4s.JsonAST.{JBool, JInt}
+import org.json4s.JsonAST.JInt
 
 trait Validator[T, U] {
   def doValidate(objValue: T, fieldValue: U): List[ValidationError]
-  def generateJSONSchema: List[JField]
+  def generateJSON: List[JField]
 }
 
 case class ValidationError(key: String, params: Any*)
@@ -19,19 +19,19 @@ trait Validators {
 
   def gt[T](than: Int) =
     fieldValidator[T, Int](_ > than)(_ => ValidationError(s"Must be greater than $than"))(
-      List(JField("miniminum", JInt(than)), JField("exclusiveMinimum", JBool(value = true))))
+      List(JField("gt", JInt(than))))
 
   def lt[T](than: Int) =
     fieldValidator[T, Int](_ < than)(_ => ValidationError(s"Must be less than $than"))(
-      List(JField("maximum", JInt(than)), JField("exclusiveMaximum", JBool(value = true))))
+      List(JField("lt", JInt(than))))
 
   def ge[T](than: Int) =
     fieldValidator[T, Int](_ >= than)(_ => ValidationError(s"Must be greater or equal to $than"))(
-      List(JField("miniminum", JInt(than)), JField("exclusiveMinimum", JBool(value = false))))
+      List(JField("ge", JInt(than))))
 
   def le[T](than: Int) =
     fieldValidator[T, Int](_ <= than)(_ => ValidationError(s"Must be less or equal to $than"))(
-      List(JField("maximum", JInt(than)), JField("exclusiveMaximum", JBool(value = false))))
+      List(JField("le", JInt(than))))
 
 
   def custom[T, U](test: (T, U) => Boolean, createError: (T, U) => ValidationError): Validator[T, U] = new Validator[T, U] {
@@ -42,10 +42,10 @@ trait Validators {
         Nil
       }
     }
-    override def generateJSONSchema = Nil
+    override def generateJSON = Nil
   }
 
-  private def fieldValidator[T, U](test: U => Boolean)(createError: U => ValidationError)(jsonSchema: List[JField]) =
+  private def fieldValidator[T, U](test: U => Boolean)(createError: U => ValidationError)(json: List[JField]) =
     new Validator[T, U] {
       override def doValidate(objValue: T, fieldValue: U) = {
         if (!test(fieldValue)) {
@@ -55,6 +55,6 @@ trait Validators {
         }
       }
 
-      override def generateJSONSchema = jsonSchema
+      override def generateJSON = json
     }
 }
