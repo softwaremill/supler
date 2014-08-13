@@ -1,5 +1,11 @@
 function SuplerForm(container, customOptions) {
-    this.options = $.extend(this, this.defaultOptions, customOptions);
+    this.options = {};
+    copyProperties(this.options, this.defaultOptions);
+    copyProperties(this.options, customOptions);
+
+    // easy access to options
+    copyProperties(this, this.options);
+
     this.idCounter = 0;
     this.container = container;
 }
@@ -203,11 +209,11 @@ SuplerForm.prototype.defaultOptions = {
 
   // html form elements
   renderHtmlInput: function(inputType, id, name, value, options) {
-    return this.renderTag("input", $.extend({}, { "id": id, "type": inputType, "name": name, "value": value }, options), true);
+    return this.renderTag("input", copyProperties({ "id": id, "type": inputType, "name": name, "value": value }, options), true);
   },
   renderHtmlSelect: function(id, name, value, possibleValues, options) {
     var html = "";
-    html += this.renderTag("select", $.extend({}, { "id": id, "name": name }, options), false);
+    html += this.renderTag("select", copyProperties({ "id": id, "name": name }, options), false);
     html += "\n";
     for (var i in possibleValues) {
         var selected = "";
@@ -245,3 +251,13 @@ SuplerForm.prototype.renderTag = function(tagName, tagAttrs, voidTag) {
 
   return r;
 };
+
+function copyProperties(to, from) {
+    for (var k in from) {
+        if (from.hasOwnProperty(k)) {
+            to[k] = from[k];
+        }
+    }
+
+    return to;
+}
