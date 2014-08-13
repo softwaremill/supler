@@ -91,33 +91,6 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     f4Field.fieldType should be (StringFieldType)
   }
 
-  "field" should "generate json value basing on the entity passed" in {
-    // given
-    case class Person(f1: String, f2: Option[Int], f3: Boolean)
-
-    val p1 = Person("s1", Some(10), f3 = true)
-    val p2 = Person("s2", None, f3 = false)
-
-    // when
-    object PersonMeta extends Supler[Person] {
-      val f1Field = field(_.f1)
-      val f2Field = field(_.f2)
-      val f3Field = field(_.f3)
-    }
-
-    // then
-    import PersonMeta._
-
-    f1Field.generateJSONValues(p1) should be (List(JField("f1", JString("s1"))))
-    f1Field.generateJSONValues(p2) should be (List(JField("f1", JString("s2"))))
-
-    f2Field.generateJSONValues(p1) should be (List(JField("f2", JInt(10))))
-    f2Field.generateJSONValues(p2) should be (Nil)
-
-    f3Field.generateJSONValues(p1) should be (List(JField("f3", JBool(value = true))))
-    f3Field.generateJSONValues(p2) should be (List(JField("f3", JBool(value = false))))
-  }
-
   "field" should "validate required fields" in {
     // given
     case class Person(f1: String, f2: Option[String], f3: Int, f4: Option[Int])
@@ -152,29 +125,6 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     f4Field.doValidate(p1).size should be (0)
     f4Field.doValidate(p2).size should be (0)
     f4Field.doValidate(p3).size should be (0)
-  }
-
-  "form" should "generate json values basing on the entity passed" in {
-    // given
-    case class Person(f1: String, f2: Option[Int], f3: Boolean)
-
-    val form = Supler.form[Person](f => List(
-      f.field(_.f1),
-      f.field(_.f2),
-      f.field(_.f3)
-    ))
-
-    val p = Person("John", Some(10), f3 = true)
-
-    // when
-    val json = form.generateJSONValues(p)
-
-    // then
-    json should be (JObject(
-      JField("f1", JString("John")),
-      JField("f2", JInt(10)),
-      JField("f3", JBool(value = true))
-    ))
   }
 
   "form" should "apply json values to the entity given" in {
