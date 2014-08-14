@@ -4,3 +4,6 @@ dist
 .sass-cache
 bower_components
 test/bower_components
+app/scripts/supler.out.js
+app/scripts/supler.out.js.map
+app/reference.ts

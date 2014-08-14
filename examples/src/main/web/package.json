@@ -5,6 +5,7 @@
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-cli": "^0.1.13",
+    "grunt-ts": "1.11.6",
     "grunt-connect-proxy": "0.1.5",
     "grunt-contrib-copy": "~0.5.0",
     "grunt-contrib-concat": "~0.3.0",
