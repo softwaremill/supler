@@ -16,7 +16,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
   def getJson(route: Route) = get { respondWithMediaType(MediaTypes.`application/json`) { route } }
 
   startServer(interface = "localhost", port = 8080) {
-    path("form1.json") {
+    path("rest" / "form1.json") {
       getJson {
         complete {
           PersonForm.personForm.generateJSON(person)

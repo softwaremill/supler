@@ -1,5 +1,5 @@
 $(document).ready(function() {
-  $.get("http://localhost:8080/form1.json", function(data) {
+  $.get("/rest/form1.json", function(data) {
     showForm(data);
   });
 });
@@ -24,7 +24,7 @@ $("#submit").click(function() {
     feedback.show();
   } else {*/
     $.ajax({
-      url: "http://localhost:8080/form1.json",
+      url: "/rest/form1.json",
       type: "POST",
       data: JSON.stringify(form.getValue()),
       dataType: "json",

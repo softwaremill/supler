@@ -22,3 +22,5 @@ project/plugins/project/
 **/*.iml
 *.iml
 .idea_modules
+
+**/node_modules
