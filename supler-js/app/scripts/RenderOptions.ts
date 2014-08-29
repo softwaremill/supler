@@ -107,16 +107,16 @@ class DefaultRenderOptions implements RenderOptions {
         var html = "";
         html += HtmlUtil.renderTag("select", copyProperties({ "id": id, "name": name }, options), false);
         html += "\n";
-        for (var i in possibleValues) {
+        Util.foreach(possibleValues, (i, v) => {
             var selected = "";
-            if (possibleValues[i] === value) {
+            if (v === value) {
                 selected = " selected ";
             }
 
-            html += '<option value="' + possibleValues[i] + '"' + selected + '>';
-            html += possibleValues[i];
+            html += '<option value="' + v + '"' + selected + '>';
+            html += v;
             html += '</option>\n';
-        }
+        });
         html += "</select>\n";
         return html;
     }

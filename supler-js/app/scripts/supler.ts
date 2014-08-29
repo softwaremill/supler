@@ -14,12 +14,9 @@ class SuplerForm {
     formFromJson(formJson) {
         var fields = formJson.fields;
         var html = "";
-        for (var field in fields) {
-            if (fields.hasOwnProperty(field)) {
-                var fieldJson = fields[field];
-                html += this.fieldFromJson(field, fieldJson) + "\n";
-            }
-        }
+        Util.foreach(fields, (field, fieldJson) => {
+            html += this.fieldFromJson(field, fieldJson) + "\n";
+        });
 
         return html;
     }
@@ -133,11 +130,9 @@ class SuplerForm {
                 } else if (children[i].childNodes.length > 0) {
                     // flattening
                     var childResult = this.getValueFrom(children[i]);
-                    for (var field in childResult) {
-                        if (childResult.hasOwnProperty(field)) {
-                            appendFieldValue(field, childResult[field], multiple);
-                        }
-                    }
+                    Util.foreach(childResult, (field, v) => {
+                        appendFieldValue(field, v, multiple);
+                    });
                 }
             }
         }
@@ -152,11 +147,9 @@ class SuplerForm {
 }
 
 function copyProperties(to, from) {
-    for (var k in from) {
-        if (from.hasOwnProperty(k)) {
-            to[k] = from[k];
-        }
-    }
+    Util.foreach(from, (k, v) => {
+        to[k] = v;
+    });
 
     return to;
 }
