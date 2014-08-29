@@ -1,17 +1,9 @@
-class SuplerForm {
-    private options: RenderOptions;
+class RenderFormFromJson {
     private idCounter: number = 0;
 
-    constructor(private container: HTMLDivElement, customOptions: any) {
-        this.options = new DefaultRenderOptions();
-        Util.copyProperties(this.options, customOptions);
-    }
+    constructor(private options: RenderOptions) {}
 
-    render(formJson) {
-        this.container.innerHTML = this.formFromJson(formJson);
-    }
-
-    private formFromJson(formJson) {
+    formFromJson(formJson) {
         var fields = formJson.fields;
         var html = "";
         Util.foreach(fields, (field, fieldJson) => {
@@ -77,13 +69,8 @@ class SuplerForm {
         return html;
     }
 
-    getValue() {
-        return new ReadFormValues().getValueFrom(this.container);
-    }
-
     private nextId() {
         this.idCounter += 1;
         return "id" + this.idCounter;
     }
 }
-
