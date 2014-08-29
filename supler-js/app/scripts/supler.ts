@@ -1,8 +1,8 @@
 class SuplerForm {
-    options:any = {};
-    idCounter:number = 0;
+    private options: RenderOptions;
+    private idCounter: number = 0;
 
-    constructor(public container:HTMLDivElement, customOptions:any) {
+    constructor(private container: HTMLDivElement, customOptions: any) {
         this.options = new DefaultRenderOptions();
         Util.copyProperties(this.options, customOptions);
     }
