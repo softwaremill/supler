@@ -33,7 +33,7 @@ class SuplerForm {
                 return this.stringFieldFromJson(id, fieldName, fieldJson, fieldOptions);
 
             case "integer":
-                return this.options.renderIntegerField(this, fieldJson.label, id, fieldName, fieldJson.value, fieldOptions);
+                return this.options.renderIntegerField(fieldJson.label, id, fieldName, fieldJson.value, fieldOptions);
 
             case "subform":
                 return this.subformFieldFromJson(id, fieldName, fieldJson);
@@ -48,23 +48,23 @@ class SuplerForm {
             if (fieldJson.multiple) {
                 return "";
             } else {
-                return this.options.renderSingleChoiceSelectField(this, fieldJson.label, id, fieldName, fieldJson.value,
+                return this.options.renderSingleChoiceSelectField(fieldJson.label, id, fieldName, fieldJson.value,
                     fieldJson.possible_values, fieldOptions);
             }
         } else {
-            return this.options.renderStringField(this, fieldJson.label, id, fieldName, fieldJson.value, fieldOptions);
+            return this.options.renderStringField(fieldJson.label, id, fieldName, fieldJson.value, fieldOptions);
         }
     }
 
     subformFieldFromJson(id, fieldName, fieldJson) {
         var html = "";
-        html += this.renderTag("fieldset", {"id": id, "name": fieldName }, false);
+        html += HtmlUtil.renderTag("fieldset", {"id": id, "name": fieldName }, false);
         html += "\n";
         html += "<legend>" + fieldJson.label + "</legend>\n";
 
         if (fieldJson.multiple) {
             for (var i in fieldJson.value) {
-                html += this.renderTag("div", {
+                html += HtmlUtil.renderTag("div", {
                     "class": "well",
                     "supler:fieldType": "subform",
                     "supler:fieldName": fieldName,
@@ -76,7 +76,7 @@ class SuplerForm {
 
         }
 
-        html += "</fieldset>\n"
+        html += "</fieldset>\n";
         return html;
     }
 
@@ -145,29 +145,11 @@ class SuplerForm {
         return result;
     }
 
-    renderTag(tagName, tagAttrs, voidTag) {
-        var r = "<" + tagName + " ";
-        for (var tagAttrName in tagAttrs) {
-            if (tagAttrs.hasOwnProperty(tagAttrName) && tagAttrs[tagAttrName]) {
-                r += tagAttrName + '="' + tagAttrs[tagAttrName] + '" ';
-            }
-        }
-
-        if (voidTag) {
-            r += "/>";
-        } else {
-            r += ">";
-        }
-
-        return r;
-    }
-
     nextId() {
         this.idCounter += 1;
         return "id" + this.idCounter;
     }
 }
-;
 
 class DefaultOptions {
     constructor() {
@@ -175,24 +157,24 @@ class DefaultOptions {
 
     // main field rendering entry points
     // basic types
-    renderStringField(form: SuplerForm, label, id, name, value, options) {
+    renderStringField(label, id, name, value, options) {
         var self = this;
         return this.renderRhsField(function () {
-            return self.renderHtmlInput(form, "text", id, name, value, options);
+            return self.renderHtmlInput("text", id, name, value, options);
         }, label, id);
     }
 
-    renderIntegerField(form: SuplerForm, label, id, name, value, options) {
+    renderIntegerField(label, id, name, value, options) {
         var self = this;
         return this.renderRhsField(function () {
-            return self.renderHtmlInput(form, "number", id, name, value, options);
+            return self.renderHtmlInput("number", id, name, value, options);
         }, label, id);
     }
 
-    renderDoubleField(form: SuplerForm, label, id, name, value, options) {
+    renderDoubleField(label, id, name, value, options) {
         var self = this;
         return this.renderRhsField(function () {
-            return self.renderHtmlInput(form, "number", id, name, value, options);
+            return self.renderHtmlInput("number", id, name, value, options);
         }, label, id);
     }
 
@@ -201,10 +183,10 @@ class DefaultOptions {
     }
 
     // text field render hints
-    renderPasswordField(form: SuplerForm, label, id, name, value, options) {
+    renderPasswordField(label, id, name, value, options) {
         var self = this;
         return this.renderRhsField(function () {
-            return self.renderHtmlInput(form, "password", id, name, value, options);
+            return self.renderHtmlInput("password", id, name, value, options);
         }, label, id);
     }
 
@@ -224,10 +206,10 @@ class DefaultOptions {
         return "";
     }
 
-    renderSingleChoiceSelectField(form: SuplerForm, label, id, name, value, possibleValues, options) {
+    renderSingleChoiceSelectField(label, id, name, value, possibleValues, options) {
         var self = this;
         return this.renderRhsField(function () {
-            return self.renderHtmlSelect(form, id, name, value, possibleValues, options);
+            return self.renderHtmlSelect(id, name, value, possibleValues, options);
         }, label, id);
     }
 
@@ -253,13 +235,13 @@ class DefaultOptions {
     }
 
     // html form elements
-    renderHtmlInput(form: SuplerForm, inputType, id, name, value, options) {
-        return form.renderTag("input", copyProperties({ "id": id, "type": inputType, "name": name, "value": value }, options), true);
+    renderHtmlInput(inputType, id, name, value, options) {
+        return HtmlUtil.renderTag("input", copyProperties({ "id": id, "type": inputType, "name": name, "value": value }, options), true);
     }
 
-    renderHtmlSelect(form: SuplerForm, id, name, value, possibleValues, options) {
+    renderHtmlSelect(id, name, value, possibleValues, options) {
         var html = "";
-        html += form.renderTag("select", copyProperties({ "id": id, "name": name }, options), false);
+        html += HtmlUtil.renderTag("select", copyProperties({ "id": id, "name": name }, options), false);
         html += "\n";
         for (var i in possibleValues) {
             var selected = "";
