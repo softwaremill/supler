@@ -100,12 +100,12 @@ class DefaultRenderOptions implements RenderOptions {
     //
 
     renderHtmlInput(inputType, id, name, value, options) {
-        return HtmlUtil.renderTag("input", copyProperties({ "id": id, "type": inputType, "name": name, "value": value }, options), true);
+        return HtmlUtil.renderTag("input", Util.copyProperties({ "id": id, "type": inputType, "name": name, "value": value }, options), true);
     }
 
     renderHtmlSelect(id, name, value, possibleValues, options) {
         var html = "";
-        html += HtmlUtil.renderTag("select", copyProperties({ "id": id, "name": name }, options), false);
+        html += HtmlUtil.renderTag("select", Util.copyProperties({ "id": id, "name": name }, options), false);
         html += "\n";
         Util.foreach(possibleValues, (i, v) => {
             var selected = "";

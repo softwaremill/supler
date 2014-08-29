@@ -6,4 +6,12 @@ class Util {
             }
         }
     }
+
+    static copyProperties(to, from) {
+        Util.foreach(from, (k, v) => {
+            to[k] = v;
+        });
+
+        return to;
+    }
 }

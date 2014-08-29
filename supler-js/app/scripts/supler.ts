@@ -4,7 +4,7 @@ class SuplerForm {
 
     constructor(public container:HTMLDivElement, customOptions:any) {
         this.options = new DefaultRenderOptions();
-        copyProperties(this.options, customOptions);
+        Util.copyProperties(this.options, customOptions);
     }
 
     render(formJson) {
@@ -146,10 +146,3 @@ class SuplerForm {
     }
 }
 
-function copyProperties(to, from) {
-    Util.foreach(from, (k, v) => {
-        to[k] = v;
-    });
-
-    return to;
-}
