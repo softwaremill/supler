@@ -36,24 +36,15 @@ class DefaultRenderOptions implements RenderOptions {
     }
 
     renderStringField(label, id, name, value, options) {
-        var self = this;
-        return this.renderRhsField(function () {
-            return self.renderHtmlInput("text", id, name, value, options);
-        }, label, id);
+        return this.renderRhsField(() => this.renderHtmlInput("text", id, name, value, options), label, id);
     }
 
     renderIntegerField(label, id, name, value, options) {
-        var self = this;
-        return this.renderRhsField(function () {
-            return self.renderHtmlInput("number", id, name, value, options);
-        }, label, id);
+        return this.renderRhsField(() => this.renderHtmlInput("number", id, name, value, options), label, id);
     }
 
     renderDoubleField(label, id, name, value, options) {
-        var self = this;
-        return this.renderRhsField(function () {
-            return self.renderHtmlInput("number", id, name, value, options);
-        }, label, id);
+        return this.renderRhsField(() => this.renderHtmlInput("number", id, name, value, options), label, id);
     }
 
     renderBooleanField(label, id, name, value, options) {
@@ -62,10 +53,7 @@ class DefaultRenderOptions implements RenderOptions {
 
     // text field render hints
     renderPasswordField(label, id, name, value, options) {
-        var self = this;
-        return this.renderRhsField(function () {
-            return self.renderHtmlInput("password", id, name, value, options);
-        }, label, id);
+        return this.renderRhsField(() => this.renderHtmlInput("password", id, name, value, options), label, id);
     }
 
     renderTextareaField(label, id, name, value, options) {
@@ -85,10 +73,7 @@ class DefaultRenderOptions implements RenderOptions {
     }
 
     renderSingleChoiceSelectField(label, id, name, value, possibleValues, options) {
-        var self = this;
-        return this.renderRhsField(function () {
-            return self.renderHtmlSelect(id, name, value, possibleValues, options);
-        }, label, id);
+        return this.renderRhsField(() => this.renderHtmlSelect(id, name, value, possibleValues, options), label, id);
     }
 
     //
