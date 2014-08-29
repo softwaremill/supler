@@ -20,7 +20,7 @@ object PersonForm {
   val personForm = form[Person](f => List(
     f.field(_.firstName).label("First name"),
     f.field(_.lastName).label("Last name")
-      .validate(custom((e, v) => v.length > e.firstName.length, (e, v) => ValidationError("Last name must be longer than first name!"))),
+      .validate(custom((e, v) => v.length <= e.firstName.length, (e, v) => ValidationError("Last name must be longer than first name!"))),
     f.field(_.age).label("Age"),
     f.field(_.address1).label("Address 1"),
     f.field(_.address2).label("Address 2"),
