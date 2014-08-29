@@ -11,7 +11,7 @@ class SuplerForm {
         this.container.innerHTML = this.formFromJson(formJson);
     }
 
-    formFromJson(formJson) {
+    private formFromJson(formJson) {
         var fields = formJson.fields;
         var html = "";
         Util.foreach(fields, (field, fieldJson) => {
@@ -21,7 +21,7 @@ class SuplerForm {
         return html;
     }
 
-    fieldFromJson(fieldName, fieldJson) {
+    private fieldFromJson(fieldName, fieldJson) {
         var fieldOptions = { "class": "form-control", "supler:fieldType": fieldJson.type, "supler:multiple": fieldJson.multiple };
         var id = this.nextId();
 
@@ -40,7 +40,7 @@ class SuplerForm {
         }
     }
 
-    stringFieldFromJson(id, fieldName, fieldJson, fieldOptions) {
+    private stringFieldFromJson(id, fieldName, fieldJson, fieldOptions) {
         if (fieldJson.possible_values) {
             if (fieldJson.multiple) {
                 return "";
@@ -53,7 +53,7 @@ class SuplerForm {
         }
     }
 
-    subformFieldFromJson(id, fieldName, fieldJson) {
+    private subformFieldFromJson(id, fieldName, fieldJson) {
         var html = "";
         html += HtmlUtil.renderTag("fieldset", {"id": id, "name": fieldName }, false);
         html += "\n";
@@ -81,7 +81,7 @@ class SuplerForm {
         return new ReadFormValues().getValueFrom(this.container);
     }
 
-    nextId() {
+    private nextId() {
         this.idCounter += 1;
         return "id" + this.idCounter;
     }
