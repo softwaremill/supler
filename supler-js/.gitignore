@@ -6,3 +6,4 @@ bower_components
 test/bower_components
 app/scripts/compiled
 app/reference.ts
+.tscache

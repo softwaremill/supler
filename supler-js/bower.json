@@ -1,9 +1,7 @@
 {
-  "name": "costam",
+  "name": "supler-js",
   "private": true,
   "dependencies": {
-    "bootstrap": "~3.0.3",
-    "jquery": "~1.11.0",
     "mocha": "1.21.4"
   },
   "devDependencies": {}

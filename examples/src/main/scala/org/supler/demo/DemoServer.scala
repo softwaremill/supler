@@ -42,6 +42,9 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
     pathPrefix("site") {
       getFromResourceDirectory("")
     } ~
+    pathPrefix("supler-js") {
+      getFromDirectory("./supler-js/app/scripts/compiled") // compiled by grunt
+    } ~
     path("") {
       redirect("/site/index.html", Found)
     }
