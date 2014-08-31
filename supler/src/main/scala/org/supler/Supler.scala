@@ -2,172 +2,27 @@ package org.supler
 
 import java.util.concurrent.atomic.AtomicLong
 
+import scala.language.experimental.macros
+
 import org.json4s.JsonAST.{JField, JObject, JString}
 import org.json4s._
 
-import scala.language.experimental.macros
-import scala.reflect.macros.blackbox.Context
-
 object Supler extends Validators {
-
   def form[T](rows: Supler[T] => List[Row[T]]) = {
     Form(rows(new Supler[T] {}))
-  }
-
-  def newPrimitiveField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean, fieldType: FieldType[U]): PrimitiveField[T, U] = {
-    PrimitiveField[T, U](fieldName, read, write, List(), None, None, required, fieldType)
-  }
-
-  def newTableField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T,
-    embeddedForm: Form[U], createEmpty: () => U): TableField[T, U] = {
-    TableField[T, U](fieldName, read, write, None, embeddedForm, createEmpty)
   }
 
   def dataProvider[T, U](provider: T => List[U]): DataProvider[T, U] = {
     new DataProvider[T, U](provider)
   }
 
-  def field[T, U](param: T => U): PrimitiveField[T, U] = macro Supler.field_impl[T, U]
-  def table[T, U](param: T => List[U], form: Form[U], createEmpty: => U): TableField[T, U] = macro Supler.table_impl[T, U]
-
-  def field_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: Context)(param: c.Expr[T => U]): c.Expr[PrimitiveField[T, U]] = {
-    import c.universe._
-
-    val (fieldName, paramRepExpr) = extractFieldName(c)(param)
-
-    val readFieldValueExpr = generateFieldRead[T, U](c)(fieldName)
-
-    val classSymbol = implicitly[WeakTypeTag[T]].tpe.typeSymbol.asClass
-
-    val writeFieldValueExpr = generateFieldWrite[T, U](c)(fieldName, classSymbol)
-
-    val isOption = implicitly[WeakTypeTag[U]].tpe.typeSymbol.asClass.fullName == "scala.Option"
-    val isRequiredExpr = c.Expr[Boolean](Literal(Constant(!isOption)))
-
-    val fieldTypeTree = generateFieldType(c)(implicitly[WeakTypeTag[U]].tpe)
-    val fieldTypeExpr = c.Expr[FieldType[U]](fieldTypeTree)
-
-    reify {
-      newPrimitiveField(paramRepExpr.splice,
-        readFieldValueExpr.splice,
-        writeFieldValueExpr.splice,
-        isRequiredExpr.splice,
-        fieldTypeExpr.splice)
-    }
-  }
-
-  def table_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: Context)(param: c.Expr[T => List[U]],
-    form: c.Expr[Form[U]], createEmpty: c.Tree): c.Expr[TableField[T, U]] = {
-    import c.universe._
-
-    val (fieldName, paramRepExpr) = extractFieldName(c)(param)
-
-    val readFieldValueExpr = generateFieldRead[T, List[U]](c)(fieldName)
-
-    val classSymbol = implicitly[WeakTypeTag[T]].tpe.typeSymbol.asClass
-
-    val writeFieldValueExpr = generateFieldWrite[T, List[U]](c)(fieldName, classSymbol)
-
-    val createEmptyExpr = c.Expr[() => U](q"() => $createEmpty")
-
-    reify {
-      newTableField(paramRepExpr.splice,
-        readFieldValueExpr.splice,
-        writeFieldValueExpr.splice,
-        form.splice,
-        createEmptyExpr.splice)
-    }
-  }
-
-  private def extractFieldName(c: Context)(param: c.Expr[_]): (String, c.Expr[String]) = {
-    import c.universe._
-    val fieldName = param match {
-      case Expr(
-      Function(
-      List(ValDef(Modifiers(_), TermName(termDef: String), TypeTree(), EmptyTree)),
-      Select(Ident(TermName(termUse: String)), TermName(field: String)))) if termDef == termUse =>
-        field
-      case _ => throw new IllegalArgumentException("Illegal field reference " + show(param.tree) + "; please use _.fieldName instead")
-    }
-
-    val paramRepTree = Literal(Constant(fieldName))
-    val paramRepExpr = c.Expr[String](paramRepTree)
-
-    (fieldName, paramRepExpr)
-  }
-
-  private def generateFieldRead[T, U](c: Context)(fieldName: String): c.Expr[T => U] = {
-    import c.universe._
-
-    // obj => obj.[fieldName]
-    val readFieldValueTree = Function(List(ValDef(Modifiers(Flag.PARAM), TermName("obj"), TypeTree(), EmptyTree)),
-      Select(Ident(TermName("obj")), TermName(fieldName)))
-
-    c.Expr[T => U](readFieldValueTree)
-  }
-
-  private def generateFieldWrite[T, U](c: Context)(fieldName: String, classSymbol: c.universe.ClassSymbol): c.Expr[(T, U) => T] = {
-    import c.universe._
-
-    val isCaseClass = classSymbol.isCaseClass
-
-    val writeFieldValueTree = if (isCaseClass) {
-      // constructors can have only one param list
-      val ctorParams = classSymbol.primaryConstructor.asMethod.paramLists(0)
-
-      val copyParams = ctorParams.map { param =>
-        if (param.name.decodedName.toString == fieldName) {
-          Ident(TermName("v"))
-        } else {
-          Select(Ident(TermName("obj")), param.name)
-        }
-      }
-
-      // (obj, v) => obj.copy(obj.otherField1, ..., v, ..., obj.otherFieldN)
-      Function(List(
-        ValDef(Modifiers(Flag.PARAM), TermName("obj"), TypeTree(), EmptyTree),
-        ValDef(Modifiers(Flag.PARAM), TermName("v"), TypeTree(), EmptyTree)),
-        Apply(Select(Ident(TermName("obj")), TermName("copy")), copyParams))
-    } else {
-      // (obj, v) => obj.[fieldName] = v; obj
-      Function(List(
-        ValDef(Modifiers(Flag.PARAM), TermName("obj"), TypeTree(), EmptyTree),
-        ValDef(Modifiers(Flag.PARAM), TermName("v"), TypeTree(), EmptyTree)),
-        Block(
-          List(Apply(Select(Ident(TermName("obj")), TermName(fieldName + "_$eq")), List(Ident(TermName("v"))))),
-          Ident(TermName("obj"))))
-    }
-
-    c.Expr[(T, U) => T](writeFieldValueTree)
-  }
-
-  private def generateFieldType(c: Context)(fieldTpe: c.Type): c.Tree = {
-    import c.universe._
-
-    if (fieldTpe <:< c.typeOf[String]) {
-      q"_root_.org.supler.StringFieldType"
-    } else if (fieldTpe <:< c.typeOf[Int]) {
-      q"_root_.org.supler.IntFieldType"
-    } else if (fieldTpe <:< c.typeOf[Long]) {
-      q"_root_.org.supler.LongFieldType"
-    } else if (fieldTpe <:< c.typeOf[Double]) {
-      q"_root_.org.supler.DoubleFieldType"
-    } else if (fieldTpe <:< c.typeOf[Float]) {
-      q"_root_.org.supler.FloatFieldType"
-    } else if (fieldTpe <:< c.typeOf[Boolean]) {
-      q"_root_.org.supler.BooleanFieldType"
-    } else if (fieldTpe <:< c.typeOf[Option[_]]) {
-      val innerTree = generateFieldType(c)(fieldTpe.typeArgs(0))
-      q"new _root_.org.supler.OptionalFieldType($innerTree)"
-    } else {
-      throw new IllegalArgumentException(s"Fields of type $fieldTpe are not supported")
-    }
-  }
+  def field[T, U](param: T => U): PrimitiveField[T, U] = macro SuplerMacros.field_impl[T, U]
+  def table[T, U](param: T => List[U], form: Form[U], createEmpty: => U): TableField[T, U] = macro SuplerMacros.table_impl[T, U]
 }
 
 trait Supler[T] extends Validators {
-  def field[U](param: T => U): PrimitiveField[T, U] = macro Supler.field_impl[T, U]
-  def table[U](param: T => List[U], form: Form[U], createEmpty: => U): TableField[T, U] = macro Supler.table_impl[T, U]
+  def field[U](param: T => U): PrimitiveField[T, U] = macro SuplerMacros.field_impl[T, U]
+  def table[U](param: T => List[U], form: Form[U], createEmpty: => U): TableField[T, U] = macro SuplerMacros.table_impl[T, U]
 }
 
 case class FieldValidationError(field: Field[_, _], key: String, params: Any*)
