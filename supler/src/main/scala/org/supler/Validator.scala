@@ -18,25 +18,24 @@ trait Validators {
     fieldValidator[T, String](_.length > maxLength)(_ => ValidationError("Too long"))(List(JField("maxLength", JInt(maxLength))))
 
   def gt[T](than: Int) =
-    fieldValidator[T, Int](_ > than)(_ => ValidationError(s"Must be greater than $than"))(
+    fieldValidator[T, Int](_ <= than)(_ => ValidationError(s"Must be greater than $than"))(
       List(JField("gt", JInt(than))))
 
   def lt[T](than: Int) =
-    fieldValidator[T, Int](_ < than)(_ => ValidationError(s"Must be less than $than"))(
+    fieldValidator[T, Int](_ >= than)(_ => ValidationError(s"Must be less than $than"))(
       List(JField("lt", JInt(than))))
 
   def ge[T](than: Int) =
-    fieldValidator[T, Int](_ >= than)(_ => ValidationError(s"Must be greater or equal to $than"))(
+    fieldValidator[T, Int](_ < than)(_ => ValidationError(s"Must be greater or equal to $than"))(
       List(JField("ge", JInt(than))))
 
   def le[T](than: Int) =
-    fieldValidator[T, Int](_ <= than)(_ => ValidationError(s"Must be less or equal to $than"))(
+    fieldValidator[T, Int](_ > than)(_ => ValidationError(s"Must be less or equal to $than"))(
       List(JField("le", JInt(than))))
 
-
-  def custom[T, U](test: (T, U) => Boolean, createError: (T, U) => ValidationError): Validator[T, U] = new Validator[T, U] {
+  def custom[T, U](errorTest: (T, U) => Boolean, createError: (T, U) => ValidationError): Validator[T, U] = new Validator[T, U] {
     override def doValidate(objValue: T, fieldValue: U) = {
-      if (test(objValue, fieldValue)) {
+      if (errorTest(objValue, fieldValue)) {
         List(createError(objValue, fieldValue))
       } else {
         Nil
@@ -45,10 +44,10 @@ trait Validators {
     override def generateJSON = Nil
   }
 
-  private def fieldValidator[T, U](test: U => Boolean)(createError: U => ValidationError)(json: List[JField]) =
+  private def fieldValidator[T, U](errorTest: U => Boolean)(createError: U => ValidationError)(json: List[JField]) =
     new Validator[T, U] {
       override def doValidate(objValue: T, fieldValue: U) = {
-        if (!test(fieldValue)) {
+        if (errorTest(fieldValue)) {
           List(createError(fieldValue))
         } else {
           Nil
