@@ -2,6 +2,7 @@ package org.supler.demo
 
 import akka.actor.ActorSystem
 import org.json4s.JValue
+import org.json4s.JsonAST.{JObject, JField, JString}
 import spray.http.{StatusCodes, MediaTypes}
 import spray.httpx.Json4sSupport
 import spray.routing.{Route, SimpleRoutingApp}
@@ -26,15 +27,16 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
         entity(as[JValue]) { jvalue =>
           complete {
             val newPerson = PersonForm.personForm.applyJSONValues(person, jvalue)
-            val result = PersonForm.personForm.doValidate(newPerson) match {
-              case Nil =>
-                person = newPerson
-                println(s"Persisted: $person")
-                "Persisted: " + person
-              case l => "Server-side validation errors: " + l.map(fve => s"${fve.path}: ${fve.validationError.key}").mkString(", ")
-            }
+            val result = PersonForm.personForm.doValidate(newPerson)
 
-            result
+            if (result.hasErrors) {
+              JObject(JField("validation_errors", result.generateJSON))
+            } else {
+              person = newPerson
+              println(s"Persisted: $person")
+
+              JObject(JField("msg", JString("Persisted: " + person)))
+            }
           }
         }
       }

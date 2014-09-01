@@ -12,10 +12,10 @@ case class ValidationError(key: String, params: Any*)
 
 trait Validators {
   def minLength[T](minLength: Int) =
-    fieldValidator[T, String](_.length < minLength)(_ => ValidationError("Too short"))(List(JField("minLength", JInt(minLength))))
+    fieldValidator[T, String](_.length < minLength)(_ => ValidationError("Too short"))(List(JField("min_length", JInt(minLength))))
 
   def maxLength[T](maxLength: Int) =
-    fieldValidator[T, String](_.length > maxLength)(_ => ValidationError("Too long"))(List(JField("maxLength", JInt(maxLength))))
+    fieldValidator[T, String](_.length > maxLength)(_ => ValidationError("Too long"))(List(JField("max_length", JInt(maxLength))))
 
   def gt[T](than: Int) =
     fieldValidator[T, Int](_ <= than)(_ => ValidationError(s"Must be greater than $than"))(

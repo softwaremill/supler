@@ -31,6 +31,7 @@ $('#submit').click(function() {
         contentType: 'application/json; charset=utf-8',
         success: function(data) {
             feedback.html(data);
+            console.log(data);
             feedback.show();
         }
     });
