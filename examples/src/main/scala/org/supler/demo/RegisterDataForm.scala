@@ -1,7 +1,8 @@
 package org.supler.demo
 
-import org.supler.{ValidationError, Supler}
+import org.supler.Supler
 import Supler._
+import org.supler.validation.ValidationError
 
 object RegisterDataForm {
   form[RegisterData](f => List(

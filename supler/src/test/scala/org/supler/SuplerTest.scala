@@ -2,6 +2,7 @@ package org.supler
 
 import org.json4s.JsonAST._
 import org.scalatest.{FlatSpec, ShouldMatchers}
+import org.supler.validation.EmptyPath
 
 class SuplerTest extends FlatSpec with ShouldMatchers {
   "field" should "create a variable field representation" in {

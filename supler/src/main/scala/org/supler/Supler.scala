@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 import org.json4s.JsonAST.JField
 import org.json4s._
+import org.supler.validation.{FieldPath, FieldValidationError, Validators}
 
 import scala.language.experimental.macros
 
@@ -24,8 +25,6 @@ trait Supler[T] extends Validators {
   def field[U](param: T => U): PrimitiveField[T, U] = macro SuplerMacros.field_impl[T, U]
   def table[U](param: T => List[U], form: Form[U], createEmpty: => U): TableField[T, U] = macro SuplerMacros.table_impl[T, U]
 }
-
-case class FieldValidationError(field: Field[_, _], path: FieldPath, validationError: ValidationError)
 
 trait Row[T] {
   def generateJSON(obj: T): List[JField]

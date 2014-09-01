@@ -1,4 +1,4 @@
-package org.supler
+package org.supler.validation
 
 import org.json4s.JField
 import org.json4s.JsonAST.JInt
