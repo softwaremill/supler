@@ -25,7 +25,7 @@ trait Supler[T] extends Validators {
   def table[U](param: T => List[U], form: Form[U], createEmpty: => U): TableField[T, U] = macro SuplerMacros.table_impl[T, U]
 }
 
-case class FieldValidationError(field: Field[_, _], key: String, params: Any*)
+case class FieldValidationError(field: Field[_, _], path: FieldPath, validationError: ValidationError)
 
 trait Row[T] {
   def generateJSON(obj: T): List[JField]
@@ -34,7 +34,7 @@ trait Row[T] {
 
   def ||(field: Field[T, _]): Row[T]
 
-  def doValidate(obj: T): List[FieldValidationError]
+  def doValidate(parentPath: FieldPath, obj: T): List[FieldValidationError]
 }
 
 trait Field[T, U] extends Row[T] {
@@ -46,7 +46,8 @@ trait Field[T, U] extends Row[T] {
 case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   override def ||(field: Field[T, _]): Row[T] = MultiFieldRow(fields ++ List(field))
 
-  override def doValidate(obj: T): List[FieldValidationError] = fields.flatMap(_.doValidate(obj))
+  override def doValidate(parentPath: FieldPath, obj: T): List[FieldValidationError] =
+    fields.flatMap(_.doValidate(parentPath, obj))
 
   override def generateJSON(obj: T) = fields.flatMap(_.generateJSON(obj))
 
@@ -54,8 +55,6 @@ case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
     fields.foldLeft(obj)((currentObj, field) => field.applyJSONValues(currentObj, jsonFields))
   }
 }
-
-
 
 case class DataProvider[T, U](provider: T => List[U])
 

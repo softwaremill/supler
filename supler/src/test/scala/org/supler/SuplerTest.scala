@@ -110,21 +110,21 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     // then
     import PersonMeta._
 
-    f1Field.doValidate(p1).size should be (0)
-    f1Field.doValidate(p2).size should be (1)
-    f1Field.doValidate(p3).size should be (1)
+    f1Field.doValidate(EmptyPath, p1).size should be (0)
+    f1Field.doValidate(EmptyPath, p2).size should be (1)
+    f1Field.doValidate(EmptyPath, p3).size should be (1)
 
-    f2Field.doValidate(p1).size should be (0)
-    f2Field.doValidate(p2).size should be (0)
-    f2Field.doValidate(p3).size should be (0)
+    f2Field.doValidate(EmptyPath, p1).size should be (0)
+    f2Field.doValidate(EmptyPath, p2).size should be (0)
+    f2Field.doValidate(EmptyPath, p3).size should be (0)
 
-    f3Field.doValidate(p1).size should be (0)
-    f3Field.doValidate(p2).size should be (0)
-    f3Field.doValidate(p3).size should be (0)
+    f3Field.doValidate(EmptyPath, p1).size should be (0)
+    f3Field.doValidate(EmptyPath, p2).size should be (0)
+    f3Field.doValidate(EmptyPath, p3).size should be (0)
 
-    f4Field.doValidate(p1).size should be (0)
-    f4Field.doValidate(p2).size should be (0)
-    f4Field.doValidate(p3).size should be (0)
+    f4Field.doValidate(EmptyPath, p1).size should be (0)
+    f4Field.doValidate(EmptyPath, p2).size should be (0)
+    f4Field.doValidate(EmptyPath, p3).size should be (0)
   }
 
   "form" should "apply json values to the entity given" in {

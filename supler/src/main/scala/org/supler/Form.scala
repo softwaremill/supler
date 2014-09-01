@@ -4,7 +4,9 @@ import org.json4s.JsonAST.{JField, JObject}
 import org.json4s._
 
 case class Form[T](rows: List[Row[T]]) {
-  def doValidate(obj: T): List[FieldValidationError] = rows.flatMap(_.doValidate(obj))
+  def doValidate(obj: T): List[FieldValidationError] = doValidate(EmptyPath, obj)
+
+  def doValidate(parentPath: FieldPath, obj: T): List[FieldValidationError] = rows.flatMap(_.doValidate(parentPath, obj))
 
   def generateJSON(obj: T) = {
     JObject(

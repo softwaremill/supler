@@ -31,5 +31,7 @@ case class TableField[T, U](
     write(obj, vs)
   }
 
-  override def doValidate(obj: T) = read(obj).flatMap(embeddedForm.doValidate)
+  override def doValidate(parentPath: FieldPath, obj: T) = read(obj).zipWithIndex.flatMap { case (el, i) =>
+    embeddedForm.doValidate(parentPath.appendWithIndex(name, i), el)
+  }
 }

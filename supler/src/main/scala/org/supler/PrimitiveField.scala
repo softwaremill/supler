@@ -22,17 +22,19 @@ case class PrimitiveField[T, U](
     case None => this.copy(dataProvider = Some(dataProvider))
   }
 
-  override def doValidate(obj: T): List[FieldValidationError] = {
+  override def doValidate(parentPath: FieldPath, obj: T): List[FieldValidationError] = {
     val v = read(obj)
-    val fves = validators.flatMap(_.doValidate(obj, v)).map(ve => FieldValidationError(this, ve.key, ve.params: _*))
+    val ves = validators.flatMap(_.doValidate(obj, v))
 
     def valueMissing = v == null || !fieldType.valuePresent(v)
 
-    if (required && valueMissing) {
-      FieldValidationError(this, "Value is required") :: fves
+    val allVes = if (required && valueMissing) {
+      ValidationError("Value is required") :: ves
     } else {
-      fves
+      ves
     }
+
+    allVes.map(ve => FieldValidationError(this, parentPath.append(name), ve))
   }
 
   override def generateJSON(obj: T) = {
