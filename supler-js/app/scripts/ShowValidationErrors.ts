@@ -1,15 +1,24 @@
 class ShowValidationErrors {
+    private removeValidationsFns: { (): void } [] = [];
+
     constructor(private container: HTMLElement) {}
 
-    show(validationJson: any) {
-        for (var i=0; i<validationJson.length; i++) {
-            var validationError = validationJson[i];
-            var fieldPath = <string>validationError.field_path;
-            var formElement = this.searchForElementByPath(this.container, fieldPath.split("."));
-            var validationId = formElement.getAttribute("supler:validationId");
-            var validationElement = document.getElementById(validationId);
-            this.showValidation(validationError, validationElement, formElement);
+    show(validationJson: any): boolean {
+        this.removeValidations();
+
+        if (validationJson) {
+            for (var i = 0; i < validationJson.length; i++) {
+                var validationError = validationJson[i];
+                var fieldPath = <string>validationError.field_path;
+                var formElement = this.searchForElementByPath(this.container, fieldPath.split("."));
+                var validationId = formElement.getAttribute("supler:validationId");
+                var validationElement = document.getElementById(validationId);
+
+                this.showValidation(validationError, validationElement, formElement);
+            }
         }
+
+        return validationJson && validationJson.length > 0;
     }
 
     private searchForElementByPath(inside: HTMLElement, path: string[]): HTMLElement {
@@ -62,6 +71,14 @@ class ShowValidationErrors {
         }
     }
 
+    private removeValidations() {
+        for (var i=0; i<this.removeValidationsFns.length; i++) {
+            this.removeValidationsFns[i]();
+        }
+
+        this.removeValidationsFns = [];
+    }
+
     private showValidation(validationError: any, validationElement: HTMLElement, formElement: HTMLElement) {
         var current = validationElement.innerHTML;
         if (current && current.length > 0) {
@@ -71,5 +88,10 @@ class ShowValidationErrors {
         }
 
         HtmlUtil.addClass(formElement.parentElement, 'has-error');
+
+        this.removeValidationsFns.push(() => {
+            validationElement.innerHTML = '';
+            HtmlUtil.removeClass(formElement.parentElement, 'has-error');
+        });
     }
 }

@@ -1,9 +1,12 @@
 class SuplerForm {
     private options: RenderOptions;
+    private validationErrors: ShowValidationErrors;
 
     constructor(private container: HTMLElement, customOptions: any) {
         this.options = new DefaultRenderOptions();
         Util.copyProperties(this.options, customOptions);
+
+        this.validationErrors = new ShowValidationErrors(this.container);
     }
 
     render(formJson) {
@@ -14,8 +17,11 @@ class SuplerForm {
         return new ReadFormValues().getValueFrom(this.container);
     }
 
-    showValidationErrors(validationJson) {
-        new ShowValidationErrors(this.container).show(validationJson);
+    /**
+     * @returns True if there were validation errors.
+     */
+    showValidationErrors(validationJson): boolean {
+        return this.validationErrors.show(validationJson);
     }
 }
 

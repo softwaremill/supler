@@ -21,4 +21,8 @@ class HtmlUtil {
             toElement.className = toElement.className + ' ' + cls;
         }
     }
+
+    static removeClass(toElement: HTMLElement, cls: string) {
+        toElement.className = toElement.className.replace(cls, '');
+    }
 }

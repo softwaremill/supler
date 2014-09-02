@@ -30,9 +30,10 @@ $('#submit').click(function() {
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
         success: function(data) {
-            feedback.html(data);
-            if (data.validation_errors) {
-                form.showValidationErrors(data.validation_errors);
+            if (form.showValidationErrors(data.validation_errors)) {
+                feedback.html('There are validation errors');
+            } else {
+                feedback.html(data.msg);
             }
             feedback.show();
         }
