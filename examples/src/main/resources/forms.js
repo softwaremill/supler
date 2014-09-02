@@ -9,7 +9,7 @@ var form = null;
 
 function showForm(formJson) {
     form = new SuplerForm(formContainer, {});
-    form.render(formJson);
+    form.create(formJson);
 }
 
 var feedback = $('#feedback');

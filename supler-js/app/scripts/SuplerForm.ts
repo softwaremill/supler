@@ -9,8 +9,8 @@ class SuplerForm {
         this.validationErrors = new ShowValidationErrors(this.container);
     }
 
-    render(formJson) {
-        this.container.innerHTML = new RenderFormFromJson(this.options).formFromJson(formJson);
+    create(formJson) {
+        this.container.innerHTML = new CreateFormFromJson(this.options).formFromJson(formJson);
     }
 
     getValue() {

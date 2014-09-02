@@ -1,4 +1,4 @@
-class RenderFormFromJson {
+class CreateFormFromJson {
     private idCounter: number = 0;
 
     constructor(private options: RenderOptions) {}
