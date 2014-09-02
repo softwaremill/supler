@@ -4,8 +4,8 @@ class ReadFormValues {
         var result = {};
 
         for (var i=0; i<children.length; i++) {
-            var fieldType = children[i].getAttribute("supler:fieldType");
-            var multiple = children[i].getAttribute("supler:multiple") === "true";
+            var fieldType = children[i].getAttribute(SuplerAttributes.FIELD_TYPE);
+            var multiple = children[i].getAttribute(SuplerAttributes.MULTIPLE) === "true";
             if (fieldType) {
                 var fieldName = children[i].getAttribute("name");
                 switch (fieldType) {
@@ -18,7 +18,7 @@ class ReadFormValues {
                         break;
 
                     case FieldTypes.SUBFORM:
-                        fieldName = children[i].getAttribute("supler:fieldName");
+                        fieldName = children[i].getAttribute(SuplerAttributes.FIELD_NAME);
                         var subResult = this.getValueFrom(children[i]);
                         this.appendFieldValue(result, fieldName, subResult, multiple);
                         break;

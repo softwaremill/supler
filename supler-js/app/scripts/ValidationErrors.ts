@@ -68,7 +68,7 @@ class ValidationErrors {
 
         while (elementQueue.length > 0) {
             var currentElement = elementQueue.shift();
-            if (currentElement.getAttribute("supler:fieldName") === pathPart) {
+            if (currentElement.getAttribute(SuplerAttributes.FIELD_NAME) === pathPart) {
                 if (elementIdx === 0) {
                     return currentElement;
                 } else {
