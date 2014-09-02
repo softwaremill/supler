@@ -5,8 +5,10 @@ class ShowValidationErrors {
         for (var i=0; i<validationJson.length; i++) {
             var validationError = validationJson[i];
             var fieldPath = <string>validationError.field_path;
-            var fieldElement = this.searchForElementByPath(this.container, fieldPath.split("."));
-            console.log(fieldPath, " -> ", fieldElement);
+            var formElement = this.searchForElementByPath(this.container, fieldPath.split("."));
+            var validationId = formElement.getAttribute("supler:validationId");
+            var validationElement = document.getElementById(validationId);
+            this.showValidation(validationError, validationElement, formElement);
         }
     }
 
@@ -58,5 +60,16 @@ class ShowValidationErrors {
         } else {
             return { pathPart: rawPathPart, elementIdx: 0 };
         }
+    }
+
+    private showValidation(validationError: any, validationElement: HTMLElement, formElement: HTMLElement) {
+        var current = validationElement.innerHTML;
+        if (current && current.length > 0) {
+            validationElement.innerHTML = current + '; ' + validationError.error_key;
+        } else {
+            validationElement.innerHTML = validationError.error_key;
+        }
+
+        HtmlUtil.addClass(formElement.parentElement, 'has-error');
     }
 }

@@ -26,10 +26,10 @@ class RenderFormFromJson {
 
         switch(fieldJson.type) {
             case "string":
-                return this.stringFieldFromJson(id, fieldName, fieldJson, fieldOptions);
+                return this.stringFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions);
 
             case "integer":
-                return this.options.renderIntegerField(fieldJson.label, id, fieldName, fieldJson.value, fieldOptions);
+                return this.options.renderIntegerField(fieldJson.label, id, validationId, fieldName, fieldJson.value, fieldOptions);
 
             case "subform":
                 return this.subformFieldFromJson(id, fieldName, fieldJson);
@@ -39,16 +39,17 @@ class RenderFormFromJson {
         }
     }
 
-    private stringFieldFromJson(id, fieldName, fieldJson, fieldOptions) {
+    private stringFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions) {
         if (fieldJson.possible_values) {
             if (fieldJson.multiple) {
                 return "";
             } else {
-                return this.options.renderSingleChoiceSelectField(fieldJson.label, id, fieldName, fieldJson.value,
-                    fieldJson.possible_values, fieldOptions);
+                return this.options.renderSingleChoiceSelectField(fieldJson.label, id, validationId, fieldName,
+                    fieldJson.value, fieldJson.possible_values, fieldOptions);
             }
         } else {
-            return this.options.renderStringField(fieldJson.label, id, fieldName, fieldJson.value, fieldOptions);
+            return this.options.renderStringField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
+                fieldOptions);
         }
     }
 

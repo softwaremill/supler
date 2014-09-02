@@ -15,4 +15,10 @@ class HtmlUtil {
 
         return r;
     }
+
+    static addClass(toElement: HTMLElement, cls: string) {
+        if (toElement.className.indexOf(cls) === -1) {
+            toElement.className = toElement.className + ' ' + cls;
+        }
+    }
 }
