@@ -14,7 +14,7 @@ interface ValidatorFn {
  */
 class DefaultValidatorFnFactories {
     required(json): ValidatorFn { return (fieldValue: string) => {
-        if (json === true && !fieldValue || fieldValue.length == 0) return new ValidationError("Value is required"); else return null;
+        if (json === true && (!fieldValue || fieldValue.length == 0)) return new ValidationError("Value is required"); else return null;
     }}
 
     ge(json): ValidatorFn { return (fieldValue: string) => {
