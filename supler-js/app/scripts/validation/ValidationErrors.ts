@@ -1,7 +1,9 @@
 class ValidationErrors {
     private removeValidationsFns: { (): void } [] = [];
 
-    constructor(private container: HTMLElement, private validatorDictionary: ElementValidatorDictionary) {}
+    constructor(private container: HTMLElement,
+                private validatorDictionary: ElementValidatorDictionary,
+                private validatorRenderOptions: ValidatorRenderOptions) {}
 
     /**
      * @returns True if there were validation errors.
@@ -110,18 +112,10 @@ class ValidationErrors {
     }
 
     private appendValidation(validationError: ValidationError, validationElement: HTMLElement, formElement: HTMLElement) {
-        var current = validationElement.innerHTML;
-        if (current && current.length > 0) {
-            validationElement.innerHTML = current + '; ' + validationError.errorKey;
-        } else {
-            validationElement.innerHTML = validationError.errorKey;
-        }
-
-        HtmlUtil.addClass(formElement.parentElement, 'has-error');
+        this.validatorRenderOptions.appendValidation(validationError.errorKey, validationElement, formElement);
 
         this.removeValidationsFns.push(() => {
-            validationElement.innerHTML = '';
-            HtmlUtil.removeClass(formElement.parentElement, 'has-error');
+            this.validatorRenderOptions.removeValidation(validationElement, formElement);
         });
     }
 }
