@@ -1,7 +1,7 @@
 class SuplerForm {
     private options: RenderOptions;
 
-    constructor(private container: HTMLDivElement, customOptions: any) {
+    constructor(private container: HTMLElement, customOptions: any) {
         this.options = new DefaultRenderOptions();
         Util.copyProperties(this.options, customOptions);
     }
@@ -12,6 +12,10 @@ class SuplerForm {
 
     getValue() {
         return new ReadFormValues().getValueFrom(this.container);
+    }
+
+    showValidationErrors(validationJson) {
+        new ShowValidationErrors(this.container).show(validationJson);
     }
 }
 

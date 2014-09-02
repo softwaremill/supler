@@ -31,7 +31,9 @@ $('#submit').click(function() {
         contentType: 'application/json; charset=utf-8',
         success: function(data) {
             feedback.html(data);
-            console.log(data);
+            if (data.validation_errors) {
+                form.showValidationErrors(data.validation_errors);
+            }
             feedback.show();
         }
     });

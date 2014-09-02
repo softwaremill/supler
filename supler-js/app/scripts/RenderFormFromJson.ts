@@ -14,8 +14,15 @@ class RenderFormFromJson {
     }
 
     private fieldFromJson(fieldName, fieldJson) {
-        var fieldOptions = { "class": "form-control", "supler:fieldType": fieldJson.type, "supler:multiple": fieldJson.multiple };
         var id = this.nextId();
+        var validationId = this.nextId();
+        var fieldOptions = {
+            "class": "form-control",
+            "supler:fieldName": fieldName,
+            "supler:fieldType": fieldJson.type,
+            "supler:multiple": fieldJson.multiple,
+            "supler:validationId": validationId
+        };
 
         switch(fieldJson.type) {
             case "string":

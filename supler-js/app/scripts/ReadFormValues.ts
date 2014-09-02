@@ -19,7 +19,6 @@ class ReadFormValues {
                             break;
 
                         case "subform":
-                            // the name is on the fieldset, which is the parent, not on the per-form container.
                             fieldName = children[i].getAttribute("supler:fieldName");
                             var subResult = this.getValueFrom(children[i]);
                             this.appendFieldValue(result, fieldName, subResult, multiple);
