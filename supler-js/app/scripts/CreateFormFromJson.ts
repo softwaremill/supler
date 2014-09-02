@@ -59,13 +59,13 @@ class CreateFormFromJson {
         };
 
         switch(fieldJson.type) {
-            case "string":
+            case FieldTypes.STRING:
                 return this.stringFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions);
 
-            case "integer":
+            case FieldTypes.INTEGER:
                 return this.renderOptions.renderIntegerField(fieldJson.label, id, validationId, fieldName, fieldJson.value, fieldOptions);
 
-            case "subform":
+            case FieldTypes.SUBFORM:
                 return this.subformFieldFromJson(id, fieldName, fieldJson, validatorDictionary);
 
             default:

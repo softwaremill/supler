@@ -9,15 +9,15 @@ class ReadFormValues {
             if (fieldType) {
                 var fieldName = children[i].getAttribute("name");
                 switch (fieldType) {
-                    case "string":
+                    case FieldTypes.STRING:
                         this.appendFieldValue(result, fieldName, children[i].value, multiple);
                         break;
 
-                    case "integer":
+                    case FieldTypes.INTEGER:
                         this.appendFieldValue(result, fieldName, parseInt(children[i].value), multiple);
                         break;
 
-                    case "subform":
+                    case FieldTypes.SUBFORM:
                         fieldName = children[i].getAttribute("supler:fieldName");
                         var subResult = this.getValueFrom(children[i]);
                         this.appendFieldValue(result, fieldName, subResult, multiple);
