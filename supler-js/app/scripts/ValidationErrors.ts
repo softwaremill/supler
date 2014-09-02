@@ -1,9 +1,9 @@
-class ShowValidationErrors {
+class ValidationErrors {
     private removeValidationsFns: { (): void } [] = [];
 
-    constructor(private container: HTMLElement) {}
+    constructor(private container: HTMLElement, private validatorDictionary: ElementValidatorDictionary) {}
 
-    show(validationJson: any): boolean {
+    processServer(validationJson: any): boolean {
         this.removeValidations();
 
         if (validationJson) {
@@ -14,7 +14,7 @@ class ShowValidationErrors {
                 var validationId = formElement.getAttribute("supler:validationId");
                 var validationElement = document.getElementById(validationId);
 
-                this.showValidation(ValidationError.fromJson(validationErrorJson), validationElement, formElement);
+                this.appendValidation(ValidationError.fromJson(validationErrorJson), validationElement, formElement);
             }
         }
 
@@ -79,7 +79,7 @@ class ShowValidationErrors {
         this.removeValidationsFns = [];
     }
 
-    private showValidation(validationError: ValidationError, validationElement: HTMLElement, formElement: HTMLElement) {
+    private appendValidation(validationError: ValidationError, validationElement: HTMLElement, formElement: HTMLElement) {
         var current = validationElement.innerHTML;
         if (current && current.length > 0) {
             validationElement.innerHTML = current + '; ' + validationError.errorKey;
