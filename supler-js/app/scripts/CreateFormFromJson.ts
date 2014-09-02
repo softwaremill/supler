@@ -24,7 +24,7 @@ class CreateFormFromJson {
         var html = this.fieldHtmlFromJson(id, validationId, fieldName, fieldJson, validatorDictionary);
 
         if (html) {
-            validatorDictionary[id] = new ElementValidator(id, this.fieldValidatorFns(fieldJson));
+            validatorDictionary[id] = new ElementValidator(this.fieldValidatorFns(fieldJson));
             return html;
         } else {
             return null;

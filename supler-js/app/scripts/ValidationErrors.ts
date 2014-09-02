@@ -3,6 +3,9 @@ class ValidationErrors {
 
     constructor(private container: HTMLElement, private validatorDictionary: ElementValidatorDictionary) {}
 
+    /**
+     * @returns True if there were validation errors.
+     */
     processServer(validationJson: any): boolean {
         this.removeValidations();
 
@@ -11,14 +14,36 @@ class ValidationErrors {
                 var validationErrorJson = validationJson[i];
                 var fieldPath = <string>validationErrorJson.field_path;
                 var formElement = this.searchForElementByPath(this.container, fieldPath.split("."));
-                var validationId = formElement.getAttribute("supler:validationId");
-                var validationElement = document.getElementById(validationId);
+                var validationElement = this.lookupValidationElement(formElement);
 
                 this.appendValidation(ValidationError.fromJson(validationErrorJson), validationElement, formElement);
             }
         }
 
         return validationJson && validationJson.length > 0;
+    }
+
+    /**
+     * @returns True if there were validation errors.
+     */
+    processClient(): boolean {
+        this.removeValidations();
+
+        var hasErrors = false;
+
+        Util.foreach(this.validatorDictionary, (elementId: string, validator: ElementValidator) => {
+            var formElement = document.getElementById(elementId);
+            var validationElement = this.lookupValidationElement(formElement);
+
+            var errors = validator.validate(formElement);
+
+            for (var i=0; i<errors.length; i++) {
+                this.appendValidation(errors[i], validationElement, formElement);
+                hasErrors = true;
+            }
+        });
+
+        return hasErrors;
     }
 
     private searchForElementByPath(inside: HTMLElement, path: string[]): HTMLElement {
@@ -69,6 +94,11 @@ class ValidationErrors {
         } else {
             return { pathPart: rawPathPart, elementIdx: 0 };
         }
+    }
+
+    private lookupValidationElement(formElement: HTMLElement) {
+        var validationId = formElement.getAttribute("supler:validationId");
+        return document.getElementById(validationId);
     }
 
     private removeValidations() {

@@ -2,10 +2,9 @@
  * Can validate a single form element using the given validator functions.
  */
 class ElementValidator {
-    constructor(private elementId: string, private validatorFns: ValidatorFn[]) {}
+    constructor(private validatorFns: ValidatorFn[]) {}
 
-    public validate(): ValidationError[] {
-        var element = document.getElementById(this.elementId);
+    public validate(element: HTMLElement): ValidationError[] {
         var value = (<HTMLInputElement>element).value;
         var errors = [];
         for (var i=0; i<this.validatorFns.length; i++) {

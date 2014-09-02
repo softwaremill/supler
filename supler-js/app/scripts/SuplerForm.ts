@@ -27,5 +27,12 @@ class SuplerForm {
     processServerValidationErrors(validationJson): boolean {
         return this.validationErrors.processServer(validationJson);
     }
+
+    /**
+     * @returns True if there were validation errors.
+     */
+    validate(): boolean {
+        return this.validationErrors.processClient();
+    }
 }
 
