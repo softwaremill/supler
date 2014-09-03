@@ -61,7 +61,7 @@ object SuplerMacros {
 
     def newSubformField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T,
                             embeddedForm: Form[U], createEmpty: () => U): SubformField[T, U] = {
-      SubformField[T, U](fieldName, read, write, None, embeddedForm, createEmpty)
+      SubformField[T, U](fieldName, read, write, None, embeddedForm, createEmpty, SubformTableRenderHint)
     }
   }
 

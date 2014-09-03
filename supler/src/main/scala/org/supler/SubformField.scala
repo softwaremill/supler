@@ -8,16 +8,20 @@ case class SubformField[T, U](
   name: String,
   read: T => List[U],
   write: (T, List[U]) => T,
-  label: Option[String],
+  _label: Option[String],
   embeddedForm: Form[U],
-  createEmpty: () => U) extends Field[T, List[U]] {
+  createEmpty: () => U,
+  renderHint: SubformRenderHint) extends Field[T, List[U]] {
 
-  def label(newLabel: String) = this.copy(label = Some(newLabel))
+  def label(newLabel: String) = this.copy(_label = Some(newLabel))
+
+  def renderHint(newRenderHint: SubformRenderHint) = this.copy(renderHint = newRenderHint)
 
   def generateJSON(obj: T) = List(JField(name, JObject(
     JField("type", JString("subform")),
+    JField("render_hint", JString(renderHint.name)),
     JField("multiple", JBool(value = true)),
-    JField("label", JString(label.getOrElse(""))),
+    JField("label", JString(_label.getOrElse(""))),
     JField("value", JArray(read(obj).map(embeddedForm.generateJSON)))
   )))
 
@@ -36,3 +40,7 @@ case class SubformField[T, U](
     embeddedForm.doValidate(parentPath.appendWithIndex(name, i), el)
   }
 }
+
+sealed abstract class SubformRenderHint(val name: String)
+case object SubformTableRenderHint extends SubformRenderHint("table")
+case object SubformListRenderHint extends SubformRenderHint("list")
