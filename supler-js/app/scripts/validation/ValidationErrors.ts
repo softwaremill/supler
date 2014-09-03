@@ -61,9 +61,9 @@ class ValidationErrors {
     }
 
     private searchForElement(inside: HTMLElement, rawPathPart: string): HTMLElement {
-        var tuple = this.extractElementIdx(rawPathPart);
-        var pathPart = tuple.pathPart;
-        var elementIdx = tuple.elementIdx;
+        var pathPartWithIndex = this.extractElementIdx(rawPathPart);
+        var pathPart = pathPartWithIndex.pathPart;
+        var elementIdx = pathPartWithIndex.elementIdx;
 
         // looking layer by layer through the tree rooted at "inside"
         var elementQueue = [ inside ];
