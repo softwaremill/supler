@@ -3,7 +3,7 @@ class CreateFormFromJson {
 
     constructor(private renderOptions: RenderOptions, private validatorFnFactories: any) {}
 
-    formFromJson(formJson): CreateFormResult {
+    renderForm(formJson): RenderFormResult {
         var fields = formJson.fields;
         var html = '';
         var validatorDictionary: ElementValidatorDictionary = {};
@@ -14,7 +14,7 @@ class CreateFormFromJson {
             }
         });
 
-        return new CreateFormResult(html, validatorDictionary);
+        return new RenderFormResult(html, validatorDictionary);
     }
 
     private fieldFromJson(fieldName: string, fieldJson: any, validatorDictionary: ElementValidatorDictionary,
@@ -100,7 +100,7 @@ class CreateFormFromJson {
                     'supler:multiple': fieldJson.multiple
                 };
 
-                var subformResult = this.formFromJson(fieldJson.value[k]);
+                var subformResult = this.renderForm(fieldJson.value[k]);
                 Util.copyProperties(validatorDictionary, subformResult.validatorDictionary);
 
                 subformHtml += this.renderOptions.renderSubformListElement(subformResult.html, options);
@@ -143,6 +143,6 @@ class CreateFormFromJson {
     }
 }
 
-class CreateFormResult {
+class RenderFormResult {
     constructor(public html: string, public validatorDictionary: ElementValidatorDictionary) {}
 }
