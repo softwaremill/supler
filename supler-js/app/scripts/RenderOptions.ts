@@ -39,40 +39,40 @@ class DefaultRenderOptions implements RenderOptions {
     }
 
     renderStringField(label, id, validationId, name, value, options, compact) {
-        return this.renderRhsField(() => this.renderHtmlInput("text", id, name, value, options), label, id, validationId, compact);
+        return this.renderRhsField(() => this.renderHtmlInput('text', id, name, value, options), label, id, validationId, compact);
     }
 
     renderIntegerField(label, id, validationId, name, value, options, compact) {
-        return this.renderRhsField(() => this.renderHtmlInput("number", id, name, value, options), label, id, validationId, compact);
+        return this.renderRhsField(() => this.renderHtmlInput('number', id, name, value, options), label, id, validationId, compact);
     }
 
     renderDoubleField(label, id, validationId, name, value, options, compact) {
-        return this.renderRhsField(() => this.renderHtmlInput("number", id, name, value, options), label, id, validationId, compact);
+        return this.renderRhsField(() => this.renderHtmlInput('number', id, name, value, options), label, id, validationId, compact);
     }
 
     renderBooleanField(label, id, validationId, name, value, options, compact) {
-        return "";
+        return '';
     }
 
     // text field render hints
     renderPasswordField(label, id, validationId, name, value, options, compact) {
-        return this.renderRhsField(() => this.renderHtmlInput("password", id, name, value, options), label, id, validationId, compact);
+        return this.renderRhsField(() => this.renderHtmlInput('password', id, name, value, options), label, id, validationId, compact);
     }
 
     renderTextareaField(label, id, validationId, name, value, options, compact) {
-        return "";
+        return '';
     }
 
     renderMultiChoiceCheckboxField(label, id, validationId, name, values, possibleValues, options, compact) {
-        return "";
+        return '';
     }
 
     renderMultiChoiceSelectField(label, id, validationId, name, values, possibleValues, options, compact) {
-        return "";
+        return '';
     }
 
     renderSingleChoiceRadioField(label, id, validationId, name, value, possibleValues, options, compact) {
-        return "";
+        return '';
     }
 
     renderSingleChoiceSelectField(label, id, validationId, name, value, possibleValues, options, compact) {
@@ -92,9 +92,9 @@ class DefaultRenderOptions implements RenderOptions {
         return '<div class="form-group">' +
             labelPart +
             renderInput() +
-            "\n" +
+            '\n' +
             this.renderValidation(validationId) +
-            "\n" +
+            '\n' +
             '</div>';
     }
 
@@ -107,14 +107,14 @@ class DefaultRenderOptions implements RenderOptions {
     }
 
     renderSubformDecoration(renderSubform, label, id, name) {
-        var html = "";
-        html += HtmlUtil.renderTag("fieldset", {"id": id, "name": name }, false);
-        html += "\n";
-        html += "<legend>" + label + "</legend>\n";
+        var html = '';
+        html += HtmlUtil.renderTag('fieldset', {'id': id, 'name': name }, false);
+        html += '\n';
+        html += '<legend>' + label + '</legend>\n';
 
         html += renderSubform();
 
-        html += "</fieldset>\n";
+        html += '</fieldset>\n';
         return html;
     }
 
@@ -130,24 +130,24 @@ class DefaultRenderOptions implements RenderOptions {
     //
 
     renderHtmlInput(inputType, id, name, value, options) {
-        return HtmlUtil.renderTag("input", Util.copyProperties({ "id": id, "type": inputType, "name": name, "value": value }, options), true);
+        return HtmlUtil.renderTag('input', Util.copyProperties({ 'id': id, 'type': inputType, 'name': name, 'value': value }, options), true);
     }
 
     renderHtmlSelect(id, name, value, possibleValues, options) {
-        var html = "";
-        html += HtmlUtil.renderTag("select", Util.copyProperties({ "id": id, "name": name }, options), false);
-        html += "\n";
+        var html = '';
+        html += HtmlUtil.renderTag('select', Util.copyProperties({ 'id': id, 'name': name }, options), false);
+        html += '\n';
         Util.foreach(possibleValues, (i, v) => {
-            var selected = "";
+            var selected = '';
             if (v === value) {
-                selected = " selected ";
+                selected = ' selected ';
             }
 
             html += '<option value="' + v + '"' + selected + '>';
             html += v;
             html += '</option>\n';
         });
-        html += "</select>\n";
+        html += '</select>\n';
         return html;
     }
 }

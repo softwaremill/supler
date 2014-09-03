@@ -5,12 +5,12 @@ class CreateFormFromJson {
 
     formFromJson(formJson): CreateFormResult {
         var fields = formJson.fields;
-        var html = "";
+        var html = '';
         var validatorDictionary: ElementValidatorDictionary = {};
         Util.foreach(fields, (field, fieldJson) => {
             var fieldResult = this.fieldFromJson(field, fieldJson, validatorDictionary, false);
             if (fieldResult) {
-                html += fieldResult + "\n";
+                html += fieldResult + '\n';
             }
         });
 
@@ -55,11 +55,11 @@ class CreateFormFromJson {
         validatorDictionary: ElementValidatorDictionary, compact: boolean): string {
 
         var fieldOptions = {
-            "class": "form-control",
-            "supler:fieldName": fieldName,
-            "supler:fieldType": fieldJson.type,
-            "supler:multiple": fieldJson.multiple,
-            "supler:validationId": validationId
+            'class': 'form-control',
+            'supler:fieldName': fieldName,
+            'supler:fieldType': fieldJson.type,
+            'supler:multiple': fieldJson.multiple,
+            'supler:validationId': validationId
         };
 
         switch(fieldJson.type) {
@@ -80,7 +80,7 @@ class CreateFormFromJson {
     private stringFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact) {
         if (fieldJson.possible_values) {
             if (fieldJson.multiple) {
-                return "";
+                return '';
             } else {
                 return this.renderOptions.renderSingleChoiceSelectField(fieldJson.label, id, validationId, fieldName,
                     fieldJson.value, fieldJson.possible_values, fieldOptions, compact);
@@ -94,7 +94,7 @@ class CreateFormFromJson {
     private subformFieldFromJson(id, fieldName, fieldJson, validatorDictionary) {
         return this.renderOptions.renderSubformDecoration(() => {
             var html = '';
-            if (fieldJson.render_hint === "list") {
+            if (fieldJson.render_hint === 'list') {
                 for (var i in fieldJson.value) {
                     var options = {
                         'supler:fieldType': 'subform',
@@ -148,7 +148,7 @@ class CreateFormFromJson {
 
     private nextId() {
         this.idCounter += 1;
-        return "id" + this.idCounter;
+        return 'id' + this.idCounter;
     }
 }
 
