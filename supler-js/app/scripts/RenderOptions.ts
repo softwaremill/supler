@@ -1,9 +1,9 @@
 interface RenderSingleChoiceField {
-    (label: string, id: string, validationId: string, name: string, value: any, options: any): string
+    (label: string, id: string, validationId: string, name: string, value: any, options: any, compact: boolean): string
 }
 
 interface RenderMultiChoiceField {
-    (label: string, id: string, validationId: string, name: string, value: any, possibleValues: any[], options: any): string
+    (label: string, id: string, validationId: string, name: string, value: any, possibleValues: any[], options: any, compact: boolean): string
 }
 
 interface RenderOptions {
@@ -22,7 +22,7 @@ interface RenderOptions {
 
     // templates
     // Rhs - [label] [input] [validation] (input on the right from the label)
-    renderRhsField: (renderInput: () => string, label: string, id: string, validationId: string) => string
+    renderRhsField: (renderInput: () => string, label: string, id: string, validationId: string, compact: boolean) => string
     renderLabel: (forId: string, label: string) => string
     renderValidation: (validationId: string) => string
 
@@ -35,53 +35,59 @@ class DefaultRenderOptions implements RenderOptions {
     constructor() {
     }
 
-    renderStringField(label, id, validationId, name, value, options) {
-        return this.renderRhsField(() => this.renderHtmlInput("text", id, name, value, options), label, id, validationId);
+    renderStringField(label, id, validationId, name, value, options, compact) {
+        return this.renderRhsField(() => this.renderHtmlInput("text", id, name, value, options), label, id, validationId, compact);
     }
 
-    renderIntegerField(label, id, validationId, name, value, options) {
-        return this.renderRhsField(() => this.renderHtmlInput("number", id, name, value, options), label, id, validationId);
+    renderIntegerField(label, id, validationId, name, value, options, compact) {
+        return this.renderRhsField(() => this.renderHtmlInput("number", id, name, value, options), label, id, validationId, compact);
     }
 
-    renderDoubleField(label, id, validationId, name, value, options) {
-        return this.renderRhsField(() => this.renderHtmlInput("number", id, name, value, options), label, id, validationId);
+    renderDoubleField(label, id, validationId, name, value, options, compact) {
+        return this.renderRhsField(() => this.renderHtmlInput("number", id, name, value, options), label, id, validationId, compact);
     }
 
-    renderBooleanField(label, id, validationId, name, value, options) {
+    renderBooleanField(label, id, validationId, name, value, options, compact) {
         return "";
     }
 
     // text field render hints
-    renderPasswordField(label, id, validationId, name, value, options) {
-        return this.renderRhsField(() => this.renderHtmlInput("password", id, name, value, options), label, id, validationId);
+    renderPasswordField(label, id, validationId, name, value, options, compact) {
+        return this.renderRhsField(() => this.renderHtmlInput("password", id, name, value, options), label, id, validationId, compact);
     }
 
-    renderTextareaField(label, id, validationId, name, value, options) {
+    renderTextareaField(label, id, validationId, name, value, options, compact) {
         return "";
     }
 
-    renderMultiChoiceCheckboxField(label, id, validationId, name, values, possibleValues, options) {
+    renderMultiChoiceCheckboxField(label, id, validationId, name, values, possibleValues, options, compact) {
         return "";
     }
 
-    renderMultiChoiceSelectField(label, id, validationId, name, values, possibleValues, options) {
+    renderMultiChoiceSelectField(label, id, validationId, name, values, possibleValues, options, compact) {
         return "";
     }
 
-    renderSingleChoiceRadioField(label, id, validationId, name, value, possibleValues, options) {
+    renderSingleChoiceRadioField(label, id, validationId, name, value, possibleValues, options, compact) {
         return "";
     }
 
-    renderSingleChoiceSelectField(label, id, validationId, name, value, possibleValues, options) {
-        return this.renderRhsField(() => this.renderHtmlSelect(id, name, value, possibleValues, options), label, id, validationId);
+    renderSingleChoiceSelectField(label, id, validationId, name, value, possibleValues, options, compact) {
+        return this.renderRhsField(() => this.renderHtmlSelect(id, name, value, possibleValues, options), label, id, validationId, compact);
     }
 
     //
 
-    renderRhsField(renderInput, label, id, validationId) {
+    renderRhsField(renderInput, label, id, validationId, compact) {
+        var labelPart;
+        if (compact) {
+            labelPart = '';
+        } else {
+            labelPart = this.renderLabel(id, label) + '\n';
+        }
+
         return '<div class="form-group">' +
-            this.renderLabel(id, label) +
-            "\n" +
+            labelPart +
             renderInput() +
             "\n" +
             this.renderValidation(validationId) +

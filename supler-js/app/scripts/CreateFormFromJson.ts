@@ -8,7 +8,7 @@ class CreateFormFromJson {
         var html = "";
         var validatorDictionary: ElementValidatorDictionary = {};
         Util.foreach(fields, (field, fieldJson) => {
-            var fieldResult = this.fieldFromJson(field, fieldJson, validatorDictionary);
+            var fieldResult = this.fieldFromJson(field, fieldJson, validatorDictionary, false);
             if (fieldResult) {
                 html += fieldResult + "\n";
             }
@@ -17,11 +17,13 @@ class CreateFormFromJson {
         return new CreateFormResult(html, validatorDictionary);
     }
 
-    private fieldFromJson(fieldName, fieldJson, validatorDictionary) {
+    private fieldFromJson(fieldName: string, fieldJson: any, validatorDictionary: ElementValidatorDictionary,
+        compact: boolean): string {
+
         var id = this.nextId();
         var validationId = this.nextId();
 
-        var html = this.fieldHtmlFromJson(id, validationId, fieldName, fieldJson, validatorDictionary);
+        var html = this.fieldHtmlFromJson(id, validationId, fieldName, fieldJson, validatorDictionary, compact);
 
         if (html) {
             validatorDictionary[id] = new ElementValidator(this.fieldValidatorFns(fieldJson));
@@ -49,7 +51,9 @@ class CreateFormFromJson {
         return validators;
     }
 
-    private fieldHtmlFromJson(id, validationId, fieldName, fieldJson, validatorDictionary) {
+    private fieldHtmlFromJson(id: string, validationId: string, fieldName: string, fieldJson: any,
+        validatorDictionary: ElementValidatorDictionary, compact: boolean): string {
+
         var fieldOptions = {
             "class": "form-control",
             "supler:fieldName": fieldName,
@@ -60,10 +64,10 @@ class CreateFormFromJson {
 
         switch(fieldJson.type) {
             case FieldTypes.STRING:
-                return this.stringFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions);
+                return this.stringFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact);
 
             case FieldTypes.INTEGER:
-                return this.renderOptions.renderIntegerField(fieldJson.label, id, validationId, fieldName, fieldJson.value, fieldOptions);
+                return this.renderOptions.renderIntegerField(fieldJson.label, id, validationId, fieldName, fieldJson.value, fieldOptions, compact);
 
             case FieldTypes.SUBFORM:
                 return this.subformFieldFromJson(id, fieldName, fieldJson, validatorDictionary);
@@ -73,17 +77,17 @@ class CreateFormFromJson {
         }
     }
 
-    private stringFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions) {
+    private stringFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact) {
         if (fieldJson.possible_values) {
             if (fieldJson.multiple) {
                 return "";
             } else {
                 return this.renderOptions.renderSingleChoiceSelectField(fieldJson.label, id, validationId, fieldName,
-                    fieldJson.value, fieldJson.possible_values, fieldOptions);
+                    fieldJson.value, fieldJson.possible_values, fieldOptions, compact);
             }
         } else {
             return this.renderOptions.renderStringField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
-                fieldOptions);
+                fieldOptions, compact);
         }
     }
 
@@ -93,7 +97,7 @@ class CreateFormFromJson {
         html += "\n";
         html += "<legend>" + fieldJson.label + "</legend>\n";
 
-        if (fieldJson.multiple) {
+        if (fieldJson.render_hint === "list") {
             for (var i in fieldJson.value) {
                 html += HtmlUtil.renderTag("div", {
                     "class": "well",
@@ -105,12 +109,42 @@ class CreateFormFromJson {
                 Util.copyProperties(validatorDictionary, result.validatorDictionary);
                 html += "</div>\n";
             }
-        } else {
+        } else { // table
+            html += '<table class="table">\n';
 
+            html += '<tr>';
+            var headers = this.getTableHeaderLabels(fieldJson);
+            headers.forEach((header) => html += '<th>' + header + '</th>');
+            html += '</tr>\n';
+
+            for (var i in fieldJson.value) {
+                html += '<tr>\n';
+                var subfieldsJson = fieldJson.value[i].fields;
+                Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
+                    var fieldResult = this.fieldFromJson(subfield, subfieldJson, validatorDictionary, true);
+                    if (fieldResult) {
+                        html += '<td>' + fieldResult + '</td>\n';
+                    }
+                });
+                html += '</tr>\n';
+            }
+
+            html += '</table>\n';
         }
 
         html += "</fieldset>\n";
         return html;
+    }
+
+    private getTableHeaderLabels(fieldJson: any): string[] {
+        if (fieldJson.value.length > 0) {
+            var firstRow = fieldJson.value[0];
+            var result = [];
+            Util.foreach(firstRow.fields, (fieldName, fieldValue) => result.push(fieldValue.label));
+            return result;
+        } else {
+            return [];
+        }
     }
 
     private nextId() {
