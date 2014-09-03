@@ -15,7 +15,7 @@ class SuplerForm {
         Util.copyProperties(this.validatorRenderOptions, customOptions);
     }
 
-    create(formJson) {
+    render(formJson) {
         var result = new CreateFormFromJson(this.renderOptions, this.validatorFnFactories).renderForm(formJson);
         this.container.innerHTML = result.html;
         this.validationErrors = new ValidationErrors(this.container, result.validatorDictionary,

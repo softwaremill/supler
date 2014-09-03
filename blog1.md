@@ -112,7 +112,7 @@ Next, when the page loads and we obtain the JSON description of the form (e.g. v
 ````
 var formContainer = document.getElementById('form-container');
 var form =  = new SuplerForm(formContainer, {});
-form.create(formJson);
+form.render(formJson);
 ````
 
 And finally, we need some JavaScript to call the correct methods; here I'm using JQuery to send the data to the server
