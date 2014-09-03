@@ -95,7 +95,7 @@ class CreateFormFromJson {
         return this.renderOptions.renderSubformDecoration(() => {
             var html = '';
             if (fieldJson.render_hint === 'list') {
-                for (var i in fieldJson.value) {
+                for (var k in fieldJson.value) {
                     var options = {
                         'supler:fieldType': 'subform',
                         'supler:fieldName': fieldName,
@@ -103,32 +103,27 @@ class CreateFormFromJson {
                     };
                     
                     html += this.renderOptions.renderSubformListElement(() => {
-                        var result = this.formFromJson(fieldJson.value[i]);
+                        var result = this.formFromJson(fieldJson.value[k]);
                         Util.copyProperties(validatorDictionary, result.validatorDictionary);
                         return result.html;
                     }, options);
                 }
             } else { // table
-                html += '<table class="table">\n';
-
-                html += '<tr>';
                 var headers = this.getTableHeaderLabels(fieldJson);
-                headers.forEach((header) => html += '<th>' + header + '</th>');
-                html += '</tr>\n';
+                var cells: string[][] = [];
 
-                for (var i in fieldJson.value) {
-                    html += '<tr>\n';
+                for (var i=0; i<fieldJson.value.length; i++) {
+                    var j = 0;
+                    cells[i] = [];
+
                     var subfieldsJson = fieldJson.value[i].fields;
                     Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
-                        var fieldResult = this.fieldFromJson(subfield, subfieldJson, validatorDictionary, true);
-                        if (fieldResult) {
-                            html += '<td>' + fieldResult + '</td>\n';
-                        }
+                        cells[i][j] = this.fieldFromJson(subfield, subfieldJson, validatorDictionary, true);
+                        j += 1;
                     });
-                    html += '</tr>\n';
                 }
 
-                html += '</table>\n';
+                html += this.renderOptions.renderSubformTable(headers, cells);
             }
 
             return html;

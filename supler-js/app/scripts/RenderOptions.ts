@@ -28,6 +28,7 @@ interface RenderOptions {
 
     renderSubformDecoration: (renderSubform: () => string, label: string, id: string, name: string) => string
     renderSubformListElement: (renderSubformElement: () => string, options: any) => string;
+    renderSubformTable: (tableHeaders: string[], cells: string[][]) => string;
 
     // html form elements
     renderHtmlInput: (inputType: string, id: string, name: string, value: any, options: any) => string
@@ -124,6 +125,28 @@ class DefaultRenderOptions implements RenderOptions {
         html += HtmlUtil.renderTag('div', optionsWithClass, false);
         html += renderSubformElement();
         html += '</div>\n';
+        return html;
+    }
+
+    renderSubformTable(tableHeaders, cells) {
+        var html = '';
+        html += '<table class="table">\n';
+
+        html += '<tr>';
+        tableHeaders.forEach((header) => html += '<th>' + header + '</th>');
+        html += '</tr>\n';
+
+        for (var i=0; i<cells.length; i++) {
+            var row = cells[i];
+            html += '<tr>\n';
+            for (var j=0; j<row.length; j++) {
+                html += '<td>' + row[j] + '</td>\n';
+            }
+            html += '</tr>\n';
+        }
+
+        html += '</table>\n';
+
         return html;
     }
 
