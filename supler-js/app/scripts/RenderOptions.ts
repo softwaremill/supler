@@ -26,6 +26,8 @@ interface RenderOptions {
     renderLabel: (forId: string, label: string) => string
     renderValidation: (validationId: string) => string
 
+    renderSubformDecoration: (renderSubform: () => string, label: string, id: string, name: string) => string
+
     // html form elements
     renderHtmlInput: (inputType: string, id: string, name: string, value: any, options: any) => string
     renderHtmlSelect: (id: string, name: string, value: string, possibleValues: any[], options: any) => string
@@ -101,6 +103,18 @@ class DefaultRenderOptions implements RenderOptions {
 
     renderValidation(validationId) {
         return '<div class="text-danger" id="' + validationId + '"></div>';
+    }
+
+    renderSubformDecoration(renderSubform, label, id, name) {
+        var html = "";
+        html += HtmlUtil.renderTag("fieldset", {"id": id, "name": name }, false);
+        html += "\n";
+        html += "<legend>" + label + "</legend>\n";
+
+        html += renderSubform();
+
+        html += "</fieldset>\n";
+        return html;
     }
 
     //

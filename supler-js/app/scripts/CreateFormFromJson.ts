@@ -92,48 +92,45 @@ class CreateFormFromJson {
     }
 
     private subformFieldFromJson(id, fieldName, fieldJson, validatorDictionary) {
-        var html = "";
-        html += HtmlUtil.renderTag("fieldset", {"id": id, "name": fieldName }, false);
-        html += "\n";
-        html += "<legend>" + fieldJson.label + "</legend>\n";
+        return this.renderOptions.renderSubformDecoration(() => {
+            var html = '';
+            if (fieldJson.render_hint === "list") {
+                for (var i in fieldJson.value) {
+                    html += HtmlUtil.renderTag("div", {
+                        "class": "well",
+                        "supler:fieldType": "subform",
+                        "supler:fieldName": fieldName,
+                        "supler:multiple": fieldJson.multiple }, false);
+                    var result = this.formFromJson(fieldJson.value[i]);
+                    html += result.html;
+                    Util.copyProperties(validatorDictionary, result.validatorDictionary);
+                    html += "</div>\n";
+                }
+            } else { // table
+                html += '<table class="table">\n';
 
-        if (fieldJson.render_hint === "list") {
-            for (var i in fieldJson.value) {
-                html += HtmlUtil.renderTag("div", {
-                    "class": "well",
-                    "supler:fieldType": "subform",
-                    "supler:fieldName": fieldName,
-                    "supler:multiple": fieldJson.multiple }, false);
-                var result = this.formFromJson(fieldJson.value[i]);
-                html += result.html;
-                Util.copyProperties(validatorDictionary, result.validatorDictionary);
-                html += "</div>\n";
-            }
-        } else { // table
-            html += '<table class="table">\n';
-
-            html += '<tr>';
-            var headers = this.getTableHeaderLabels(fieldJson);
-            headers.forEach((header) => html += '<th>' + header + '</th>');
-            html += '</tr>\n';
-
-            for (var i in fieldJson.value) {
-                html += '<tr>\n';
-                var subfieldsJson = fieldJson.value[i].fields;
-                Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
-                    var fieldResult = this.fieldFromJson(subfield, subfieldJson, validatorDictionary, true);
-                    if (fieldResult) {
-                        html += '<td>' + fieldResult + '</td>\n';
-                    }
-                });
+                html += '<tr>';
+                var headers = this.getTableHeaderLabels(fieldJson);
+                headers.forEach((header) => html += '<th>' + header + '</th>');
                 html += '</tr>\n';
+
+                for (var i in fieldJson.value) {
+                    html += '<tr>\n';
+                    var subfieldsJson = fieldJson.value[i].fields;
+                    Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
+                        var fieldResult = this.fieldFromJson(subfield, subfieldJson, validatorDictionary, true);
+                        if (fieldResult) {
+                            html += '<td>' + fieldResult + '</td>\n';
+                        }
+                    });
+                    html += '</tr>\n';
+                }
+
+                html += '</table>\n';
             }
 
-            html += '</table>\n';
-        }
-
-        html += "</fieldset>\n";
-        return html;
+            return html;
+        }, fieldJson.label, id, name);
     }
 
     private getTableHeaderLabels(fieldJson: any): string[] {
