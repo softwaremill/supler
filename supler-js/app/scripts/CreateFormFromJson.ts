@@ -96,15 +96,17 @@ class CreateFormFromJson {
             var html = '';
             if (fieldJson.render_hint === "list") {
                 for (var i in fieldJson.value) {
-                    html += HtmlUtil.renderTag("div", {
-                        "class": "well",
-                        "supler:fieldType": "subform",
-                        "supler:fieldName": fieldName,
-                        "supler:multiple": fieldJson.multiple }, false);
-                    var result = this.formFromJson(fieldJson.value[i]);
-                    html += result.html;
-                    Util.copyProperties(validatorDictionary, result.validatorDictionary);
-                    html += "</div>\n";
+                    var options = {
+                        'supler:fieldType': 'subform',
+                        'supler:fieldName': fieldName,
+                        'supler:multiple': fieldJson.multiple
+                    };
+                    
+                    html += this.renderOptions.renderSubformListElement(() => {
+                        var result = this.formFromJson(fieldJson.value[i]);
+                        Util.copyProperties(validatorDictionary, result.validatorDictionary);
+                        return result.html;
+                    }, options);
                 }
             } else { // table
                 html += '<table class="table">\n';

@@ -27,6 +27,7 @@ interface RenderOptions {
     renderValidation: (validationId: string) => string
 
     renderSubformDecoration: (renderSubform: () => string, label: string, id: string, name: string) => string
+    renderSubformListElement: (renderSubformElement: () => string, options: any) => string;
 
     // html form elements
     renderHtmlInput: (inputType: string, id: string, name: string, value: any, options: any) => string
@@ -114,6 +115,15 @@ class DefaultRenderOptions implements RenderOptions {
         html += renderSubform();
 
         html += "</fieldset>\n";
+        return html;
+    }
+
+    renderSubformListElement(renderSubformElement, options) {
+        var html = '';
+        var optionsWithClass = Util.copyProperties({ 'class': 'well'}, options);
+        html += HtmlUtil.renderTag('div', optionsWithClass, false);
+        html += renderSubformElement();
+        html += '</div>\n';
         return html;
     }
 
