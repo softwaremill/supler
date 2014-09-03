@@ -33,6 +33,9 @@ interface RenderOptions {
     // html form elements
     renderHtmlInput: (inputType: string, id: string, name: string, value: any, options: any) => string
     renderHtmlSelect: (id: string, name: string, value: string, possibleValues: any[], options: any) => string
+
+    // misc
+    defaultFieldOptions: () => any
 }
 
 class DefaultRenderOptions implements RenderOptions {
@@ -172,5 +175,11 @@ class DefaultRenderOptions implements RenderOptions {
         });
         html += '</select>\n';
         return html;
+    }
+
+    //
+
+    defaultFieldOptions() {
+        return { 'class': 'form-control' };
     }
 }

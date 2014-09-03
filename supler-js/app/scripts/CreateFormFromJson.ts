@@ -54,13 +54,12 @@ class CreateFormFromJson {
     private fieldHtmlFromJson(id: string, validationId: string, fieldName: string, fieldJson: any,
         validatorDictionary: ElementValidatorDictionary, compact: boolean): string {
 
-        var fieldOptions = {
-            'class': 'form-control',
+        var fieldOptions = Util.copyProperties({
             'supler:fieldName': fieldName,
             'supler:fieldType': fieldJson.type,
             'supler:multiple': fieldJson.multiple,
             'supler:validationId': validationId
-        };
+        }, this.renderOptions.defaultFieldOptions());
 
         switch(fieldJson.type) {
             case FieldTypes.STRING:
