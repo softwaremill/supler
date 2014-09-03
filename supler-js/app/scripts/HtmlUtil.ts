@@ -1,11 +1,11 @@
 class HtmlUtil {
     static renderTag(tagName, tagAttrs, voidTag) {
         var r = "<" + tagName + " ";
-        for (var tagAttrName in tagAttrs) {
-            if (tagAttrs.hasOwnProperty(tagAttrName) && tagAttrs[tagAttrName]) {
-                r += tagAttrName + '="' + tagAttrs[tagAttrName] + '" ';
+        Util.foreach(tagAttrs, (tagAttrName, tagAttrValue) => {
+            if (tagAttrValue || tagAttrValue === 0 || tagAttrValue === "" || tagAttrValue === false) {
+                r += tagAttrName + '="' + tagAttrValue + '" ';
             }
-        }
+        });
 
         if (voidTag) {
             r += "/>";
