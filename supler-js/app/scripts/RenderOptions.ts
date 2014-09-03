@@ -26,8 +26,8 @@ interface RenderOptions {
     renderLabel: (forId: string, label: string) => string
     renderValidation: (validationId: string) => string
 
-    renderSubformDecoration: (renderSubform: () => string, label: string, id: string, name: string) => string
-    renderSubformListElement: (renderSubformElement: () => string, options: any) => string;
+    renderSubformDecoration: (subform: string, label: string, id: string, name: string) => string
+    renderSubformListElement: (subformElement: string, options: any) => string;
     renderSubformTable: (tableHeaders: string[], cells: string[][]) => string;
 
     // html form elements
@@ -110,23 +110,23 @@ class DefaultRenderOptions implements RenderOptions {
         return '<div class="text-danger" id="' + validationId + '"></div>';
     }
 
-    renderSubformDecoration(renderSubform, label, id, name) {
+    renderSubformDecoration(subform, label, id, name) {
         var html = '';
         html += HtmlUtil.renderTag('fieldset', {'id': id, 'name': name }, false);
         html += '\n';
         html += '<legend>' + label + '</legend>\n';
 
-        html += renderSubform();
+        html += subform;
 
         html += '</fieldset>\n';
         return html;
     }
 
-    renderSubformListElement(renderSubformElement, options) {
+    renderSubformListElement(subformElement, options) {
         var html = '';
         var optionsWithClass = Util.copyProperties({ 'class': 'well'}, options);
         html += HtmlUtil.renderTag('div', optionsWithClass, false);
-        html += renderSubformElement();
+        html += subformElement;
         html += '</div>\n';
         return html;
     }

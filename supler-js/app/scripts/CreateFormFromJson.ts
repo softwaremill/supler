@@ -91,42 +91,39 @@ class CreateFormFromJson {
     }
 
     private subformFieldFromJson(id, fieldName, fieldJson, validatorDictionary) {
-        return this.renderOptions.renderSubformDecoration(() => {
-            var html = '';
-            if (fieldJson.render_hint === 'list') {
-                for (var k in fieldJson.value) {
-                    var options = {
-                        'supler:fieldType': 'subform',
-                        'supler:fieldName': fieldName,
-                        'supler:multiple': fieldJson.multiple
-                    };
-                    
-                    html += this.renderOptions.renderSubformListElement(() => {
-                        var result = this.formFromJson(fieldJson.value[k]);
-                        Util.copyProperties(validatorDictionary, result.validatorDictionary);
-                        return result.html;
-                    }, options);
-                }
-            } else { // table
-                var headers = this.getTableHeaderLabels(fieldJson);
-                var cells: string[][] = [];
+        var subformHtml = '';
+        if (fieldJson.render_hint === 'list') {
+            for (var k in fieldJson.value) {
+                var options = {
+                    'supler:fieldType': 'subform',
+                    'supler:fieldName': fieldName,
+                    'supler:multiple': fieldJson.multiple
+                };
 
-                for (var i=0; i<fieldJson.value.length; i++) {
-                    var j = 0;
-                    cells[i] = [];
+                var subformResult = this.formFromJson(fieldJson.value[k]);
+                Util.copyProperties(validatorDictionary, subformResult.validatorDictionary);
 
-                    var subfieldsJson = fieldJson.value[i].fields;
-                    Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
-                        cells[i][j] = this.fieldFromJson(subfield, subfieldJson, validatorDictionary, true);
-                        j += 1;
-                    });
-                }
+                subformHtml += this.renderOptions.renderSubformListElement(subformResult.html, options);
+            }
+        } else { // table
+            var headers = this.getTableHeaderLabels(fieldJson);
+            var cells: string[][] = [];
 
-                html += this.renderOptions.renderSubformTable(headers, cells);
+            for (var i=0; i<fieldJson.value.length; i++) {
+                var j = 0;
+                cells[i] = [];
+
+                var subfieldsJson = fieldJson.value[i].fields;
+                Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
+                    cells[i][j] = this.fieldFromJson(subfield, subfieldJson, validatorDictionary, true);
+                    j += 1;
+                });
             }
 
-            return html;
-        }, fieldJson.label, id, name);
+            subformHtml += this.renderOptions.renderSubformTable(headers, cells);
+        }
+
+        return this.renderOptions.renderSubformDecoration(subformHtml, fieldJson.label, id, name);
     }
 
     private getTableHeaderLabels(fieldJson: any): string[] {
