@@ -12,7 +12,14 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
   implicit val actorSystem = ActorSystem()
   implicit val json4sFormats = org.json4s.DefaultFormats
 
-  var person = Person("Adam", "", 10, None, None, null, List(Car("Ford", 1990), Car("Toyota", 2004)))
+  var person = Person("Adam", "", 10, None, None, null,
+    List(
+      Car("Ford", 1990),
+      Car("Toyota", 2004)),
+    List(
+      LegoSet("Motorcycle", "Technic", 1924, 31),
+      LegoSet("Arctic Supply Plane", "City", 60064, 0),
+      LegoSet("Princess and Horse", "Duplo", 4825, 7)))
 
   def getJson(route: Route) = get { respondWithMediaType(MediaTypes.`application/json`) { route } }
 
