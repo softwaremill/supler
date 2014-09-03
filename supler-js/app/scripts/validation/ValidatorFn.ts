@@ -34,6 +34,6 @@ class DefaultValidatorFnFactories {
     }}
 
     type_integer(): ValidatorFn { return (fieldValue: string) => {
-        if (fieldValue && fieldValue.match(/^\d+$/)) return null; else return new ValidationError("Must be a number");
+        if (fieldValue && fieldValue.match(/^-?\d+$/)) return null; else return new ValidationError("Must be a number");
     }}
 }
