@@ -30,8 +30,9 @@ object SuplerMacros {
     }
   }
 
-  def table_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)(param: c.Expr[T => List[U]],
-                                                                          form: c.Expr[Form[U]], createEmpty: c.Tree): c.Expr[TableField[T, U]] = {
+  def subform_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)(param: c.Expr[T => List[U]],
+    form: c.Expr[Form[U]], createEmpty: c.Tree): c.Expr[SubformField[T, U]] = {
+
     import c.universe._
 
     val (fieldName, paramRepExpr) = extractFieldName(c)(param)
@@ -45,7 +46,7 @@ object SuplerMacros {
     val createEmptyExpr = c.Expr[() => U](q"() => $createEmpty")
 
     reify {
-      FactoryMethods.newTableField(paramRepExpr.splice,
+      FactoryMethods.newSubformField(paramRepExpr.splice,
         readFieldValueExpr.splice,
         writeFieldValueExpr.splice,
         form.splice,
@@ -58,9 +59,9 @@ object SuplerMacros {
       PrimitiveField[T, U](fieldName, read, write, List(), None, None, required, fieldType)
     }
 
-    def newTableField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T,
-                            embeddedForm: Form[U], createEmpty: () => U): TableField[T, U] = {
-      TableField[T, U](fieldName, read, write, None, embeddedForm, createEmpty)
+    def newSubformField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T,
+                            embeddedForm: Form[U], createEmpty: () => U): SubformField[T, U] = {
+      SubformField[T, U](fieldName, read, write, None, embeddedForm, createEmpty)
     }
   }
 

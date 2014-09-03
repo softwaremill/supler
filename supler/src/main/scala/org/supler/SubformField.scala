@@ -4,7 +4,7 @@ import org.json4s.JsonAST.{JArray, JString, JObject, JField}
 import org.json4s._
 import org.supler.validation.FieldPath
 
-case class TableField[T, U](
+case class SubformField[T, U](
   name: String,
   read: T => List[U],
   write: (T, List[U]) => T,

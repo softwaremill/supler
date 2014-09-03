@@ -233,7 +233,7 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
       f.field(_.age)
     ))
     object PersonMeta extends Supler[Person] {
-      val carsField = table(_.cars, carForm, Car(null, 0))
+      val carsField = subform(_.cars, carForm, Car(null, 0))
     }
 
     // then
@@ -258,7 +258,7 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     ))
     val personForm = form[Person](f => List(
       f.field(_.name),
-      f.table(_.cars, carForm, Car(null, 0))
+      f.subform(_.cars, carForm, Car(null, 0))
     ))
 
     val jsonInOrder = JObject(
