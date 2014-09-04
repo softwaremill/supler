@@ -5,7 +5,7 @@ object BuildSettings {
   val buildSettings = Defaults.defaultSettings ++ Seq(
     organization := "com.softwaremill",
     version := "1-SNAPSHOT",
-    scalaVersion := "2.11.1",
+    scalaVersion := "2.11.2",
     scalacOptions += "",
     licenses := ("Apache2", new java.net.URL("http://www.apache.org/licenses/LICENSE-2.0.txt")) :: Nil
   )
