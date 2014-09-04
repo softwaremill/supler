@@ -23,7 +23,13 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
 
   def getJson(route: Route) = get { respondWithMediaType(MediaTypes.`application/json`) { route } }
 
-  startServer(interface = "localhost", port = 8080) {
+  val (port, suplerJsDirective) = if (System.getProperty("supler.demo.production") != null) {
+    (8195, getFromResourceDirectory(""))
+  } else {
+    (8080, getFromDirectory("./supler-js/app/scripts/compiled")) // compiled by grunt
+  }
+
+  startServer(interface = "localhost", port = port) {
     path("rest" / "form1.json") {
       getJson {
         complete {
@@ -52,12 +58,12 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
       getFromResourceDirectory("")
     } ~
     pathPrefix("supler-js") {
-      getFromDirectory("./supler-js/app/scripts/compiled") // compiled by grunt
+      suplerJsDirective
     } ~
     path("") {
       redirect("/site/index.html", Found)
     }
   }
 
-  println("Server starting... open http://localhost:8080")
+  println(s"Server starting... open http://localhost:$port")
 }

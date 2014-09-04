@@ -1,5 +1,7 @@
+import sbt.Keys._
 import sbt._
-import Keys._
+import sbtassembly.Plugin._
+import AssemblyKeys._
 
 object BuildSettings {
   val buildSettings = Defaults.defaultSettings ++ Seq(
@@ -41,10 +43,26 @@ object SuplerBuild extends Build {
       libraryDependencies ++= Seq(json4sNative, scalaTest))
   )
 
+  lazy val createAndCopySuplerJs = taskKey[Unit]("Create and copy the supler js files.")
+
   lazy val examples: Project = Project(
     "examples",
     file("examples"),
-    settings = buildSettings ++ Seq(
-      libraryDependencies ++= Seq(akka, sprayCan, sprayRouting, sprayHttpx))
+    settings = buildSettings ++ assemblySettings ++ Seq(
+      libraryDependencies ++= Seq(akka, sprayCan, sprayRouting, sprayHttpx),
+      jarName in assembly := "supler-example.jar",
+      mainClass in assembly := Some("org.supler.demo.DemoServer"),
+      createAndCopySuplerJs := {
+        val suplerJsDir = baseDirectory.value / ".." / "supler-js"
+
+        println("Running grunt")
+        Process(List("grunt", "ts"), suplerJsDir.getCanonicalFile).!
+
+        val suplerJsSource = suplerJsDir / "app" / "scripts" / "compiled" / "supler.out.js"
+        val suplerJsTarget = (classDirectory in Compile).value / "supler.out.js"
+        println(s"Copying supler.js to resources from $suplerJsSource to $suplerJsTarget")
+        IO.copy(List((suplerJsSource, suplerJsTarget)))
+      },
+      assembly <<= assembly.dependsOn(createAndCopySuplerJs))
   ) dependsOn (supler)
 }
