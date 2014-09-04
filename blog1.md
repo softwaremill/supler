@@ -34,7 +34,8 @@ you'd like to see Supler developed further.
 Demo
 ---
 
-But, to the important parts - how does Supler look in action? You can see a [live demo here](???). Try to remove some
+But, to the important parts - how does Supler look in action? You can see a 
+[live demo here](https://supler.softwaremill.com). Try to remove some
 values, enter incorrect values, submit the form, refresh the page. A more detailed description of how the code works
 is below.
  
