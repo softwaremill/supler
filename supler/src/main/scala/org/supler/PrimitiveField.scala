@@ -46,7 +46,7 @@ case class PrimitiveField[T, U](
     val possibleValuesJSON = dataProvider match {
       case Some(dp) =>
         val possibilities = dp.provider(obj).flatMap(fieldType.toJValue)
-        List(JField("possible_values", JArray(if (required) possibilities else JString("") :: possibilities)))
+        List(JField("possible_values", JArray(possibilities)))
       case None => Nil
     }
 

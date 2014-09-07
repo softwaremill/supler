@@ -81,8 +81,12 @@ class CreateFormFromJson {
             if (fieldJson.multiple) {
                 return '';
             } else {
+                var possibleValues = <string[]>fieldJson.possible_values;
+                if (!fieldJson.validate || !fieldJson.validate.required) {
+                    possibleValues = [ "" ].concat(possibleValues);
+                }
                 return this.renderOptions.renderSingleChoiceSelectField(fieldJson.label, id, validationId, fieldName,
-                    fieldJson.value, fieldJson.possible_values, fieldOptions, compact);
+                    fieldJson.value, possibleValues, fieldOptions, compact);
             }
         } else {
             return this.renderOptions.renderStringField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
