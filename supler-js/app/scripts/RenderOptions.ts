@@ -1,24 +1,24 @@
-interface RenderSingleChoiceField {
+interface RenderAnyValueField {
     (label: string, id: string, validationId: string, name: string, value: any, options: any, compact: boolean): string
 }
 
-interface RenderMultiChoiceField {
+interface RenderPossibleValuesField {
     (label: string, id: string, validationId: string, name: string, value: any, possibleValues: any[], options: any, compact: boolean): string
 }
 
 interface RenderOptions {
     // main field rendering entry points
     // basic types
-    renderStringField: RenderSingleChoiceField
-    renderIntegerField: RenderSingleChoiceField
-    renderDoubleField: RenderSingleChoiceField
-    renderBooleanField: RenderSingleChoiceField
-    renderPasswordField: RenderSingleChoiceField
-    renderTextareaField: RenderSingleChoiceField
-    renderMultiChoiceCheckboxField: RenderMultiChoiceField
-    renderMultiChoiceSelectField: RenderMultiChoiceField
-    renderSingleChoiceRadioField: RenderMultiChoiceField
-    renderSingleChoiceSelectField: RenderMultiChoiceField
+    renderStringField: RenderAnyValueField
+    renderIntegerField: RenderAnyValueField
+    renderDoubleField: RenderAnyValueField
+    renderBooleanField: RenderAnyValueField
+    renderPasswordField: RenderAnyValueField
+    renderTextareaField: RenderAnyValueField
+    renderMultiChoiceCheckboxField: RenderPossibleValuesField
+    renderMultiChoiceSelectField: RenderPossibleValuesField
+    renderSingleChoiceRadioField: RenderPossibleValuesField
+    renderSingleChoiceSelectField: RenderPossibleValuesField
 
     // templates
     // Rhs - [label] [input] [validation] (input on the right from the label)

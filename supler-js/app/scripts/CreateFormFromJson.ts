@@ -85,6 +85,7 @@ class CreateFormFromJson {
                 if (!fieldJson.validate || !fieldJson.validate.required) {
                     possibleValues = [ "" ].concat(possibleValues);
                 }
+
                 return this.renderOptions.renderSingleChoiceSelectField(fieldJson.label, id, validationId, fieldName,
                     fieldJson.value, possibleValues, fieldOptions, compact);
             }
