@@ -23,10 +23,11 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
 
   def getJson(route: Route) = get { respondWithMediaType(MediaTypes.`application/json`) { route } }
 
-  val (port, suplerJsDirective) = if (System.getProperty("supler.demo.production") != null) {
-    (8195, getFromResourceDirectory(""))
+  val (port, suplerJsDirective, sourceMapDirective) = if (System.getProperty("supler.demo.production") != null) {
+    (8195, getFromResourceDirectory(""), getFromResourceDirectory(""))
   } else {
-    (8080, getFromDirectory("./supler-js/app/scripts/compiled")) // compiled by grunt
+    (8080, getFromDirectory("./supler-js/app/scripts/compiled"), getFromDirectory("./supler-js/app/scripts"))
+    // compiled by grunt
   }
 
   startServer(interface = "localhost", port = port) {
@@ -53,6 +54,9 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
           }
         }
       }
+    } ~
+    pathSuffixTest(".+\\.ts".r) { id =>
+      sourceMapDirective
     } ~
     pathPrefix("site") {
       getFromResourceDirectory("")
