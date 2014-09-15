@@ -165,7 +165,7 @@ class DefaultRenderOptions implements RenderOptions {
         html += '\n';
         Util.foreach(possibleValues, (i, v) => {
             var selected = '';
-            if (v === value) {
+            if (v.index === value) {
                 selected = ' selected ';
             }
 

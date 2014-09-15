@@ -46,20 +46,22 @@ case class PrimitiveField[T, U](
   }
 
   private def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]): List[JField] = {
-    val valueJSON = fieldType.toJValue(read(obj)).map(JField("value", _))
+    val possibleValues = dp.provider(obj)
+    val currentValue = possibleValues.indexOf(read(obj))
+    val valueJSON = JField("value", JInt(currentValue))
     val validationJSON = List(JField("validate", JObject(
       JField("required", JBool(required)) :: validators.flatMap(_.generateJSON)
     )))
-    val possibilities = dp.provider(obj).zipWithIndex.flatMap(t => fieldType.toJValue(t._1).map(jv => (jv, t._2)))
-    val possibilitiesObjs = possibilities.map { case (jvalue, index) =>
+    val possibleJValuesWithIndex = possibleValues.zipWithIndex.flatMap(t => fieldType.toJValue(t._1).map(jv => (jv, t._2)))
+    val possibleJValues = possibleJValuesWithIndex.map { case (jvalue, index) =>
       JObject(JField("index", JInt(index)), JField("label", jvalue))
     }
-    val possibleValuesJSON = List(JField("possible_values", JArray(possibilitiesObjs)))
+    val possibleValuesJSON = List(JField("possible_values", JArray(possibleJValues)))
 
     List(JField(name, JObject(List(
       JField("label", JString(label.getOrElse(""))),
       JField("type", JString("select"))
-    ) ++ valueJSON.toList ++ validationJSON ++ possibleValuesJSON)))
+    ) ++ List(valueJSON) ++ validationJSON ++ possibleValuesJSON)))
   }
 
   private def generateJSONWithoutDataProvider(obj: T): List[JField] = {
