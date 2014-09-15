@@ -96,14 +96,13 @@ class CreateFormFromJson {
 
     private subformFieldFromJson(id, fieldName, fieldJson, validatorDictionary) {
         var subformHtml = '';
+        var options = {
+            'supler:fieldType': FieldTypes.SUBFORM,
+            'supler:fieldName': fieldName,
+            'supler:multiple': fieldJson.multiple
+        };
         if (fieldJson.render_hint === 'list') {
             for (var k in fieldJson.value) {
-                var options = {
-                    'supler:fieldType': 'subform',
-                    'supler:fieldName': fieldName,
-                    'supler:multiple': fieldJson.multiple
-                };
-
                 var subformResult = this.renderForm(fieldJson.value[k]);
                 Util.copyProperties(validatorDictionary, subformResult.validatorDictionary);
 
@@ -124,7 +123,7 @@ class CreateFormFromJson {
                 });
             }
 
-            subformHtml += this.renderOptions.renderSubformTable(headers, cells);
+            subformHtml += this.renderOptions.renderSubformTable(headers, cells, options);
         }
 
         return this.renderOptions.renderSubformDecoration(subformHtml, fieldJson.label, id, name);
