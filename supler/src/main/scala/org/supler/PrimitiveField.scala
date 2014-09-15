@@ -45,23 +45,44 @@ case class PrimitiveField[T, U](
     )))
     val possibleValuesJSON = dataProvider match {
       case Some(dp) =>
-        val possibilities = dp.provider(obj).flatMap(fieldType.toJValue)
-        List(JField("possible_values", JArray(possibilities)))
+        val possibilities = dp.provider(obj).zipWithIndex.flatMap(t => fieldType.toJValue(t._1).map(jv => (jv, t._2)))
+        val possibilitiesObjs = possibilities.map { case (jvalue, index) =>
+          JObject(JField("index", JInt(index)), JField("label", jvalue))
+        }
+        List(JField("possible_values", JArray(possibilitiesObjs)))
       case None => Nil
+    }
+    val generatedFieldTypeName = dataProvider match {
+      case Some(dp) => "select"
+      case None => fieldType.jsonSchemaName
     }
 
     List(JField(name, JObject(List(
       JField("label", JString(label.getOrElse(""))),
-      JField("type", JString(fieldType.jsonSchemaName))
+      JField("type", JString(generatedFieldTypeName))
     ) ++ valueJSON.toList ++ validationJSON ++ possibleValuesJSON)))
   }
 
   override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {
-    (for {
-      jsonValue <- jsonFields.get(name)
-      value <- fieldType.fromJValue.lift(jsonValue)
-    } yield {
-      write(obj, value)
-    }).getOrElse(obj)
+    val appliedOpt = dataProvider match {
+      case Some(dp) =>
+        for {
+          jsonValue <- jsonFields.get(name)
+          index <- jsonValue match { case JInt(index) => Some(index.intValue()); case _ => None }
+          value <- dp.provider(obj).lift(index.intValue())
+        } yield {
+          write(obj, value)
+        }
+      case None => {
+        for {
+          jsonValue <- jsonFields.get(name)
+          value <- fieldType.fromJValue.lift(jsonValue)
+        } yield {
+          write(obj, value)
+        }
+      }
+    }
+
+    appliedOpt.getOrElse(obj)
   }
 }

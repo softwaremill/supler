@@ -63,10 +63,14 @@ class CreateFormFromJson {
 
         switch(fieldJson.type) {
             case FieldTypes.STRING:
-                return this.stringFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact);
+                return this.renderOptions.renderStringField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
+                    fieldOptions, compact);
 
             case FieldTypes.INTEGER:
                 return this.renderOptions.renderIntegerField(fieldJson.label, id, validationId, fieldName, fieldJson.value, fieldOptions, compact);
+
+            case FieldTypes.SELECT:
+                return this.selectFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact);
 
             case FieldTypes.SUBFORM:
                 return this.subformFieldFromJson(id, fieldName, fieldJson, validatorDictionary);
@@ -76,22 +80,17 @@ class CreateFormFromJson {
         }
     }
 
-    private stringFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact) {
-        if (fieldJson.possible_values) {
-            if (fieldJson.multiple) {
-                return '';
-            } else {
-                var possibleValues = <string[]>fieldJson.possible_values;
-                if (!fieldJson.validate || !fieldJson.validate.required) {
-                    possibleValues = [ "" ].concat(possibleValues);
-                }
-
-                return this.renderOptions.renderSingleChoiceSelectField(fieldJson.label, id, validationId, fieldName,
-                    fieldJson.value, possibleValues, fieldOptions, compact);
-            }
+    private selectFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact) {
+        if (fieldJson.multiple) {
+            return '';
         } else {
-            return this.renderOptions.renderStringField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
-                fieldOptions, compact);
+            var possibleSelectValues = fieldJson.possible_values.map(v => new SelectValue(v.index, v.label));
+            if (!fieldJson.validate || !fieldJson.validate.required) {
+                possibleSelectValues = [ new SelectValue(null, "") ].concat(possibleSelectValues);
+            }
+
+            return this.renderOptions.renderSingleChoiceSelectField(fieldJson.label, id, validationId, fieldName,
+                fieldJson.value, possibleSelectValues, fieldOptions, compact);
         }
     }
 

@@ -15,3 +15,7 @@ class Util {
         return to;
     }
 }
+
+class SelectValue {
+    constructor(public index: number, public label: string) {}
+}

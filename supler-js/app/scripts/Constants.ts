@@ -1,6 +1,7 @@
 class FieldTypes {
     static STRING = "string";
     static INTEGER = "integer";
+    static SELECT = "select";
     static SUBFORM = "subform"
 }
 

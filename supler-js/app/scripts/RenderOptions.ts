@@ -3,7 +3,7 @@ interface RenderAnyValueField {
 }
 
 interface RenderPossibleValuesField {
-    (label: string, id: string, validationId: string, name: string, value: any, possibleValues: any[], options: any, compact: boolean): string
+    (label: string, id: string, validationId: string, name: string, value: any, possibleValues: SelectValue[], options: any, compact: boolean): string
 }
 
 interface RenderOptions {
@@ -32,7 +32,7 @@ interface RenderOptions {
 
     // html form elements
     renderHtmlInput: (inputType: string, id: string, name: string, value: any, options: any) => string
-    renderHtmlSelect: (id: string, name: string, value: string, possibleValues: any[], options: any) => string
+    renderHtmlSelect: (id: string, name: string, value: string, possibleValues: SelectValue[], options: any) => string
 
     // misc
     defaultFieldOptions: () => any
@@ -169,8 +169,8 @@ class DefaultRenderOptions implements RenderOptions {
                 selected = ' selected ';
             }
 
-            html += '<option value="' + v + '"' + selected + '>';
-            html += v;
+            html += '<option value="' + v.index + '"' + selected + '>';
+            html += v.label;
             html += '</option>\n';
         });
         html += '</select>\n';

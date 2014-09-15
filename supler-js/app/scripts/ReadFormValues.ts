@@ -17,6 +17,10 @@ class ReadFormValues {
                         this.appendFieldValue(result, fieldName, parseInt(children[i].value), multiple);
                         break;
 
+                    case FieldTypes.SELECT:
+                        this.appendFieldValue(result, fieldName, parseInt(children[i].value), multiple);
+                        break;
+
                     case FieldTypes.SUBFORM:
                         fieldName = children[i].getAttribute(SuplerAttributes.FIELD_NAME);
                         var subResult = this.getValueFrom(children[i]);
