@@ -39,28 +39,39 @@ case class PrimitiveField[T, U](
   }
 
   override def generateJSON(obj: T) = {
+    dataProvider match {
+      case Some(dp) => generateJSONWithDataProvider(obj, dp)
+      case None => generateJSONWithoutDataProvider(obj)
+    }
+  }
+
+  private def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]): List[JField] = {
     val valueJSON = fieldType.toJValue(read(obj)).map(JField("value", _))
     val validationJSON = List(JField("validate", JObject(
       JField("required", JBool(required)) :: validators.flatMap(_.generateJSON)
     )))
-    val possibleValuesJSON = dataProvider match {
-      case Some(dp) =>
-        val possibilities = dp.provider(obj).zipWithIndex.flatMap(t => fieldType.toJValue(t._1).map(jv => (jv, t._2)))
-        val possibilitiesObjs = possibilities.map { case (jvalue, index) =>
-          JObject(JField("index", JInt(index)), JField("label", jvalue))
-        }
-        List(JField("possible_values", JArray(possibilitiesObjs)))
-      case None => Nil
+    val possibilities = dp.provider(obj).zipWithIndex.flatMap(t => fieldType.toJValue(t._1).map(jv => (jv, t._2)))
+    val possibilitiesObjs = possibilities.map { case (jvalue, index) =>
+      JObject(JField("index", JInt(index)), JField("label", jvalue))
     }
-    val generatedFieldTypeName = dataProvider match {
-      case Some(dp) => "select"
-      case None => fieldType.jsonSchemaName
-    }
+    val possibleValuesJSON = List(JField("possible_values", JArray(possibilitiesObjs)))
 
     List(JField(name, JObject(List(
       JField("label", JString(label.getOrElse(""))),
-      JField("type", JString(generatedFieldTypeName))
+      JField("type", JString("select"))
     ) ++ valueJSON.toList ++ validationJSON ++ possibleValuesJSON)))
+  }
+
+  private def generateJSONWithoutDataProvider(obj: T): List[JField] = {
+    val valueJSON = fieldType.toJValue(read(obj)).map(JField("value", _))
+    val validationJSON = List(JField("validate", JObject(
+      JField("required", JBool(required)) :: validators.flatMap(_.generateJSON)
+    )))
+
+    List(JField(name, JObject(List(
+      JField("label", JString(label.getOrElse(""))),
+      JField("type", JString(fieldType.jsonSchemaName))
+    ) ++ valueJSON.toList ++ validationJSON)))
   }
 
   override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {
