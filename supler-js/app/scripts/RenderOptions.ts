@@ -64,7 +64,10 @@ class DefaultRenderOptions implements RenderOptions {
     }
 
     renderTextareaField(label, id, validationId, name, value, options, compact) {
-        return '';
+        var tag = HtmlUtil.renderTag('textarea', Util.copyProperties({ 'id': id, 'name': name }, options), false);
+        if (value) tag += value;
+        tag += '</textarea>';
+        return this.renderRhsField(tag, label, id, validationId, compact);
     }
 
     renderMultiChoiceCheckboxField(label, id, validationId, name, values, possibleValues, options, compact) {

@@ -12,7 +12,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
   implicit val actorSystem = ActorSystem()
   implicit val json4sFormats = org.json4s.DefaultFormats
 
-  var person = Person("Adam", "", 10, None, None, null,
+  var person = Person("Adam", "", 10, None, None, null, None, None,
     List(
       Car("Ford", 1990),
       Car("Toyota", 2004)),

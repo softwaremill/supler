@@ -34,6 +34,8 @@ object PersonForm {
     f.field(_.address1).label("Address 1"),
     f.field(_.address2).label("Address 2"),
     f.field(_.gender).label("Gender").use(dataProvider(_ => List("Male", "Female"))),
+    f.field(_.secret).label("Secret").renderHint(asPassword()),
+    f.field(_.bio).label("Biography").renderHint(asTextarea()),
     f.subform(_.cars, carForm, Car(null, 0)).label("Cars").renderHint(asList()),
     f.subform(_.legoSets, legoSetForm, LegoSet(null, null, 0, 0)).label("Lego sets")
   ))
@@ -46,6 +48,8 @@ case class Person(
   address1: Option[String],
   address2: Option[String],
   gender: String,
+  secret: Option[String],
+  bio: Option[String],
   cars: List[Car],
   legoSets: List[LegoSet])
 

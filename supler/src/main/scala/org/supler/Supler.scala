@@ -22,6 +22,9 @@ object Supler extends Validators {
 
   def asList() = SubformListRenderHint
   def asTable() = SubformTableRenderHint
+
+  def asPassword() = FieldPasswordRenderHint
+  def asTextarea() = FieldTextareaRenderHint
 }
 
 trait Supler[T] extends Validators {

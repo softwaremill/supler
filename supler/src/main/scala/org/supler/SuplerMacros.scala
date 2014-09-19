@@ -56,7 +56,7 @@ object SuplerMacros {
 
   object FactoryMethods {
     def newPrimitiveField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean, fieldType: FieldType[U]): PrimitiveField[T, U] = {
-      PrimitiveField[T, U](fieldName, read, write, List(), None, None, required, fieldType)
+      PrimitiveField[T, U](fieldName, read, write, List(), None, None, required, fieldType, None)
     }
 
     def newSubformField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T,

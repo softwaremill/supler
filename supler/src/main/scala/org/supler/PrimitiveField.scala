@@ -12,11 +12,14 @@ case class PrimitiveField[T, U](
   dataProvider: Option[DataProvider[T, U]],
   label: Option[String],
   required: Boolean,
-  fieldType: FieldType[U]) extends Field[T, U] {
+  fieldType: FieldType[U],
+  renderHint: Option[FieldRenderHint]) extends Field[T, U] {
 
-  def label(newLabel: String) = this.copy(label = Some(newLabel))
+  def label(newLabel: String): PrimitiveField[T, U] = this.copy(label = Some(newLabel))
 
   def validate(validators: Validator[T, U]*): PrimitiveField[T, U] = this.copy(validators = this.validators ++ validators)
+
+  def renderHint(newRenderHint: FieldRenderHint): PrimitiveField[T, U] = this.copy(renderHint = Some(newRenderHint))
 
   def use(dataProvider: DataProvider[T, U]): PrimitiveField[T, U] = this.dataProvider match {
     case Some(_) => throw new IllegalStateException("A data provider is already defined!")
@@ -69,11 +72,12 @@ case class PrimitiveField[T, U](
     val validationJSON = List(JField("validate", JObject(
       JField("required", JBool(required)) :: validators.flatMap(_.generateJSON)
     )))
+    val renderHintJSON = renderHint.map(rh => JField("render_hint", JString(rh.name)))
 
     List(JField(name, JObject(List(
       JField("label", JString(label.getOrElse(""))),
       JField("type", JString(fieldType.jsonSchemaName))
-    ) ++ valueJSON.toList ++ validationJSON)))
+    ) ++ renderHintJSON.toList ++ valueJSON.toList ++ validationJSON)))
   }
 
   override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {
@@ -99,3 +103,7 @@ case class PrimitiveField[T, U](
     appliedOpt.getOrElse(obj)
   }
 }
+
+sealed abstract class FieldRenderHint(val name: String)
+case object FieldPasswordRenderHint extends FieldRenderHint("password")
+case object FieldTextareaRenderHint extends FieldRenderHint("textarea")

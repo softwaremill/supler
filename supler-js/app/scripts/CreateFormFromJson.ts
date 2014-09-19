@@ -63,8 +63,7 @@ class CreateFormFromJson {
 
         switch(fieldJson.type) {
             case FieldTypes.STRING:
-                return this.renderOptions.renderStringField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
-                    fieldOptions, compact);
+                return this.stringFieldFromJson(id, fieldName, fieldJson, validationId, fieldOptions, compact);
 
             case FieldTypes.INTEGER:
                 return this.renderOptions.renderIntegerField(fieldJson.label, id, validationId, fieldName, fieldJson.value, fieldOptions, compact);
@@ -77,6 +76,19 @@ class CreateFormFromJson {
 
             default:
                 return null;
+        }
+    }
+
+    private stringFieldFromJson(id, fieldName, fieldJson, validationId, fieldOptions, compact) {
+        if (fieldJson.render_hint === 'password') {
+            return this.renderOptions.renderPasswordField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
+                fieldOptions, compact);
+        } else if (fieldJson.render_hint === 'textarea') {
+            return this.renderOptions.renderTextareaField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
+                fieldOptions, compact);
+        } else {
+            return this.renderOptions.renderStringField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
+                fieldOptions, compact);
         }
     }
 
