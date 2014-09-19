@@ -35,7 +35,7 @@ object PersonForm {
     f.field(_.address2).label("Address 2"),
     f.field(_.gender).label("Gender").use(dataProvider(_ => List("Male", "Female"))),
     f.field(_.secret).label("Secret").renderHint(asPassword()),
-    f.field(_.bio).label("Biography").renderHint(asTextarea()),
+    f.field(_.bio).label("Biography").renderHint(asTextarea(rows = 6)),
     f.subform(_.cars, carForm, Car(null, 0)).label("Cars").renderHint(asList()),
     f.subform(_.legoSets, legoSetForm, LegoSet(null, null, 0, 0)).label("Lego sets")
   ))

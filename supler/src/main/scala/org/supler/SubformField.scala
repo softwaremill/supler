@@ -19,7 +19,7 @@ case class SubformField[T, U](
 
   def generateJSON(obj: T) = List(JField(name, JObject(
     JField("type", JString("subform")),
-    JField("render_hint", JString(renderHint.name)),
+    JField("render_hint", JObject(JField("name", JString(renderHint.name)))),
     JField("multiple", JBool(value = true)),
     JField("label", JString(_label.getOrElse(""))),
     JField("value", JArray(read(obj).map(embeddedForm.generateJSON)))

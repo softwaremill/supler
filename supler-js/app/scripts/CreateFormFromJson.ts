@@ -80,12 +80,16 @@ class CreateFormFromJson {
     }
 
     private stringFieldFromJson(id, fieldName, fieldJson, validationId, fieldOptions, compact) {
-        if (fieldJson.render_hint === 'password') {
+        var renderHintName = this.getRenderHintName(fieldJson);
+        if (renderHintName === 'password') {
             return this.renderOptions.renderPasswordField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
                 fieldOptions, compact);
-        } else if (fieldJson.render_hint === 'textarea') {
+        } else if (renderHintName === 'textarea') {
+            var fieldOptionsWithDim = Util.copyProperties(
+                { rows: fieldJson.render_hint.rows, cols: fieldJson.render_hint.cols },
+                fieldOptions);
             return this.renderOptions.renderTextareaField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
-                fieldOptions, compact);
+                fieldOptionsWithDim, compact);
         } else {
             return this.renderOptions.renderStringField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
                 fieldOptions, compact);
@@ -113,7 +117,7 @@ class CreateFormFromJson {
             'supler:fieldName': fieldName,
             'supler:multiple': fieldJson.multiple
         };
-        if (fieldJson.render_hint === 'list') {
+        if (this.getRenderHintName(fieldJson) === 'list') {
             for (var k in fieldJson.value) {
                 var subformResult = this.renderForm(fieldJson.value[k]);
                 Util.copyProperties(validatorDictionary, subformResult.validatorDictionary);
@@ -139,6 +143,14 @@ class CreateFormFromJson {
         }
 
         return this.renderOptions.renderSubformDecoration(subformHtml, fieldJson.label, id, name);
+    }
+
+    private getRenderHintName(fieldJson: any): string {
+        if (fieldJson.render_hint) {
+            return fieldJson.render_hint.name;
+        } else {
+            return null;
+        }
     }
 
     private getTableHeaderLabels(fieldJson: any): string[] {

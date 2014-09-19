@@ -64,7 +64,7 @@ case class PrimitiveField[T, U](
     List(JField(name, JObject(List(
       JField("label", JString(label.getOrElse(""))),
       JField("type", JString("select"))
-    ) ++ List(valueJSON) ++ validationJSON ++ possibleValuesJSON)))
+    ) ++ List(valueJSON) ++ renderHintJSON ++ validationJSON ++ possibleValuesJSON)))
   }
 
   private def generateJSONWithoutDataProvider(obj: T): List[JField] = {
@@ -72,13 +72,15 @@ case class PrimitiveField[T, U](
     val validationJSON = List(JField("validate", JObject(
       JField("required", JBool(required)) :: validators.flatMap(_.generateJSON)
     )))
-    val renderHintJSON = renderHint.map(rh => JField("render_hint", JString(rh.name)))
 
     List(JField(name, JObject(List(
       JField("label", JString(label.getOrElse(""))),
       JField("type", JString(fieldType.jsonSchemaName))
-    ) ++ renderHintJSON.toList ++ valueJSON.toList ++ validationJSON)))
+    ) ++ renderHintJSON ++ valueJSON.toList ++ validationJSON)))
   }
+
+  private def renderHintJSON = renderHint.map(rh => JField("render_hint", JObject(
+    JField("name", JString(rh.name)) :: rh.extraJSON)))
 
   override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {
     val appliedOpt = dataProvider match {
@@ -104,6 +106,10 @@ case class PrimitiveField[T, U](
   }
 }
 
-sealed abstract class FieldRenderHint(val name: String)
+sealed abstract class FieldRenderHint(val name: String) {
+  def extraJSON: List[JField] = Nil
+}
 case object FieldPasswordRenderHint extends FieldRenderHint("password")
-case object FieldTextareaRenderHint extends FieldRenderHint("textarea")
+case class FieldTextareaRenderHint(rows: Option[Int], cols: Option[Int]) extends FieldRenderHint("textarea") {
+  override def extraJSON = rows.map(r => JField("rows", JInt(r))).toList ++ cols.map(c => JField("cols", JInt(c))).toList
+}
