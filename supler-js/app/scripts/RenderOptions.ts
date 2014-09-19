@@ -137,11 +137,23 @@ class DefaultRenderOptions implements RenderOptions {
     renderSubformTable(tableHeaders, cells, elementOptions) {
         var html = '';
         html += '<table class="table">\n';
+        html += this.renderSubformTableHeader(tableHeaders);
+        html += this.renderSubformTableBody(cells, elementOptions);
+        html += '</table>\n';
 
+        return html;
+    }
+
+    private renderSubformTableHeader(tableHeaders) {
+        var html = '';
         html += '<tr>';
         tableHeaders.forEach((header) => html += '<th>' + header + '</th>');
         html += '</tr>\n';
+        return html;
+    }
 
+    private renderSubformTableBody(cells, elementOptions) {
+        var html = '';
         for (var i=0; i<cells.length; i++) {
             var row = cells[i];
             html += HtmlUtil.renderTag('tr', elementOptions, false) + '\n';
@@ -150,9 +162,6 @@ class DefaultRenderOptions implements RenderOptions {
             }
             html += '</tr>\n';
         }
-
-        html += '</table>\n';
-
         return html;
     }
 
