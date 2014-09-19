@@ -136,12 +136,25 @@ Use-cases:
 <div id="form-container">
   <div supler:validationTemplate>
     // any html with optional placeholders:
-    // {{suplerValidationText}}
+    // {{suplerValidationId}}
   </div>
 </div>
 ````
 
-* re-define how a field *type* is rendered
+* re-define how a field's input of a given *type* is rendered
+
+````html
+<div id="form-container">
+  <div supler:fieldInputTypeTemplate="[field type name]">
+    // any html with optional placeholders:
+    // {{suplerFieldId}}
+    // {{suplerFieldName}}
+    // {{suplerFieldValue}}
+  </div>
+</div>
+````
+
+* re-define how a field overall of a given *type* is rendered
 
 ````html
 <div id="form-container">
@@ -150,19 +163,36 @@ Use-cases:
     // {{suplerFieldId}}
     // {{suplerFieldName}}
     // {{suplerFieldValue}}
+    // {{suplerFieldLabel}}
+    // {{suplerFieldValidationId}}
   </div>
 </div>
 ````
 
-* re-define how a specific field is rendered
+* re-define how a specific field's input is rendered (given a field path)
 
 ````html
 <div id="form-container">
-  <div supler:namedFieldTemplate="[field name]">
+  <div supler:namedFieldInputTemplate="[field path]">
     // any html with optional placeholders:
     // {{suplerFieldId}}
     // {{suplerFieldName}}
     // {{suplerFieldValue}}
+  </div>
+</div>
+````
+
+* re-define how a specific field overall is rendered (given a field path)
+
+````html
+<div id="form-container">
+  <div supler:namedFieldTemplate="[field path]">
+    // any html with optional placeholders:
+    // {{suplerFieldId}}
+    // {{suplerFieldName}}
+    // {{suplerFieldValue}}
+    // {{suplerFieldLabel}}
+    // {{suplerFieldValidationId}}
   </div>
 </div>
 ````
