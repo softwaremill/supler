@@ -206,7 +206,7 @@ class DefaultRenderOptions implements RenderOptions {
             }
 
             html += '<div class="radio"><label>\n';
-            html += this.renderHtmlInput('radio', id + v.index, name, v.index, radioOptions);
+            html += this.renderHtmlInput('radio', id + '.' + v.index, name, v.index, radioOptions);
             html += v.label;
             html += '</label></div>\n';
         });
