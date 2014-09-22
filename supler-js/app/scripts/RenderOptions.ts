@@ -33,6 +33,7 @@ interface RenderOptions {
     // html form elements
     renderHtmlInput: (inputType: string, id: string, name: string, value: any, options: any) => string
     renderHtmlSelect: (id: string, name: string, value: string, possibleValues: SelectValue[], options: any) => string
+    renderHtmlRadios: (id: string, name: string, value: string, possibleValues: SelectValue[], options: any) => string
 
     // misc
     defaultFieldOptions: () => any
@@ -79,7 +80,7 @@ class DefaultRenderOptions implements RenderOptions {
     }
 
     renderSingleChoiceRadioField(label, id, validationId, name, value, possibleValues, options, compact) {
-        return '';
+        return this.renderRhsField(this.renderHtmlRadios(id, name, value, possibleValues, options), label, id, validationId, compact);
     }
 
     renderSingleChoiceSelectField(label, id, validationId, name, value, possibleValues, options, compact) {
@@ -186,6 +187,31 @@ class DefaultRenderOptions implements RenderOptions {
             html += '</option>\n';
         });
         html += '</select>\n';
+        return html;
+    }
+
+    renderHtmlRadios(id, name, value, possibleValues, options) {
+        // the radio buttons need to be grouped inside an element with the form field's id and validation id, so that
+        // it could be found e.g. during validation.
+        var radioContainerOptions = { 'id' : id, 'supler:validationId' : options['supler:validationId'] };
+        var html = HtmlUtil.renderTag('span', radioContainerOptions, false) + '\n';
+        Util.foreach(possibleValues, (i, v) => {
+            var radioOptions = Util.copyProperties({}, options);
+
+            // for radios we need to remove the form-control default class or they look ugly
+            radioOptions.class = radioOptions.class.replace('form-control', '');
+
+            if (v.index === value) {
+                radioOptions.checked = 'checked';
+            }
+
+            html += '<div class="radio"><label>\n';
+            html += this.renderHtmlInput('radio', id + v.index, name, v.index, radioOptions);
+            html += v.label;
+            html += '</label></div>\n';
+        });
+        html += '</span>';
+
         return html;
     }
 

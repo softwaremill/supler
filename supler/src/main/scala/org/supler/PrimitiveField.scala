@@ -113,3 +113,4 @@ case object FieldPasswordRenderHint extends FieldRenderHint("password")
 case class FieldTextareaRenderHint(rows: Option[Int], cols: Option[Int]) extends FieldRenderHint("textarea") {
   override def extraJSON = rows.map(r => JField("rows", JInt(r))).toList ++ cols.map(c => JField("cols", JInt(c))).toList
 }
+case object FieldRadioRenderHint extends FieldRenderHint("radio")

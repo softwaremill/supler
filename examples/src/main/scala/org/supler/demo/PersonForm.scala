@@ -3,7 +3,6 @@ package org.supler.demo
 import org.supler.Supler
 import Supler._
 import org.supler.validation.ValidationError
-import shapeless.list
 
 object PersonForm {
   val carMakesAndModels = Map(
@@ -33,7 +32,7 @@ object PersonForm {
     f.field(_.age).label("Age"),
     f.field(_.address1).label("Address 1"),
     f.field(_.address2).label("Address 2"),
-    f.field(_.gender).label("Gender").use(dataProvider(_ => List("Male", "Female"))),
+    f.field(_.gender).label("Gender").use(dataProvider(_ => List("Male", "Female"))).renderHint(asRadio()),
     f.field(_.secret).label("Secret").renderHint(asPassword()),
     f.field(_.bio).label("Biography").renderHint(asTextarea(rows = 6)),
     f.subform(_.cars, carForm, Car(null, 0)).label("Cars").renderHint(asList()),

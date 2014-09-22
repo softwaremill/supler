@@ -97,6 +97,7 @@ class CreateFormFromJson {
     }
 
     private selectFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact) {
+        var renderHintName = this.getRenderHintName(fieldJson);
         if (fieldJson.multiple) {
             return '';
         } else {
@@ -105,8 +106,13 @@ class CreateFormFromJson {
                 possibleSelectValues = [ new SelectValue(null, "") ].concat(possibleSelectValues);
             }
 
-            return this.renderOptions.renderSingleChoiceSelectField(fieldJson.label, id, validationId, fieldName,
-                fieldJson.value, possibleSelectValues, fieldOptions, compact);
+            if (renderHintName == 'radio') {
+                return this.renderOptions.renderSingleChoiceRadioField(fieldJson.label, id, validationId, fieldName,
+                    fieldJson.value, possibleSelectValues, fieldOptions, compact);
+            } else {
+                return this.renderOptions.renderSingleChoiceSelectField(fieldJson.label, id, validationId, fieldName,
+                    fieldJson.value, possibleSelectValues, fieldOptions, compact);
+            }
         }
     }
 

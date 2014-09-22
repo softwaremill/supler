@@ -14,6 +14,20 @@ class Util {
 
         return to;
     }
+
+    static getSingleProperty(obj) {
+        var result = null;
+        for (var k in obj) {
+            if (obj.hasOwnProperty(k)) {
+                if (result != null) {
+                    throw "Multiple properties in " + obj + ", while a single property was expected!"
+                }
+                result = obj[k];
+            }
+        }
+
+        return result;
+    }
 }
 
 class SelectValue {

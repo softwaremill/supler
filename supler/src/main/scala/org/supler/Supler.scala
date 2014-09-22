@@ -28,6 +28,7 @@ object Supler extends Validators {
     def toOption(d: Int) = if (d == -1) None else Some(d)
     FieldTextareaRenderHint(toOption(rows), toOption(cols))
   }
+  def asRadio() = FieldRadioRenderHint
 }
 
 trait Supler[T] extends Validators {

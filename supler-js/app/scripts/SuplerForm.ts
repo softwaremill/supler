@@ -23,7 +23,7 @@ class SuplerForm {
     }
 
     getValue() {
-        return new ReadFormValues().getValueFrom(this.container);
+        return ReadFormValues.getValueFrom(this.container);
     }
 
     /**
