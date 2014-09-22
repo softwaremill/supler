@@ -1,7 +1,7 @@
 class SuplerForm {
     private renderOptions: RenderOptions;
     private validatorFnFactories: any;
-    private validationErrors: ValidationErrors;
+    private validation: Validation;
     private validatorRenderOptions: ValidatorRenderOptions;
 
     constructor(private container: HTMLElement, customOptions: any) {
@@ -18,7 +18,7 @@ class SuplerForm {
     render(formJson) {
         var result = new CreateFormFromJson(this.renderOptions, this.validatorFnFactories).renderForm(formJson);
         this.container.innerHTML = result.html;
-        this.validationErrors = new ValidationErrors(this.container, result.validatorDictionary,
+        this.validation = new Validation(this.container, result.validatorDictionary,
             this.validatorRenderOptions);
     }
 
@@ -30,13 +30,13 @@ class SuplerForm {
      * @returns True if there were validation errors.
      */
     processServerValidationErrors(validationJson): boolean {
-        return this.validationErrors.processServer(validationJson);
+        return this.validation.processServer(validationJson);
     }
 
     /**
      * @returns True if there were validation errors.
      */
     validate(): boolean {
-        return this.validationErrors.processClient();
+        return this.validation.processClient();
     }
 }

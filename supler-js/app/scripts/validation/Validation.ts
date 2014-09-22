@@ -1,5 +1,5 @@
-class ValidationErrors {
-    private removeValidationsFns: { (): void } [] = [];
+class Validation {
+    private removeValidationErrorsFns: { (): void } [] = [];
 
     constructor(private container: HTMLElement,
                 private validatorDictionary: ElementValidatorDictionary,
@@ -9,7 +9,7 @@ class ValidationErrors {
      * @returns True if there were validation errors.
      */
     processServer(validationJson: any): boolean {
-        this.removeValidations();
+        this.removeValidationErrors();
 
         if (validationJson) {
             for (var i = 0; i < validationJson.length; i++) {
@@ -29,7 +29,7 @@ class ValidationErrors {
      * @returns True if there were validation errors.
      */
     processClient(): boolean {
-        this.removeValidations();
+        this.removeValidationErrors();
 
         var hasErrors = false;
 
@@ -103,18 +103,18 @@ class ValidationErrors {
         return document.getElementById(validationId);
     }
 
-    private removeValidations() {
-        for (var i=0; i<this.removeValidationsFns.length; i++) {
-            this.removeValidationsFns[i]();
+    private removeValidationErrors() {
+        for (var i=0; i<this.removeValidationErrorsFns.length; i++) {
+            this.removeValidationErrorsFns[i]();
         }
 
-        this.removeValidationsFns = [];
+        this.removeValidationErrorsFns = [];
     }
 
     private appendValidation(validationError: ValidationError, validationElement: HTMLElement, formElement: HTMLElement) {
         this.validatorRenderOptions.appendValidation(validationError.errorKey, validationElement, formElement);
 
-        this.removeValidationsFns.push(() => {
+        this.removeValidationErrorsFns.push(() => {
             this.validatorRenderOptions.removeValidation(validationElement, formElement);
         });
     }
