@@ -9,4 +9,5 @@ class SuplerAttributes {
     static FIELD_TYPE = "supler:fieldType";
     static MULTIPLE = "supler:multiple";
     static FIELD_NAME = "supler:fieldName";
+    static VALIDATION_ID = "supler:validationId";
 }

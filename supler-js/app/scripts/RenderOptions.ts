@@ -193,7 +193,7 @@ class DefaultRenderOptions implements RenderOptions {
     renderHtmlRadios(id, name, value, possibleValues, options) {
         // the radio buttons need to be grouped inside an element with the form field's id and validation id, so that
         // it could be found e.g. during validation.
-        var radioContainerOptions = { 'id' : id, 'supler:validationId' : options['supler:validationId'] };
+        var radioContainerOptions = { 'id' : id, 'supler:validationId' : options[ SuplerAttributes.VALIDATION_ID ] };
         var html = HtmlUtil.renderTag('span', radioContainerOptions, false) + '\n';
         Util.foreach(possibleValues, (i, v) => {
             var radioOptions = Util.copyProperties({}, options);
