@@ -18,6 +18,7 @@ object Supler extends Validators {
   }
 
   def field[T, U](param: T => U): PrimitiveField[T, U] = macro SuplerMacros.field_impl[T, U]
+  def setField[T, U](param: T => Set[U]): SetField[T, U] = macro SuplerMacros.setField_impl[T, U]
   def subform[T, U](param: T => List[U], form: Form[U], createEmpty: => U): SubformField[T, U] = macro SuplerMacros.subform_impl[T, U]
 
   def asList() = SubformListRenderHint
@@ -33,6 +34,7 @@ object Supler extends Validators {
 
 trait Supler[T] extends Validators {
   def field[U](param: T => U): PrimitiveField[T, U] = macro SuplerMacros.field_impl[T, U]
+  def setField[U](param: T => Set[U]): SetField[T, U] = macro SuplerMacros.setField_impl[T, U]
   def subform[U](param: T => List[U], form: Form[U], createEmpty: => U): SubformField[T, U] = macro SuplerMacros.subform_impl[T, U]
 }
 

@@ -13,6 +13,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
   implicit val json4sFormats = org.json4s.DefaultFormats
 
   var person = Person("Adam", "", 10, None, None, null, None, None,
+    Set("red", "blue"),
     List(
       Car("Ford", 1990),
       Car("Toyota", 2004)),

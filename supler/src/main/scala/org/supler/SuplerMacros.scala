@@ -30,6 +30,28 @@ object SuplerMacros {
     }
   }
 
+  def setField_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)(param: c.Expr[T => Set[U]]): c.Expr[SetField[T, U]] = {
+    import c.universe._
+
+    val (fieldName, paramRepExpr) = extractFieldName(c)(param)
+
+    val readFieldValueExpr = generateFieldRead[T, Set[U]](c)(fieldName)
+
+    val classSymbol = implicitly[WeakTypeTag[T]].tpe.typeSymbol.asClass
+
+    val writeFieldValueExpr = generateFieldWrite[T, Set[U]](c)(fieldName, classSymbol)
+
+    val fieldTypeTree = generateFieldType(c)(implicitly[WeakTypeTag[U]].tpe)
+    val fieldTypeExpr = c.Expr[FieldType[U]](fieldTypeTree)
+
+    reify {
+      FactoryMethods.newSetField(paramRepExpr.splice,
+        readFieldValueExpr.splice,
+        writeFieldValueExpr.splice,
+        fieldTypeExpr.splice)
+    }
+  }
+
   def subform_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)(param: c.Expr[T => List[U]],
     form: c.Expr[Form[U]], createEmpty: c.Tree): c.Expr[SubformField[T, U]] = {
 
@@ -62,6 +84,10 @@ object SuplerMacros {
     def newSubformField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T,
                             embeddedForm: Form[U], createEmpty: () => U): SubformField[T, U] = {
       SubformField[T, U](fieldName, read, write, None, embeddedForm, createEmpty, SubformTableRenderHint)
+    }
+
+    def newSetField[T, U](fieldName: String, read: T => Set[U], write: (T, Set[U]) => T, fieldType: FieldType[U]): SetField[T, U] = {
+      SetField[T, U](fieldName, read, write, Nil, None, None, fieldType)
     }
   }
 

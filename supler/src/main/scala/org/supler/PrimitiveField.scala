@@ -13,7 +13,7 @@ case class PrimitiveField[T, U](
   label: Option[String],
   required: Boolean,
   fieldType: FieldType[U],
-  renderHint: Option[FieldRenderHint]) extends Field[T, U] {
+  renderHint: Option[FieldRenderHint]) extends SimpleField[T, U] {
 
   def label(newLabel: String): PrimitiveField[T, U] = this.copy(label = Some(newLabel))
 
@@ -41,33 +41,21 @@ case class PrimitiveField[T, U](
     allVes.map(ve => FieldValidationError(this, parentPath.append(name), ve))
   }
 
-  override def generateJSON(obj: T) = {
-    dataProvider match {
-      case Some(dp) => generateJSONWithDataProvider(obj, dp)
-      case None => generateJSONWithoutDataProvider(obj)
-    }
-  }
-
-  private def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]): List[JField] = {
+  protected def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]): List[JField] = {
     val possibleValues = dp.provider(obj)
     val currentValue = possibleValues.indexOf(read(obj))
     val valueJSON = JField("value", JInt(currentValue))
     val validationJSON = List(JField("validate", JObject(
       JField("required", JBool(required)) :: validators.flatMap(_.generateJSON)
     )))
-    val possibleJValuesWithIndex = possibleValues.zipWithIndex.flatMap(t => fieldType.toJValue(t._1).map(jv => (jv, t._2)))
-    val possibleJValues = possibleJValuesWithIndex.map { case (jvalue, index) =>
-      JObject(JField("index", JInt(index)), JField("label", jvalue))
-    }
-    val possibleValuesJSON = List(JField("possible_values", JArray(possibleJValues)))
 
     List(JField(name, JObject(List(
       JField("label", JString(label.getOrElse(""))),
       JField("type", JString("select"))
-    ) ++ List(valueJSON) ++ renderHintJSON ++ validationJSON ++ possibleValuesJSON)))
+    ) ++ List(valueJSON) ++ renderHintJSON ++ validationJSON ++ generatePossibleValuesJSON(possibleValues))))
   }
 
-  private def generateJSONWithoutDataProvider(obj: T): List[JField] = {
+  protected def generateJSONWithoutDataProvider(obj: T): List[JField] = {
     val valueJSON = fieldType.toJValue(read(obj)).map(JField("value", _))
     val validationJSON = List(JField("validate", JObject(
       JField("required", JBool(required)) :: validators.flatMap(_.generateJSON)
