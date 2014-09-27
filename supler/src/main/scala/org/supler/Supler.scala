@@ -59,6 +59,7 @@ trait Field[T, U] extends Row[T] {
   protected val ValueField = "value"
   protected val ValidateField = "validate"
   protected val RenderHintField = "render_hint"
+  protected val PossibleValuesField = "possible_values"
 
   protected val ValidateRequiredField = "required"
 

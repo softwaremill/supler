@@ -1,8 +1,8 @@
 package org.supler
 
-import org.json4s.JsonAST.{JString, JObject, JField}
+import org.json4s.JsonAST.JField
 import org.json4s._
-import org.supler.validation.{FieldValidationError, FieldPath, Validator}
+import org.supler.validation.{FieldPath, FieldValidationError, Validator}
 
 case class SetField[T, U](
   name: String,
@@ -28,32 +28,24 @@ case class SetField[T, U](
     ves.map(ve => FieldValidationError(this, parentPath.append(name), ve))
   }
 
-  protected def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]): List[JField] = {
+  protected def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]) = {
     val possibleValues = dp.provider(obj)
     val currentValues = read(obj).map(possibleValues.indexOf).filter(_ != -1)
-    val valueJSON = JField(ValueField, JArray(currentValues.map(JInt(_)).toList))
-    val validationJSON = List(JField(ValidateField, JObject(
-      validators.flatMap(_.generateJSON)
-    )))
 
-    List(JField(name, JObject(List(
-      JField(LabelField, JString(label.getOrElse(""))),
-      JField(TypeField, JString(SelectType)),
-      JField(MultipleField, JBool(value = true))
-    ) ++ List(valueJSON) ++ validationJSON ++ generatePossibleValuesJSON(possibleValues))))
+    GenerateJSONData(
+      valueJSONValue = Some(JArray(currentValues.map(JInt(_)).toList)),
+      validationJSON = validators.flatMap(_.generateJSON),
+      fieldTypeName = SelectType,
+      extraJSON = JField(MultipleField, JBool(value = true)) :: generatePossibleValuesJSON(possibleValues)
+    )
   }
 
-  protected def generateJSONWithoutDataProvider(obj: T): List[JField] = {
-    val valueJSON = JField(ValueField, JArray(read(obj).toList.flatMap(fieldType.toJValue)))
-    val validationJSON = List(JField(ValidateField, JObject(
-      validators.flatMap(_.generateJSON)
-    )))
-
-    List(JField(name, JObject(List(
-      JField(LabelField, JString(label.getOrElse(""))),
-      JField(TypeField, JString(fieldType.jsonSchemaName)),
-      JField(MultipleField, JBool(value = true))
-    ) ++ List(valueJSON) ++ validationJSON)))
+  protected def generateJSONWithoutDataProvider(obj: T) = {
+    GenerateJSONData(
+      valueJSONValue = Some(JArray(read(obj).toList.flatMap(fieldType.toJValue))),
+      validationJSON = validators.flatMap(_.generateJSON),
+      fieldTypeName = fieldType.jsonSchemaName
+    )
   }
 
   override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {

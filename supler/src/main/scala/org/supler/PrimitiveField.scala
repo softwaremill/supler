@@ -41,34 +41,30 @@ case class PrimitiveField[T, U](
     allVes.map(ve => FieldValidationError(this, parentPath.append(name), ve))
   }
 
-  protected def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]): List[JField] = {
+  protected def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]) = {
     val possibleValues = dp.provider(obj)
     val currentValue = possibleValues.indexOf(read(obj))
-    val valueJSON = JField(ValueField, JInt(currentValue))
-    val validationJSON = List(JField(ValidateField, JObject(
-      JField(ValidateRequiredField, JBool(required)) :: validators.flatMap(_.generateJSON)
-    )))
 
-    List(JField(name, JObject(List(
-      JField(LabelField, JString(label.getOrElse(""))),
-      JField(TypeField, JString(SelectType))
-    ) ++ List(valueJSON) ++ renderHintJSON ++ validationJSON ++ generatePossibleValuesJSON(possibleValues))))
+    GenerateJSONData(
+      valueJSONValue = Some(JInt(currentValue)),
+      validationJSON = JField(ValidateRequiredField, JBool(required)) :: validators.flatMap(_.generateJSON),
+      fieldTypeName = SelectType,
+      renderHintJSONValue = generateRenderHintJSONValue,
+      extraJSON = generatePossibleValuesJSON(possibleValues)
+    )
   }
 
-  protected def generateJSONWithoutDataProvider(obj: T): List[JField] = {
-    val valueJSON = fieldType.toJValue(read(obj)).map(JField("value", _))
-    val validationJSON = List(JField(ValidateField, JObject(
-      JField(ValidateRequiredField, JBool(required)) :: validators.flatMap(_.generateJSON)
-    )))
-
-    List(JField(name, JObject(List(
-      JField(LabelField, JString(label.getOrElse(""))),
-      JField(TypeField, JString(fieldType.jsonSchemaName))
-    ) ++ renderHintJSON ++ valueJSON.toList ++ validationJSON)))
+  protected def generateJSONWithoutDataProvider(obj: T) = {
+    GenerateJSONData(
+      valueJSONValue = fieldType.toJValue(read(obj)),
+      validationJSON = JField(ValidateRequiredField, JBool(required)) :: validators.flatMap(_.generateJSON),
+      fieldTypeName = fieldType.jsonSchemaName,
+      renderHintJSONValue = generateRenderHintJSONValue
+    )
   }
 
-  private def renderHintJSON = renderHint.map(rh => JField(RenderHintField, JObject(
-    JField("name", JString(rh.name)) :: rh.extraJSON)))
+  private def generateRenderHintJSONValue = renderHint.map(rh => JObject(
+    JField("name", JString(rh.name)) :: rh.extraJSON))
 
   override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {
     val appliedOpt = dataProvider match {
