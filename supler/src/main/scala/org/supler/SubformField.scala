@@ -18,11 +18,11 @@ case class SubformField[T, U](
   def renderHint(newRenderHint: SubformRenderHint) = this.copy(renderHint = newRenderHint)
 
   def generateJSON(obj: T) = List(JField(name, JObject(
-    JField("type", JString("subform")),
-    JField("render_hint", JObject(JField("name", JString(renderHint.name)))),
-    JField("multiple", JBool(value = true)),
-    JField("label", JString(_label.getOrElse(""))),
-    JField("value", JArray(read(obj).map(embeddedForm.generateJSON)))
+    JField(TypeField, JString(SubformType)),
+    JField(RenderHintField, JObject(JField("name", JString(renderHint.name)))),
+    JField(MultipleField, JBool(value = true)),
+    JField(LabelField, JString(_label.getOrElse(""))),
+    JField(ValueField, JArray(read(obj).map(embeddedForm.generateJSON)))
   )))
 
   override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]) = {

@@ -31,28 +31,28 @@ case class SetField[T, U](
   protected def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]): List[JField] = {
     val possibleValues = dp.provider(obj)
     val currentValues = read(obj).map(possibleValues.indexOf).filter(_ != -1)
-    val valueJSON = JField("value", JArray(currentValues.map(JInt(_)).toList))
-    val validationJSON = List(JField("validate", JObject(
+    val valueJSON = JField(ValueField, JArray(currentValues.map(JInt(_)).toList))
+    val validationJSON = List(JField(ValidateField, JObject(
       validators.flatMap(_.generateJSON)
     )))
 
     List(JField(name, JObject(List(
-      JField("label", JString(label.getOrElse(""))),
-      JField("type", JString("select")),
-      JField("multiple", JBool(value = true))
+      JField(LabelField, JString(label.getOrElse(""))),
+      JField(TypeField, JString(SelectType)),
+      JField(MultipleField, JBool(value = true))
     ) ++ List(valueJSON) ++ validationJSON ++ generatePossibleValuesJSON(possibleValues))))
   }
 
   protected def generateJSONWithoutDataProvider(obj: T): List[JField] = {
-    val valueJSON = JField("value", JArray(read(obj).toList.flatMap(fieldType.toJValue)))
-    val validationJSON = List(JField("validate", JObject(
+    val valueJSON = JField(ValueField, JArray(read(obj).toList.flatMap(fieldType.toJValue)))
+    val validationJSON = List(JField(ValidateField, JObject(
       validators.flatMap(_.generateJSON)
     )))
 
     List(JField(name, JObject(List(
-      JField("label", JString(label.getOrElse(""))),
-      JField("type", JString(fieldType.jsonSchemaName)),
-      JField("multiple", JBool(value = true))
+      JField(LabelField, JString(label.getOrElse(""))),
+      JField(TypeField, JString(fieldType.jsonSchemaName)),
+      JField(MultipleField, JBool(value = true))
     ) ++ List(valueJSON) ++ validationJSON)))
   }
 
