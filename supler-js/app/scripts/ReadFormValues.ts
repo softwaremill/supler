@@ -47,7 +47,7 @@ class ReadFormValues {
     }
 
     private static getElementValue(element) {
-        if (element.type === 'radio' && !element.checked) {
+        if ((element.type === 'radio' || element.type === 'checkbox') && !element.checked) {
             return null;
         } else {
             return element.value;

@@ -98,10 +98,13 @@ class CreateFormFromJson {
 
     private selectFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact) {
         var renderHintName = this.getRenderHintName(fieldJson);
+
+        var possibleSelectValues = fieldJson.possible_values.map(v => new SelectValue(v.index, v.label));
+
         if (fieldJson.multiple) {
-            return '';
+            return this.renderOptions.renderMultiChoiceCheckboxField(fieldJson.label, id, validationId, fieldName,
+                fieldJson.value, possibleSelectValues, fieldOptions, compact);
         } else {
-            var possibleSelectValues = fieldJson.possible_values.map(v => new SelectValue(v.index, v.label));
             if (!fieldJson.validate || !fieldJson.validate.required) {
                 possibleSelectValues = [ new SelectValue(null, "") ].concat(possibleSelectValues);
             }

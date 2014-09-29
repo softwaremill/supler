@@ -33,7 +33,8 @@ interface RenderOptions {
     // html form elements
     renderHtmlInput: (inputType: string, id: string, name: string, value: any, options: any) => string
     renderHtmlSelect: (id: string, name: string, value: string, possibleValues: SelectValue[], options: any) => string
-    renderHtmlRadios: (id: string, name: string, value: string, possibleValues: SelectValue[], options: any) => string
+    renderHtmlRadios: (id: string, name: string, value: number, possibleValues: SelectValue[], options: any) => string
+    renderHtmlCheckboxes: (id: string, name: string, values: number[], possibleValues: SelectValue[], options: any) => string
 
     // misc
     defaultFieldOptions: () => any
@@ -72,7 +73,7 @@ class DefaultRenderOptions implements RenderOptions {
     }
 
     renderMultiChoiceCheckboxField(label, id, validationId, name, values, possibleValues, options, compact) {
-        return '';
+        return this.renderRhsField(this.renderHtmlCheckboxes(id, name, values, possibleValues, options), label, id, validationId, compact);
     }
 
     renderMultiChoiceSelectField(label, id, validationId, name, values, possibleValues, options, compact) {
@@ -191,27 +192,44 @@ class DefaultRenderOptions implements RenderOptions {
     }
 
     renderHtmlRadios(id, name, value, possibleValues, options) {
-        // the radio buttons need to be grouped inside an element with the form field's id and validation id, so that
-        // it could be found e.g. during validation.
-        var radioContainerOptions = { 'id' : id, 'supler:validationId' : options[ SuplerAttributes.VALIDATION_ID ] };
-        var html = HtmlUtil.renderTag('span', radioContainerOptions, false) + '\n';
+        return this.renderCheckable('radio', id, name, possibleValues, options,
+            (v) => { return v.index === value; });
+    }
+
+    renderHtmlCheckboxes(id, name, values, possibleValues, options) {
+        return this.renderCheckable('checkbox', id, name, possibleValues, options,
+            (v) => { return values.indexOf(v.index) >= 0; });
+    }
+
+    private renderCheckable(inputType: string, id: string, name: string, possibleValues: SelectValue[], options: any,
+        isChecked: (SelectValue) => boolean) {
+
+        var html = '';
         Util.foreach(possibleValues, (i, v) => {
-            var radioOptions = Util.copyProperties({}, options);
+            var checkableOptions = Util.copyProperties({}, options);
 
-            // for radios we need to remove the form-control default class or they look ugly
-            radioOptions.class = radioOptions.class.replace('form-control', '');
+            // for checkables we need to remove the form-control default class or they look ugly
+            checkableOptions.class = checkableOptions.class.replace('form-control', '');
 
-            if (v.index === value) {
-                radioOptions.checked = 'checked';
+            if (isChecked(v)) {
+                checkableOptions.checked = 'checked';
             }
 
-            html += '<div class="radio"><label>\n';
-            html += this.renderHtmlInput('radio', id + '.' + v.index, name, v.index, radioOptions);
+            html += '<div class="' + inputType + '"><label>\n';
+            html += this.renderHtmlInput(inputType, id + '.' + v.index, name, v.index, checkableOptions);
             html += v.label;
             html += '</label></div>\n';
         });
-        html += '</span>';
 
+        return this.renderWithContainingElement(html, id, options);
+    }
+
+    private renderWithContainingElement(body: string, id: string, options: any): string {
+        // radio buttons and checkboxes need to be grouped inside an element with the form field's id and validation
+        // id, so that it could be found e.g. during validation.
+        var containerOptions = { 'id' : id, 'supler:validationId' : options[ SuplerAttributes.VALIDATION_ID ] };
+        var html = HtmlUtil.renderTag('span', containerOptions, false) + '\n';
+        html += body;
         return html;
     }
 
