@@ -22,6 +22,10 @@ class ReadFormValues {
                     ReadFormValues.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
                     break;
 
+                case FieldTypes.BOOLEAN:
+                    ReadFormValues.appendFieldValue(result, fieldName, this.parseBooleanOrNull(this.getElementValue(element)), multiple);
+                    break;
+
                 case FieldTypes.SUBFORM:
                     fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
                     var subResult = this.getValueFromChildren(element, {});
@@ -74,6 +78,15 @@ class ReadFormValues {
             return null;
         } else {
             return p;
+        }
+    }
+
+    private static parseBooleanOrNull(v): number {
+        var p = parseInt(v);
+        if (isNaN(p)) {
+            return null;
+        } else {
+            return p === 1;
         }
     }
 }

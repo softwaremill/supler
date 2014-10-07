@@ -30,9 +30,10 @@ object PersonForm {
     f.field(_.lastName).label("Last name")
       .validate(custom((e, v) => v.length <= e.firstName.length, (e, v) => ValidationError("Last name must be longer than first name!"))),
     f.field(_.age).label("Age"),
-    f.setField(_.favoriteColors).label("Favorite colors").use(dataProvider(_ => List("red", "green", "blue", "magenta"))),
+    f.field(_.likesBroccoli).label("Likes broccoli"),
     f.field(_.address1).label("Address 1"),
     f.field(_.address2).label("Address 2"),
+    f.setField(_.favoriteColors).label("Favorite colors").use(dataProvider(_ => List("red", "green", "blue", "magenta"))),
     f.field(_.gender).label("Gender").use(dataProvider(_ => List("Male", "Female"))).renderHint(asRadio()),
     f.field(_.secret).label("Secret").renderHint(asPassword()),
     f.field(_.bio).label("Biography").renderHint(asTextarea(rows = 6)),
@@ -51,6 +52,7 @@ case class Person(
   secret: Option[String],
   bio: Option[String],
   favoriteColors: Set[String],
+  likesBroccoli: Boolean,
   cars: List[Car],
   legoSets: List[LegoSet])
 

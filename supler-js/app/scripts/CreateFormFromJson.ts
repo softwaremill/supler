@@ -68,6 +68,9 @@ class CreateFormFromJson {
             case FieldTypes.INTEGER:
                 return this.renderOptions.renderIntegerField(fieldJson.label, id, validationId, fieldName, fieldJson.value, fieldOptions, compact);
 
+            case FieldTypes.BOOLEAN:
+                return this.booleanFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact);
+
             case FieldTypes.SELECT:
                 return this.selectFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact);
 
@@ -94,6 +97,13 @@ class CreateFormFromJson {
             return this.renderOptions.renderStringField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
                 fieldOptions, compact);
         }
+    }
+
+    private booleanFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact) {
+        var possibleSelectValues = [ new SelectValue(0, 'No'), new SelectValue(1, 'Yes') ];
+
+        return this.renderOptions.renderSingleChoiceRadioField(fieldJson.label, id, validationId, fieldName,
+            fieldJson.value ? 1 : 0, possibleSelectValues, fieldOptions, compact);
     }
 
     private selectFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact) {
