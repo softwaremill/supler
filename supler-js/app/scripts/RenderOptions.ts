@@ -12,7 +12,6 @@ interface RenderOptions {
     renderStringField: RenderAnyValueField
     renderIntegerField: RenderAnyValueField
     renderDoubleField: RenderAnyValueField
-    renderBooleanField: RenderAnyValueField
     renderPasswordField: RenderAnyValueField
     renderTextareaField: RenderAnyValueField
     renderMultiChoiceCheckboxField: RenderPossibleValuesField
@@ -54,10 +53,6 @@ class DefaultRenderOptions implements RenderOptions {
 
     renderDoubleField(label, id, validationId, name, value, options, compact) {
         return this.renderRhsField(this.renderHtmlInput('number', id, name, value, options), label, id, validationId, compact);
-    }
-
-    renderBooleanField(label, id, validationId, name, value, options, compact) {
-        return '';
     }
 
     // text field render hints
