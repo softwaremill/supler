@@ -7,7 +7,8 @@ import org.supler.validation.{FormValidationResult, FieldValidationError, EmptyP
 case class Form[T](rows: List[Row[T]]) {
   def doValidate(obj: T): FormValidationResult = FormValidationResult(doValidate(EmptyPath, obj))
 
-  def doValidate(parentPath: FieldPath, obj: T): List[FieldValidationError] = rows.flatMap(_.doValidate(parentPath, obj))
+  private[supler] def doValidate(parentPath: FieldPath, obj: T): List[FieldValidationError] =
+    rows.flatMap(_.doValidate(parentPath, obj))
 
   def generateJSON(obj: T) = {
     JObject(
