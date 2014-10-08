@@ -1,8 +1,8 @@
 package org.supler
 
-import org.json4s.JsonAST.{JString, JObject, JField}
-import org.json4s._
-import org.supler.validation.{FieldValidationError, FieldPath, ValidationError, Validator}
+import org.json4s.JsonAST._
+import org.supler.transformation.FullTransformer
+import org.supler.validation.{FieldPath, FieldValidationError, ValidationError, Validator}
 
 case class PrimitiveField[T, U](
   name: String,
@@ -12,7 +12,7 @@ case class PrimitiveField[T, U](
   dataProvider: Option[DataProvider[T, U]],
   label: Option[String],
   required: Boolean,
-  fieldType: FieldType[U],
+  transformer: FullTransformer[U, _],
   renderHint: Option[FieldRenderHint]) extends SimpleField[T, U] {
 
   def label(newLabel: String): PrimitiveField[T, U] = this.copy(label = Some(newLabel))
@@ -30,7 +30,7 @@ case class PrimitiveField[T, U](
     val v = read(obj)
     val ves = validators.flatMap(_.doValidate(obj, v))
 
-    def valueMissing = v == null || !fieldType.valuePresent(v)
+    def valueMissing = v == null || v == None || v == ""
 
     val allVes = if (required && valueMissing) {
       ValidationError("Value is required") :: ves
@@ -56,9 +56,9 @@ case class PrimitiveField[T, U](
 
   protected def generateJSONWithoutDataProvider(obj: T) = {
     GenerateJSONData(
-      valueJSONValue = fieldType.toJValue(read(obj)),
+      valueJSONValue = transformer.serialize(read(obj)),
       validationJSON = JField(ValidateRequiredField, JBool(required)) :: validators.flatMap(_.generateJSON),
-      fieldTypeName = fieldType.jsonSchemaName,
+      fieldTypeName = transformer.jsonSchemaName,
       renderHintJSONValue = generateRenderHintJSONValue
     )
   }
@@ -76,14 +76,13 @@ case class PrimitiveField[T, U](
         } yield {
           write(obj, value)
         }
-      case None => {
+      case None =>
         for {
           jsonValue <- jsonFields.get(name)
-          value <- fieldType.fromJValue.lift(jsonValue)
+          value <- transformer.deserialize(jsonValue).right.toOption
         } yield {
           write(obj, value)
         }
-      }
     }
 
     appliedOpt.getOrElse(obj)

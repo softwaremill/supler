@@ -1,10 +1,15 @@
 package org.supler
 
+import org.supler.transformation.FullTransformer
+
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 object SuplerMacros {
-  def field_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)(param: c.Expr[T => U]): c.Expr[PrimitiveField[T, U]] = {
+  def field_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)
+    (param: c.Expr[T => U])
+    (transformer: c.Expr[FullTransformer[U, _]]): c.Expr[PrimitiveField[T, U]] = {
+
     import c.universe._
 
     val (fieldName, paramRepExpr) = extractFieldName(c)(param)
@@ -18,19 +23,19 @@ object SuplerMacros {
     val isOption = implicitly[WeakTypeTag[U]].tpe.typeSymbol.asClass.fullName == "scala.Option"
     val isRequiredExpr = c.Expr[Boolean](Literal(Constant(!isOption)))
 
-    val fieldTypeTree = generateFieldType(c)(implicitly[WeakTypeTag[U]].tpe)
-    val fieldTypeExpr = c.Expr[FieldType[U]](fieldTypeTree)
-
     reify {
       FactoryMethods.newPrimitiveField(paramRepExpr.splice,
         readFieldValueExpr.splice,
         writeFieldValueExpr.splice,
         isRequiredExpr.splice,
-        fieldTypeExpr.splice)
+        transformer.splice)
     }
   }
 
-  def setField_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)(param: c.Expr[T => Set[U]]): c.Expr[SetField[T, U]] = {
+  def setField_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)
+    (param: c.Expr[T => Set[U]])
+    (transformer: c.Expr[FullTransformer[U, _]]): c.Expr[SetField[T, U]] = {
+
     import c.universe._
 
     val (fieldName, paramRepExpr) = extractFieldName(c)(param)
@@ -41,14 +46,11 @@ object SuplerMacros {
 
     val writeFieldValueExpr = generateFieldWrite[T, Set[U]](c)(fieldName, classSymbol)
 
-    val fieldTypeTree = generateFieldType(c)(implicitly[WeakTypeTag[U]].tpe)
-    val fieldTypeExpr = c.Expr[FieldType[U]](fieldTypeTree)
-
     reify {
       FactoryMethods.newSetField(paramRepExpr.splice,
         readFieldValueExpr.splice,
         writeFieldValueExpr.splice,
-        fieldTypeExpr.splice)
+        transformer.splice)
     }
   }
 
@@ -77,8 +79,10 @@ object SuplerMacros {
   }
 
   object FactoryMethods {
-    def newPrimitiveField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean, fieldType: FieldType[U]): PrimitiveField[T, U] = {
-      PrimitiveField[T, U](fieldName, read, write, List(), None, None, required, fieldType, None)
+    def newPrimitiveField[T, U, S](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,
+      transformer: FullTransformer[U, S]): PrimitiveField[T, U] = {
+
+      PrimitiveField[T, U](fieldName, read, write, List(), None, None, required, transformer, None)
     }
 
     def newSubformField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T,
@@ -86,8 +90,10 @@ object SuplerMacros {
       SubformField[T, U](fieldName, read, write, None, embeddedForm, createEmpty, SubformTableRenderHint)
     }
 
-    def newSetField[T, U](fieldName: String, read: T => Set[U], write: (T, Set[U]) => T, fieldType: FieldType[U]): SetField[T, U] = {
-      SetField[T, U](fieldName, read, write, Nil, None, None, fieldType)
+    def newSetField[T, U](fieldName: String, read: T => Set[U], write: (T, Set[U]) => T,
+      transformer: FullTransformer[U, _]): SetField[T, U] = {
+
+      SetField[T, U](fieldName, read, write, Nil, None, None, transformer)
     }
   }
 
@@ -151,28 +157,5 @@ object SuplerMacros {
     }
 
     c.Expr[(T, U) => T](writeFieldValueTree)
-  }
-
-  private def generateFieldType(c: blackbox.Context)(fieldTpe: c.Type): c.Tree = {
-    import c.universe._
-
-    if (fieldTpe <:< c.typeOf[String]) {
-      q"_root_.org.supler.StringFieldType"
-    } else if (fieldTpe <:< c.typeOf[Int]) {
-      q"_root_.org.supler.IntFieldType"
-    } else if (fieldTpe <:< c.typeOf[Long]) {
-      q"_root_.org.supler.LongFieldType"
-    } else if (fieldTpe <:< c.typeOf[Double]) {
-      q"_root_.org.supler.DoubleFieldType"
-    } else if (fieldTpe <:< c.typeOf[Float]) {
-      q"_root_.org.supler.FloatFieldType"
-    } else if (fieldTpe <:< c.typeOf[Boolean]) {
-      q"_root_.org.supler.BooleanFieldType"
-    } else if (fieldTpe <:< c.typeOf[Option[_]]) {
-      val innerTree = generateFieldType(c)(fieldTpe.typeArgs(0))
-      q"new _root_.org.supler.OptionalFieldType($innerTree)"
-    } else {
-      throw new IllegalArgumentException(s"Fields of type $fieldTpe are not supported")
-    }
   }
 }

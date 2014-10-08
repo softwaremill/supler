@@ -2,6 +2,7 @@ package org.supler
 
 import org.json4s.JsonAST.JField
 import org.json4s._
+import org.supler.transformation.FullTransformer
 import org.supler.validation.{FieldPath, FieldValidationError, Validator}
 
 case class SetField[T, U](
@@ -11,7 +12,7 @@ case class SetField[T, U](
   validators: List[Validator[T, Set[U]]],
   dataProvider: Option[DataProvider[T, U]],
   label: Option[String],
-  fieldType: FieldType[U]) extends SimpleField[T, U] {
+  transformer: FullTransformer[U, _]) extends SimpleField[T, U] {
 
   def label(newLabel: String): SetField[T, U] = this.copy(label = Some(newLabel))
 
@@ -42,9 +43,9 @@ case class SetField[T, U](
 
   protected def generateJSONWithoutDataProvider(obj: T) = {
     GenerateJSONData(
-      valueJSONValue = Some(JArray(read(obj).toList.flatMap(fieldType.toJValue))),
+      valueJSONValue = Some(JArray(read(obj).toList.flatMap(i => transformer.serialize(i)))),
       validationJSON = validators.flatMap(_.generateJSON),
-      fieldTypeName = fieldType.jsonSchemaName
+      fieldTypeName = transformer.jsonSchemaName
     )
   }
 
@@ -65,7 +66,7 @@ case class SetField[T, U](
         val values = for {
           JArray(jsonValues) <- jsonFields.get(name).toList
           jsonValue <- jsonValues
-          value <- fieldType.fromJValue.lift(jsonValue).toList
+          value <- transformer.deserialize(jsonValue).right.toOption.toList
         } yield {
           value
         }

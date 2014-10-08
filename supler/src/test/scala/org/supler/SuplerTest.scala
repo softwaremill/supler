@@ -30,7 +30,6 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     f1Field.write(p1, "s11").f1 should be ("s11")
     f1Field.write(p2, "s21").f1 should be ("s21")
     f1Field.required should be (true)
-    f1Field.fieldType should be (StringFieldType)
 
     f2Field.name should be ("f2")
     f2Field.read(p1) should be (Some(10))
@@ -38,7 +37,6 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     f2Field.write(p1, None).f2 should be (None)
     f2Field.write(p2, Some(20)).f2 should be (Some(20))
     f2Field.required should be (false)
-    f2Field.fieldType should be (OptionalFieldType(IntFieldType))
   }
 
   "field" should "create a case class field representation" in {
@@ -65,7 +63,6 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     f1Field.write(p1, "s11").f1 should be ("s11")
     f1Field.write(p2, "s21").f1 should be ("s21")
     f1Field.required should be (true)
-    f1Field.fieldType should be (StringFieldType)
 
     f2Field.name should be ("f2")
     f2Field.read(p1) should be (Some(10))
@@ -73,7 +70,6 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     f2Field.write(p1, None).f2 should be (None)
     f2Field.write(p2, Some(20)).f2 should be (Some(20))
     f2Field.required should be (false)
-    f2Field.fieldType should be (OptionalFieldType(IntFieldType))
 
     f3Field.name should be ("f3")
     f3Field.read(p1) should be (true)
@@ -81,7 +77,6 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     f3Field.write(p1, false).f3 should be (false)
     f3Field.write(p2, true).f3 should be (true)
     f3Field.required should be (true)
-    f3Field.fieldType should be (BooleanFieldType)
 
     f4Field.name should be ("f4")
     f4Field.read(p1) should be ("x1")
@@ -89,7 +84,6 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     f4Field.write(p1, "x11").f4 should be ("x11")
     f4Field.write(p2, "x21").f4 should be ("x21")
     f4Field.required should be (true)
-    f4Field.fieldType should be (StringFieldType)
   }
 
   "field" should "validate required fields" in {

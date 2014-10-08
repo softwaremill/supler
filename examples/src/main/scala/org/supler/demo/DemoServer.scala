@@ -1,6 +1,7 @@
 package org.supler.demo
 
 import akka.actor.ActorSystem
+import org.joda.time.DateTime
 import org.json4s.JValue
 import org.json4s.JsonAST.{JObject, JField, JString}
 import spray.http.{StatusCodes, MediaTypes}
@@ -12,7 +13,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
   implicit val actorSystem = ActorSystem()
   implicit val json4sFormats = org.json4s.DefaultFormats
 
-  var person = Person("Adam", "", 10, None, None, null, None, None,
+  var person = Person("Adam", "", new DateTime(), 10, None, None, null, None, None,
     Set("red", "blue"), likesBroccoli = false,
     List(
       Car("Ford", 1990),

@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 import org.json4s.JsonAST.JField
 import org.json4s._
+import org.supler.transformation.FullTransformer
 import org.supler.validation.{FieldPath, FieldValidationError, Validators}
 
 import scala.language.experimental.macros
@@ -17,8 +18,14 @@ object Supler extends Validators {
     new DataProvider[T, U](provider)
   }
 
-  def field[T, U](param: T => U): PrimitiveField[T, U] = macro SuplerMacros.field_impl[T, U]
-  def setField[T, U](param: T => Set[U]): SetField[T, U] = macro SuplerMacros.setField_impl[T, U]
+  def field[T, U, S](param: T => U)
+    (implicit transformer: FullTransformer[U, _]): PrimitiveField[T, U] =
+    macro SuplerMacros.field_impl[T, U]
+
+  def setField[T, U](param: T => Set[U])
+    (implicit transformer: FullTransformer[U, _]): SetField[T, U] =
+    macro SuplerMacros.setField_impl[T, U]
+
   def subform[T, U](param: T => List[U], form: Form[U], createEmpty: => U): SubformField[T, U] = macro SuplerMacros.subform_impl[T, U]
 
   def asList() = SubformListRenderHint
@@ -33,8 +40,14 @@ object Supler extends Validators {
 }
 
 trait Supler[T] extends Validators {
-  def field[U](param: T => U): PrimitiveField[T, U] = macro SuplerMacros.field_impl[T, U]
-  def setField[U](param: T => Set[U]): SetField[T, U] = macro SuplerMacros.setField_impl[T, U]
+  def field[U](param: T => U)
+    (implicit transformer: FullTransformer[U, _]): PrimitiveField[T, U] =
+    macro SuplerMacros.field_impl[T, U]
+
+  def setField[U](param: T => Set[U])
+    (implicit transformer: FullTransformer[U, _]): SetField[T, U] =
+    macro SuplerMacros.setField_impl[T, U]
+
   def subform[U](param: T => List[U], form: Form[U], createEmpty: => U): SubformField[T, U] = macro SuplerMacros.subform_impl[T, U]
 }
 

@@ -1,7 +1,10 @@
 package org.supler.demo
 
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import org.supler.Supler
 import Supler._
+import org.supler.transformation.StringTransformer
 import org.supler.validation.ValidationError
 
 object PersonForm {
@@ -25,11 +28,22 @@ object PersonForm {
     f.field(_.age).label("Age").validate(ge(0), le(50))
   ))
 
+  implicit val dateTimeTransformer = new StringTransformer[DateTime] {
+    override def serialize(t: DateTime) = ISODateTimeFormat.date().print(t)
+
+    override def deserialize(u: String) = try {
+      Right(ISODateTimeFormat.date().parseDateTime(u))
+    } catch {
+      case e: IllegalArgumentException => Left(e.getMessage)
+    }
+  }
+
   val personForm = form[Person](f => List(
     f.field(_.firstName).label("First name"),
     f.field(_.lastName).label("Last name")
       .validate(custom((e, v) => v.length <= e.firstName.length, (e, v) => ValidationError("Last name must be longer than first name!"))),
     f.field(_.age).label("Age"),
+    f.field(_.birthday).label("Birthday"),
     f.field(_.likesBroccoli).label("Likes broccoli"),
     f.field(_.address1).label("Address 1"),
     f.field(_.address2).label("Address 2"),
@@ -45,6 +59,7 @@ object PersonForm {
 case class Person(
   firstName: String,
   lastName: String,
+  birthday: DateTime,
   age: Int,
   address1: Option[String],
   address2: Option[String],

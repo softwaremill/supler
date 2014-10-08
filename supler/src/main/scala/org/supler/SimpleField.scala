@@ -2,11 +2,12 @@ package org.supler
 
 import org.json4s.JsonAST.{JField, JObject}
 import org.json4s._
+import org.supler.transformation.FullTransformer
 
 trait SimpleField[T, U] extends Field[T, U] {
   def dataProvider: Option[DataProvider[T, U]]
-  def fieldType: FieldType[U]
   def label: Option[String]
+  def transformer: FullTransformer[U, _]
 
   override def generateJSON(obj: T): List[JField] = {
     val data = dataProvider match {
@@ -28,7 +29,8 @@ trait SimpleField[T, U] extends Field[T, U] {
   protected def generateJSONWithoutDataProvider(obj: T): GenerateJSONData
 
   protected def generatePossibleValuesJSON(possibleValues: List[U]): List[JField] = {
-    val possibleJValuesWithIndex = possibleValues.zipWithIndex.flatMap(t => fieldType.toJValue(t._1).map(jv => (jv, t._2)))
+    val possibleJValuesWithIndex = possibleValues.zipWithIndex
+      .flatMap(t => transformer.serialize(t._1).map(jv => (jv, t._2)))
     val possibleJValues = possibleJValuesWithIndex.map { case (jvalue, index) =>
       JObject(JField("index", JInt(index)), JField("label", jvalue))
     }
