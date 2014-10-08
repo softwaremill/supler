@@ -33,7 +33,7 @@ case class PrimitiveField[T, U](
     def valueMissing = v == null || v == None || v == ""
 
     val allVes = if (required && valueMissing) {
-      ErrorMessage("Value is required") :: ves
+      ErrorMessage("error_valueRequired") :: ves
     } else {
       ves
     }

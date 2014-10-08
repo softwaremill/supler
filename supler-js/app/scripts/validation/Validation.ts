@@ -3,7 +3,8 @@ class Validation {
 
     constructor(private container: HTMLElement,
                 private validatorDictionary: ElementValidatorDictionary,
-                private validatorRenderOptions: ValidatorRenderOptions) {}
+                private validatorRenderOptions: ValidatorRenderOptions,
+                private i18n: I18n) {}
 
     /**
      * @returns True if there were validation errors.
@@ -18,7 +19,9 @@ class Validation {
                 var formElement = this.searchForElementByPath(this.container, fieldPath.split("."));
                 var validationElement = this.lookupValidationElement(formElement);
 
-                this.appendValidation(ValidationError.fromJson(validationErrorJson), validationElement, formElement);
+                this.appendValidation(
+                    this.i18n.fromKeyAndParams(validationErrorJson.error_key, validationErrorJson.error_params),
+                    validationElement, formElement);
             }
         }
 
@@ -111,8 +114,8 @@ class Validation {
         this.removeValidationErrorsFns = [];
     }
 
-    private appendValidation(validationError: ValidationError, validationElement: HTMLElement, formElement: HTMLElement) {
-        this.validatorRenderOptions.appendValidation(validationError.errorKey, validationElement, formElement);
+    private appendValidation(text: string, validationElement: HTMLElement, formElement: HTMLElement) {
+        this.validatorRenderOptions.appendValidation(text, validationElement, formElement);
 
         this.removeValidationErrorsFns.push(() => {
             this.validatorRenderOptions.removeValidation(validationElement, formElement);

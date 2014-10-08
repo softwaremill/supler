@@ -8,7 +8,10 @@ var formContainer = document.getElementById('form-container');
 var form = null;
 
 function showForm(formJson) {
-    form = new SuplerForm(formContainer, {});
+    form = new SuplerForm(formContainer, {
+        error_custom_lastNameLongerThanFirstName: function() { return "Last name must be longer than first name!"; },
+        error_custom_illegalDateFormat: function() { return "Illegal date format"; }
+    });
     form.render(formJson);
 }
 

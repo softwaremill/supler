@@ -5,7 +5,7 @@
  * Should return null if validation succeeds.
  */
 interface ValidatorFn {
-    (fieldValue: any): ValidationError
+    (fieldValue: any): string
 }
 
 /**
@@ -15,27 +15,29 @@ interface ValidatorFn {
  * configuration.
  */
 class DefaultValidatorFnFactories {
+    constructor(private i18n: I18n) {}
+
     required(json): ValidatorFn { return (fieldValue: any) => {
-        if (json === true && (fieldValue === null || fieldValue.length == 0)) return new ValidationError("Value is required"); else return null;
+        if (json === true && (fieldValue === null || fieldValue.length == 0)) return this.i18n.error_valueRequired(); else return null;
     }}
 
     ge(json): ValidatorFn { return (fieldValue: any) => {
-        if (parseInt(fieldValue) >= json) return null; else return new ValidationError("Must be greater or equal to " + json);
+        if (parseInt(fieldValue) >= json) return null; else return this.i18n.error_number_ge(json);
     }}
 
     gt(json): ValidatorFn { return (fieldValue: any) => {
-        if (parseInt(fieldValue) > json) return null; else return new ValidationError("Must be greater than " + json);
+        if (parseInt(fieldValue) > json) return null; else return this.i18n.error_number_gt(json);
     }}
 
     le(json): ValidatorFn { return (fieldValue: any) => {
-        if (parseInt(fieldValue) <= json) return null; else return new ValidationError("Must be less or equal to " + json);
+        if (parseInt(fieldValue) <= json) return null; else return this.i18n.error_number_le(json);
     }}
 
     lt(json): ValidatorFn { return (fieldValue: any) => {
-        if (parseInt(fieldValue) < json) return null; else return new ValidationError("Must be less than " + json);
+        if (parseInt(fieldValue) < json) return null; else return this.i18n.error_number_lt(json);
     }}
 
     type_integer(): ValidatorFn { return (fieldValue: any) => {
-        if (parseInt(fieldValue) === fieldValue) return null; else return new ValidationError("Must be a number");
+        if (parseInt(fieldValue) === fieldValue) return null; else return this.i18n.error_type_number();
     }}
 }

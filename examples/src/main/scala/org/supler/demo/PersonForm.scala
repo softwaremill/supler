@@ -34,14 +34,14 @@ object PersonForm {
     override def deserialize(u: String) = try {
       Right(ISODateTimeFormat.date().parseDateTime(u))
     } catch {
-      case e: IllegalArgumentException => Left(e.getMessage)
+      case e: IllegalArgumentException => Left("error_custom_illegalDateFormat")
     }
   }
 
   val personForm = form[Person](f => List(
     f.field(_.firstName).label("First name"),
     f.field(_.lastName).label("Last name")
-      .validate(custom((e, v) => v.length <= e.firstName.length, (e, v) => ErrorMessage("Last name must be longer than first name!"))),
+      .validate(custom((e, v) => v.length <= e.firstName.length, (e, v) => ErrorMessage("error_custom_lastNameLongerThanFirstName"))),
     f.field(_.age).label("Age"),
     f.field(_.birthday).label("Birthday"),
     f.field(_.likesBroccoli).label("Likes broccoli"),

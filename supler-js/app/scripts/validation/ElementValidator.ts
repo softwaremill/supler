@@ -4,7 +4,7 @@
 class ElementValidator {
     constructor(private validatorFns: ValidatorFn[]) {}
 
-    public validate(element: HTMLElement): ValidationError[] {
+    public validate(element: HTMLElement): string[] {
         var value = Util.getSingleProperty(ReadFormValues.getValueFrom(element));
         var errors = [];
         for (var i=0; i<this.validatorFns.length; i++) {
@@ -18,12 +18,4 @@ class ElementValidator {
 
 interface ElementValidatorDictionary {
     [ elementId: string ]: ElementValidator
-}
-
-class ValidationError {
-    constructor(public errorKey: string, public errorParams: string[] = []) {}
-
-    static fromJson(validationErrorJson: any) {
-        return new ValidationError(validationErrorJson.error_key, validationErrorJson.error_params);
-    }
 }
