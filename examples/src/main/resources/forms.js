@@ -29,8 +29,8 @@ $('#submit').click(function() {
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
             success: function (data) {
-                if (form.processServerValidationErrors(data.validation_errors)) {
-                    feedback.html('There are server-side validation errors');
+                if (form.processServerFormErrors(data.form_errors)) {
+                    feedback.html('There are server-side apply or validation errors');
                 } else {
                     feedback.html(data.msg);
                 }

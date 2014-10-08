@@ -2,7 +2,7 @@ package org.supler
 
 import org.json4s.JsonAST._
 import org.supler.transformation.FullTransformer
-import org.supler.errors.{FieldPath, FieldErrorMessage, ErrorMessage, Validator}
+import org.supler.errors._
 
 case class PrimitiveField[T, U](
   name: String,
@@ -38,7 +38,7 @@ case class PrimitiveField[T, U](
       ves
     }
 
-    allVes.map(ve => FieldErrorMessage(this, parentPath.append(name), ve))
+    allVes.map(toFieldErrorMessage(parentPath))
   }
 
   protected def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]) = {
@@ -66,7 +66,7 @@ case class PrimitiveField[T, U](
   private def generateRenderHintJSONValue = renderHint.map(rh => JObject(
     JField("name", JString(rh.name)) :: rh.extraJSON))
 
-  override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {
+  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
     val appliedOpt = dataProvider match {
       case Some(dp) =>
         for {
@@ -74,18 +74,20 @@ case class PrimitiveField[T, U](
           index <- jsonValue match { case JInt(index) => Some(index.intValue()); case _ => None }
           value <- dp.provider(obj).lift(index.intValue())
         } yield {
-          write(obj, value)
+          Right(write(obj, value))
         }
       case None =>
         for {
           jsonValue <- jsonFields.get(name)
-          value <- transformer.deserialize(jsonValue).right.toOption
+          value = transformer.deserialize(jsonValue)
         } yield {
-          write(obj, value)
+          value
+            .left.map(msg => List(toFieldErrorMessage(parentPath)(ErrorMessage(msg))))
+            .right.map(write(obj, _))
         }
     }
 
-    appliedOpt.getOrElse(obj)
+    appliedOpt.getOrElse(Right(obj))
   }
 }
 

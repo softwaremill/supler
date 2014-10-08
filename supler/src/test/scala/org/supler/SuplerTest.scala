@@ -160,9 +160,9 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     val p3 = form.applyJSONValues(p, jsonPartial)
 
     // then
-    p1 should be (Person("John", Some(10), f3 = true, Some("Something")))
-    p2 should be (Person("John", Some(10), f3 = true, None))
-    p3 should be (Person("John", Some(10), f3 = false, Some("Nothing")))
+    p1 should be (Right(Person("John", Some(10), f3 = true, Some("Something"))))
+    p2 should be (Right(Person("John", Some(10), f3 = true, None)))
+    p3 should be (Right(Person("John", Some(10), f3 = false, Some("Nothing"))))
   }
 
   /*"form" should "create a new entity based on the json" in {
@@ -273,6 +273,6 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     val p = personForm.applyJSONValues(Person("", Nil), jsonInOrder)
 
     // then
-    p should be (Person("John", List(Car("m1", 10), Car("m2", 20))))
+    p should be (Right(Person("John", List(Car("m1", 10), Car("m2", 20)))))
   }
 }

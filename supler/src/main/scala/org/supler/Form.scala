@@ -2,7 +2,7 @@ package org.supler
 
 import org.json4s.JsonAST.{JField, JObject}
 import org.json4s._
-import org.supler.errors.{FormErrors, FieldErrorMessage, EmptyPath, FieldPath}
+import org.supler.errors._
 
 case class Form[T](rows: List[Row[T]]) {
   def doValidate(obj: T): FormErrors = FormErrors(doValidate(EmptyPath, obj))
@@ -16,11 +16,13 @@ case class Form[T](rows: List[Row[T]]) {
     )
   }
 
-  def applyJSONValues(obj: T, jvalue: JValue): T = {
+  def applyJSONValues(obj: T, jvalue: JValue): Either[FormErrors, T] =
+    applyJSONValues(EmptyPath, obj, jvalue).left.map(FormErrors)
+
+  private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jvalue: JValue): Either[FieldErrors, T] = {
     jvalue match {
-      case JObject(jsonFields) =>
-        rows.foldLeft(obj)((currentObj, row) => row.applyJSONValues(currentObj, jsonFields.toMap))
-      case _ => obj
+      case JObject(jsonFields) => Row.applyJSONValues(rows, parentPath, obj, jsonFields.toMap)
+      case _ => Right(obj)
     }
   }
 

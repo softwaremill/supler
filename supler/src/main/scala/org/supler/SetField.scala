@@ -3,7 +3,7 @@ package org.supler
 import org.json4s.JsonAST.JField
 import org.json4s._
 import org.supler.transformation.FullTransformer
-import org.supler.errors.{FieldPath, FieldErrorMessage, Validator}
+import org.supler.errors._
 
 case class SetField[T, U](
   name: String,
@@ -26,7 +26,7 @@ case class SetField[T, U](
   override def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] = {
     val v = read(obj)
     val ves = validators.flatMap(_.doValidate(obj, v))
-    ves.map(ve => FieldErrorMessage(this, parentPath.append(name), ve))
+    ves.map(toFieldErrorMessage(parentPath))
   }
 
   protected def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]) = {
@@ -49,7 +49,7 @@ case class SetField[T, U](
     )
   }
 
-  override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {
+  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
     dataProvider match {
       case Some(dp) =>
         val possibleValues = dp.provider(obj).lift
@@ -61,17 +61,21 @@ case class SetField[T, U](
         } yield {
           value
         }
-        write(obj, values.toSet)
-      case None => {
-        val values = for {
+
+        Right(write(obj, values.toSet))
+
+      case None =>
+        val errorsOrValues = for {
           JArray(jsonValues) <- jsonFields.get(name).toList
           jsonValue <- jsonValues
-          value <- transformer.deserialize(jsonValue).right.toOption.toList
         } yield {
-          value
+          transformer.deserialize(jsonValue)
+            .left.map(msg => List(toFieldErrorMessage(parentPath)(ErrorMessage(msg))))
         }
-        write(obj, values.toSet)
-      }
+
+        val errorsOrValueSet = foldErrorsOrValues[Set, U](errorsOrValues, Set(), (e, s) => s + e)
+
+        errorsOrValueSet.right.map(write(obj, _))
     }
   }
 }

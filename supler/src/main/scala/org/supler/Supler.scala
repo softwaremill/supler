@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong
 import org.json4s.JsonAST.JField
 import org.json4s._
 import org.supler.transformation.FullTransformer
-import org.supler.errors.{FieldPath, FieldErrorMessage, Validators}
+import org.supler.errors.{FieldErrors, FieldPath, FieldErrorMessage, Validators}
 
 import scala.language.experimental.macros
 
@@ -54,11 +54,27 @@ trait Supler[T] extends Validators {
 trait Row[T] {
   def generateJSON(obj: T): List[JField]
 
-  def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T
-
   def ||(field: Field[T, _]): Row[T]
+  
+  def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T]
 
-  def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage]
+  def doValidate(parentPath: FieldPath, obj: T): FieldErrors
+}
+
+object Row {
+  def applyJSONValues[T](toRows: Iterable[Row[T]], parentPath: FieldPath, obj: T, 
+    jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
+    
+    toRows.foldLeft[Either[FieldErrors, T]](Right(obj)) { (currentRes, row) =>
+      currentRes match {
+        case Left(errors) =>
+          // only accumulating errors, if any. Trying to apply on the raw object
+          val newErrors = row.applyJSONValues(parentPath, obj, jsonFields).fold(identity, _ => Nil)
+          Left(errors ++ newErrors)
+        case Right(currentObj) => row.applyJSONValues(parentPath, currentObj, jsonFields)
+      }
+    }
+  }
 }
 
 trait Field[T, U] extends Row[T] {
@@ -86,11 +102,10 @@ case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   override def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] =
     fields.flatMap(_.doValidate(parentPath, obj))
 
-  override def generateJSON(obj: T) = fields.flatMap(_.generateJSON(obj))
+  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] =
+    Row.applyJSONValues(fields, parentPath, obj, jsonFields)
 
-  override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]): T = {
-    fields.foldLeft(obj)((currentObj, field) => field.applyJSONValues(currentObj, jsonFields))
-  }
+  override def generateJSON(obj: T) = fields.flatMap(_.generateJSON(obj))
 }
 
 case class DataProvider[T, U](provider: T => List[U])

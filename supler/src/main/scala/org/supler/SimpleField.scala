@@ -2,9 +2,11 @@ package org.supler
 
 import org.json4s.JsonAST.{JField, JObject}
 import org.json4s._
+import org.supler.errors.{FieldPath, FieldErrorMessage, ErrorMessage}
 import org.supler.transformation.FullTransformer
 
 trait SimpleField[T, U] extends Field[T, U] {
+  def name: String
   def dataProvider: Option[DataProvider[T, U]]
   def label: Option[String]
   def transformer: FullTransformer[U, _]
@@ -36,6 +38,9 @@ trait SimpleField[T, U] extends Field[T, U] {
     }
     List(JField(PossibleValuesField, JArray(possibleJValues)))
   }
+
+  protected def toFieldErrorMessage(parentPath: FieldPath)(errorMessage: ErrorMessage) =
+    FieldErrorMessage(this, parentPath.append(name), errorMessage)
 
   case class GenerateJSONData(
     fieldTypeName: String,

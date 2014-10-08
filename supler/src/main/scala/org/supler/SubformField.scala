@@ -2,7 +2,7 @@ package org.supler
 
 import org.json4s.JsonAST.{JArray, JString, JObject, JField}
 import org.json4s._
-import org.supler.errors.FieldPath
+import org.supler.errors._
 
 case class SubformField[T, U](
   name: String,
@@ -25,15 +25,17 @@ case class SubformField[T, U](
     JField(ValueField, JArray(read(obj).map(embeddedForm.generateJSON)))
   )))
 
-  override def applyJSONValues(obj: T, jsonFields: Map[String, JValue]) = {
-    val vs = for {
+  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) = {
+    val errorsOrValues = for {
       JArray(formJValues) <- jsonFields.get(name).toList
-      formJValue <- formJValues
+      (formJValue, i) <- formJValues.zipWithIndex
     } yield {
-      embeddedForm.applyJSONValues(createEmpty(), formJValue)
+      embeddedForm.applyJSONValues(parentPath.appendWithIndex(name, i), createEmpty(), formJValue)
     }
 
-    write(obj, vs)
+    val errorsOrValueList = foldErrorsOrValues[List, U](errorsOrValues, Nil, _ :: _)
+
+    errorsOrValueList.right.map(write(obj, _))
   }
 
   override def doValidate(parentPath: FieldPath, obj: T) = read(obj).zipWithIndex.flatMap { case (el, i) =>
