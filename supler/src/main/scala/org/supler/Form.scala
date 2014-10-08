@@ -5,9 +5,12 @@ import org.json4s._
 import org.supler.errors._
 
 case class Form[T](rows: List[Row[T]]) {
-  def doValidate(obj: T): FormErrors = FormErrors(doValidate(EmptyPath, obj))
+  def doValidate(obj: T): Option[FormErrors] = {
+    val fe = doValidate(EmptyPath, obj)
+    if (fe.size > 0) Some(FormErrors(fe)) else None
+  }
 
-  private[supler] def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] =
+  private[supler] def doValidate(parentPath: FieldPath, obj: T): FieldErrors =
     rows.flatMap(_.doValidate(parentPath, obj))
 
   def generateJSON(obj: T) = {
@@ -23,6 +26,17 @@ case class Form[T](rows: List[Row[T]]) {
     jvalue match {
       case JObject(jsonFields) => Row.applyJSONValues(rows, parentPath, obj, jsonFields.toMap)
       case _ => Right(obj)
+    }
+  }
+
+  def applyJSONValuesAndValidate(obj: T, jvalue: JValue): Either[FormErrors, T] = {
+    applyJSONValues(obj, jvalue) match {
+      case right@Right(appliedObj) =>
+        doValidate(appliedObj) match {
+          case None => right
+          case Some(errors) => Left(errors)
+        }
+      case left => left
     }
   }
 
