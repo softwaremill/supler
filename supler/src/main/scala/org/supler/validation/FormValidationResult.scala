@@ -7,7 +7,7 @@ case class FormValidationResult(fieldErrors: List[FieldErrorMessage]) {
 
   def generateJSON = JArray(fieldErrors.map(generateFieldErrorJSON))
 
-  def generateFieldErrorJSON(fieldError: FieldErrorMessage) = {
+  private def generateFieldErrorJSON(fieldError: FieldErrorMessage) = {
     JObject(
       JField("field_path", JString(fieldError.path.toString)),
       JField("error_key", JString(fieldError.errorMessage.key)),
