@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong
 import org.json4s.JsonAST.JField
 import org.json4s._
 import org.supler.transformation.FullTransformer
-import org.supler.validation.{FieldPath, FieldValidationError, Validators}
+import org.supler.validation.{FieldPath, FieldErrorMessage, Validators}
 
 import scala.language.experimental.macros
 
@@ -58,7 +58,7 @@ trait Row[T] {
 
   def ||(field: Field[T, _]): Row[T]
 
-  def doValidate(parentPath: FieldPath, obj: T): List[FieldValidationError]
+  def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage]
 }
 
 trait Field[T, U] extends Row[T] {
@@ -83,7 +83,7 @@ trait Field[T, U] extends Row[T] {
 case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   override def ||(field: Field[T, _]): Row[T] = MultiFieldRow(fields ++ List(field))
 
-  override def doValidate(parentPath: FieldPath, obj: T): List[FieldValidationError] =
+  override def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] =
     fields.flatMap(_.doValidate(parentPath, obj))
 
   override def generateJSON(obj: T) = fields.flatMap(_.generateJSON(obj))

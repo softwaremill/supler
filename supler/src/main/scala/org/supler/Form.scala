@@ -2,12 +2,12 @@ package org.supler
 
 import org.json4s.JsonAST.{JField, JObject}
 import org.json4s._
-import org.supler.validation.{FormValidationResult, FieldValidationError, EmptyPath, FieldPath}
+import org.supler.validation.{FormValidationResult, FieldErrorMessage, EmptyPath, FieldPath}
 
 case class Form[T](rows: List[Row[T]]) {
   def doValidate(obj: T): FormValidationResult = FormValidationResult(doValidate(EmptyPath, obj))
 
-  private[supler] def doValidate(parentPath: FieldPath, obj: T): List[FieldValidationError] =
+  private[supler] def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] =
     rows.flatMap(_.doValidate(parentPath, obj))
 
   def generateJSON(obj: T) = {

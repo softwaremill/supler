@@ -3,7 +3,7 @@ package org.supler
 import org.json4s.JsonAST.JField
 import org.json4s._
 import org.supler.transformation.FullTransformer
-import org.supler.validation.{FieldPath, FieldValidationError, Validator}
+import org.supler.validation.{FieldPath, FieldErrorMessage, Validator}
 
 case class SetField[T, U](
   name: String,
@@ -23,10 +23,10 @@ case class SetField[T, U](
     case None => this.copy(dataProvider = Some(dataProvider))
   }
 
-  override def doValidate(parentPath: FieldPath, obj: T): List[FieldValidationError] = {
+  override def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] = {
     val v = read(obj)
     val ves = validators.flatMap(_.doValidate(obj, v))
-    ves.map(ve => FieldValidationError(this, parentPath.append(name), ve))
+    ves.map(ve => FieldErrorMessage(this, parentPath.append(name), ve))
   }
 
   protected def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]) = {

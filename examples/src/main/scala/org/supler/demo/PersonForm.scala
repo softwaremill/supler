@@ -5,7 +5,7 @@ import org.joda.time.format.ISODateTimeFormat
 import org.supler.Supler
 import Supler._
 import org.supler.transformation.StringTransformer
-import org.supler.validation.ValidationError
+import org.supler.validation.ErrorMessage
 
 object PersonForm {
   val carMakesAndModels = Map(
@@ -41,7 +41,7 @@ object PersonForm {
   val personForm = form[Person](f => List(
     f.field(_.firstName).label("First name"),
     f.field(_.lastName).label("Last name")
-      .validate(custom((e, v) => v.length <= e.firstName.length, (e, v) => ValidationError("Last name must be longer than first name!"))),
+      .validate(custom((e, v) => v.length <= e.firstName.length, (e, v) => ErrorMessage("Last name must be longer than first name!"))),
     f.field(_.age).label("Age"),
     f.field(_.birthday).label("Birthday"),
     f.field(_.likesBroccoli).label("Likes broccoli"),
