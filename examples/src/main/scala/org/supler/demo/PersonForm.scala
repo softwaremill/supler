@@ -16,14 +16,14 @@ object PersonForm {
   )
 
   val carForm = form[Car](f => List(
-    f.field(_.make).use(dataProvider(_ => carMakesAndModels.keys.toList)).label("Make"),
+    f.field(_.make).possibleValues(_ => carMakesAndModels.keys.toList).label("Make"),
     //f.field(_.model).use(dataProvider(car => carMakesAndModels(car.make))),
     f.field(_.year).validate(gt(1900)).label("Year")
   ))
 
   val legoSetForm = form[LegoSet](f => List(
     f.field(_.name).label("Name"),
-    f.field(_.theme).label("Theme").use(dataProvider(_ => List("City", "Technic", "Duplo", "Space", "Friends", "Universal"))),
+    f.field(_.theme).label("Theme").possibleValues(_ => List("City", "Technic", "Duplo", "Space", "Friends", "Universal")),
     f.field(_.number).label("Set number").validate(lt(100000)),
     f.field(_.age).label("Age").validate(ge(0), le(50))
   ))
@@ -47,8 +47,8 @@ object PersonForm {
     f.field(_.likesBroccoli).label("Likes broccoli"),
     f.field(_.address1).label("Address 1"),
     f.field(_.address2).label("Address 2"),
-    f.setField(_.favoriteColors).label("Favorite colors").use(dataProvider(_ => List("red", "green", "blue", "magenta"))),
-    f.field(_.gender).label("Gender").use(dataProvider(_ => List("Male", "Female"))).renderHint(asRadio()),
+    f.setField(_.favoriteColors).label("Favorite colors").possibleValues(_ => List("red", "green", "blue", "magenta")),
+    f.field(_.gender).label("Gender").possibleValues(_ => List("Male", "Female")).renderHint(asRadio()),
     f.field(_.secret).label("Secret").renderHint(asPassword()),
     f.field(_.bio).label("Biography").renderHint(asTextarea(rows = 6)),
     f.subform(_.cars, carForm, Car(null, 0)).label("Cars").renderHint(asList()),

@@ -7,14 +7,14 @@ import org.supler.transformation.FullTransformer
 
 trait SimpleField[T, U] extends Field[T, U] {
   def name: String
-  def dataProvider: Option[DataProvider[T, U]]
+  def valuesProvider: Option[ValuesProvider[T, U]]
   def label: Option[String]
   def transformer: FullTransformer[U, _]
 
   override def generateJSON(obj: T): List[JField] = {
-    val data = dataProvider match {
-      case Some(dp) => generateJSONWithDataProvider(obj, dp)
-      case None => generateJSONWithoutDataProvider(obj)
+    val data = valuesProvider match {
+      case Some(vp) => generateJSONWithValuesProvider(obj, vp)
+      case None => generateJSONWithoutValuesProvider(obj)
     }
 
     List(JField(name, JObject(List(
@@ -26,9 +26,9 @@ trait SimpleField[T, U] extends Field[T, U] {
       ++ data.extraJSON)))
   }
 
-  protected def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]): GenerateJSONData
+  protected def generateJSONWithValuesProvider(obj: T, dp: ValuesProvider[T, U]): GenerateJSONData
 
-  protected def generateJSONWithoutDataProvider(obj: T): GenerateJSONData
+  protected def generateJSONWithoutValuesProvider(obj: T): GenerateJSONData
 
   protected def generatePossibleValuesJSON(possibleValues: List[U]): List[JField] = {
     val possibleJValuesWithIndex = possibleValues.zipWithIndex

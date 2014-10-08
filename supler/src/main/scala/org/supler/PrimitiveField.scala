@@ -9,7 +9,7 @@ case class PrimitiveField[T, U](
   read: T => U,
   write: (T, U) => T,
   validators: List[Validator[T, U]],
-  dataProvider: Option[DataProvider[T, U]],
+  valuesProvider: Option[ValuesProvider[T, U]],
   label: Option[String],
   required: Boolean,
   transformer: FullTransformer[U, _],
@@ -21,9 +21,9 @@ case class PrimitiveField[T, U](
 
   def renderHint(newRenderHint: FieldRenderHint): PrimitiveField[T, U] = this.copy(renderHint = Some(newRenderHint))
 
-  def use(dataProvider: DataProvider[T, U]): PrimitiveField[T, U] = this.dataProvider match {
-    case Some(_) => throw new IllegalStateException("A data provider is already defined!")
-    case None => this.copy(dataProvider = Some(dataProvider))
+  def possibleValues(values: T => List[U]): PrimitiveField[T, U] = this.valuesProvider match {
+    case Some(_) => throw new IllegalStateException("A values provider is already defined!")
+    case None => this.copy(valuesProvider = Some(values))
   }
 
   override def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] = {
@@ -41,8 +41,8 @@ case class PrimitiveField[T, U](
     allVes.map(toFieldErrorMessage(parentPath))
   }
 
-  protected def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]) = {
-    val possibleValues = dp.provider(obj)
+  protected def generateJSONWithValuesProvider(obj: T, vp: ValuesProvider[T, U]) = {
+    val possibleValues = vp(obj)
     val currentValue = possibleValues.indexOf(read(obj))
 
     GenerateJSONData(
@@ -54,7 +54,7 @@ case class PrimitiveField[T, U](
     )
   }
 
-  protected def generateJSONWithoutDataProvider(obj: T) = {
+  protected def generateJSONWithoutValuesProvider(obj: T) = {
     GenerateJSONData(
       valueJSONValue = transformer.serialize(read(obj)),
       validationJSON = JField(ValidateRequiredField, JBool(required)) :: validators.flatMap(_.generateJSON),
@@ -67,12 +67,12 @@ case class PrimitiveField[T, U](
     JField("name", JString(rh.name)) :: rh.extraJSON))
 
   override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
-    val appliedOpt = dataProvider match {
-      case Some(dp) =>
+    val appliedOpt = valuesProvider match {
+      case Some(vp) =>
         for {
           jsonValue <- jsonFields.get(name)
           index <- jsonValue match { case JInt(index) => Some(index.intValue()); case _ => None }
-          value <- dp.provider(obj).lift(index.intValue())
+          value <- vp(obj).lift(index.intValue())
         } yield {
           Right(write(obj, value))
         }

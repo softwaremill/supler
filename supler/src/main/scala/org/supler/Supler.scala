@@ -14,10 +14,6 @@ object Supler extends Validators {
     Form(rows(new Supler[T] {}))
   }
 
-  def dataProvider[T, U](provider: T => List[U]): DataProvider[T, U] = {
-    new DataProvider[T, U](provider)
-  }
-
   def field[T, U, S](param: T => U)
     (implicit transformer: FullTransformer[U, _]): PrimitiveField[T, U] =
     macro SuplerMacros.field_impl[T, U]
@@ -107,8 +103,6 @@ case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
 
   override def generateJSON(obj: T) = fields.flatMap(_.generateJSON(obj))
 }
-
-case class DataProvider[T, U](provider: T => List[U])
 
 object IdGenerator {
   private val counter = new AtomicLong(0)

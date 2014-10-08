@@ -10,7 +10,7 @@ case class SetField[T, U](
   read: T => Set[U],
   write: (T, Set[U]) => T,
   validators: List[Validator[T, Set[U]]],
-  dataProvider: Option[DataProvider[T, U]],
+  valuesProvider: Option[ValuesProvider[T, U]],
   label: Option[String],
   transformer: FullTransformer[U, _]) extends SimpleField[T, U] {
 
@@ -18,9 +18,9 @@ case class SetField[T, U](
 
   def validate(validators: Validator[T, Set[U]]*): SetField[T, U] = this.copy(validators = this.validators ++ validators)
 
-  def use(dataProvider: DataProvider[T, U]): SetField[T, U] = this.dataProvider match {
-    case Some(_) => throw new IllegalStateException("A data provider is already defined!")
-    case None => this.copy(dataProvider = Some(dataProvider))
+  def possibleValues(values: ValuesProvider[T, U]): SetField[T, U] = this.valuesProvider match {
+    case Some(_) => throw new IllegalStateException("A values provider is already defined!")
+    case None => this.copy(valuesProvider = Some(values))
   }
 
   override def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] = {
@@ -29,8 +29,8 @@ case class SetField[T, U](
     ves.map(toFieldErrorMessage(parentPath))
   }
 
-  protected def generateJSONWithDataProvider(obj: T, dp: DataProvider[T, U]) = {
-    val possibleValues = dp.provider(obj)
+  protected def generateJSONWithValuesProvider(obj: T, vp: ValuesProvider[T, U]) = {
+    val possibleValues = vp(obj)
     val currentValues = read(obj).map(possibleValues.indexOf).filter(_ != -1)
 
     GenerateJSONData(
@@ -41,7 +41,7 @@ case class SetField[T, U](
     )
   }
 
-  protected def generateJSONWithoutDataProvider(obj: T) = {
+  protected def generateJSONWithoutValuesProvider(obj: T) = {
     GenerateJSONData(
       valueJSONValue = Some(JArray(read(obj).toList.flatMap(i => transformer.serialize(i)))),
       validationJSON = validators.flatMap(_.generateJSON),
@@ -50,9 +50,9 @@ case class SetField[T, U](
   }
 
   override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
-    dataProvider match {
-      case Some(dp) =>
-        val possibleValues = dp.provider(obj).lift
+    valuesProvider match {
+      case Some(vp) =>
+        val possibleValues = vp(obj).lift
         val values = for {
           jsonValue <- jsonFields.get(name).toList
           indexes <- jsonValue match { case JArray(jindexes) => List(jindexes.collect { case JInt(idx) => idx }); case _ => Nil }
