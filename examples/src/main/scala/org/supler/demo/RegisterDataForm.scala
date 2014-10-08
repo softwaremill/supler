@@ -2,7 +2,7 @@ package org.supler.demo
 
 import org.supler.Supler
 import Supler._
-import org.supler.validation.ErrorMessage
+import org.supler.errors.ErrorMessage
 
 object RegisterDataForm {
   form[RegisterData](f => List(

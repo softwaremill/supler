@@ -3,7 +3,7 @@ package org.supler
 import org.json4s.JsonAST.JField
 import org.json4s._
 import org.supler.transformation.FullTransformer
-import org.supler.validation.{FieldPath, FieldErrorMessage, Validator}
+import org.supler.errors.{FieldPath, FieldErrorMessage, Validator}
 
 case class SetField[T, U](
   name: String,

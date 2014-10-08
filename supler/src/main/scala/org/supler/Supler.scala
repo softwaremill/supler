@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong
 import org.json4s.JsonAST.JField
 import org.json4s._
 import org.supler.transformation.FullTransformer
-import org.supler.validation.{FieldPath, FieldErrorMessage, Validators}
+import org.supler.errors.{FieldPath, FieldErrorMessage, Validators}
 
 import scala.language.experimental.macros
 

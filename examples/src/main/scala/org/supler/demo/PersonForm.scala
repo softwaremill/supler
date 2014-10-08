@@ -5,7 +5,7 @@ import org.joda.time.format.ISODateTimeFormat
 import org.supler.Supler
 import Supler._
 import org.supler.transformation.StringTransformer
-import org.supler.validation.ErrorMessage
+import org.supler.errors.ErrorMessage
 
 object PersonForm {
   val carMakesAndModels = Map(

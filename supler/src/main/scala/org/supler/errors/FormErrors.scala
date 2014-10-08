@@ -1,8 +1,8 @@
-package org.supler.validation
+package org.supler.errors
 
 import org.json4s.JsonAST.{JString, JField, JObject, JArray}
 
-case class FormValidationResult(fieldErrors: List[FieldErrorMessage]) {
+case class FormErrors(fieldErrors: List[FieldErrorMessage]) {
   def hasErrors = fieldErrors.size > 0
 
   def generateJSON = JArray(fieldErrors.map(generateFieldErrorJSON))

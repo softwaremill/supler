@@ -1,4 +1,4 @@
-package org.supler.validation
+package org.supler.errors
 
 import scala.annotation.tailrec
 

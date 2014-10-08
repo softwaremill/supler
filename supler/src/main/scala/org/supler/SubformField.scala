@@ -2,7 +2,7 @@ package org.supler
 
 import org.json4s.JsonAST.{JArray, JString, JObject, JField}
 import org.json4s._
-import org.supler.validation.FieldPath
+import org.supler.errors.FieldPath
 
 case class SubformField[T, U](
   name: String,

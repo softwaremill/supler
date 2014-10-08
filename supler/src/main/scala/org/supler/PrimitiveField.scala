@@ -2,7 +2,7 @@ package org.supler
 
 import org.json4s.JsonAST._
 import org.supler.transformation.FullTransformer
-import org.supler.validation.{FieldPath, FieldErrorMessage, ErrorMessage, Validator}
+import org.supler.errors.{FieldPath, FieldErrorMessage, ErrorMessage, Validator}
 
 case class PrimitiveField[T, U](
   name: String,
