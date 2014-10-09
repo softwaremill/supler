@@ -81,7 +81,7 @@ class ReadFormValues {
         }
     }
 
-    private static parseBooleanOrNull(v): number {
+    private static parseBooleanOrNull(v): boolean {
         var p = parseInt(v);
         if (isNaN(p)) {
             return null;
