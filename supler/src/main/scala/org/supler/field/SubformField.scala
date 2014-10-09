@@ -36,7 +36,7 @@ case class SubformField[T, U](
 
     val errorsOrValueList = foldErrorsOrValues[List, U](errorsOrValues, Nil, _ :: _)
 
-    errorsOrValueList.right.map(write(obj, _))
+    errorsOrValueList.right.map(vs => write(obj, vs.reverse))
   }
 
   override def doValidate(parentPath: FieldPath, obj: T) = read(obj).zipWithIndex.flatMap { case (el, i) =>
