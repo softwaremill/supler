@@ -49,7 +49,7 @@ trait Supler[T] extends Validators {
 }
 
 trait Row[T] {
-  def generateJSON(obj: T): List[JField]
+  private[supler] def generateJSON(obj: T): List[JField]
 
   def ||(field: Field[T, _]): Row[T]
   
