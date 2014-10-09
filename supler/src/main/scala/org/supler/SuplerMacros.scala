@@ -102,7 +102,7 @@ object SuplerMacros {
     val fieldName = param match {
       case Expr(
       Function(
-      List(ValDef(Modifiers(_), TermName(termDef: String), TypeTree(), EmptyTree)),
+      List(ValDef(Modifiers(_, _, _), TermName(termDef: String), TypeTree(), EmptyTree)),
       Select(Ident(TermName(termUse: String)), TermName(field: String)))) if termDef == termUse =>
         field
       case _ => throw new IllegalArgumentException("Illegal field reference " + show(param.tree) + "; please use _.fieldName instead")

@@ -8,7 +8,7 @@ object BuildSettings {
     organization := "com.softwaremill",
     version := "1-SNAPSHOT",
     scalaVersion := "2.11.2",
-    scalacOptions ++= Seq("-unchecked", "-deprecation"),
+    scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:existentials", "-language:higherKinds"),
     licenses := ("Apache2", new java.net.URL("http://www.apache.org/licenses/LICENSE-2.0.txt")) :: Nil
   )
 }
