@@ -49,7 +49,7 @@ case class BasicField[T, U](
     GenerateJSONData(
       valueJSONValue = Some(JInt(currentValue)),
       validationJSON = JField(JSONFieldNames.ValidateRequired, JBool(required)) :: validators.flatMap(_.generateJSON),
-      fieldTypeName = SelectType,
+      fieldTypeName = SpecialFieldTypes.Select,
       renderHintJSONValue = generateRenderHintJSONValue,
       extraJSON = generatePossibleValuesJSON(possibleValues)
     )

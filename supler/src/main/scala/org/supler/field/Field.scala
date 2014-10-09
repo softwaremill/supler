@@ -19,6 +19,8 @@ trait Field[T, U] extends Row[T] {
     val ValidateRequired = "required"
   }
 
-  protected val SelectType = "select"
-  protected val SubformType = "subform"
+  protected object SpecialFieldTypes {
+    val Select = "select"
+    val Subform = "subform"
+  }
 }

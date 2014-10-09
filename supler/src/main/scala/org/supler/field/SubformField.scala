@@ -21,7 +21,7 @@ case class SubformField[T, U](
   def generateJSON(obj: T) = {
     import JSONFieldNames._
     List(JField(name, JObject(
-      JField(Type, JString(SubformType)),
+      JField(Type, JString(SpecialFieldTypes.Subform)),
       JField(RenderHint, JObject(JField("name", JString(renderHint.name)))),
       JField(Multiple, JBool(value = true)),
       JField(Label, JString(_label.getOrElse(""))),
