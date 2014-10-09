@@ -38,7 +38,7 @@ case class SetField[T, U](
       valueJSONValue = Some(JArray(currentValues.map(JInt(_)).toList)),
       validationJSON = validators.flatMap(_.generateJSON),
       fieldTypeName = SelectType,
-      extraJSON = JField(MultipleField, JBool(value = true)) :: generatePossibleValuesJSON(possibleValues)
+      extraJSON = JField(JSONFieldNames.Multiple, JBool(value = true)) :: generatePossibleValuesJSON(possibleValues)
     )
   }
 

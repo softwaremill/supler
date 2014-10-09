@@ -18,12 +18,14 @@ trait NonNestedFieldJSON[T, U] {
       case None => generateJSONWithoutValuesProvider(obj)
     }
 
+    import JSONFieldNames._
+
     List(JField(name, JObject(List(
-      JField(LabelField, JString(label.getOrElse(""))),
-      JField(TypeField, JString(data.fieldTypeName)),
-      JField(ValidateField, JObject(data.validationJSON.toList))
-    ) ++ data.valueJSONValue.map(JField(ValueField, _)).toList
-      ++ data.renderHintJSONValue.map(JField(RenderHintField, _)).toList
+      JField(Label, JString(label.getOrElse(""))),
+      JField(Type, JString(data.fieldTypeName)),
+      JField(Validate, JObject(data.validationJSON.toList))
+    ) ++ data.valueJSONValue.map(JField(Value, _)).toList
+      ++ data.renderHintJSONValue.map(JField(RenderHint, _)).toList
       ++ data.extraJSON)))
   }
 
@@ -37,7 +39,7 @@ trait NonNestedFieldJSON[T, U] {
     val possibleJValues = possibleJValuesWithIndex.map { case (jvalue, index) =>
       JObject(JField("index", JInt(index)), JField("label", jvalue))
     }
-    List(JField(PossibleValuesField, JArray(possibleJValues)))
+    List(JField(JSONFieldNames.PossibleValues, JArray(possibleJValues)))
   }
 
   case class GenerateJSONData(

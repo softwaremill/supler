@@ -48,7 +48,7 @@ case class BasicField[T, U](
 
     GenerateJSONData(
       valueJSONValue = Some(JInt(currentValue)),
-      validationJSON = JField(ValidateRequiredField, JBool(required)) :: validators.flatMap(_.generateJSON),
+      validationJSON = JField(JSONFieldNames.ValidateRequired, JBool(required)) :: validators.flatMap(_.generateJSON),
       fieldTypeName = SelectType,
       renderHintJSONValue = generateRenderHintJSONValue,
       extraJSON = generatePossibleValuesJSON(possibleValues)
@@ -58,7 +58,7 @@ case class BasicField[T, U](
   protected def generateJSONWithoutValuesProvider(obj: T) = {
     GenerateJSONData(
       valueJSONValue = transformer.serialize(read(obj)),
-      validationJSON = JField(ValidateRequiredField, JBool(required)) :: validators.flatMap(_.generateJSON),
+      validationJSON = JField(JSONFieldNames.ValidateRequired, JBool(required)) :: validators.flatMap(_.generateJSON),
       fieldTypeName = transformer.jsonSchemaName,
       renderHintJSONValue = generateRenderHintJSONValue
     )
