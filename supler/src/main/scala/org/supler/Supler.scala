@@ -14,7 +14,7 @@ object Supler extends Validators {
     Form(rows(new Supler[T] {}))
   }
 
-  def field[T, U, S](param: T => U)
+  def field[T, U](param: T => U)
     (implicit transformer: FullTransformer[U, _]): PrimitiveField[T, U] =
     macro SuplerMacros.field_impl[T, U]
 
