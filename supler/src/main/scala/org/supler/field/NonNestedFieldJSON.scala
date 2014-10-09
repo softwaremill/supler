@@ -12,7 +12,7 @@ trait NonNestedFieldJSON[T, U] {
   def label: Option[String]
   def transformer: FullTransformer[U, _]
 
-  override def generateJSON(obj: T): List[JField] = {
+  private[supler] override def generateJSON(obj: T): List[JField] = {
     val data = valuesProvider match {
       case Some(vp) => generateJSONWithValuesProvider(obj, vp)
       case None => generateJSONWithoutValuesProvider(obj)
