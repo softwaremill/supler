@@ -42,7 +42,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
       post {
         entity(as[JValue]) { jvalue =>
           complete {
-            PersonForm.personForm.applyJSONValuesAndValidate(person, jvalue) match {
+            PersonForm.personForm.applyValuesFromJSONAndValidate(person, jvalue) match {
               case Left(errors) =>
                 JObject(JField("form_errors", errors.generateJSON))
               case Right(newPerson) =>

@@ -200,9 +200,9 @@ After receiving a JSON representing an updated state, the form can be used to ap
 to an object:
 
 ````scala
-personForm.applyJSONValues(person, receivedJson)
+personForm.applyValuesFromJSON(person, receivedJson)
 // or
-personForm.applyJSONValuesAndValidate(person, receivedJson)
+personForm.applyValuesFromJSONAndValidate(person, receivedJson)
 ````
 
 The resulting type of each method is `Either[FormErrors, Person]`. The errors can result from conversion or validation.
