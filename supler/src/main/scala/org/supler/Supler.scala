@@ -15,7 +15,7 @@ object Supler extends Validators {
   }
 
   def field[T, U](param: T => U)
-    (implicit transformer: FullTransformer[U, _]): PrimitiveField[T, U] =
+    (implicit transformer: FullTransformer[U, _]): BasicField[T, U] =
     macro SuplerMacros.field_impl[T, U]
 
   def setField[T, U](param: T => Set[U])
@@ -37,7 +37,7 @@ object Supler extends Validators {
 
 trait Supler[T] extends Validators {
   def field[U](param: T => U)
-    (implicit transformer: FullTransformer[U, _]): PrimitiveField[T, U] =
+    (implicit transformer: FullTransformer[U, _]): BasicField[T, U] =
     macro SuplerMacros.field_impl[T, U]
 
   def setField[U](param: T => Set[U])

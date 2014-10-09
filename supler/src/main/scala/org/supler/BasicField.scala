@@ -4,7 +4,7 @@ import org.json4s.JsonAST._
 import org.supler.transformation.FullTransformer
 import org.supler.errors._
 
-case class PrimitiveField[T, U](
+case class BasicField[T, U](
   name: String,
   read: T => U,
   write: (T, U) => T,
@@ -13,15 +13,15 @@ case class PrimitiveField[T, U](
   label: Option[String],
   required: Boolean,
   transformer: FullTransformer[U, _],
-  renderHint: Option[FieldRenderHint]) extends SimpleField[T, U] {
+  renderHint: Option[FieldRenderHint]) extends Field[T, U] with NonNestedFieldJSON[T, U] {
 
-  def label(newLabel: String): PrimitiveField[T, U] = this.copy(label = Some(newLabel))
+  def label(newLabel: String): BasicField[T, U] = this.copy(label = Some(newLabel))
 
-  def validate(validators: Validator[T, U]*): PrimitiveField[T, U] = this.copy(validators = this.validators ++ validators)
+  def validate(validators: Validator[T, U]*): BasicField[T, U] = this.copy(validators = this.validators ++ validators)
 
-  def renderHint(newRenderHint: FieldRenderHint): PrimitiveField[T, U] = this.copy(renderHint = Some(newRenderHint))
+  def renderHint(newRenderHint: FieldRenderHint): BasicField[T, U] = this.copy(renderHint = Some(newRenderHint))
 
-  def possibleValues(values: T => List[U]): PrimitiveField[T, U] = this.valuesProvider match {
+  def possibleValues(values: T => List[U]): BasicField[T, U] = this.valuesProvider match {
     case Some(_) => throw new IllegalStateException("A values provider is already defined!")
     case None => this.copy(valuesProvider = Some(values))
   }
@@ -89,6 +89,9 @@ case class PrimitiveField[T, U](
 
     appliedOpt.getOrElse(Right(obj))
   }
+
+  private def toFieldErrorMessage(parentPath: FieldPath)(errorMessage: ErrorMessage) =
+    FieldErrorMessage(this, parentPath.append(name), errorMessage)
 }
 
 sealed abstract class FieldRenderHint(val name: String) {

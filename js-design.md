@@ -262,3 +262,8 @@ hidden
 submit 
 button   
 image
+
+Vocabulary
+==========
+
+* basic type: string, int, long, float, double, boolean

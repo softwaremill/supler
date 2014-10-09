@@ -12,7 +12,7 @@ case class SetField[T, U](
   validators: List[Validator[T, Set[U]]],
   valuesProvider: Option[ValuesProvider[T, U]],
   label: Option[String],
-  transformer: FullTransformer[U, _]) extends SimpleField[T, U] {
+  transformer: FullTransformer[U, _]) extends Field[T, U] with NonNestedFieldJSON[T, U] {
 
   def label(newLabel: String): SetField[T, U] = this.copy(label = Some(newLabel))
 
@@ -78,4 +78,7 @@ case class SetField[T, U](
         errorsOrValueSet.right.map(write(obj, _))
     }
   }
+
+  private def toFieldErrorMessage(parentPath: FieldPath)(errorMessage: ErrorMessage) =
+    FieldErrorMessage(this, parentPath.append(name), errorMessage)
 }

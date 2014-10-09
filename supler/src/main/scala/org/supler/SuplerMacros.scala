@@ -8,7 +8,7 @@ import scala.reflect.macros.blackbox
 object SuplerMacros {
   def field_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)
     (param: c.Expr[T => U])
-    (transformer: c.Expr[FullTransformer[U, _]]): c.Expr[PrimitiveField[T, U]] = {
+    (transformer: c.Expr[FullTransformer[U, _]]): c.Expr[BasicField[T, U]] = {
 
     import c.universe._
 
@@ -24,7 +24,7 @@ object SuplerMacros {
     val isRequiredExpr = c.Expr[Boolean](Literal(Constant(!isOption)))
 
     reify {
-      FactoryMethods.newPrimitiveField(paramRepExpr.splice,
+      FactoryMethods.newBasicField(paramRepExpr.splice,
         readFieldValueExpr.splice,
         writeFieldValueExpr.splice,
         isRequiredExpr.splice,
@@ -79,10 +79,10 @@ object SuplerMacros {
   }
 
   object FactoryMethods {
-    def newPrimitiveField[T, U, S](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,
-      transformer: FullTransformer[U, S]): PrimitiveField[T, U] = {
+    def newBasicField[T, U, S](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,
+      transformer: FullTransformer[U, S]): BasicField[T, U] = {
 
-      PrimitiveField[T, U](fieldName, read, write, List(), None, None, required, transformer, None)
+      BasicField[T, U](fieldName, read, write, List(), None, None, required, transformer, None)
     }
 
     def newSubformField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T,
