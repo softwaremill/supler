@@ -22,10 +22,10 @@ object PersonForm {
   ))
 
   val legoSetForm = form[LegoSet](f => List(
-    f.field(_.name).label("Name"),
-    f.field(_.theme).label("Theme").possibleValues(_ => List("City", "Technic", "Duplo", "Space", "Friends", "Universal")),
-    f.field(_.number).label("Set number").validate(lt(100000)),
-    f.field(_.age).label("Age").validate(ge(0), le(50))
+    f.field(_.name).label("label_lego_name"),
+    f.field(_.theme).label("label_lego_theme").possibleValues(_ => List("City", "Technic", "Duplo", "Space", "Friends", "Universal")),
+    f.field(_.number).label("label_lego_setnumber").validate(lt(100000)),
+    f.field(_.age).label("label_lego_age").validate(ge(0), le(50))
   ))
 
   implicit val dateTimeTransformer = new StringTransformer[DateTime] {
@@ -39,8 +39,8 @@ object PersonForm {
   }
 
   val personForm = form[Person](f => List(
-    f.field(_.firstName).label("First name"),
-    f.field(_.lastName).label("Last name")
+    f.field(_.firstName).label("label_person_firstname"),
+    f.field(_.lastName).label("label_person_lastname")
       .validate(custom((e, v) => v.length <= e.firstName.length, (e, v) => ErrorMessage("error_custom_lastNameLongerThanFirstName"))),
     f.field(_.age).label("Age"),
     f.field(_.birthday).label("Birthday"),

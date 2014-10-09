@@ -9,8 +9,14 @@ var form = null;
 
 function showForm(formJson) {
     form = new SuplerForm(formContainer, {
-        error_custom_lastNameLongerThanFirstName: function() { return "Last name must be longer than first name!"; },
-        error_custom_illegalDateFormat: function() { return "Illegal date format"; }
+        error_custom_lastNameLongerThanFirstName: "Last name must be longer than first name!",
+        error_custom_illegalDateFormat: "Illegal date format",
+        label_person_firstname: "First name",
+        label_person_lastname: "Last name",
+        label_lego_name: "Name",
+        label_lego_theme: "Theme",
+        label_lego_setnumber: "Set number",
+        label_lego_age: "Age"
     });
     form.render(formJson);
 }

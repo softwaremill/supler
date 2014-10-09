@@ -1,10 +1,13 @@
 class I18n {
     fromKeyAndParams(errorKey: string, errorParams: string[]) {
         var fn = this[errorKey];
-        if (fn)
+        if (fn && typeof(fn) == "function") {
             return fn.apply(this, errorParams);
-        else
+        } else if (fn) {
+            return fn;
+        } else {
             return errorKey;
+        }
     }
 
     error_valueRequired() { return "Value is required"; }

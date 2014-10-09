@@ -1,7 +1,7 @@
 class CreateFormFromJson {
     private idCounter: number = 0;
 
-    constructor(private renderOptions: RenderOptions, private validatorFnFactories: any) {}
+    constructor(private renderOptions: RenderOptions, private i18n: I18n, private validatorFnFactories: any) {}
 
     renderForm(formJson): RenderFormResult {
         var fields = formJson.fields;
@@ -61,58 +61,60 @@ class CreateFormFromJson {
             'supler:validationId': validationId
         }, this.renderOptions.defaultFieldOptions());
 
+        var label = this.labelFor(fieldJson.label);
+
         switch(fieldJson.type) {
             case FieldTypes.STRING:
-                return this.stringFieldFromJson(id, fieldName, fieldJson, validationId, fieldOptions, compact);
+                return this.stringFieldFromJson(label, id, fieldName, fieldJson, validationId, fieldOptions, compact);
 
             case FieldTypes.INTEGER:
-                return this.renderOptions.renderIntegerField(fieldJson.label, id, validationId, fieldName, fieldJson.value, fieldOptions, compact);
+                return this.renderOptions.renderIntegerField(label, id, validationId, fieldName, fieldJson.value, fieldOptions, compact);
 
             case FieldTypes.BOOLEAN:
-                return this.booleanFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact);
+                return this.booleanFieldFromJson(label, id, validationId, fieldName, fieldJson, fieldOptions, compact);
 
             case FieldTypes.SELECT:
-                return this.selectFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact);
+                return this.selectFieldFromJson(label, id, validationId, fieldName, fieldJson, fieldOptions, compact);
 
             case FieldTypes.SUBFORM:
-                return this.subformFieldFromJson(id, fieldName, fieldJson, validatorDictionary);
+                return this.subformFieldFromJson(label, id, fieldName, fieldJson, validatorDictionary);
 
             default:
                 return null;
         }
     }
 
-    private stringFieldFromJson(id, fieldName, fieldJson, validationId, fieldOptions, compact) {
+    private stringFieldFromJson(label, id, fieldName, fieldJson, validationId, fieldOptions, compact) {
         var renderHintName = this.getRenderHintName(fieldJson);
         if (renderHintName === 'password') {
-            return this.renderOptions.renderPasswordField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
+            return this.renderOptions.renderPasswordField(label, id, validationId, fieldName, fieldJson.value,
                 fieldOptions, compact);
         } else if (renderHintName === 'textarea') {
             var fieldOptionsWithDim = Util.copyProperties(
                 { rows: fieldJson.render_hint.rows, cols: fieldJson.render_hint.cols },
                 fieldOptions);
-            return this.renderOptions.renderTextareaField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
+            return this.renderOptions.renderTextareaField(label, id, validationId, fieldName, fieldJson.value,
                 fieldOptionsWithDim, compact);
         } else {
-            return this.renderOptions.renderStringField(fieldJson.label, id, validationId, fieldName, fieldJson.value,
+            return this.renderOptions.renderStringField(label, id, validationId, fieldName, fieldJson.value,
                 fieldOptions, compact);
         }
     }
 
-    private booleanFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact) {
+    private booleanFieldFromJson(label, id, validationId, fieldName, fieldJson, fieldOptions, compact) {
         var possibleSelectValues = [ new SelectValue(0, 'No'), new SelectValue(1, 'Yes') ];
 
-        return this.renderOptions.renderSingleChoiceRadioField(fieldJson.label, id, validationId, fieldName,
+        return this.renderOptions.renderSingleChoiceRadioField(label, id, validationId, fieldName,
             fieldJson.value ? 1 : 0, possibleSelectValues, fieldOptions, compact);
     }
 
-    private selectFieldFromJson(id, validationId, fieldName, fieldJson, fieldOptions, compact) {
+    private selectFieldFromJson(label, id, validationId, fieldName, fieldJson, fieldOptions, compact) {
         var renderHintName = this.getRenderHintName(fieldJson);
 
-        var possibleSelectValues = fieldJson.possible_values.map(v => new SelectValue(v.index, v.label));
+        var possibleSelectValues = fieldJson.possible_values.map(v => new SelectValue(v.index, this.labelFor(v.label)));
 
         if (fieldJson.multiple) {
-            return this.renderOptions.renderMultiChoiceCheckboxField(fieldJson.label, id, validationId, fieldName,
+            return this.renderOptions.renderMultiChoiceCheckboxField(label, id, validationId, fieldName,
                 fieldJson.value, possibleSelectValues, fieldOptions, compact);
         } else {
             if (!fieldJson.validate || !fieldJson.validate.required) {
@@ -120,16 +122,16 @@ class CreateFormFromJson {
             }
 
             if (renderHintName == 'radio') {
-                return this.renderOptions.renderSingleChoiceRadioField(fieldJson.label, id, validationId, fieldName,
+                return this.renderOptions.renderSingleChoiceRadioField(label, id, validationId, fieldName,
                     fieldJson.value, possibleSelectValues, fieldOptions, compact);
             } else {
-                return this.renderOptions.renderSingleChoiceSelectField(fieldJson.label, id, validationId, fieldName,
+                return this.renderOptions.renderSingleChoiceSelectField(label, id, validationId, fieldName,
                     fieldJson.value, possibleSelectValues, fieldOptions, compact);
             }
         }
     }
 
-    private subformFieldFromJson(id, fieldName, fieldJson, validatorDictionary) {
+    private subformFieldFromJson(label, id, fieldName, fieldJson, validatorDictionary) {
         var subformHtml = '';
         var options = {
             'supler:fieldType': FieldTypes.SUBFORM,
@@ -161,7 +163,7 @@ class CreateFormFromJson {
             subformHtml += this.renderOptions.renderSubformTable(headers, cells, options);
         }
 
-        return this.renderOptions.renderSubformDecoration(subformHtml, fieldJson.label, id, name);
+        return this.renderOptions.renderSubformDecoration(subformHtml, label, id, name);
     }
 
     private getRenderHintName(fieldJson: any): string {
@@ -176,11 +178,15 @@ class CreateFormFromJson {
         if (fieldJson.value.length > 0) {
             var firstRow = fieldJson.value[0];
             var result = [];
-            Util.foreach(firstRow.fields, (fieldName, fieldValue) => result.push(fieldValue.label));
+            Util.foreach(firstRow.fields, (fieldName, fieldValue) => result.push(this.labelFor(fieldValue.label)));
             return result;
         } else {
             return [];
         }
+    }
+
+    private labelFor(rawLabel: any): string {
+        return this.i18n.fromKeyAndParams(rawLabel, []);
     }
 
     private nextId() {

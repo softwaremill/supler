@@ -22,7 +22,7 @@ class SuplerForm {
     }
 
     render(formJson) {
-        var result = new CreateFormFromJson(this.renderOptions, this.validatorFnFactories).renderForm(formJson);
+        var result = new CreateFormFromJson(this.renderOptions, this.i18n, this.validatorFnFactories).renderForm(formJson);
         this.container.innerHTML = result.html;
         this.validation = new Validation(this.container, result.validatorDictionary,
             this.validatorRenderOptions, this.i18n);
