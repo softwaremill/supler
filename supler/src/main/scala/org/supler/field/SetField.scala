@@ -50,7 +50,7 @@ case class SetField[T, U](
     )
   }
 
-  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
+  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
     valuesProvider match {
       case Some(vp) =>
         val possibleValues = vp(obj).lift

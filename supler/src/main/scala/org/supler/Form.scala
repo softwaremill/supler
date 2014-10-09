@@ -20,11 +20,11 @@ case class Form[T](rows: List[Row[T]]) {
   }
 
   def applyValuesFromJSON(obj: T, jvalue: JValue): Either[FormErrors, T] =
-    applyJSONValues(EmptyPath, obj, jvalue).left.map(FormErrors)
+    applyValuesFromJSON(EmptyPath, obj, jvalue).left.map(FormErrors)
 
-  private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jvalue: JValue): Either[FieldErrors, T] = {
+  private[supler] def applyValuesFromJSON(parentPath: FieldPath, obj: T, jvalue: JValue): Either[FieldErrors, T] = {
     jvalue match {
-      case JObject(jsonFields) => Row.applyJSONValues(rows, parentPath, obj, jsonFields.toMap)
+      case JObject(jsonFields) => Row.applyValuesFromJSON(rows, parentPath, obj, jsonFields.toMap)
       case _ => Right(obj)
     }
   }

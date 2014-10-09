@@ -67,7 +67,7 @@ case class BasicField[T, U](
   private def generateRenderHintJSONValue = renderHint.map(rh => JObject(
     JField("name", JString(rh.name)) :: rh.extraJSON))
 
-  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
+  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
     val appliedOpt = valuesProvider match {
       case Some(vp) =>
         for {

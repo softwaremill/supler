@@ -53,22 +53,22 @@ trait Row[T] {
 
   def ||(field: Field[T, _]): Row[T]
   
-  def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T]
+  def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T]
 
   def doValidate(parentPath: FieldPath, obj: T): FieldErrors
 }
 
 object Row {
-  def applyJSONValues[T](toRows: Iterable[Row[T]], parentPath: FieldPath, obj: T, 
+  def applyValuesFromJSON[T](toRows: Iterable[Row[T]], parentPath: FieldPath, obj: T, 
     jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
     
     toRows.foldLeft[Either[FieldErrors, T]](Right(obj)) { (currentRes, row) =>
       currentRes match {
         case Left(errors) =>
           // only accumulating errors, if any. Trying to apply on the raw object
-          val newErrors = row.applyJSONValues(parentPath, obj, jsonFields).fold(identity, _ => Nil)
+          val newErrors = row.applyValuesFromJSON(parentPath, obj, jsonFields).fold(identity, _ => Nil)
           Left(errors ++ newErrors)
-        case Right(currentObj) => row.applyJSONValues(parentPath, currentObj, jsonFields)
+        case Right(currentObj) => row.applyValuesFromJSON(parentPath, currentObj, jsonFields)
       }
     }
   }
@@ -80,8 +80,8 @@ case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   override def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] =
     fields.flatMap(_.doValidate(parentPath, obj))
 
-  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] =
-    Row.applyJSONValues(fields, parentPath, obj, jsonFields)
+  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] =
+    Row.applyValuesFromJSON(fields, parentPath, obj, jsonFields)
 
   override def generateJSON(obj: T) = fields.flatMap(_.generateJSON(obj))
 }
