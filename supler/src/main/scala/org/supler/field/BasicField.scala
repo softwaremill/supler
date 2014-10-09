@@ -1,8 +1,9 @@
-package org.supler
+package org.supler.field
 
 import org.json4s.JsonAST._
-import org.supler.transformation.FullTransformer
+import org.supler._
 import org.supler.errors._
+import org.supler.transformation.FullTransformer
 
 case class BasicField[T, U](
   name: String,

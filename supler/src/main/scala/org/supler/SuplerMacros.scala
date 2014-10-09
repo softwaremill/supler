@@ -1,5 +1,6 @@
 package org.supler
 
+import org.supler.field.{SubformTableRenderHint, SubformField, SetField, BasicField}
 import org.supler.transformation.FullTransformer
 
 import scala.language.experimental.macros

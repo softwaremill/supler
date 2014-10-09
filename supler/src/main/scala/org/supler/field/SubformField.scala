@@ -1,8 +1,9 @@
-package org.supler
+package org.supler.field
 
-import org.json4s.JsonAST.{JArray, JString, JObject, JField}
+import org.json4s.JsonAST.{JArray, JField, JObject, JString}
 import org.json4s._
 import org.supler.errors._
+import org.supler.Form
 
 case class SubformField[T, U](
   name: String,
