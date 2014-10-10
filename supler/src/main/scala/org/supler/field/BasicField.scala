@@ -14,13 +14,13 @@ case class BasicField[T, U](
   label: Option[String],
   required: Boolean,
   transformer: FullTransformer[U, _],
-  renderHint: Option[BasicFieldRenderHint]) extends Field[T, U] with NonNestedFieldJSON[T, U] {
+  renderHint: Option[RenderHint with BasicFieldCompatible]) extends Field[T, U] with NonNestedFieldJSON[T, U] {
 
   def label(newLabel: String): BasicField[T, U] = this.copy(label = Some(newLabel))
 
   def validate(validators: Validator[T, U]*): BasicField[T, U] = this.copy(validators = this.validators ++ validators)
 
-  def renderHint(newRenderHint: BasicFieldRenderHint): BasicField[T, U] = this.copy(renderHint = Some(newRenderHint))
+  def renderHint(newRenderHint: RenderHint with BasicFieldCompatible): BasicField[T, U] = this.copy(renderHint = Some(newRenderHint))
 
   def possibleValues(values: T => List[U]): BasicField[T, U] = this.valuesProvider match {
     case Some(_) => throw new IllegalStateException("A values provider is already defined!")
@@ -50,7 +50,6 @@ case class BasicField[T, U](
       valueJSONValue = Some(JInt(currentValue)),
       validationJSON = JField(JSONFieldNames.ValidateRequired, JBool(required)) :: validators.flatMap(_.generateJSON),
       fieldTypeName = SpecialFieldTypes.Select,
-      renderHintJSONValue = generateRenderHintJSONValue,
       extraJSON = generatePossibleValuesJSON(possibleValues)
     )
   }
@@ -59,13 +58,9 @@ case class BasicField[T, U](
     GenerateJSONData(
       valueJSONValue = transformer.serialize(read(obj)),
       validationJSON = JField(JSONFieldNames.ValidateRequired, JBool(required)) :: validators.flatMap(_.generateJSON),
-      fieldTypeName = transformer.jsonSchemaName,
-      renderHintJSONValue = generateRenderHintJSONValue
+      fieldTypeName = transformer.jsonSchemaName
     )
   }
-
-  private def generateRenderHintJSONValue = renderHint.map(rh => JObject(
-    JField("name", JString(rh.name)) :: rh.extraJSON))
 
   override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
     val appliedOpt = valuesProvider match {
@@ -94,12 +89,3 @@ case class BasicField[T, U](
   private def toFieldErrorMessage(parentPath: FieldPath)(errorMessage: ErrorMessage) =
     FieldErrorMessage(this, parentPath.append(name), errorMessage)
 }
-
-sealed abstract class BasicFieldRenderHint(val name: String) {
-  def extraJSON: List[JField] = Nil
-}
-case object BasicFieldPasswordRenderHint extends BasicFieldRenderHint("password")
-case class BasicFieldTextareaRenderHint(rows: Option[Int], cols: Option[Int]) extends BasicFieldRenderHint("textarea") {
-  override def extraJSON = rows.map(r => JField("rows", JInt(r))).toList ++ cols.map(c => JField("cols", JInt(c))).toList
-}
-case object BasicFieldRadioRenderHint extends BasicFieldRenderHint("radio")

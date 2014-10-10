@@ -11,6 +11,7 @@ trait NonNestedFieldJSON[T, U] {
   def valuesProvider: Option[ValuesProvider[T, U]]
   def label: Option[String]
   def transformer: FullTransformer[U, _]
+  def renderHint: Option[RenderHint]
 
   private[supler] override def generateJSON(obj: T): List[JField] = {
     val data = valuesProvider match {
@@ -25,7 +26,7 @@ trait NonNestedFieldJSON[T, U] {
       JField(Type, JString(data.fieldTypeName)),
       JField(Validate, JObject(data.validationJSON.toList))
     ) ++ data.valueJSONValue.map(JField(Value, _)).toList
-      ++ data.renderHintJSONValue.map(JField(RenderHint, _)).toList
+      ++ generateRenderHintJSONValue.map(JField(RenderHint, _)).toList
       ++ data.extraJSON)))
   }
 
@@ -42,11 +43,13 @@ trait NonNestedFieldJSON[T, U] {
     List(JField(JSONFieldNames.PossibleValues, JArray(possibleJValues)))
   }
 
+  def generateRenderHintJSONValue = renderHint.map(rh => JObject(
+    JField("name", JString(rh.name)) :: rh.extraJSON))
+
   case class GenerateJSONData(
     fieldTypeName: String,
     valueJSONValue: Option[JValue],
     validationJSON: List[JField],
-    renderHintJSONValue: Option[JValue] = None,
     extraJSON: List[JField] = Nil
   )
 }

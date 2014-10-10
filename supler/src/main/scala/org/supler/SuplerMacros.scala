@@ -94,7 +94,7 @@ object SuplerMacros {
     def newSetField[T, U](fieldName: String, read: T => Set[U], write: (T, Set[U]) => T,
       transformer: FullTransformer[U, _]): SetField[T, U] = {
 
-      SetField[T, U](fieldName, read, write, Nil, None, None, transformer)
+      SetField[T, U](fieldName, read, write, Nil, None, None, transformer, None)
     }
   }
 

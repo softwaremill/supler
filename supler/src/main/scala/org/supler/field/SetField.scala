@@ -13,11 +13,14 @@ case class SetField[T, U](
   validators: List[Validator[T, Set[U]]],
   valuesProvider: Option[ValuesProvider[T, U]],
   label: Option[String],
-  transformer: FullTransformer[U, _]) extends Field[T, U] with NonNestedFieldJSON[T, U] {
+  transformer: FullTransformer[U, _],
+  renderHint: Option[RenderHint with SetFieldCompatible]) extends Field[T, U] with NonNestedFieldJSON[T, U] {
 
   def label(newLabel: String): SetField[T, U] = this.copy(label = Some(newLabel))
 
   def validate(validators: Validator[T, Set[U]]*): SetField[T, U] = this.copy(validators = this.validators ++ validators)
+
+  def renderHint(newRenderHint: RenderHint with SetFieldCompatible): SetField[T, U] = this.copy(renderHint = Some(newRenderHint))
 
   def possibleValues(values: ValuesProvider[T, U]): SetField[T, U] = this.valuesProvider match {
     case Some(_) => throw new IllegalStateException("A values provider is already defined!")

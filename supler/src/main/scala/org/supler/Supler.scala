@@ -34,6 +34,7 @@ object Supler extends Validators {
     BasicFieldTextareaRenderHint(toOption(rows), toOption(cols))
   }
   def asRadio() = BasicFieldRadioRenderHint
+  def asLabel() = LabelRenderHint
 }
 
 trait Supler[T] extends Validators {
