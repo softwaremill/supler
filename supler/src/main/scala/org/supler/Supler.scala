@@ -28,12 +28,12 @@ object Supler extends Validators {
   def asList() = SubformListRenderHint
   def asTable() = SubformTableRenderHint
 
-  def asPassword() = FieldPasswordRenderHint
+  def asPassword() = BasicFieldPasswordRenderHint
   def asTextarea(rows: Int = -1, cols: Int = -1) = {
     def toOption(d: Int) = if (d == -1) None else Some(d)
-    FieldTextareaRenderHint(toOption(rows), toOption(cols))
+    BasicFieldTextareaRenderHint(toOption(rows), toOption(cols))
   }
-  def asRadio() = FieldRadioRenderHint
+  def asRadio() = BasicFieldRadioRenderHint
 }
 
 trait Supler[T] extends Validators {

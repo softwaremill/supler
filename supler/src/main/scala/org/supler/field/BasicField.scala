@@ -14,13 +14,13 @@ case class BasicField[T, U](
   label: Option[String],
   required: Boolean,
   transformer: FullTransformer[U, _],
-  renderHint: Option[FieldRenderHint]) extends Field[T, U] with NonNestedFieldJSON[T, U] {
+  renderHint: Option[BasicFieldRenderHint]) extends Field[T, U] with NonNestedFieldJSON[T, U] {
 
   def label(newLabel: String): BasicField[T, U] = this.copy(label = Some(newLabel))
 
   def validate(validators: Validator[T, U]*): BasicField[T, U] = this.copy(validators = this.validators ++ validators)
 
-  def renderHint(newRenderHint: FieldRenderHint): BasicField[T, U] = this.copy(renderHint = Some(newRenderHint))
+  def renderHint(newRenderHint: BasicFieldRenderHint): BasicField[T, U] = this.copy(renderHint = Some(newRenderHint))
 
   def possibleValues(values: T => List[U]): BasicField[T, U] = this.valuesProvider match {
     case Some(_) => throw new IllegalStateException("A values provider is already defined!")
@@ -95,11 +95,11 @@ case class BasicField[T, U](
     FieldErrorMessage(this, parentPath.append(name), errorMessage)
 }
 
-sealed abstract class FieldRenderHint(val name: String) {
+sealed abstract class BasicFieldRenderHint(val name: String) {
   def extraJSON: List[JField] = Nil
 }
-case object FieldPasswordRenderHint extends FieldRenderHint("password")
-case class FieldTextareaRenderHint(rows: Option[Int], cols: Option[Int]) extends FieldRenderHint("textarea") {
+case object BasicFieldPasswordRenderHint extends BasicFieldRenderHint("password")
+case class BasicFieldTextareaRenderHint(rows: Option[Int], cols: Option[Int]) extends BasicFieldRenderHint("textarea") {
   override def extraJSON = rows.map(r => JField("rows", JInt(r))).toList ++ cols.map(c => JField("cols", JInt(c))).toList
 }
-case object FieldRadioRenderHint extends FieldRenderHint("radio")
+case object BasicFieldRadioRenderHint extends BasicFieldRenderHint("radio")
