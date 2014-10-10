@@ -36,7 +36,7 @@ All examples assume that all members of the `Supler` objects are available in th
 ### Forms
 
 You can use any object and class as the backing object for a Supler form. The fields of the class which are editable in
-the form must be either `var`s, provide a Scala-style gett/setter, or immutable `val`s in a `case class`. We recommend
+the form must be either `var`s, provide a Scala-style getter/setter, or immutable `val`s in a `case class`. We recommend
 the latter, immutable approach.
 
 A form consists of a list of fields belonging to a single class. Supler provides a convenience method, `form`, which
@@ -194,6 +194,9 @@ val personFormJson = personForm.generateJSON(person)
 The resulting JSON can be then sent to the client. Supler uses the Scala-standard [json4s](https://github.com/json4s/json4s)
 to generate the JSON.
 
+The JSON contains both the form structure and the form values. It is a custom format, however it's very easy to
+understand, and self-explanatory; the fields in the JSON correspond closely to the DSL-based definition.
+
 ### Applying values and validating
 
 After receiving a JSON representing an updated state, the form can be used to apply the values
@@ -244,6 +247,12 @@ Any existing errors will be cleared upon next invocation of `validate()`.
 
 To read the value of a form as a JSON object, simply use the `SuplerForm.getValue()` method. The resulting JSON can be
 sent to the server.
+
+The resulting JSON is what you might expect, mirroring the form's structure through objects, JSON arrays, nested
+objects and primitive types.
+
+In fact, to apply a JSON to an object on the server-side you don't need to use Supler-frontend. Because there's nothing
+special about the format, it is easy to generate such a JSON yourself.
 
 ### Handling server responses
 
