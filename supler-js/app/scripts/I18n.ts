@@ -21,4 +21,7 @@ class I18n {
     error_length_tooLong(maxLength) { return "Too long; maximum length: " + maxLength; }
 
     error_type_number() { return "Must be a number"; }
+
+    label_boolean_true() { return "Yes"; }
+    label_boolean_false() { return "No"; }
 }

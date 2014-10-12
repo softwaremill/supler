@@ -105,7 +105,10 @@ class CreateFormFromJson {
     }
 
     private booleanFieldFromJson(label, id, validationId, fieldName, fieldJson, fieldOptions, compact) {
-        var possibleSelectValues = [ new SelectValue(0, 'No'), new SelectValue(1, 'Yes') ];
+        var possibleSelectValues = [
+            new SelectValue(0, this.i18n.label_boolean_false()),
+            new SelectValue(1, this.i18n.label_boolean_true())
+        ];
 
         return this.renderOptions.renderSingleChoiceRadioField(label, id, validationId, fieldName,
             fieldJson.value ? 1 : 0, possibleSelectValues, fieldOptions, compact);
