@@ -28,6 +28,15 @@ class Util {
 
         return result;
     }
+
+    static find<T>(arr: T[], predicate: (el: T) => boolean) {
+        for (var i = 0; i < arr.length; i++) {
+            if (predicate(arr[i])) {
+                return arr[i];
+            }
+        }
+        return null;
+    }
 }
 
 class SelectValue {
