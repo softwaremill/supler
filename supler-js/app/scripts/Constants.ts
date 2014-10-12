@@ -4,6 +4,7 @@ class FieldTypes {
     static BOOLEAN = 'boolean';
     static SELECT = 'select';
     static SUBFORM = 'subform';
+    static STATIC = 'static';
 }
 
 class SuplerAttributes {

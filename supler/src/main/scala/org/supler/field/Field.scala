@@ -22,5 +22,6 @@ trait Field[T, U] extends Row[T] {
   protected object SpecialFieldTypes {
     val Select = "select"
     val Subform = "subform"
+    val Static = "static"
   }
 }

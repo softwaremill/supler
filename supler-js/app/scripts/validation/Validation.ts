@@ -38,13 +38,15 @@ class Validation {
 
         Util.foreach(this.validatorDictionary, (elementId: string, validator: ElementValidator) => {
             var formElement = document.getElementById(elementId);
-            var validationElement = this.lookupValidationElement(formElement);
+            if (formElement) {
+                var validationElement = this.lookupValidationElement(formElement);
 
-            var errors = validator.validate(formElement);
+                var errors = validator.validate(formElement);
 
-            for (var i=0; i<errors.length; i++) {
-                this.appendValidation(errors[i], validationElement, formElement);
-                hasErrors = true;
+                for (var i = 0; i < errors.length; i++) {
+                    this.appendValidation(errors[i], validationElement, formElement);
+                    hasErrors = true;
+                }
             }
         });
 

@@ -25,6 +25,9 @@ interface RenderOptions {
     renderLabel: (forId: string, label: string) => string
     renderValidation: (validationId: string) => string
 
+    renderStaticField: (label: string, id: string, validationId: string, value: any, compact: boolean) => string
+    renderStaticText: (text: string) => string
+
     renderSubformDecoration: (subform: string, label: string, id: string, name: string) => string
     renderSubformListElement: (subformElement: string, options: any) => string;
     renderSubformTable: (tableHeaders: string[], cells: string[][], elementOptions: any) => string;
@@ -65,6 +68,14 @@ class DefaultRenderOptions implements RenderOptions {
         if (value) tag += value;
         tag += '</textarea>';
         return this.renderRhsField(tag, label, id, validationId, compact);
+    }
+
+    renderStaticField(label, id, validationId, value, compact) {
+        return this.renderRhsField(this.renderStaticText(value), label, id, validationId, compact);
+    }
+
+    renderStaticText(text) {
+        return '<div class="form-control-static">' + text + '</div>';
     }
 
     renderMultiChoiceCheckboxField(label, id, validationId, name, values, possibleValues, options, compact) {

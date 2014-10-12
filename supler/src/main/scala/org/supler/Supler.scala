@@ -25,6 +25,8 @@ object Supler extends Validators {
 
   def subform[T, U](param: T => List[U], form: Form[U], createEmpty: => U): SubformField[T, U] = macro SuplerMacros.subform_impl[T, U]
 
+  def staticField[T](createMessage: T => Message) = new StaticField[T](createMessage, None)
+
   def asList() = SubformListRenderHint
   def asTable() = SubformTableRenderHint
 
@@ -34,7 +36,6 @@ object Supler extends Validators {
     BasicFieldTextareaRenderHint(toOption(rows), toOption(cols))
   }
   def asRadio() = BasicFieldRadioRenderHint
-  def asLabel() = LabelRenderHint
 }
 
 trait Supler[T] extends Validators {
@@ -47,6 +48,8 @@ trait Supler[T] extends Validators {
     macro SuplerMacros.setField_impl[T, U]
 
   def subform[U](param: T => List[U], form: Form[U], createEmpty: => U): SubformField[T, U] = macro SuplerMacros.subform_impl[T, U]
+
+  def staticField(createMessage: T => Message) = new StaticField[T](createMessage, None)
 }
 
 trait Row[T] {

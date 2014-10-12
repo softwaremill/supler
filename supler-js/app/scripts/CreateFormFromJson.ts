@@ -79,6 +79,9 @@ class CreateFormFromJson {
             case FieldTypes.SUBFORM:
                 return this.subformFieldFromJson(label, id, fieldName, fieldJson, validatorDictionary);
 
+            case FieldTypes.STATIC:
+                return this.staticFieldFromJson(label, id, validationId, fieldJson, compact);
+
             default:
                 return null;
         }
@@ -164,6 +167,12 @@ class CreateFormFromJson {
         }
 
         return this.renderOptions.renderSubformDecoration(subformHtml, label, id, name);
+    }
+
+    private staticFieldFromJson(label, id, validationId, fieldJson, compact) {
+        var value = this.i18n.fromKeyAndParams(fieldJson.value.key, fieldJson.value.params);
+        if (!value) value = '-';
+        return this.renderOptions.renderStaticField(label, id, validationId, value, compact);
     }
 
     private getRenderHintName(fieldJson: any): string {

@@ -21,7 +21,8 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
     List(
       LegoSet("Motorcycle", "Technic", 1924, 31),
       LegoSet("Arctic Supply Plane", "City", 60064, 0),
-      LegoSet("Princess and Horse", "Duplo", 4825, 7)))
+      LegoSet("Princess and Horse", "Duplo", 4825, 7)),
+    new DateTime(2012, 2, 19, 0, 0))
 
   def getJson(route: Route) = get { respondWithMediaType(MediaTypes.`application/json`) { route } }
 
