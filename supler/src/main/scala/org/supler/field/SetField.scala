@@ -74,7 +74,7 @@ case class SetField[T, U](
           jsonValue <- jsonValues
         } yield {
           transformer.deserialize(jsonValue)
-            .left.map(msg => List(toFieldErrorMessage(parentPath)(ErrorMessage(msg))))
+            .left.map(msg => List(toFieldErrorMessage(parentPath)(Message(msg))))
         }
 
         val errorsOrValueSet = foldErrorsOrValues[Set, U](errorsOrValues, Set(), (e, s) => s + e)
@@ -83,6 +83,6 @@ case class SetField[T, U](
     }
   }
 
-  private def toFieldErrorMessage(parentPath: FieldPath)(errorMessage: ErrorMessage) =
+  private def toFieldErrorMessage(parentPath: FieldPath)(errorMessage: Message) =
     FieldErrorMessage(this, parentPath.append(name), errorMessage)
 }

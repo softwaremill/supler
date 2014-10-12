@@ -10,8 +10,8 @@ case class FormErrors(fieldErrors: FieldErrors) {
   private def generateFieldErrorJSON(fieldError: FieldErrorMessage) = {
     JObject(
       JField("field_path", JString(fieldError.path.toString)),
-      JField("error_key", JString(fieldError.errorMessage.key)),
-      JField("error_params", JArray(fieldError.errorMessage.params.map(p => JString(p.toString)).toList))
+      JField("error_key", JString(fieldError.message.key)),
+      JField("error_params", JArray(fieldError.message.params.map(p => JString(p.toString)).toList))
     )
   }
 }

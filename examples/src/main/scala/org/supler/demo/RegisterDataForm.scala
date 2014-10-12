@@ -1,8 +1,7 @@
 package org.supler.demo
 
-import org.supler.Supler
+import org.supler.{Message, Supler}
 import Supler._
-import org.supler.errors.ErrorMessage
 
 object RegisterDataForm {
   form[RegisterData](f => List(
@@ -13,7 +12,7 @@ object RegisterDataForm {
       .label("Password:")
       .validate(minLength(8)),
     f.field(_.confirmPasswd).label("Confirm password:")
-      .validate(custom((e, v) => v == e.passwd, (e, v) => ErrorMessage("Passwords must match!")))
+      .validate(custom((e, v) => v == e.passwd, (e, v) => Message("Passwords must match!")))
   ))
 }
 

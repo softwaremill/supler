@@ -34,7 +34,7 @@ case class BasicField[T, U](
     def valueMissing = v == null || v == None || v == ""
 
     val allVes = if (required && valueMissing) {
-      ErrorMessage("error_valueRequired") :: ves
+      Message("error_valueRequired") :: ves
     } else {
       ves
     }
@@ -78,7 +78,7 @@ case class BasicField[T, U](
           value = transformer.deserialize(jsonValue)
         } yield {
           value
-            .left.map(msg => List(toFieldErrorMessage(parentPath)(ErrorMessage(msg))))
+            .left.map(msg => List(toFieldErrorMessage(parentPath)(Message(msg))))
             .right.map(write(obj, _))
         }
     }
@@ -86,6 +86,6 @@ case class BasicField[T, U](
     appliedOpt.getOrElse(Right(obj))
   }
 
-  private def toFieldErrorMessage(parentPath: FieldPath)(errorMessage: ErrorMessage) =
+  private def toFieldErrorMessage(parentPath: FieldPath)(errorMessage: Message) =
     FieldErrorMessage(this, parentPath.append(name), errorMessage)
 }
