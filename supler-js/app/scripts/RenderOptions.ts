@@ -73,7 +73,7 @@ class DefaultRenderOptions implements RenderOptions {
     }
 
     renderStaticText(text) {
-        return '<div class="form-control-static">' + text + '</div>';
+        return HtmlUtil.renderTag('div', { 'class': 'form-control-static' }, text);
     }
 
     renderMultiChoiceCheckboxField(label, id, validationId, name, values, possibleValues, options, compact) {
@@ -102,71 +102,61 @@ class DefaultRenderOptions implements RenderOptions {
             labelPart = this.renderLabel(id, label) + '\n';
         }
 
-        return '<div class="form-group">' +
-            labelPart +
+        var divBody = labelPart +
             input +
             '\n' +
             this.renderValidation(validationId) +
-            '\n' +
-            '</div>';
+            '\n';
+
+        return HtmlUtil.renderTag('div', { 'class': 'form-group' }, divBody);
     }
 
     renderLabel(forId, label) {
-        return '<label for="' + forId + '">' + label + '</label>';
+        return HtmlUtil.renderTag('label', { 'for': forId }, label);
     }
 
     renderValidation(validationId) {
-        return '<div class="text-danger" id="' + validationId + '"></div>';
+        return HtmlUtil.renderTag('div', { 'class': 'text-danger', 'id': validationId });
     }
 
     renderSubformDecoration(subform, label, id, name) {
-        var html = '';
-        html += HtmlUtil.renderTag('fieldset', {'id': id, 'name': name }, false);
-        html += '\n';
-        html += '<legend>' + label + '</legend>\n';
+        var fieldsetBody = '\n';
+        fieldsetBody += HtmlUtil.renderTag('legend', {}, label);
+        fieldsetBody += subform;
 
-        html += subform;
-
-        html += '</fieldset>\n';
-        return html;
+        return HtmlUtil.renderTag('fieldset', {'id': id, 'name': name }, fieldsetBody);
     }
 
     renderSubformListElement(subformElement, options) {
-        var html = '';
         var optionsWithClass = Util.copyProperties({ 'class': 'well'}, options);
-        html += HtmlUtil.renderTag('div', optionsWithClass, false);
-        html += subformElement;
-        html += '</div>\n';
-        return html;
+        return HtmlUtil.renderTag('div', optionsWithClass, subformElement);
     }
 
     renderSubformTable(tableHeaders, cells, elementOptions) {
-        var html = '';
-        html += '<table class="table">\n';
-        html += this.renderSubformTableHeader(tableHeaders);
-        html += this.renderSubformTableBody(cells, elementOptions);
-        html += '</table>\n';
+        var tableBody = this.renderSubformTableHeader(tableHeaders);
+        tableBody += this.renderSubformTableBody(cells, elementOptions);
 
-        return html;
+        return HtmlUtil.renderTag('table', { 'class': 'table' }, tableBody);
     }
 
     private renderSubformTableHeader(tableHeaders) {
-        var html = '';
-        html += '<tr>';
-        tableHeaders.forEach((header) => html += '<th>' + header + '</th>');
-        html += '</tr>\n';
-        return html;
+        var trBody = '';
+        tableHeaders.forEach((header) => trBody += HtmlUtil.renderTag('th', {}, header));
+
+        return HtmlUtil.renderTag('tr', {}, trBody);
     }
 
     private renderSubformTableBody(cells, elementOptions) {
         var html = '';
         for (var i=0; i<cells.length; i++) {
             var row = cells[i];
-            html += HtmlUtil.renderTag('tr', elementOptions, false) + '\n';
+
+            var trBody = '';
             for (var j=0; j<row.length; j++) {
-                html += '<td>' + row[j] + '</td>\n';
+                trBody += HtmlUtil.renderTag('td', {}, row[j]);
             }
-            html += '</tr>\n';
+
+            html += HtmlUtil.renderTag('tr', elementOptions, trBody) + '\n';
         }
         return html;
     }
@@ -174,24 +164,22 @@ class DefaultRenderOptions implements RenderOptions {
     //
 
     renderHtmlInput(inputType, id, name, value, options) {
-        return HtmlUtil.renderTag('input', Util.copyProperties({ 'id': id, 'type': inputType, 'name': name, 'value': value }, options), true);
+        return HtmlUtil.renderTag('input', Util.copyProperties({ 'id': id, 'type': inputType, 'name': name, 'value': value }, options));
     }
 
     renderHtmlSelect(id, name, value, possibleValues, options) {
-        var html = '';
-        html += HtmlUtil.renderTag('select', Util.copyProperties({ 'id': id, 'name': name }, options), false);
-        html += '\n';
+        var selectBody = '';
         Util.foreach(possibleValues, (i, v) => {
-            var selected = '';
+            var optionOptions = { 'value': v.index };
             if (v.index === value) {
-                selected = ' selected ';
+                optionOptions['selected'] = 'selected';
             }
 
-            html += '<option value="' + v.index + '"' + selected + '>';
-            html += v.label;
-            html += '</option>\n';
+            selectBody += HtmlUtil.renderTag('option', optionOptions, v.label);
         });
-        html += '</select>\n';
+
+        var html = HtmlUtil.renderTag('select', Util.copyProperties({ 'id': id, 'name': name }, options), selectBody);
+        html += '\n';
         return html;
     }
 
@@ -206,10 +194,7 @@ class DefaultRenderOptions implements RenderOptions {
     }
 
     renderHtmlTextarea(id, name, value, options) {
-        var tag = HtmlUtil.renderTag('textarea', Util.copyProperties({ 'id': id, 'name': name }, options), false);
-        if (value) tag += value;
-        tag += '</textarea>';
-        return tag;
+        return HtmlUtil.renderTag('textarea', Util.copyProperties({ 'id': id, 'name': name }, options), value);
     }
 
     private renderCheckable(inputType: string, id: string, name: string, possibleValues: SelectValue[], options: any,
@@ -220,16 +205,17 @@ class DefaultRenderOptions implements RenderOptions {
             var checkableOptions = Util.copyProperties({}, options);
 
             // for checkables we need to remove the form-control default class or they look ugly
-            checkableOptions.class = checkableOptions.class.replace('form-control', '');
+            checkableOptions['class'] = checkableOptions['class'].replace('form-control', '');
 
             if (isChecked(v)) {
-                checkableOptions.checked = 'checked';
+                checkableOptions['checked'] = 'checked';
             }
 
-            html += '<div class="' + inputType + '"><label>\n';
-            html += this.renderHtmlInput(inputType, id + '.' + v.index, name, v.index, checkableOptions);
-            html += v.label;
-            html += '</label></div>\n';
+            var labelBody = this.renderHtmlInput(inputType, id + '.' + v.index, name, v.index, checkableOptions);
+            labelBody += HtmlUtil.renderTag('span', {}, v.label);
+
+            var divBody = HtmlUtil.renderTag('label', {}, labelBody);
+            html += HtmlUtil.renderTag('div', { 'class': inputType }, divBody);
         });
 
         return this.renderWithContainingElement(html, id, options);
@@ -239,9 +225,7 @@ class DefaultRenderOptions implements RenderOptions {
         // radio buttons and checkboxes need to be grouped inside an element with the form field's id and validation
         // id, so that it could be found e.g. during validation.
         var containerOptions = { 'id' : id, 'supler:validationId' : options[ SuplerAttributes.VALIDATION_ID ] };
-        var html = HtmlUtil.renderTag('span', containerOptions, false) + '\n';
-        html += body;
-        return html;
+        return HtmlUtil.renderTag('span', containerOptions, body);
     }
 
     //

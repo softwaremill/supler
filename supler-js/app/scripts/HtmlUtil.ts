@@ -1,17 +1,19 @@
 class HtmlUtil {
-    static renderTag(tagName, tagAttrs, voidTag) {
-        var r = "<" + tagName + " ";
+    static renderTag(tagName, tagAttrs, tagBody = null) {
+        var r = '<' + tagName + ' ';
         Util.foreach(tagAttrs, (tagAttrName, tagAttrValue) => {
-            if (tagAttrValue || tagAttrValue === 0 || tagAttrValue === "" || tagAttrValue === false) {
+            if (tagAttrValue || tagAttrValue === 0 || tagAttrValue === '' || tagAttrValue === false) {
                 r += tagAttrName + '="' + tagAttrValue + '" ';
             }
         });
 
-        if (voidTag) {
-            r += "/>";
-        } else {
-            r += ">";
+        r += '>';
+
+        if (tagBody) {
+            r += tagBody;
         }
+
+        r += '</' + tagName + '>';
 
         return r;
     }
