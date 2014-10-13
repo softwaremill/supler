@@ -20,7 +20,7 @@ renderSingleChoiceRadioField: function(label, id, name, value, options) {}
 renderSingleChoiceSelectField: function(label, id, name, value, options) {}
 
 // templates
-renderRhsField: function(renderInput, label, id) {}
+renderField: function(renderInput, label, id) {}
 renderLabel: function(forId, label) {}
 renderValidation: function() {}
 ````
