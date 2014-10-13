@@ -37,6 +37,7 @@ interface RenderOptions {
     renderHtmlSelect: (id: string, name: string, value: string, possibleValues: SelectValue[], options: any) => string
     renderHtmlRadios: (id: string, name: string, value: number, possibleValues: SelectValue[], options: any) => string
     renderHtmlCheckboxes: (id: string, name: string, values: number[], possibleValues: SelectValue[], options: any) => string
+    renderHtmlTextarea: (id: string, name: string, value: any, options: any) => string
 
     // misc
     defaultFieldOptions: () => any
@@ -64,10 +65,7 @@ class DefaultRenderOptions implements RenderOptions {
     }
 
     renderTextareaField(label, id, validationId, name, value, options, compact) {
-        var tag = HtmlUtil.renderTag('textarea', Util.copyProperties({ 'id': id, 'name': name }, options), false);
-        if (value) tag += value;
-        tag += '</textarea>';
-        return this.renderRhsField(tag, label, id, validationId, compact);
+        return this.renderRhsField(this.renderHtmlTextarea(id, name, value, options), label, id, validationId, compact);
     }
 
     renderStaticField(label, id, validationId, value, compact) {
@@ -205,6 +203,13 @@ class DefaultRenderOptions implements RenderOptions {
     renderHtmlCheckboxes(id, name, values, possibleValues, options) {
         return this.renderCheckable('checkbox', id, name, possibleValues, options,
             (v) => { return values.indexOf(v.index) >= 0; });
+    }
+
+    renderHtmlTextarea(id, name, value, options) {
+        var tag = HtmlUtil.renderTag('textarea', Util.copyProperties({ 'id': id, 'name': name }, options), false);
+        if (value) tag += value;
+        tag += '</textarea>';
+        return tag;
     }
 
     private renderCheckable(inputType: string, id: string, name: string, possibleValues: SelectValue[], options: any,
