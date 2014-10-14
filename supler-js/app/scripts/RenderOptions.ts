@@ -108,7 +108,7 @@ class DefaultRenderOptions implements RenderOptions {
             this.renderValidation(validationId) +
             '\n';
 
-        return HtmlUtil.renderTag('div', { 'class': 'form-group' }, divBody);
+        return HtmlUtil.renderTag('div', { 'class': 'form-group' }, divBody, false);
     }
 
     renderLabel(forId, label) {
@@ -124,26 +124,26 @@ class DefaultRenderOptions implements RenderOptions {
         fieldsetBody += HtmlUtil.renderTag('legend', {}, label);
         fieldsetBody += subform;
 
-        return HtmlUtil.renderTag('fieldset', {'id': id, 'name': name }, fieldsetBody);
+        return HtmlUtil.renderTag('fieldset', {'id': id, 'name': name }, fieldsetBody, false);
     }
 
     renderSubformListElement(subformElement, options) {
         var optionsWithClass = Util.copyProperties({ 'class': 'well'}, options);
-        return HtmlUtil.renderTag('div', optionsWithClass, subformElement);
+        return HtmlUtil.renderTag('div', optionsWithClass, subformElement, false);
     }
 
     renderSubformTable(tableHeaders, cells, elementOptions) {
         var tableBody = this.renderSubformTableHeader(tableHeaders);
         tableBody += this.renderSubformTableBody(cells, elementOptions);
 
-        return HtmlUtil.renderTag('table', { 'class': 'table' }, tableBody);
+        return HtmlUtil.renderTag('table', { 'class': 'table' }, tableBody, false);
     }
 
     private renderSubformTableHeader(tableHeaders) {
         var trBody = '';
         tableHeaders.forEach((header) => trBody += HtmlUtil.renderTag('th', {}, header));
 
-        return HtmlUtil.renderTag('tr', {}, trBody);
+        return HtmlUtil.renderTag('tr', {}, trBody, false);
     }
 
     private renderSubformTableBody(cells, elementOptions) {
@@ -153,10 +153,10 @@ class DefaultRenderOptions implements RenderOptions {
 
             var trBody = '';
             for (var j=0; j<row.length; j++) {
-                trBody += HtmlUtil.renderTag('td', {}, row[j]);
+                trBody += HtmlUtil.renderTag('td', {}, row[j], false);
             }
 
-            html += HtmlUtil.renderTag('tr', elementOptions, trBody) + '\n';
+            html += HtmlUtil.renderTag('tr', elementOptions, trBody, false) + '\n';
         }
         return html;
     }
@@ -178,7 +178,7 @@ class DefaultRenderOptions implements RenderOptions {
             selectBody += HtmlUtil.renderTag('option', optionOptions, v.label);
         });
 
-        var html = HtmlUtil.renderTag('select', Util.copyProperties({ 'id': id, 'name': name }, options), selectBody);
+        var html = HtmlUtil.renderTag('select', Util.copyProperties({ 'id': id, 'name': name }, options), selectBody, false);
         html += '\n';
         return html;
     }
@@ -214,8 +214,8 @@ class DefaultRenderOptions implements RenderOptions {
             var labelBody = this.renderHtmlInput(inputType, id + '.' + v.index, name, v.index, checkableOptions);
             labelBody += HtmlUtil.renderTag('span', {}, v.label);
 
-            var divBody = HtmlUtil.renderTag('label', {}, labelBody);
-            html += HtmlUtil.renderTag('div', { 'class': inputType }, divBody);
+            var divBody = HtmlUtil.renderTag('label', {}, labelBody, false);
+            html += HtmlUtil.renderTag('div', { 'class': inputType }, divBody, false);
         });
 
         return this.renderWithContainingElement(html, id, options);
@@ -225,7 +225,7 @@ class DefaultRenderOptions implements RenderOptions {
         // radio buttons and checkboxes need to be grouped inside an element with the form field's id and validation
         // id, so that it could be found e.g. during validation.
         var containerOptions = { 'id' : id, 'supler:validationId' : options[ SuplerAttributes.VALIDATION_ID ] };
-        return HtmlUtil.renderTag('span', containerOptions, body);
+        return HtmlUtil.renderTag('span', containerOptions, body, false);
     }
 
     //
