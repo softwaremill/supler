@@ -4,7 +4,7 @@ import org.json4s.JValue
 import org.json4s.JsonAST._
 import org.supler.transformation.FullTransformer
 import org.supler.{ValuesProvider, Message}
-import org.supler.errors.FieldPath
+import org.supler.errors.{PartiallyAppliedObj, FieldPath}
 
 import scala.concurrent.forkjoin.ThreadLocalRandom
 
@@ -37,5 +37,6 @@ case class StaticField[T](
 
   override def doValidate(parentPath: FieldPath, obj: T) = Nil
 
-  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) = Right(obj)
+  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
+    PartiallyAppliedObj.full(obj)
 }

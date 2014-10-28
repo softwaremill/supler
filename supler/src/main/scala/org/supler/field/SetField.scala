@@ -53,7 +53,9 @@ case class SetField[T, U](
     )
   }
 
-  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
+  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+    import PartiallyAppliedObj._
+
     valuesProvider match {
       case Some(vp) =>
         val possibleValues = vp(obj).lift
@@ -66,7 +68,7 @@ case class SetField[T, U](
           value
         }
 
-        Right(write(obj, values.toSet))
+        full(write(obj, values.toSet))
 
       case None =>
         val errorsOrValues = for {
@@ -77,9 +79,14 @@ case class SetField[T, U](
             .left.map(msg => List(toFieldErrorMessage(parentPath)(Message(msg))))
         }
 
-        val errorsOrValueSet = foldErrorsOrValues[Set, U](errorsOrValues, Set(), (e, s) => s + e)
+        val (errors, values) = errorsOrValues.foldLeft(Nil: FieldErrors, Set[U]()) {
+          case ((errors, values), errorOrValue) =>
+            errorOrValue.fold(
+              es => (es ++ errors, values),
+              v => (errors, values + v))
+        }
 
-        errorsOrValueSet.right.map(write(obj, _))
+        withErrors(errors, values).map(write(obj, _))
     }
   }
 

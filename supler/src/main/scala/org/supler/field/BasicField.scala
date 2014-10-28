@@ -62,7 +62,8 @@ case class BasicField[T, U](
     )
   }
 
-  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
+  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+    import PartiallyAppliedObj._
     val appliedOpt = valuesProvider match {
       case Some(vp) =>
         for {
@@ -70,20 +71,20 @@ case class BasicField[T, U](
           index <- jsonValue match { case JInt(index) => Some(index.intValue()); case _ => None }
           value <- vp(obj).lift(index.intValue())
         } yield {
-          Right(write(obj, value))
+          full(write(obj, value))
         }
       case None =>
         for {
           jsonValue <- jsonFields.get(name)
           value = transformer.deserialize(jsonValue)
         } yield {
-          value
-            .left.map(msg => List(toFieldErrorMessage(parentPath)(Message(msg))))
-            .right.map(write(obj, _))
+          value.fold(
+            msg => withErrors(List(toFieldErrorMessage(parentPath)(Message(msg))), obj),
+            value => full(write(obj, value)))
         }
     }
 
-    appliedOpt.getOrElse(Right(obj))
+    appliedOpt.getOrElse(full(obj))
   }
 
   private def toFieldErrorMessage(parentPath: FieldPath)(errorMessage: Message) =

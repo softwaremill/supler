@@ -6,7 +6,7 @@ import org.json4s.JsonAST.JField
 import org.json4s._
 import org.supler.field._
 import org.supler.transformation.FullTransformer
-import org.supler.errors.{FieldErrors, FieldPath, FieldErrorMessage, Validators}
+import org.supler.errors._
 
 import scala.language.experimental.macros
 
@@ -57,23 +57,17 @@ trait Row[T] {
 
   def ||(field: Field[T, _]): Row[T]
   
-  def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T]
+  def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T]
 
   def doValidate(parentPath: FieldPath, obj: T): FieldErrors
 }
 
 object Row {
   def applyValuesFromJSON[T](toRows: Iterable[Row[T]], parentPath: FieldPath, obj: T, 
-    jsonFields: Map[String, JValue]): Either[FieldErrors, T] = {
+    jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     
-    toRows.foldLeft[Either[FieldErrors, T]](Right(obj)) { (currentRes, row) =>
-      currentRes match {
-        case Left(errors) =>
-          // only accumulating errors, if any. Trying to apply on the raw object
-          val newErrors = row.applyValuesFromJSON(parentPath, obj, jsonFields).fold(identity, _ => Nil)
-          Left(errors ++ newErrors)
-        case Right(currentObj) => row.applyValuesFromJSON(parentPath, currentObj, jsonFields)
-      }
+    toRows.foldLeft[PartiallyAppliedObj[T]](PartiallyAppliedObj.full(obj)) { (pao, row) =>
+      pao.flatMap(row.applyValuesFromJSON(parentPath, _, jsonFields))
     }
   }
 }
@@ -84,7 +78,7 @@ case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   override def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] =
     fields.flatMap(_.doValidate(parentPath, obj))
 
-  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Either[FieldErrors, T] =
+  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] =
     Row.applyValuesFromJSON(fields, parentPath, obj, jsonFields)
 
   override def generateJSON(obj: T) = fields.flatMap(_.generateJSON(obj))

@@ -29,17 +29,15 @@ case class SubformField[T, U](
     )))
   }
 
-  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) = {
-    val errorsOrValues = for {
+  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+    val paos = for {
       JArray(formJValues) <- jsonFields.get(name).toList
       (formJValue, i) <- formJValues.zipWithIndex
     } yield {
       embeddedForm.applyValuesFromJSON(parentPath.appendWithIndex(name, i), createEmpty(), formJValue)
     }
 
-    val errorsOrValueList = foldErrorsOrValues[List, U](errorsOrValues, Nil, _ :: _)
-
-    errorsOrValueList.right.map(vs => write(obj, vs.reverse))
+    PartiallyAppliedObj.flatten(paos).map(write(obj, _))
   }
 
   override def doValidate(parentPath: FieldPath, obj: T) = read(obj).zipWithIndex.flatMap { case (el, i) =>
