@@ -21,22 +21,20 @@ class SuplerForm {
         Util.copyProperties(this.validatorRenderOptions, customOptions);
     }
 
-    render(formJson) {
-        var result = new CreateFormFromJson(this.renderOptions, this.i18n, this.validatorFnFactories).renderForm(formJson);
+    /**
+     * @returns False if there were validation errors.
+     */
+    render(json) {
+        var result = new CreateFormFromJson(this.renderOptions, this.i18n, this.validatorFnFactories).renderForm(json.main_form);
         this.container.innerHTML = result.html;
         this.validation = new Validation(this.container, result.validatorDictionary,
             this.validatorRenderOptions, this.i18n);
+
+        return this.validation.processServer(json.errors)
     }
 
     getValue() {
         return ReadFormValues.getValueFrom(this.container);
-    }
-
-    /**
-     * @returns True if there were validation errors.
-     */
-    processServerFormErrors(validationJson): boolean {
-        return this.validation.processServer(validationJson);
     }
 
     /**

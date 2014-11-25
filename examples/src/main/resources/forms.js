@@ -18,7 +18,7 @@ function showForm(formJson) {
         label_lego_setnumber: "Set number",
         label_lego_age: "Age"
     });
-    form.render(formJson.main_form);
+    form.render(formJson);
 }
 
 var feedback = $('#feedback');
@@ -38,10 +38,11 @@ $('#submit').click(function() {
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
             success: function (data) {
-                if (form.processServerFormErrors(data.errors)) {
-                    feedback.html('There are server-side apply or validation errors');
-                } else {
+                if (data.msg) {
                     feedback.html(data.msg);
+                } else {
+                    feedback.html('There are server-side apply or validation errors');
+                    form.render(data);
                 }
                 feedback.show();
             }
