@@ -57,17 +57,17 @@ trait Row[T] {
 
   def ||(field: Field[T, _]): Row[T]
   
-  def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T]
+  def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T]
 
   def doValidate(parentPath: FieldPath, obj: T): FieldErrors
 }
 
 object Row {
-  def applyValuesFromJSON[T](toRows: Iterable[Row[T]], parentPath: FieldPath, obj: T, 
+  def applyJSONValues[T](toRows: Iterable[Row[T]], parentPath: FieldPath, obj: T, 
     jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     
     toRows.foldLeft[PartiallyAppliedObj[T]](PartiallyAppliedObj.full(obj)) { (pao, row) =>
-      pao.flatMap(row.applyValuesFromJSON(parentPath, _, jsonFields))
+      pao.flatMap(row.applyJSONValues(parentPath, _, jsonFields))
     }
   }
 }
@@ -78,8 +78,8 @@ case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   override def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] =
     fields.flatMap(_.doValidate(parentPath, obj))
 
-  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] =
-    Row.applyValuesFromJSON(fields, parentPath, obj, jsonFields)
+  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] =
+    Row.applyJSONValues(fields, parentPath, obj, jsonFields)
 
   override def generateJSON(obj: T) = fields.flatMap(_.generateJSON(obj))
 }

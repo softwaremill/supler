@@ -3,7 +3,7 @@ package org.supler.demo
 import akka.actor.ActorSystem
 import org.joda.time.DateTime
 import org.json4s.JValue
-import org.json4s.JsonAST.{JObject, JField, JString}
+import org.json4s.JsonAST.{JBool, JObject, JField, JString}
 import spray.http.{StatusCodes, MediaTypes}
 import spray.httpx.Json4sSupport
 import spray.routing.{Route, SimpleRoutingApp}
@@ -37,20 +37,24 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
     path("rest" / "form1.json") {
       getJson {
         complete {
-          PersonForm.personForm.generateJSON(person)
+          PersonForm.personForm(person).generateJSON
         }
       } ~
       post {
         entity(as[JValue]) { jvalue =>
           complete {
-            PersonForm.personForm.applyValuesFromJSONAndValidate(person, jvalue) match {
-              case Left(errors) =>
-                JObject(JField("form_errors", errors.generateJSON))
-              case Right(newPerson) =>
-                person = newPerson
-                println(s"Persisted: $person")
+            val validated = PersonForm.personForm(person)
+              .applyJSONValues(jvalue)
+              .doValidate
 
-                JObject(JField("msg", JString("Persisted: " + person)))
+            if (validated.hasErrors) {
+              validated.generateJSON
+            } else {
+              person = validated.obj
+              println(s"Persisted: $person")
+
+              JObject(
+                JField("msg", JString("Persisted: " + person)))
             }
           }
         }

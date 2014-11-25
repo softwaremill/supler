@@ -37,6 +37,6 @@ case class StaticField[T](
 
   override def doValidate(parentPath: FieldPath, obj: T) = Nil
 
-  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
+  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
     PartiallyAppliedObj.full(obj)
 }

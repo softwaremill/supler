@@ -1,42 +1,23 @@
 package org.supler
 
-import org.json4s.JsonAST.{JField, JObject}
+import org.json4s.JsonAST.JObject
 import org.json4s._
 import org.supler.errors._
 
 case class Form[T](rows: List[Row[T]]) {
-  def doValidate(obj: T): Option[FormErrors] = {
-    val fe = doValidate(EmptyPath, obj)
-    if (fe.size > 0) Some(FormErrors(fe)) else None
-  }
+  def apply(obj: T): FormWithObject[T] = InitialFormWithObject(this, obj)
 
   private[supler] def doValidate(parentPath: FieldPath, obj: T): FieldErrors =
     rows.flatMap(_.doValidate(parentPath, obj))
 
-  def generateJSON(obj: T) = {
-    JObject(
-      JField("fields", JObject(rows.flatMap(_.generateJSON(obj))))
-    )
-  }
+  private[supler] def generateJSON(obj: T) = JObject(
+    JField("fields", JObject(rows.flatMap(_.generateJSON(obj))))
+  )
 
-  def applyValuesFromJSON(obj: T, jvalue: JValue): Either[FormErrors, T] =
-    applyValuesFromJSON(EmptyPath, obj, jvalue).toEither.left.map(FormErrors)
-
-  private[supler] def applyValuesFromJSON(parentPath: FieldPath, obj: T, jvalue: JValue): PartiallyAppliedObj[T] = {
+  private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jvalue: JValue): PartiallyAppliedObj[T] = {
     jvalue match {
-      case JObject(jsonFields) => Row.applyValuesFromJSON(rows, parentPath, obj, jsonFields.toMap)
+      case JObject(jsonFields) => Row.applyJSONValues(rows, parentPath, obj, jsonFields.toMap)
       case _ => PartiallyAppliedObj.full(obj)
-    }
-  }
-
-  def applyValuesFromJSONAndValidate(obj: T, jvalue: JValue): Either[FormErrors, T] = {
-    applyValuesFromJSON(obj, jvalue) match {
-      case right@Right(appliedObj) =>
-        doValidate(appliedObj) match {
-          case None => right
-          case Some(errors) => Left(errors)
-        }
-      case left => left
     }
   }
 

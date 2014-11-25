@@ -155,9 +155,9 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     val p = Person("Mary", None, f3 = false, Some("Nothing"))
 
     // when
-    val p1 = form.applyValuesFromJSON(p, jsonInOrder)
-    val p2 = form.applyValuesFromJSON(p, jsonOutOfOrder)
-    val p3 = form.applyValuesFromJSON(p, jsonPartial)
+    val p1 = form(p).applyJSONValues(jsonInOrder)
+    val p2 = form(p).applyJSONValues(jsonOutOfOrder)
+    val p3 = form(p).applyJSONValues(jsonPartial)
 
     // then
     p1 should be (Right(Person("John", Some(10), f3 = true, Some("Something"))))
@@ -270,7 +270,7 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     )
 
     // when
-    val p = personForm.applyValuesFromJSON(Person("", Nil), jsonInOrder)
+    val p = personForm(Person("", Nil)).applyJSONValues(jsonInOrder)
 
     // then
     p should be (Right(Person("John", List(Car("m1", 10), Car("m2", 20)))))

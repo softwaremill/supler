@@ -29,12 +29,12 @@ case class SubformField[T, U](
     )))
   }
 
-  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     val paos = for {
       JArray(formJValues) <- jsonFields.get(name).toList
       (formJValue, i) <- formJValues.zipWithIndex
     } yield {
-      embeddedForm.applyValuesFromJSON(parentPath.appendWithIndex(name, i), createEmpty(), formJValue)
+      embeddedForm.applyJSONValues(parentPath.appendWithIndex(name, i), createEmpty(), formJValue)
     }
 
     PartiallyAppliedObj.flatten(paos).map(write(obj, _))

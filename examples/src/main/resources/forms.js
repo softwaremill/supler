@@ -18,7 +18,7 @@ function showForm(formJson) {
         label_lego_setnumber: "Set number",
         label_lego_age: "Age"
     });
-    form.render(formJson);
+    form.render(formJson.main_form);
 }
 
 var feedback = $('#feedback');
@@ -38,7 +38,7 @@ $('#submit').click(function() {
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
             success: function (data) {
-                if (form.processServerFormErrors(data.form_errors)) {
+                if (form.processServerFormErrors(data.errors)) {
                     feedback.html('There are server-side apply or validation errors');
                 } else {
                     feedback.html(data.msg);

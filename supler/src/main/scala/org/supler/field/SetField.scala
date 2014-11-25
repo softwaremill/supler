@@ -53,7 +53,7 @@ case class SetField[T, U](
     )
   }
 
-  override def applyValuesFromJSON(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     import PartiallyAppliedObj._
 
     valuesProvider match {
