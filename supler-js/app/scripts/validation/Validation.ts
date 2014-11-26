@@ -50,13 +50,14 @@ class Validation {
         var removeFn = this.removeValidationFnDictionary[elementId];
         if (removeFn) removeFn();
 
-        return this.doProcessClientSingle(elementId, this.elementDictionary[elementId]);
+        var validator = this.elementDictionary[elementId];
+        if (validator) return this.doProcessClientSingle(elementId, validator); else return false;
     }
 
     private doProcessClientSingle(elementId: string, validator: ElementValidator): boolean {
         var formElement = document.getElementById(elementId);
         var hasErrors = false;
-        if (formElement && validator) {
+        if (formElement) {
             var validationElement = this.lookupValidationElement(formElement);
 
             var errors = validator.validate(formElement);
