@@ -1,5 +1,5 @@
 class Validation {
-    private removeValidationErrorsFns: { (): void } [] = [];
+    private removeValidationFnDictionary: RemoveValidationFnDictionary = {};
 
     constructor(private elementSearch: ElementSearch,
                 private elementDictionary: ElementDictionary,
@@ -37,18 +37,35 @@ class Validation {
         var hasErrors = false;
 
         Util.foreach(this.elementDictionary, (elementId: string, validator: ElementValidator) => {
-            var formElement = document.getElementById(elementId);
-            if (formElement) {
-                var validationElement = this.lookupValidationElement(formElement);
-
-                var errors = validator.validate(formElement);
-
-                for (var i = 0; i < errors.length; i++) {
-                    this.appendValidation(errors[i], validationElement, formElement);
-                    hasErrors = true;
-                }
-            }
+            hasErrors = hasErrors || this.doProcessClientSingle(elementId, validator);
         });
+
+        return hasErrors;
+    }
+
+    /**
+     * @returns True if there were validation errors.
+     */
+    processClientSingle(elementId: string): boolean {
+        var removeFn = this.removeValidationFnDictionary[elementId];
+        if (removeFn) removeFn();
+
+        return this.doProcessClientSingle(elementId, this.elementDictionary[elementId]);
+    }
+
+    private doProcessClientSingle(elementId: string, validator: ElementValidator): boolean {
+        var formElement = document.getElementById(elementId);
+        var hasErrors = false;
+        if (formElement && validator) {
+            var validationElement = this.lookupValidationElement(formElement);
+
+            var errors = validator.validate(formElement);
+
+            for (var i = 0; i < errors.length; i++) {
+                this.appendValidation(errors[i], validationElement, formElement);
+                hasErrors = true;
+            }
+        }
 
         return hasErrors;
     }
@@ -59,18 +76,22 @@ class Validation {
     }
 
     private removeValidationErrors() {
-        for (var i=0; i<this.removeValidationErrorsFns.length; i++) {
-            this.removeValidationErrorsFns[i]();
-        }
+        Util.foreach(this.removeValidationFnDictionary, (elementId: string, removeFn: () => void) => {
+            removeFn();
+        });
 
-        this.removeValidationErrorsFns = [];
+        this.removeValidationFnDictionary = {};
     }
 
     private appendValidation(text: string, validationElement: HTMLElement, formElement: HTMLElement) {
         this.validatorRenderOptions.appendValidation(text, validationElement, formElement);
 
-        this.removeValidationErrorsFns.push(() => {
+        this.removeValidationFnDictionary[formElement.id] = () => {
             this.validatorRenderOptions.removeValidation(validationElement, formElement);
-        });
+        };
     }
+}
+
+interface RemoveValidationFnDictionary {
+    [ elementId: string ]: () => void
 }

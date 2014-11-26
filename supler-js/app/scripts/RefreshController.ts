@@ -2,17 +2,19 @@ class RefreshController {
     constructor(private suplerForm: SuplerForm,
                 private elementDictionary: ElementDictionary,
                 private options: RefreshControllerOptions,
-                private elementSearch: ElementSearch) {}
+                private elementSearch: ElementSearch,
+                private validation: Validation) {}
 
     attachRefreshListeners() {
         Util.foreach(this.elementDictionary, (elementId: string, validator: ElementValidator) => {
             var formElement = document.getElementById(elementId);
             if (formElement && formElement.nodeName != "FIELDSET") {
                 formElement.onchange = () => {
-
-                    this.options.refreshFormFunction(
-                        this.suplerForm.getValue(),
-                        this.refreshSuccessFn());
+                    if (!this.validation.processClientSingle(elementId)) {
+                        this.options.refreshFormFunction(
+                            this.suplerForm.getValue(),
+                            this.refreshSuccessFn());
+                    }
                 }
             }
         });
