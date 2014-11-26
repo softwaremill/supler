@@ -38,6 +38,17 @@ trait FormWithObject[T] {
       JField("errors", JArray(allErrors.map(_.generateJSON)))
     )
   }
+
+  /**
+   * Shorthand for refreshing a form basing on new field values.
+   * Calls: apply, validation (only filled) and generate json.
+   */
+  def refresh(jvalue: JValue): JValue = {
+    this
+      .applyJSONValues(jvalue)
+      .doValidate(ValidationMode.OnlyFilled)
+      .generateJSON
+  }
 }
 
 trait ExposeErrors[T] extends FormWithObject[T] {

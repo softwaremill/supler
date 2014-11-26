@@ -63,10 +63,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
       put {
         entity(as[JValue]) { jvalue =>
           complete {
-            PersonForm.personForm(person)
-              .applyJSONValues(jvalue)
-              .doValidate(ValidationMode.OnlyFilled)
-              .generateJSON
+            PersonForm.personForm(person).refresh
           }
         }
       }
