@@ -1,8 +1,8 @@
 class ElementSearch {
     constructor(private container: HTMLElement) {}
 
-    byPath(path: string[]): HTMLElement {
-        return this.insideByPath(this.container, path);
+    byPath(path: string): HTMLElement {
+        return this.insideByPath(this.container, path.split("."));
     }
 
     private insideByPath(inside: HTMLElement, path: string[]): HTMLElement {

@@ -12,4 +12,5 @@ class SuplerAttributes {
     static MULTIPLE = 'supler:multiple';
     static FIELD_NAME = 'supler:fieldName';
     static VALIDATION_ID = 'supler:validationId';
+    static PATH = 'supler:path';
 }

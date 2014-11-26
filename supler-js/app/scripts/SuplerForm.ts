@@ -33,7 +33,7 @@ class SuplerForm {
         this.validation = new Validation(this.elementSearch, result.elementDictionary,
             this.validatorRenderOptions, this.i18n);
 
-        new RefreshController(this, result.elementDictionary, this.refreshControllerOptions)
+        new RefreshController(this, result.elementDictionary, this.refreshControllerOptions, this.elementSearch)
             .attachRefreshListeners();
 
         this.validation.processServer(json.errors)

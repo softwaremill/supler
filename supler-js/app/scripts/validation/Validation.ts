@@ -16,7 +16,7 @@ class Validation {
             for (var i = 0; i < validationJson.length; i++) {
                 var validationErrorJson = validationJson[i];
                 var fieldPath = <string>validationErrorJson.field_path;
-                var formElement = this.elementSearch.byPath(fieldPath.split("."));
+                var formElement = this.elementSearch.byPath(fieldPath);
                 var validationElement = this.lookupValidationElement(formElement);
 
                 this.appendValidation(
