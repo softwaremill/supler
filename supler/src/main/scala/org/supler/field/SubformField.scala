@@ -2,6 +2,7 @@ package org.supler.field
 
 import org.json4s.JsonAST.{JArray, JField, JObject, JString}
 import org.json4s._
+import org.supler.errors.ValidationMode._
 import org.supler.errors._
 import org.supler.Form
 
@@ -43,7 +44,8 @@ case class SubformField[T, U](
     PartiallyAppliedObj.flatten(paos).map(write(obj, _))
   }
 
-  override def doValidate(parentPath: FieldPath, obj: T) = read(obj).zipWithIndex.flatMap { case (el, i) =>
-    embeddedForm.doValidate(parentPath.appendWithIndex(name, i), el)
-  }
+  override def doValidate(parentPath: FieldPath, obj: T, mode: ValidationMode) =
+    read(obj).zipWithIndex.flatMap { case (el, i) =>
+      embeddedForm.doValidate(parentPath.appendWithIndex(name, i), el, mode)
+    }
 }

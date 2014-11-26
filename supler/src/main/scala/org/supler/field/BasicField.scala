@@ -2,6 +2,7 @@ package org.supler.field
 
 import org.json4s.JsonAST._
 import org.supler._
+import org.supler.errors.ValidationMode._
 import org.supler.errors._
 import org.supler.transformation.FullTransformer
 
@@ -27,19 +28,21 @@ case class BasicField[T, U](
     case None => this.copy(valuesProvider = Some(values))
   }
 
-  override def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] = {
+  override def doValidate(parentPath: FieldPath, obj: T, mode: ValidationMode): List[FieldErrorMessage] = {
     val v = read(obj)
-    val ves = validators.flatMap(_.doValidate(obj, v))
+    val valueMissing = v == null || v == None || v == ""
 
-    def valueMissing = v == null || v == None || v == ""
+    if (valueMissing && mode == ValidationMode.OnlyFilled) Nil else {
+      val ves = if (v != null) validators.flatMap(_.doValidate(obj, v)) else Nil
 
-    val allVes = if (required && valueMissing) {
-      Message("error_valueRequired") :: ves
-    } else {
-      ves
+      val allVes = if (required && valueMissing) {
+        Message("error_valueRequired") :: ves
+      } else {
+        ves
+      }
+
+      allVes.map(toFieldErrorMessage(parentPath))
     }
-
-    allVes.map(toFieldErrorMessage(parentPath))
   }
 
   protected def generateJSONWithValuesProvider(obj: T, vp: ValuesProvider[T, U]) = {

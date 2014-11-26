@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import org.joda.time.DateTime
 import org.json4s.JValue
 import org.json4s.JsonAST.{JField, JObject, JString}
+import org.supler.errors.ValidationMode
 import spray.http.MediaTypes
 import spray.http.StatusCodes._
 import spray.httpx.Json4sSupport
@@ -45,7 +46,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
           complete {
             val validated = PersonForm.personForm(person)
               .applyJSONValues(jvalue)
-              .doValidate
+              .doValidate()
 
             if (validated.hasErrors) {
               validated.generateJSON
@@ -64,7 +65,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
           complete {
             PersonForm.personForm(person)
               .applyJSONValues(jvalue)
-              .doValidate
+              .doValidate(ValidationMode.OnlyFilled)
               .generateJSON
           }
         }

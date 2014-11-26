@@ -2,7 +2,8 @@ package org.supler
 
 import org.json4s.JValue
 import org.json4s.JsonAST.{JArray, JField, JObject}
-import org.supler.errors.{EmptyPath, FieldErrors}
+import org.supler.errors.ValidationMode._
+import org.supler.errors.{ValidationMode, EmptyPath, FieldErrors}
 
 trait FormWithObject[T] {
   def obj: T
@@ -21,9 +22,9 @@ trait FormWithObject[T] {
     }
   }
 
-  def doValidate: ValidatedFormWithObject[T] = {
+  def doValidate(mode: ValidationMode = ValidationMode.All): ValidatedFormWithObject[T] = {
     val currentApplyErrors = applyErrors
-    val newValidationErrors = form.doValidate(EmptyPath, obj)
+    val newValidationErrors = form.doValidate(EmptyPath, obj, mode)
 
     new ValidatedFormWithObject(form, obj) {
       override protected def applyErrors = currentApplyErrors

@@ -3,6 +3,7 @@ package org.supler.field
 import org.json4s.JsonAST.JField
 import org.json4s._
 import org.supler._
+import org.supler.errors.ValidationMode._
 import org.supler.errors._
 import org.supler.transformation.FullTransformer
 
@@ -27,7 +28,7 @@ case class SetField[T, U](
     case None => this.copy(valuesProvider = Some(values))
   }
 
-  override def doValidate(parentPath: FieldPath, obj: T): List[FieldErrorMessage] = {
+  override def doValidate(parentPath: FieldPath, obj: T, mode: ValidationMode): List[FieldErrorMessage] = {
     val v = read(obj)
     val ves = validators.flatMap(_.doValidate(obj, v))
     ves.map(toFieldErrorMessage(parentPath))

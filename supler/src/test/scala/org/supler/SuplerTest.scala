@@ -2,7 +2,7 @@ package org.supler
 
 import org.json4s.JsonAST._
 import org.scalatest.{FlatSpec, ShouldMatchers}
-import org.supler.errors.EmptyPath
+import org.supler.errors.{ValidationMode, EmptyPath}
 
 class SuplerTest extends FlatSpec with ShouldMatchers {
   "field" should "create a variable field representation" in {
@@ -105,21 +105,49 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     // then
     import PersonMeta._
 
-    f1Field.doValidate(EmptyPath, p1).size should be (0)
-    f1Field.doValidate(EmptyPath, p2).size should be (1)
-    f1Field.doValidate(EmptyPath, p3).size should be (1)
+    f1Field.doValidate(EmptyPath, p1, ValidationMode.All).size should be (0)
+    f1Field.doValidate(EmptyPath, p2, ValidationMode.All).size should be (1)
+    f1Field.doValidate(EmptyPath, p3, ValidationMode.All).size should be (1)
 
-    f2Field.doValidate(EmptyPath, p1).size should be (0)
-    f2Field.doValidate(EmptyPath, p2).size should be (0)
-    f2Field.doValidate(EmptyPath, p3).size should be (0)
+    f2Field.doValidate(EmptyPath, p1, ValidationMode.All).size should be (0)
+    f2Field.doValidate(EmptyPath, p2, ValidationMode.All).size should be (0)
+    f2Field.doValidate(EmptyPath, p3, ValidationMode.All).size should be (0)
 
-    f3Field.doValidate(EmptyPath, p1).size should be (0)
-    f3Field.doValidate(EmptyPath, p2).size should be (0)
-    f3Field.doValidate(EmptyPath, p3).size should be (0)
+    f3Field.doValidate(EmptyPath, p1, ValidationMode.All).size should be (0)
+    f3Field.doValidate(EmptyPath, p2, ValidationMode.All).size should be (0)
+    f3Field.doValidate(EmptyPath, p3, ValidationMode.All).size should be (0)
 
-    f4Field.doValidate(EmptyPath, p1).size should be (0)
-    f4Field.doValidate(EmptyPath, p2).size should be (0)
-    f4Field.doValidate(EmptyPath, p3).size should be (0)
+    f4Field.doValidate(EmptyPath, p1, ValidationMode.All).size should be (0)
+    f4Field.doValidate(EmptyPath, p2, ValidationMode.All).size should be (0)
+    f4Field.doValidate(EmptyPath, p3, ValidationMode.All).size should be (0)
+  }
+
+  "field" should "not validate empty fields if validating only filled" in {
+    // given
+    case class Person(f1: String)
+
+    val p1 = Person("aaaa")
+    val p2 = Person("aa")
+    val p3 = Person("")
+    val p4 = Person(null)
+
+    // when
+    object PersonMeta extends Supler[Person] {
+      val f1Field = field(_.f1).validate(minLength(3))
+    }
+
+    // then
+    import PersonMeta._
+
+    f1Field.doValidate(EmptyPath, p1, ValidationMode.All).size should be (0)
+    f1Field.doValidate(EmptyPath, p2, ValidationMode.All).size should be (1)
+    f1Field.doValidate(EmptyPath, p3, ValidationMode.All).size should be (2)
+    f1Field.doValidate(EmptyPath, p4, ValidationMode.All).size should be (1)
+
+    f1Field.doValidate(EmptyPath, p1, ValidationMode.OnlyFilled).size should be (0)
+    f1Field.doValidate(EmptyPath, p2, ValidationMode.OnlyFilled).size should be (1)
+    f1Field.doValidate(EmptyPath, p3, ValidationMode.OnlyFilled).size should be (0)
+    f1Field.doValidate(EmptyPath, p4, ValidationMode.OnlyFilled).size should be (0)
   }
 
   "form" should "apply json values to the entity given" in {
@@ -155,14 +183,14 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     val p = Person("Mary", None, f3 = false, Some("Nothing"))
 
     // when
-    val p1 = form(p).applyJSONValues(jsonInOrder)
-    val p2 = form(p).applyJSONValues(jsonOutOfOrder)
-    val p3 = form(p).applyJSONValues(jsonPartial)
+    val p1 = form(p).applyJSONValues(jsonInOrder).obj
+    val p2 = form(p).applyJSONValues(jsonOutOfOrder).obj
+    val p3 = form(p).applyJSONValues(jsonPartial).obj
 
     // then
-    p1 should be (Right(Person("John", Some(10), f3 = true, Some("Something"))))
-    p2 should be (Right(Person("John", Some(10), f3 = true, None)))
-    p3 should be (Right(Person("John", Some(10), f3 = false, Some("Nothing"))))
+    p1 should be (Person("John", Some(10), f3 = true, Some("Something")))
+    p2 should be (Person("John", Some(10), f3 = true, None))
+    p3 should be (Person("John", Some(10), f3 = false, Some("Nothing")))
   }
 
   /*"form" should "create a new entity based on the json" in {
@@ -270,9 +298,10 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     )
 
     // when
-    val p = personForm(Person("", Nil)).applyJSONValues(jsonInOrder)
+    val result = personForm(Person("", Nil)).applyJSONValues(jsonInOrder)
 
     // then
-    p should be (Right(Person("John", List(Car("m1", 10), Car("m2", 20)))))
+    result.errors should be ('empty)
+    result.obj should be (Person("John", List(Car("m1", 10), Car("m2", 20))))
   }
 }
