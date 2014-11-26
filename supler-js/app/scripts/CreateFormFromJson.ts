@@ -6,27 +6,27 @@ class CreateFormFromJson {
     renderForm(formJson): RenderFormResult {
         var fields = formJson.fields;
         var html = '';
-        var validatorDictionary: ElementValidatorDictionary = {};
+        var elementDictionary: ElementDictionary = {};
         Util.foreach(fields, (field, fieldJson) => {
-            var fieldResult = this.fieldFromJson(field, fieldJson, validatorDictionary, false);
+            var fieldResult = this.fieldFromJson(field, fieldJson, elementDictionary, false);
             if (fieldResult) {
                 html += fieldResult + '\n';
             }
         });
 
-        return new RenderFormResult(html, validatorDictionary);
+        return new RenderFormResult(html, elementDictionary);
     }
 
-    private fieldFromJson(fieldName: string, fieldJson: any, validatorDictionary: ElementValidatorDictionary,
+    private fieldFromJson(fieldName: string, fieldJson: any, elementDictionary: ElementDictionary,
         compact: boolean): string {
 
         var id = this.nextId();
         var validationId = this.nextId();
 
-        var html = this.fieldHtmlFromJson(id, validationId, fieldName, fieldJson, validatorDictionary, compact);
+        var html = this.fieldHtmlFromJson(id, validationId, fieldName, fieldJson, elementDictionary, compact);
 
         if (html) {
-            validatorDictionary[id] = new ElementValidator(this.fieldValidatorFns(fieldJson));
+            elementDictionary[id] = new ElementValidator(this.fieldValidatorFns(fieldJson));
             return html;
         } else {
             return null;
@@ -52,7 +52,7 @@ class CreateFormFromJson {
     }
 
     private fieldHtmlFromJson(id: string, validationId: string, fieldName: string, fieldJson: any,
-        validatorDictionary: ElementValidatorDictionary, compact: boolean): string {
+        elementDictionary: ElementDictionary, compact: boolean): string {
 
         var fieldOptions = Util.copyProperties({
             'supler:fieldName': fieldName,
@@ -77,7 +77,7 @@ class CreateFormFromJson {
                 return this.selectFieldFromJson(label, id, validationId, fieldName, fieldJson, fieldOptions, compact);
 
             case FieldTypes.SUBFORM:
-                return this.subformFieldFromJson(label, id, fieldName, fieldJson, validatorDictionary);
+                return this.subformFieldFromJson(label, id, fieldName, fieldJson, elementDictionary);
 
             case FieldTypes.STATIC:
                 return this.staticFieldFromJson(label, id, validationId, fieldJson, compact);
@@ -137,7 +137,7 @@ class CreateFormFromJson {
         }
     }
 
-    private subformFieldFromJson(label, id, fieldName, fieldJson, validatorDictionary) {
+    private subformFieldFromJson(label, id, fieldName, fieldJson, elementDictionary) {
         var subformHtml = '';
         var options = {
             'supler:fieldType': FieldTypes.SUBFORM,
@@ -147,7 +147,7 @@ class CreateFormFromJson {
         if (this.getRenderHintName(fieldJson) === 'list') {
             for (var k in fieldJson.value) {
                 var subformResult = this.renderForm(fieldJson.value[k]);
-                Util.copyProperties(validatorDictionary, subformResult.validatorDictionary);
+                Util.copyProperties(elementDictionary, subformResult.elementDictionary);
 
                 subformHtml += this.renderOptions.renderSubformListElement(subformResult.html, options);
             }
@@ -161,7 +161,7 @@ class CreateFormFromJson {
 
                 var subfieldsJson = fieldJson.value[i].fields;
                 Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
-                    cells[i][j] = this.fieldFromJson(subfield, subfieldJson, validatorDictionary, true);
+                    cells[i][j] = this.fieldFromJson(subfield, subfieldJson, elementDictionary, true);
                     j += 1;
                 });
             }
@@ -208,5 +208,5 @@ class CreateFormFromJson {
 }
 
 class RenderFormResult {
-    constructor(public html: string, public validatorDictionary: ElementValidatorDictionary) {}
+    constructor(public html: string, public elementDictionary: ElementDictionary) {}
 }

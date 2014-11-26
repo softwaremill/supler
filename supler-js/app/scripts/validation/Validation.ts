@@ -2,7 +2,7 @@ class Validation {
     private removeValidationErrorsFns: { (): void } [] = [];
 
     constructor(private container: HTMLElement,
-                private validatorDictionary: ElementValidatorDictionary,
+                private elementDictionary: ElementDictionary,
                 private validatorRenderOptions: ValidatorRenderOptions,
                 private i18n: I18n) {}
 
@@ -36,7 +36,7 @@ class Validation {
 
         var hasErrors = false;
 
-        Util.foreach(this.validatorDictionary, (elementId: string, validator: ElementValidator) => {
+        Util.foreach(this.elementDictionary, (elementId: string, validator: ElementValidator) => {
             var formElement = document.getElementById(elementId);
             if (formElement) {
                 var validationElement = this.lookupValidationElement(formElement);

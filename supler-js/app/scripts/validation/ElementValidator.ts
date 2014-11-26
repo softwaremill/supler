@@ -15,7 +15,3 @@ class ElementValidator {
         return errors;
     }
 }
-
-interface ElementValidatorDictionary {
-    [ elementId: string ]: ElementValidator
-}
