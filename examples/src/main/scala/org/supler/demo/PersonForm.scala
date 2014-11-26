@@ -16,7 +16,7 @@ object PersonForm {
 
   val carForm = form[Car](f => List(
     f.field(_.make).possibleValues(_ => carMakesAndModels.keys.toList).label("Make"),
-    //f.field(_.model).use(dataProvider(car => carMakesAndModels(car.make))),
+    f.field(_.model).possibleValues(car => carMakesAndModels(car.make)),
     f.field(_.year).validate(gt(1900)).label("Year")
   ))
 
@@ -50,7 +50,7 @@ object PersonForm {
     f.field(_.gender).label("Gender").possibleValues(_ => List("Male", "Female")).renderHint(asRadio()),
     f.field(_.secret).label("Secret").renderHint(asPassword()),
     f.field(_.bio).label("Biography").renderHint(asTextarea(rows = 6)),
-    f.subform(_.cars, carForm, Car(null, 0)).label("Cars").renderHint(asList()),
+    f.subform(_.cars, carForm, Car(null, null, 0)).label("Cars").renderHint(asList()),
     f.subform(_.legoSets, legoSetForm, LegoSet(null, null, 0, 0)).label("Lego sets"),
     f.staticField(p => Message(p.registrationDate)).label("Registration date")
   ))
@@ -74,7 +74,7 @@ case class Person(
 
 case class Car(
   make: String,
-  //model: String,
+  model: String,
   year: Int
 )
 

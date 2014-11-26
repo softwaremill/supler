@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import org.joda.time.DateTime
 import org.json4s.JValue
 import org.json4s.JsonAST.{JField, JObject, JString}
-import org.supler.errors.ValidationMode
 import spray.http.MediaTypes
 import spray.http.StatusCodes._
 import spray.httpx.Json4sSupport
@@ -17,8 +16,8 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
   var person = Person("Adam", "", new DateTime(), 10, None, None, null, None, None,
     Set("red", "blue"), likesBroccoli = false,
     List(
-      Car("Ford", 1990),
-      Car("Toyota", 2004)),
+      Car("Ford", "Focus", 1990),
+      Car("Toyota", "Avensis", 2004)),
     List(
       LegoSet("Motorcycle", "Technic", 1924, 31),
       LegoSet("Arctic Supply Plane", "City", 60064, 0),
