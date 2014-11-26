@@ -3,6 +3,7 @@ package org.supler.field
 import org.json4s.JsonAST.{JField, JObject}
 import org.json4s._
 import org.supler._
+import org.supler.errors.FieldPath
 import org.supler.transformation.FullTransformer
 
 trait NonNestedFieldJSON[T, U] {
@@ -13,7 +14,7 @@ trait NonNestedFieldJSON[T, U] {
   def transformer: FullTransformer[U, _]
   def renderHint: Option[RenderHint]
 
-  private[supler] override def generateJSON(obj: T): List[JField] = {
+  private[supler] override def generateJSON(parentPath: FieldPath, obj: T): List[JField] = {
     val data = valuesProvider match {
       case Some(vp) => generateJSONWithValuesProvider(obj, vp)
       case None => generateJSONWithoutValuesProvider(obj)
@@ -24,7 +25,8 @@ trait NonNestedFieldJSON[T, U] {
     List(JField(name, JObject(List(
       JField(Label, JString(label.getOrElse(""))),
       JField(Type, JString(data.fieldTypeName)),
-      JField(Validate, JObject(data.validationJSON.toList))
+      JField(Validate, JObject(data.validationJSON.toList)),
+      JField(Path, JString(parentPath.append(name).toString))
     ) ++ data.valueJSONValue.map(JField(Value, _)).toList
       ++ generateRenderHintJSONValue.map(JField(RenderHint, _)).toList
       ++ data.extraJSON)))

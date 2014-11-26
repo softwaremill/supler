@@ -10,8 +10,8 @@ case class Form[T](rows: List[Row[T]]) {
   private[supler] def doValidate(parentPath: FieldPath, obj: T): FieldErrors =
     rows.flatMap(_.doValidate(parentPath, obj))
 
-  private[supler] def generateJSON(obj: T) = JObject(
-    JField("fields", JObject(rows.flatMap(_.generateJSON(obj))))
+  private[supler] def generateJSON(parentPath: FieldPath, obj: T) = JObject(
+    JField("fields", JObject(rows.flatMap(_.generateJSON(parentPath, obj))))
   )
 
   private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jvalue: JValue): PartiallyAppliedObj[T] = {

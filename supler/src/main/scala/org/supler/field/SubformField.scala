@@ -18,14 +18,17 @@ case class SubformField[T, U](
 
   def renderHint(newRenderHint: RenderHint with SubformFieldCompatible) = this.copy(renderHint = newRenderHint)
 
-  def generateJSON(obj: T) = {
+  def generateJSON(parentPath: FieldPath, obj: T) = {
     import JSONFieldNames._
     List(JField(name, JObject(
       JField(Type, JString(SpecialFieldTypes.Subform)),
       JField(RenderHint, JObject(JField("name", JString(renderHint.name)) :: renderHint.extraJSON)),
       JField(Multiple, JBool(value = true)),
       JField(Label, JString(_label.getOrElse(""))),
-      JField(Value, JArray(read(obj).map(embeddedForm.generateJSON)))
+      JField(Path, JString(parentPath.append(name).toString)),
+      JField(Value, JArray(read(obj).zipWithIndex.map { case (v, i) =>
+        embeddedForm.generateJSON(parentPath.appendWithIndex(name, i), v)
+      }))
     )))
   }
 

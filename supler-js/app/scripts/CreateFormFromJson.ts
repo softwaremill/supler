@@ -58,7 +58,8 @@ class CreateFormFromJson {
             'supler:fieldName': fieldName,
             'supler:fieldType': fieldJson.type,
             'supler:multiple': fieldJson.multiple,
-            'supler:validationId': validationId
+            'supler:validationId': validationId,
+            'supler:path': fieldJson.path
         }, this.renderOptions.defaultFieldOptions());
 
         var label = this.labelFor(fieldJson.label);

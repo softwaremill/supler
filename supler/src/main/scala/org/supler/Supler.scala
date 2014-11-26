@@ -51,7 +51,7 @@ trait Supler[T] extends Validators {
 }
 
 trait Row[T] {
-  private[supler] def generateJSON(obj: T): List[JField]
+  private[supler] def generateJSON(parentPath: FieldPath, obj: T): List[JField]
 
   def ||(field: Field[T, _]): Row[T]
   
@@ -79,5 +79,5 @@ case class MultiFieldRow[T](fields: List[Field[T, _]]) extends Row[T] {
   override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] =
     Row.applyJSONValues(fields, parentPath, obj, jsonFields)
 
-  override def generateJSON(obj: T) = fields.flatMap(_.generateJSON(obj))
+  override def generateJSON(parentPath: FieldPath, obj: T) = fields.flatMap(_.generateJSON(parentPath, obj))
 }

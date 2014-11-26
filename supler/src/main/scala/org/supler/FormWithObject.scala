@@ -33,7 +33,7 @@ trait FormWithObject[T] {
 
   def generateJSON: JValue = {
     JObject(
-      JField("main_form", form.generateJSON(obj)),
+      JField("main_form", form.generateJSON(EmptyPath, obj)),
       JField("errors", JArray(allErrors.map(_.generateJSON)))
     )
   }
