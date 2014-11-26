@@ -1,28 +1,35 @@
+var formContainer = document.getElementById('form-container');
+var form = new SuplerForm(formContainer, {
+    refresh_form_function: refreshForm,
+    error_custom_lastNameLongerThanFirstName: "Last name must be longer than first name!",
+    error_custom_illegalDateFormat: "Illegal date format",
+    label_person_firstname: "First name",
+    label_person_lastname: "Last name",
+    label_lego_name: "Name",
+    label_lego_theme: "Theme",
+    label_lego_setnumber: "Set number",
+    label_lego_age: "Age"
+});
+
 $(document).ready(function() {
     $.get('/rest/form1.json', function(data) {
-        showForm(data);
+        form.render(data);
     });
 });
 
-var formContainer = document.getElementById('form-container');
-var form = null;
-
-function showForm(formJson) {
-    form = new SuplerForm(formContainer, {
-        error_custom_lastNameLongerThanFirstName: "Last name must be longer than first name!",
-        error_custom_illegalDateFormat: "Illegal date format",
-        label_person_firstname: "First name",
-        label_person_lastname: "Last name",
-        label_lego_name: "Name",
-        label_lego_theme: "Theme",
-        label_lego_setnumber: "Set number",
-        label_lego_age: "Age"
-    });
-    form.render(formJson);
-}
-
 var feedback = $('#feedback');
 feedback.hide();
+
+function refreshForm(formJson, successFn) {
+    $.ajax({
+        url: '/rest/form1.json',
+        type: 'PUT',
+        data: JSON.stringify(formJson),
+        dataType: 'json',
+        contentType: 'application/json; charset=utf-8',
+        success: successFn
+    });
+}
 
 $('#submit').click(function() {
     var hasErrors = form.validate();

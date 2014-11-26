@@ -3,11 +3,11 @@ package org.supler.demo
 import akka.actor.ActorSystem
 import org.joda.time.DateTime
 import org.json4s.JValue
-import org.json4s.JsonAST.{JBool, JObject, JField, JString}
-import spray.http.{StatusCodes, MediaTypes}
+import org.json4s.JsonAST.{JField, JObject, JString}
+import spray.http.MediaTypes
+import spray.http.StatusCodes._
 import spray.httpx.Json4sSupport
 import spray.routing.{Route, SimpleRoutingApp}
-import StatusCodes._
 
 object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
   implicit val actorSystem = ActorSystem()
@@ -56,6 +56,16 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
               JObject(
                 JField("msg", JString("Persisted: " + person)))
             }
+          }
+        }
+      } ~
+      put {
+        entity(as[JValue]) { jvalue =>
+          complete {
+            PersonForm.personForm(person)
+              .applyJSONValues(jvalue)
+              .doValidate
+              .generateJSON
           }
         }
       }

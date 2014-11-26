@@ -4,6 +4,7 @@ class SuplerForm {
     private validatorFnFactories: any;
     private validation: Validation;
     private validatorRenderOptions: ValidatorRenderOptions;
+    private refreshControllerOptions: RefreshControllerOptions;
 
     constructor(private container: HTMLElement, customOptions: any) {
         // TODO: we shouldn't copy everything everywhere
@@ -19,18 +20,20 @@ class SuplerForm {
 
         this.validatorRenderOptions = new ValidatorRenderOptions;
         Util.copyProperties(this.validatorRenderOptions, customOptions);
+
+        this.refreshControllerOptions = new RefreshControllerOptions(customOptions);
     }
 
-    /**
-     * @returns False if there were validation errors.
-     */
     render(json) {
         var result = new CreateFormFromJson(this.renderOptions, this.i18n, this.validatorFnFactories).renderForm(json.main_form);
         this.container.innerHTML = result.html;
-        this.validation = new Validation(this.container, result.validatorDictionary,
+        this.validation = new Validation(this.container, result.elementDictionary,
             this.validatorRenderOptions, this.i18n);
 
-        return this.validation.processServer(json.errors)
+        new RefreshController(this, result.elementDictionary, this.refreshControllerOptions)
+            .attachRefreshListeners();
+
+        this.validation.processServer(json.errors)
     }
 
     getValue() {
