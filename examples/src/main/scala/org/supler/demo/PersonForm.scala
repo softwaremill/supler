@@ -16,7 +16,7 @@ object PersonForm {
 
   val carForm = form[Car](f => List(
     f.field(_.make).possibleValues(_ => carMakesAndModels.keys.toList).label("Make"),
-    f.field(_.model).possibleValues(car => carMakesAndModels(car.make)).label("Model"),
+    f.field(_.model).possibleValues(car => carMakesAndModels.getOrElse(car.make, Nil)).label("Model"),
     f.field(_.year).validate(gt(1900)).label("Year")
   ))
 
