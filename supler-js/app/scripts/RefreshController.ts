@@ -6,18 +6,20 @@ class RefreshController {
                 private validation: Validation) {}
 
     attachRefreshListeners() {
-        Util.foreach(this.elementDictionary, (elementId: string, validator: ElementValidator) => {
-            var formElement = document.getElementById(elementId);
-            if (formElement && formElement.nodeName != "FIELDSET") {
-                formElement.onchange = () => {
-                    if (!this.validation.processClientSingle(elementId)) {
-                        this.options.refreshFormFunction(
-                            this.suplerForm.getValue(),
-                            this.refreshSuccessFn());
+        if (this.options.refreshEnabled()) {
+            Util.foreach(this.elementDictionary, (elementId:string, validator:ElementValidator) => {
+                var formElement = document.getElementById(elementId);
+                if (formElement && formElement.nodeName != "FIELDSET") {
+                    formElement.onchange = () => {
+                        if (!this.validation.processClientSingle(elementId)) {
+                            this.options.refreshFormFunction(
+                                this.suplerForm.getValue(),
+                                this.refreshSuccessFn());
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     private refreshSuccessFn() { return (data: any) => {
@@ -44,4 +46,6 @@ class RefreshControllerOptions {
     constructor(options: any) {
         this.refreshFormFunction = options.refresh_form_function;
     }
+
+    refreshEnabled(): boolean { return this.refreshFormFunction !== null; }
 }
