@@ -8,6 +8,8 @@ import org.supler.errors._
 case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
   def apply(obj: T): FormWithObject[T] = InitialFormWithObject(this, obj)
 
+  def withNewEmpty: FormWithObject[T] = InitialFormWithObject(this, createEmpty())
+
   private[supler] def doValidate(parentPath: FieldPath, obj: T, mode: ValidationMode): FieldErrors =
     rows.flatMap(_.doValidate(parentPath, obj, mode))
 
