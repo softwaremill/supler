@@ -10,19 +10,21 @@ import org.supler.transformation.FullTransformer
 import scala.language.experimental.macros
 
 object Supler extends Validators {
-  def form[T](rows: Supler[T] => List[Row[T]]) = {
-    Form(rows(new Supler[T] {}))
-  }
+  def form[T](rows: Supler[T] => List[Row[T]]) = macro SuplerFormMacros.form_impl[T]
 
   def field[T, U](param: T => U)
     (implicit transformer: FullTransformer[U, _]): BasicField[T, U] =
-    macro SuplerMacros.field_impl[T, U]
+    macro SuplerFieldMacros.field_impl[T, U]
 
   def setField[T, U](param: T => Set[U])
     (implicit transformer: FullTransformer[U, _]): SetField[T, U] =
-    macro SuplerMacros.setField_impl[T, U]
+    macro SuplerFieldMacros.setField_impl[T, U]
 
-  def subform[T, U](param: T => List[U], form: Form[U], createEmpty: => U): SubformField[T, U] = macro SuplerMacros.subform_impl[T, U]
+  def subform[T, U](param: T => List[U], form: Form[U]): SubformField[T, U] =
+    macro SuplerFieldMacros.subform_impl[T, U]
+
+  def subform[T, U](param: T => List[U], form: Form[U], createEmpty: () => U): SubformField[T, U] =
+    macro SuplerFieldMacros.subform_createempty_impl[T, U]
 
   def staticField[T](createMessage: T => Message) = new StaticField[T](createMessage, None)
 
@@ -40,13 +42,17 @@ object Supler extends Validators {
 trait Supler[T] extends Validators {
   def field[U](param: T => U)
     (implicit transformer: FullTransformer[U, _]): BasicField[T, U] =
-    macro SuplerMacros.field_impl[T, U]
+    macro SuplerFieldMacros.field_impl[T, U]
 
   def setField[U](param: T => Set[U])
     (implicit transformer: FullTransformer[U, _]): SetField[T, U] =
-    macro SuplerMacros.setField_impl[T, U]
+    macro SuplerFieldMacros.setField_impl[T, U]
 
-  def subform[U](param: T => List[U], form: Form[U], createEmpty: => U): SubformField[T, U] = macro SuplerMacros.subform_impl[T, U]
+  def subform[U](param: T => List[U], form: Form[U]): SubformField[T, U] =
+    macro SuplerFieldMacros.subform_impl[T, U]
+
+  def subform[U](param: T => List[U], form: Form[U], createEmpty: () => U): SubformField[T, U] =
+    macro SuplerFieldMacros.subform_createempty_impl[T, U]
 
   def staticField(createMessage: T => Message) = new StaticField[T](createMessage, None)
 }

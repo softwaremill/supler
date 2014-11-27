@@ -255,7 +255,7 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
       f.field(_.age)
     ))
     object PersonMeta extends Supler[Person] {
-      val carsField = subform(_.cars, carForm, Car(null, 0))
+      val carsField = subform(_.cars, carForm)
     }
 
     // then
@@ -280,7 +280,7 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     ))
     val personForm = form[Person](f => List(
       f.field(_.name),
-      f.subform(_.cars, carForm, Car(null, 0))
+      f.subform(_.cars, carForm)
     ))
 
     val jsonInOrder = JObject(
@@ -303,5 +303,22 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     // then
     result.errors should be ('empty)
     result.obj should be (Person("John", List(Car("m1", 10), Car("m2", 20))))
+  }
+
+  "form" should "generate empty classes" in {
+    // given
+    case class Car(make: String, age: Int, middleName: Option[String])
+    case class Person(name: String, age: Long, height: Double, smokes: Boolean, car: Car,
+      colors: List[String], friends: Set[String])
+
+    // when
+    import Supler._
+    val carForm = form[Car](f => List())
+    val personForm = form[Person](f => List())
+
+    // then
+    val emptyCar = Car("", 0, None)
+    carForm.createEmpty() should be (emptyCar)
+    personForm.createEmpty() should be (Person("", 0L, 0.0d, smokes = false, null, Nil, Set()))
   }
 }

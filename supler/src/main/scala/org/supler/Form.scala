@@ -5,7 +5,7 @@ import org.json4s._
 import org.supler.errors.ValidationMode._
 import org.supler.errors._
 
-case class Form[T](rows: List[Row[T]]) {
+case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
   def apply(obj: T): FormWithObject[T] = InitialFormWithObject(this, obj)
 
   private[supler] def doValidate(parentPath: FieldPath, obj: T, mode: ValidationMode): FieldErrors =
@@ -22,7 +22,9 @@ case class Form[T](rows: List[Row[T]]) {
     }
   }
 
+  def useCreateEmpty(newCreateEmpty: => T) = this.copy(createEmpty = () => newCreateEmpty)
+
   def +(row: Row[T]) = ++(List(row))
 
-  def ++(moreRows: List[Row[T]]) = Form(rows ++ moreRows)
+  def ++(moreRows: List[Row[T]]) = Form(rows ++ moreRows, createEmpty)
 }

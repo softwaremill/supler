@@ -6,7 +6,7 @@ import org.supler.transformation.FullTransformer
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-object SuplerMacros {
+object SuplerFieldMacros {
   def field_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)
     (param: c.Expr[T => U])
     (transformer: c.Expr[FullTransformer[U, _]]): c.Expr[BasicField[T, U]] = {
@@ -56,7 +56,13 @@ object SuplerMacros {
   }
 
   def subform_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)(param: c.Expr[T => List[U]],
-    form: c.Expr[Form[U]], createEmpty: c.Tree): c.Expr[SubformField[T, U]] = {
+    form: c.Expr[Form[U]]): c.Expr[SubformField[T, U]] = {
+
+    subform_createempty_impl[T, U](c)(param, form, null)
+  }
+
+  def subform_createempty_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)(param: c.Expr[T => List[U]],
+    form: c.Expr[Form[U]], createEmpty: c.Expr[() => U]): c.Expr[SubformField[T, U]] = {
 
     import c.universe._
 
@@ -68,14 +74,18 @@ object SuplerMacros {
 
     val writeFieldValueExpr = generateFieldWrite[T, List[U]](c)(fieldName, classSymbol)
 
-    val createEmptyExpr = c.Expr[() => U](q"() => $createEmpty")
+    val createEmptyOpt = if (createEmpty == null) {
+      reify { None }
+    } else {
+      reify { Some(createEmpty.splice) }
+    }
 
     reify {
       FactoryMethods.newSubformField(paramRepExpr.splice,
         readFieldValueExpr.splice,
         writeFieldValueExpr.splice,
         form.splice,
-        createEmptyExpr.splice)
+        createEmptyOpt.splice)
     }
   }
 
@@ -87,7 +97,7 @@ object SuplerMacros {
     }
 
     def newSubformField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T,
-                            embeddedForm: Form[U], createEmpty: () => U): SubformField[T, U] = {
+                            embeddedForm: Form[U], createEmpty: Option[() => U]): SubformField[T, U] = {
       SubformField[T, U](fieldName, read, write, None, embeddedForm, createEmpty, SubformTableRenderHint)
     }
 

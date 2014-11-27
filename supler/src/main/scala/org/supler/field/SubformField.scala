@@ -12,7 +12,8 @@ case class SubformField[T, U](
   write: (T, List[U]) => T,
   _label: Option[String],
   embeddedForm: Form[U],
-  createEmpty: () => U,
+  // if not specified, `embeddedForm.createEmpty` will be used
+  createEmpty: Option[() => U],
   renderHint: RenderHint with SubformFieldCompatible) extends Field[T, List[U]] {
 
   def label(newLabel: String) = this.copy(_label = Some(newLabel))
@@ -38,7 +39,8 @@ case class SubformField[T, U](
       JArray(formJValues) <- jsonFields.get(name).toList
       (formJValue, i) <- formJValues.zipWithIndex
     } yield {
-      embeddedForm.applyJSONValues(parentPath.appendWithIndex(name, i), createEmpty(), formJValue)
+      embeddedForm.applyJSONValues(parentPath.appendWithIndex(name, i),
+        createEmpty.getOrElse(embeddedForm.createEmpty)(), formJValue)
     }
 
     PartiallyAppliedObj.flatten(paos).map(write(obj, _))

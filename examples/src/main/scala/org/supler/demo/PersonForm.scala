@@ -50,8 +50,8 @@ object PersonForm {
     f.field(_.gender).label("Gender").possibleValues(_ => List("Male", "Female")).renderHint(asRadio()),
     f.field(_.secret).label("Secret").renderHint(asPassword()),
     f.field(_.bio).label("Biography").renderHint(asTextarea(rows = 6)),
-    f.subform(_.cars, carForm, Car(null, null, 0)).label("Cars").renderHint(asList()),
-    f.subform(_.legoSets, legoSetForm, LegoSet(null, null, 0, 0)).label("Lego sets"),
+    f.subform(_.cars, carForm).label("Cars").renderHint(asList()),
+    f.subform(_.legoSets, legoSetForm).label("Lego sets"),
     f.staticField(p => Message(p.registrationDate)).label("Registration date")
   ))
 }
