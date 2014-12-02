@@ -37,6 +37,8 @@ class SuplerForm {
             this.validation).attachRefreshListeners();
 
         this.validation.processServer(json.errors);
+
+        this.refreshControllerOptions.afterRenderFunction()
     }
 
     getValue() {

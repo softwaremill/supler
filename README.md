@@ -336,3 +336,8 @@ and generate back the response. When validating, there is a special mode which r
 with filled-in values, not to show the user validation errors for fields which haven't been yet edited at all.
 This can be done with the convenience `personForm(person).refresh(receivedJson)` method. This simply runs apply,
 validate and generate JSON in succession.
+
+### Adding custom behavior to the form
+
+By setting the `after_render_function` option to a no-argument function, it is possible to get notified after a form
+is rendered (or refreshed), and customize the form or add some custom dynamic behavior.

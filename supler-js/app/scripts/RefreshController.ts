@@ -42,9 +42,15 @@ class RefreshController {
 
 class RefreshControllerOptions {
     refreshFormFunction: (formJson: any, successFn: (data: any) => void) => void;
+    afterRenderFunction: () => void;
 
     constructor(options: any) {
         this.refreshFormFunction = options.refresh_form_function;
+
+        this.afterRenderFunction = options.after_render_function;
+        if (!this.afterRenderFunction) {
+            this.afterRenderFunction = () => {};
+        }
     }
 
     refreshEnabled(): boolean { return this.refreshFormFunction !== null; }
