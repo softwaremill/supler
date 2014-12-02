@@ -35,7 +35,7 @@ All of the templates can be narrowed down by using filters:
 
 * `supler:fieldPath="..."` where field path can be e.g. `cars.model.name`
 * `supler:fieldType="..."` where type can be e.g. `string`, `integer`, `double`, `static` etc.
-* `superl:fieldRenderHint="..."` where the render hint can be e.g. `textarea`, `password`, `radio` etc.
+* `supler:fieldRenderHint="..."` where the render hint can be e.g. `textarea`, `password`, `radio` etc.
 
 That way templates for a specific field or field type can be specified.
 

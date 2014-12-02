@@ -1,11 +1,11 @@
 class SuplerForm {
     private i18n: I18n;
-    private renderOptions: RenderOptions;
     private validatorFnFactories: any;
     private validation: Validation;
     private validatorRenderOptions: ValidatorRenderOptions;
     private refreshControllerOptions: RefreshControllerOptions;
     private elementSearch: ElementSearch;
+    private renderOptionsGetter: RenderOptionsGetter;
 
     constructor(private container: HTMLElement, customOptions: any) {
         // TODO: we shouldn't copy everything everywhere
@@ -13,8 +13,9 @@ class SuplerForm {
         this.i18n = new I18n();
         Util.copyProperties(this.i18n, customOptions);
 
-        this.renderOptions = new DefaultRenderOptions();
-        Util.copyProperties(this.renderOptions, customOptions);
+        var renderOptions = new DefaultRenderOptions();
+        Util.copyProperties(renderOptions, customOptions);
+        this.renderOptionsGetter = new HTMLRenderTemplateParser(this.container).parse(renderOptions);
 
         this.validatorFnFactories = new DefaultValidatorFnFactories(this.i18n);
         Util.copyProperties(this.validatorFnFactories, customOptions);
@@ -28,7 +29,7 @@ class SuplerForm {
     }
 
     render(json) {
-        var result = new CreateFormFromJson(this.renderOptions, this.i18n, this.validatorFnFactories).renderForm(json.main_form);
+        var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories).renderForm(json.main_form);
         this.container.innerHTML = result.html;
         this.validation = new Validation(this.elementSearch, result.elementDictionary,
             this.validatorRenderOptions, this.i18n);
