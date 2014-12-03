@@ -1,12 +1,7 @@
 class HtmlUtil {
     static renderTag(tagName, tagAttrs, tagBody = null, escapeTagBody = true) {
         var r = '<' + tagName + ' ';
-        Util.foreach(tagAttrs, (tagAttrName, tagAttrValue) => {
-            if (tagAttrValue || tagAttrValue === 0 || tagAttrValue === '' || tagAttrValue === false) {
-                r += tagAttrName + '="' + HtmlUtil.escapeForAttribute(tagAttrValue, false) + '" ';
-            }
-        });
-
+        r += HtmlUtil.renderAttrs(tagAttrs);
         r += '>';
 
         if (tagBody) {
@@ -15,6 +10,16 @@ class HtmlUtil {
 
         r += '</' + tagName + '>';
 
+        return r;
+    }
+
+    static renderAttrs(tagAttrs): string {
+        var r = '';
+        Util.foreach(tagAttrs, (tagAttrName, tagAttrValue) => {
+            if (tagAttrValue || tagAttrValue === 0 || tagAttrValue === '' || tagAttrValue === false) {
+                r += tagAttrName + '="' + HtmlUtil.escapeForAttribute(tagAttrValue, false) + '" ';
+            }
+        });
         return r;
     }
 
@@ -44,5 +49,22 @@ class HtmlUtil {
              */
             .replace(/\r\n/g, preserveCR) /* Must be before the next replacement. */
             .replace(/[\r\n]/g, preserveCR);
+    }
+
+    static findElementWithAttr(where: HTMLElement, attrName: string): HTMLElement {
+        if (where.hasAttribute(attrName)) return where;
+
+        var len = where.children.length;
+        for (var i=0; i<len; i++) {
+            var child = where.children[i];
+            if (child.tagName) {
+                var childResult = HtmlUtil.findElementWithAttr(<HTMLElement>child, attrName);
+                if (childResult) {
+                    return childResult;
+                }
+            }
+        }
+
+        throw 'No element with attribute ' + attrName + ' found!';
     }
 }

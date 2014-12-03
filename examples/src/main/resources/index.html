@@ -56,6 +56,14 @@
                     {{suplerValidation}}
                 </div>
             </div>
+            <div supler:fieldInputTemplate supler:fieldPath="age">
+                $$$<input type="money" {{suplerFieldInputAttrs}} />
+            </div>
+            <div supler:fieldInputTemplate supler:fieldPath="likesBroccoli" super:singleInput="true" supler:selectedAttrName="selected" supler:selectedAttrValue="selected">
+                <select {{suplerFieldInputContainerAttrs}}>
+                    <option {{suplerFieldInputAttrs}} supler:possibleValueTemplate>#{{suplerFieldInputLabel}}#</option>
+                </select>
+            </div>
         </div>
     </div>
 </div>

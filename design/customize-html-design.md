@@ -84,29 +84,35 @@ Use-cases:
   <div supler:fieldInputTemplate>
     // html with placeholders:
     // {{suplerFieldInputAttrs}}
+    // {{suplerFieldInputValue}}
   </div>
 </div>
 ````
 
 This should always be combined with a filter to make sense.
-The attributes will contain normal attributes such as `id`, `name` and `value`, as well as supler-specific meta-data.
+The attributes will contain normal attributes such as `id`, `name`, as well as supler-specific meta-data.
+If `{{suplerFieldInputValue}}` is used, the attributes won't include the field value (useful e.g. for textarea fields).
+Otherwise the attributes will contain the value mapping.
 
 * re-define how a field's input with possible values is rendered
 
 ````html
 <div id="form-container">
-  <div supler:fieldInputTemplate super:singleInput="true|false">
+  <div supler:fieldInputTemplate super:singleInput="true|false" supler:selectedAttrName="selected" supler:selectedAttrValue="selected">
     // html with placeholders:
     // {{suplerFieldInputContainerAttrs}}
-    // must contain an element with the "supler:possibleValueInputTemplate" attribute;
+    // must contain an element with the "supler:possibleValueTemplate" attribute;
     // that element will be repeated for each possible value. Placeholders:
-    // {{suplerFieldInputAttrs}}
+    // {{suplerFieldInputAttrs}}, {{suplerFieldInputValue}}, {{suplerFieldInputLabel}}
   </div>
 </div>
 ````
 
 To properly render a field with possible values, Supler needs to know if the element is rendered as a single
-input (e.g. drop-down) or multiple inputs (e.g. radio/checkboxes). If it's a single element, no container is needed.
+input (e.g. drop-down) or multiple inputs (e.g. radio/checkboxes).
+
+Also, if an element is already selected, it must have an additional attribute, which will be added to the possible
+value template. The attribute name & value are specified using `supler:selectedAttrName` and `supler:selectedAttrValue`.
 
 * re-define how a field overall is given (without separating into label/input/validation)
 

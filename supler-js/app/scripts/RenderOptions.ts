@@ -41,6 +41,8 @@ interface RenderOptions {
 
     // misc
     defaultFieldOptions: () => any
+    defaultHtmlInputOptions: (inputType: string, id: string, name: string, value: any, options: any) => any
+    defaultHtmlTextareaOptions: (id: string, name: string, options: any) => any
 }
 
 class DefaultRenderOptions implements RenderOptions {
@@ -164,7 +166,7 @@ class DefaultRenderOptions implements RenderOptions {
     //
 
     renderHtmlInput(inputType, id, name, value, options) {
-        return HtmlUtil.renderTag('input', Util.copyProperties({ 'id': id, 'type': inputType, 'name': name, 'value': value }, options));
+        return HtmlUtil.renderTag('input', this.defaultHtmlInputOptions(inputType, id, name, value, options));
     }
 
     renderHtmlSelect(id, name, value, possibleValues, options) {
@@ -194,7 +196,7 @@ class DefaultRenderOptions implements RenderOptions {
     }
 
     renderHtmlTextarea(id, name, value, options) {
-        return HtmlUtil.renderTag('textarea', Util.copyProperties({ 'id': id, 'name': name }, options), value);
+        return HtmlUtil.renderTag('textarea', this.defaultHtmlTextareaOptions(id, name, options), value);
     }
 
     private renderCheckable(inputType: string, id: string, name: string, possibleValues: SelectValue[], options: any,
@@ -232,5 +234,13 @@ class DefaultRenderOptions implements RenderOptions {
 
     defaultFieldOptions() {
         return { 'class': 'form-control' };
+    }
+
+    defaultHtmlInputOptions(inputType, id, name, value, options) {
+        return Util.copyProperties({ 'id': id, 'type': inputType, 'name': name, 'value': value }, options);
+    }
+
+    defaultHtmlTextareaOptions(id, name, options) {
+        return Util.copyProperties({ 'id': id, 'name': name }, options);
     }
 }
