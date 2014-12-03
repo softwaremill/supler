@@ -281,19 +281,10 @@ method: `SuplerForm.render(refreshedFormJson)`.
 ### Customizing the rendering process
 
 The rendering process is fully customizable. By default, [Bootstrap](http://getbootstrap.com/)-based HTML is rendered,
-but this can be changed by overriding any of the rendering functions (and in default, by providing HTML templates).
+but this can be changed either by providing HTML templates, or by overriding any of the rendering functions
+using the options.
 
-To override how a particular form element is rendered, simply provide a method in the options passed to `SuplerForm`:
-
-````javascript
-var formContainer = document.getElementById('form-container');
-var form =  = new SuplerForm(formContainer, {
-  renderStringField: function(label, id, validationId, name, value, options, compact) {
-    return someHtml;
-  }
-});
-form.render(formJson); // formJson is received from the server
-````
+For details, see the [readme on rendering customization](CUSTOMIZE_RENDER.md).
 
 ### i18n
 
