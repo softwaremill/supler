@@ -7,7 +7,7 @@ import org.supler.errors.FieldPath
 import org.supler.transformation.FullTransformer
 
 trait NonNestedFieldJSON[T, U] {
-  this: Field[T, U] =>
+  this: Field[T] =>
 
   def valuesProvider: Option[ValuesProvider[T, U]]
   def label: Option[String]

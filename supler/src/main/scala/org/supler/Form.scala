@@ -4,6 +4,7 @@ import org.json4s.JsonAST.JObject
 import org.json4s._
 import org.supler.errors.ValidationMode._
 import org.supler.errors._
+import org.supler.field._
 
 case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
   def apply(obj: T): FormWithObject[T] = InitialFormWithObject(this, obj)
@@ -21,6 +22,13 @@ case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
     jvalue match {
       case JObject(jsonFields) => Row.applyJSONValues(rows, parentPath, obj, jsonFields.toMap)
       case _ => PartiallyAppliedObj.full(obj)
+    }
+  }
+
+  private[supler] def runAction(obj: T, jvalue: JValue, ctx: RunActionContext): CompleteActionResult = {
+    jvalue match {
+      case JObject(jsonFields) => Row.runActionsUntilResult(rows, obj, jsonFields.toMap, ctx)
+      case _ => NoActionResult
     }
   }
 

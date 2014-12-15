@@ -305,12 +305,12 @@ The values can be either strings, or functions which format the message using th
 ### Refreshing the form basing on server-side form changes
 
 The form can be automatically refreshed after each field edit (value change). To do that, two things are necessary.
-Firstly, a `refresh_form_function` option must be specified. This should be a javascript function, accepting the
+Firstly, a `reload_form_function` option must be specified. This should be a javascript function, accepting the
 serialized form representation and a success function, to be called when the form is successfully refreshed. For
 example, when using JQuery, this can be:
 
 ````javascript
-function refreshForm(formJson, successFn) {
+function reloadForm(formJson, successFn) {
     $.ajax({
         url: '/refresh_form.json',
         type: 'POST',

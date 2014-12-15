@@ -4,6 +4,7 @@ import org.json4s.JValue
 import org.json4s.JsonAST.{JArray, JField, JObject}
 import org.supler.errors.ValidationMode._
 import org.supler.errors.{ValidationMode, EmptyPath, FieldErrors}
+import org.supler.field._
 
 trait FormWithObject[T] {
   def obj: T
@@ -40,14 +41,25 @@ trait FormWithObject[T] {
   }
 
   /**
-   * Shorthand for refreshing a form basing on new field values.
-   * Calls: apply, validation (only filled) and generate json.
+   * Shorthand for reloading a form basing on new field values and an optional action call.
+   * Calls: apply, validation (only filled), run action, generate json.
    */
-  def refresh(jvalue: JValue): JValue = {
+  def reload(jvalue: JValue): JValue = {
     this
       .applyJSONValues(jvalue)
       .doValidate(ValidationMode.OnlyFilled)
-      .generateJSON
+      .runAction(jvalue) match {
+      case Left(customJson) => customJson
+      case Right(fwo) => fwo.generateJSON
+    }
+  }
+
+  def runAction(jvalue: JValue): Either[JValue, FormWithObject[T]] = {
+    form.runAction(obj, jvalue, RunActionContext(Nil)) match {
+      case NoActionResult => Right(this)
+      case ValueCompleteActionResult(t) => Right(InitialFormWithObject(form, t.asInstanceOf[T]))
+      case JsonCompleteActionResult(json) => Left(json)
+    }
   }
 }
 

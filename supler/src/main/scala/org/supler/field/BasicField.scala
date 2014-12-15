@@ -15,7 +15,7 @@ case class BasicField[T, U](
   label: Option[String],
   required: Boolean,
   transformer: FullTransformer[U, _],
-  renderHint: Option[RenderHint with BasicFieldCompatible]) extends Field[T, U] with NonNestedFieldJSON[T, U] {
+  renderHint: Option[RenderHint with BasicFieldCompatible]) extends Field[T] with NonNestedFieldJSON[T, U] {
 
   def label(newLabel: String): BasicField[T, U] = this.copy(label = Some(newLabel))
 

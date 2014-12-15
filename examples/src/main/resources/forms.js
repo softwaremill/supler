@@ -1,6 +1,6 @@
 var formContainer = document.getElementById('form-container');
 var form = new SuplerForm(formContainer, {
-    refresh_form_function: refreshForm,
+    reload_form_function: reloadForm,
     error_custom_lastNameLongerThanFirstName: "Last name must be longer than first name!",
     error_custom_illegalDateFormat: "Illegal date format",
     label_person_firstname: "First name",
@@ -20,7 +20,7 @@ $(document).ready(function() {
 var feedback = $('#feedback');
 feedback.hide();
 
-function refreshForm(formJson, successFn) {
+function reloadForm(formJson, successFn) {
     $.ajax({
         url: '/rest/form1.json',
         type: 'PUT',

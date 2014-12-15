@@ -18,6 +18,7 @@ interface RenderOptions {
     renderMultiChoiceSelectField: RenderPossibleValuesField
     renderSingleChoiceRadioField: RenderPossibleValuesField
     renderSingleChoiceSelectField: RenderPossibleValuesField
+    renderActionField: (label: string, id: string, validationId: string, name: string, options: any, compact: boolean) => string
 
     // templates
     // [label] [input] [validation]
@@ -38,6 +39,7 @@ interface RenderOptions {
     renderHtmlRadios: (id: string, name: string, value: number, possibleValues: SelectValue[], options: any) => string
     renderHtmlCheckboxes: (id: string, name: string, values: number[], possibleValues: SelectValue[], options: any) => string
     renderHtmlTextarea: (id: string, name: string, value: any, options: any) => string
+    renderButton: (id: string, name: string, label: string, options: any) => string
 
     // misc
     defaultFieldOptions: () => any
@@ -92,6 +94,10 @@ class DefaultRenderOptions implements RenderOptions {
 
     renderSingleChoiceSelectField(label, id, validationId, name, value, possibleValues, options, compact) {
         return this.renderField(this.renderHtmlSelect(id, name, value, possibleValues, options), label, id, validationId, compact);
+    }
+
+    renderActionField(label, id, validationId, name, options, compact) {
+        return this.renderField(this.renderButton(id, name, label, options), '', id, validationId, compact);
     }
 
     //
@@ -197,6 +203,12 @@ class DefaultRenderOptions implements RenderOptions {
 
     renderHtmlTextarea(id, name, value, options) {
         return HtmlUtil.renderTag('textarea', this.defaultHtmlTextareaOptions(id, name, options), value);
+    }
+
+    renderButton(id, name, label, options) {
+        var allOptions = Util.copyProperties({ 'id': id, 'type': 'button', 'name': name }, options);
+        allOptions['class'] = allOptions['class'].replace('form-control', 'btn btn-default');
+        return HtmlUtil.renderTag('button', allOptions, label);
     }
 
     private renderCheckable(inputType: string, id: string, name: string, possibleValues: SelectValue[], options: any,

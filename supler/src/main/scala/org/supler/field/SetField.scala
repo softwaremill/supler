@@ -15,7 +15,7 @@ case class SetField[T, U](
   valuesProvider: Option[ValuesProvider[T, U]],
   label: Option[String],
   transformer: FullTransformer[U, _],
-  renderHint: Option[RenderHint with SetFieldCompatible]) extends Field[T, U] with NonNestedFieldJSON[T, U] {
+  renderHint: Option[RenderHint with SetFieldCompatible]) extends Field[T] with NonNestedFieldJSON[T, U] {
 
   def label(newLabel: String): SetField[T, U] = this.copy(label = Some(newLabel))
 

@@ -4,7 +4,7 @@ import org.json4s.JsonAST.{JArray, JString, JField, JObject}
 import org.supler.Message
 import org.supler.field.Field
 
-case class FieldErrorMessage(field: Field[_, _], path: FieldPath, message: Message) {
+case class FieldErrorMessage(field: Field[_], path: FieldPath, message: Message) {
   def generateJSON = {
     JObject(
       JField("field_path", JString(path.toString)),

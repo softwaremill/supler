@@ -1,11 +1,12 @@
 package org.supler.field
 
+import org.json4s.JsonAST.JValue
 import org.supler.{MultiFieldRow, Row}
 
-trait Field[T, U] extends Row[T] {
+trait Field[T] extends Row[T] {
   def name: String
 
-  override def ||(field: Field[T, _]): Row[T] = MultiFieldRow(this :: field :: Nil)
+  override def ||(field: Field[T]): Row[T] = MultiFieldRow(this :: field :: Nil)
 
   protected object JSONFieldNames {
     val Type = "type"
@@ -24,5 +25,9 @@ trait Field[T, U] extends Row[T] {
     val Select = "select"
     val Subform = "subform"
     val Static = "static"
+    val Action = "action"
   }
+
+  override def runAction(obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext): CompleteActionResult =
+    NoActionResult
 }

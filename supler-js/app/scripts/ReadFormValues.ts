@@ -1,10 +1,11 @@
 class ReadFormValues {
     /**
      * @param element Element from which to read field values
+     * @param selectedActionId The id of the element corresponding to the selected action. `null` if no action selected.
      * @param result The object to which found mappings will be added.
      * @returns An object containing mappings from found form field names to form field values.
      */
-    static getValueFrom(element, result = {}) {
+    static getValueFrom(element, selectedActionId = null, result = {}) {
         var fieldType = element.getAttribute(SuplerAttributes.FIELD_TYPE);
         var multiple = element.getAttribute(SuplerAttributes.MULTIPLE) === "true";
         if (fieldType) {
@@ -26,25 +27,31 @@ class ReadFormValues {
                     ReadFormValues.appendFieldValue(result, fieldName, this.parseBooleanOrNull(this.getElementValue(element)), multiple);
                     break;
 
+                case FieldTypes.ACTION:
+                    if (element.id === selectedActionId) {
+                        ReadFormValues.appendFieldValue(result, fieldName, true, false);
+                    }
+                    break;
+
                 case FieldTypes.SUBFORM:
                     fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
-                    var subResult = this.getValueFromChildren(element, {});
+                    var subResult = this.getValueFromChildren(element, selectedActionId, {});
                     ReadFormValues.appendFieldValue(result, fieldName, subResult, multiple);
                     break;
             }
         } else if (element.children.length > 0) {
             // flattening
-            this.getValueFromChildren(element, result);
+            this.getValueFromChildren(element, selectedActionId, result);
         }
 
         return result;
     }
 
-    private static getValueFromChildren(element, result) {
+    private static getValueFromChildren(element, selectedActionId, result) {
         var children = element.children;
 
         for (var i=0; i<children.length; i++) {
-            this.getValueFrom(children[i], result);
+            this.getValueFrom(children[i], selectedActionId, result);
         }
 
         return result;

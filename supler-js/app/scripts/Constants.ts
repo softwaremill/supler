@@ -5,6 +5,7 @@ class FieldTypes {
     static SELECT = 'select';
     static SUBFORM = 'subform';
     static STATIC = 'static';
+    static ACTION = 'action';
 }
 
 class SuplerAttributes {

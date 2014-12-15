@@ -88,6 +88,9 @@ class CreateFormFromJson {
             case FieldTypes.STATIC:
                 return this.staticFieldFromJson(renderOptions, label, id, validationId, fieldJson, compact);
 
+            case FieldTypes.ACTION:
+                return this.actionFieldFromJson(renderOptions, label, id, fieldName, validationId, fieldOptions, compact);
+
             default:
                 return null;
         }
@@ -184,6 +187,10 @@ class CreateFormFromJson {
         return renderOptions.renderStaticField(label, id, validationId, value, compact);
     }
 
+    private actionFieldFromJson(renderOptions, label, id, fieldName, validationId, fieldOptions, compact) {
+        return renderOptions.renderActionField(label, id, validationId, fieldName, fieldOptions, compact);
+    }
+
     private getRenderHintName(fieldJson: any): string {
         if (fieldJson.render_hint) {
             return fieldJson.render_hint.name;
@@ -196,7 +203,9 @@ class CreateFormFromJson {
         if (fieldJson.value.length > 0) {
             var firstRow = fieldJson.value[0];
             var result = [];
-            Util.foreach(firstRow.fields, (fieldName, fieldValue) => result.push(this.labelFor(fieldValue.label)));
+            Util.foreach(firstRow.fields, (fieldName, fieldValue) => {
+                if (fieldValue.type === FieldTypes.ACTION) result.push(''); else result.push(this.labelFor(fieldValue.label));
+            });
             return result;
         } else {
             return [];

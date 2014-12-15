@@ -3,7 +3,7 @@ class SuplerForm {
     private validatorFnFactories: any;
     private validation: Validation;
     private validatorRenderOptions: ValidatorRenderOptions;
-    private refreshControllerOptions: RefreshControllerOptions;
+    private reloadControllerOptions: ReloadControllerOptions;
     private elementSearch: ElementSearch;
     private renderOptionsGetter: RenderOptionsGetter;
 
@@ -23,7 +23,7 @@ class SuplerForm {
         this.validatorRenderOptions = new ValidatorRenderOptions;
         Util.copyProperties(this.validatorRenderOptions, customOptions);
 
-        this.refreshControllerOptions = new RefreshControllerOptions(customOptions);
+        this.reloadControllerOptions = new ReloadControllerOptions(customOptions);
 
         this.elementSearch = new ElementSearch(container);
     }
@@ -34,16 +34,18 @@ class SuplerForm {
         this.validation = new Validation(this.elementSearch, result.elementDictionary,
             this.validatorRenderOptions, this.i18n);
 
-        new RefreshController(this, result.elementDictionary, this.refreshControllerOptions, this.elementSearch,
-            this.validation).attachRefreshListeners();
+        var reloadController = new ReloadController(this, result.elementDictionary, this.reloadControllerOptions, this.elementSearch,
+            this.validation);
+        reloadController.attachRefreshListeners();
+        reloadController.attachActionListeners();
 
         this.validation.processServer(json.errors);
 
-        this.refreshControllerOptions.afterRenderFunction()
+        this.reloadControllerOptions.afterRenderFunction()
     }
 
-    getValue() {
-        return ReadFormValues.getValueFrom(this.container);
+    getValue(selectedActionId: string = null) {
+        return ReadFormValues.getValueFrom(this.container, selectedActionId);
     }
 
     /**

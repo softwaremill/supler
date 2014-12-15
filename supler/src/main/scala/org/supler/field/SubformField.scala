@@ -1,10 +1,9 @@
 package org.supler.field
 
-import org.json4s.JsonAST.{JArray, JField, JObject, JString}
 import org.json4s._
 import org.supler.errors.ValidationMode._
 import org.supler.errors._
-import org.supler.Form
+import org.supler.{Util, Form}
 
 case class SubformField[T, U](
   name: String,
@@ -14,7 +13,7 @@ case class SubformField[T, U](
   embeddedForm: Form[U],
   // if not specified, `embeddedForm.createEmpty` will be used
   createEmpty: Option[() => U],
-  renderHint: RenderHint with SubformFieldCompatible) extends Field[T, List[U]] {
+  renderHint: RenderHint with SubformFieldCompatible) extends Field[T] {
 
   def label(newLabel: String) = this.copy(_label = Some(newLabel))
 
@@ -50,4 +49,21 @@ case class SubformField[T, U](
     read(obj).zipWithIndex.flatMap { case (el, i) =>
       embeddedForm.doValidate(parentPath.appendWithIndex(name, i), el, mode)
     }
+
+  override def runAction(obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext): CompleteActionResult = {
+    val values = read(obj)
+
+    val valuesJValuesIndex = (for {
+      JArray(formJValues) <- jsonFields.get(name).toList
+    } yield values.zip(formJValues).zipWithIndex).flatten
+
+    Util
+      .findFirstMapped[((U, JValue), Int), CompleteActionResult](valuesJValuesIndex, { case ((v, jvalue), i) =>
+        val updatedCtx = ctx.push(obj, i, (v: U) => write(obj, values.updated(i, v)))
+        // assuming that the values matches the json (that is, that the json values were previously applied)
+        embeddedForm.runAction(values(i), jvalue, updatedCtx)
+      },
+      _ != NoActionResult)
+      .getOrElse(super.runAction(obj, jsonFields, ctx))
+  }
 }
