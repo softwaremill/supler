@@ -174,13 +174,14 @@ case class Person(name: String)
 
 val personForm = form[Person](f => List(
   f.field(_.name).label("Name"),
-  f.action("duplicateName")(p => ActionResult(p.copy(name = s"${p.name} ${p.name}")).label("Duplicate name")
+  f.action("duplicateName")(p => ActionResult(p.copy(name = s"${p.name} ${p.name}"))
+    .label("Duplicate name")
 ))
 ````
 
 To implement some operations on subforms, such as removing a subform element, or moving the elements around, it is
 needed to have access to the parent object. This is possible by using `parentAction`s. The subform is in such case
-parametrised by the action (so it can be reused in different contexts:
+parametrised by the action (so it can be reused in different contexts), which is provided in the parent form:
 
 ````scala
 case class Address(street: String)
@@ -195,8 +196,8 @@ def addressForm(removeAction: Address => ActionResult[Address]) = form[Address](
 
 val personForm = form[Person](f => List(
   f.field(_.name).label("Name"),
-  f.subform(_.addresses,
-    addressForm(f.parentAction((person, index, address) => ActionResult(person.removeAddress(address)))))
+  f.subform(_.addresses, addressForm(
+    f.parentAction((person, index, address) => ActionResult(person.removeAddress(address)))))
     .label("Addresses")
 ))
 ````
