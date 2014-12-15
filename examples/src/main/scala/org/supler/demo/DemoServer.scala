@@ -20,7 +20,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
       Car("Toyota", "Avensis", 2004)),
     List(
       LegoSet("Motorcycle", "Technic", 1924, 31),
-      LegoSet("Arctic Supply Plane", "City", 60064, 0),
+      LegoSet("Arctic Supply Plane", "City", 60064, 1),
       LegoSet("Princess and Horse", "Duplo", 4825, 7)),
     new DateTime(2012, 2, 19, 0, 0))
 

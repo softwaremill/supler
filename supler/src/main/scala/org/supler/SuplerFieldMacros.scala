@@ -26,9 +26,13 @@ object SuplerFieldMacros {
     val isOption = fieldValueType.typeSymbol.asClass.fullName == "scala.Option"
     val isRequiredExpr = c.Expr[Boolean](Literal(Constant(!isOption)))
 
-    val emptyValue = defaultForType(c)(fieldValueType) match {
-      case Some(defaultExpr) => c.Expr[Option[U]](reify { Some(defaultExpr.splice) }.tree)
-      case None => c.Expr[Option[U]](reify { None }.tree)
+    // If the field is a boolean, both values are non-empty by default. For other types, there's a reasonable default
+    // which can be considered as "empty" (for "required" validation).
+    val emptyValue = if (fieldValueType <:< typeOf[Boolean]) reify[Option[U]] { None } else {
+      defaultForType(c)(fieldValueType) match {
+        case Some(defaultExpr) => c.Expr[Option[U]](reify { Some(defaultExpr.splice) }.tree)
+        case None => c.Expr[Option[U]](reify { None }.tree)
+      }
     }
 
     reify {
