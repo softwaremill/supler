@@ -30,6 +30,10 @@ On the frontend side Supler provides:
 * customizability of the HTML generation process
 * automatically refresh the form with server-side changes after a field is edited
 
+## Supler diagram
+
+![Supler diagram](https://raw.githubusercontent.com/softwaremill/supler/master/design/supler%20diagram.png)
+
 ## Server-side
 
 All examples assume that all members of the `Supler` objects are available in the current scope
