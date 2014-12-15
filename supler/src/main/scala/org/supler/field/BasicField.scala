@@ -33,9 +33,9 @@ case class BasicField[T, U](
 
   override def doValidate(parentPath: FieldPath, obj: T, mode: ValidationMode): List[FieldErrorMessage] = {
     val v = read(obj)
-    val valueMissing = v == null || v == None || v == emptyValue
+    val valueMissing = v == null || v == None || Some(v) == emptyValue
 
-    if (mode == ValidationMode.OnlyFilled) Nil else {
+    if (valueMissing && mode == ValidationMode.OnlyFilled) Nil else {
       val ves = if (v != null) validators.flatMap(_.doValidate(obj, v)) else Nil
 
       val allVes = if (required && valueMissing) {
