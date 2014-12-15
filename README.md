@@ -19,6 +19,7 @@ On the server side Supler provides:
 * a DSL for defining forms
 * a way to generate a JSON description of a form
 * running server-side conversion and validation
+* running server-side actions
 * applying values sent from the frontend to the backing object
 
 On the frontend side Supler provides:
@@ -109,7 +110,7 @@ Fields of basic types (`String`, `Int`, `Long`, `Float`, `Double` and `Boolean`)
 be directly edited in form fields.
 
 If you have a more complex type, you need to provide an implicit implementation of a `Transformer[U, S]`, where `U`
-is your type, and `S` is one of the basic types. For convenience, you can extend `StringTransfomer[U]` etc.
+is your type, and `S` is one of the basic types. For convenience, you can extend `StringTransformer[U]` etc.
 
 In the transformer, you need to implement a method which serializes your type to a basic type, and another method
 which deserializes a basic type into your type, or returns a form error.
@@ -157,6 +158,46 @@ case class Person(name: String, registrationId: String)
 val personForm = form[Person](f => List(
   f.field(_.name).label("Name"),
   f.staticField(_.registrationId).label("Registration id")
+))
+````
+
+#### Actions
+
+Forms can contain buttons which invoke actions on the server side (see also the section on reloading the form below).
+Each action must have a unique name (just as fields have names, but these are inferred). An action name can only contain
+letters, digits and _ (no spaces or other characters which would form an invalid JSON object key).
+
+In its simplest form, an action can modify the object that is backing the form, and needs to return an `ActionResult`:
+
+````scala
+case class Person(name: String)
+
+val personForm = form[Person](f => List(
+  f.field(_.name).label("Name"),
+  f.action("duplicateName")(p => ActionResult(p.copy(name = s"${p.name} ${p.name}")).label("Duplicate name")
+))
+````
+
+To implement some operations on subforms, such as removing a subform element, or moving the elements around, it is
+needed to have access to the parent object. This is possible by using `parentAction`s. The subform is in such case
+parametrised by the action (so it can be reused in different contexts:
+
+````scala
+case class Address(street: String)
+case class Person(name: String, addresses: List[Address]) {
+  def removeAddress(a: Address) = this.copy(addresses = this.addresses diff List(a))
+}
+
+def addressForm(removeAction: Address => ActionResult[Address]) = form[Address](f => List(
+  f.field(_.street).label("Street"),
+  f.action("remove")(removeAction).label("Remove")
+))
+
+val personForm = form[Person](f => List(
+  f.field(_.name).label("Name"),
+  f.subform(_.addresses,
+    addressForm(f.parentAction((person, index, address) => ActionResult(person.removeAddress(address)))))
+    .label("Addresses")
 ))
 ````
 
@@ -302,12 +343,12 @@ form.render(formJson); // formJson is received from the server
 
 The values can be either strings, or functions which format the message using the error message's arguments.
 
-### Refreshing the form basing on server-side form changes
+### Reloading the form basing on server-side form changes
 
-The form can be automatically refreshed after each field edit (value change). To do that, two things are necessary.
-Firstly, a `reload_form_function` option must be specified. This should be a javascript function, accepting the
-serialized form representation and a success function, to be called when the form is successfully refreshed. For
-example, when using JQuery, this can be:
+The form can be automatically reloaded after each field edit (value change), and when actions are performed.
+To do that, two things are necessary. Firstly, a `reload_form_function` option must be specified. This should be
+a javascript function, accepting the serialized form representation and a success function, to be called when the
+form is successfully refreshed. For example, when using JQuery, this can be:
 
 ````javascript
 function reloadForm(formJson, successFn) {
@@ -325,8 +366,8 @@ function reloadForm(formJson, successFn) {
 Secondly, we need to provide a server-side endpoint which will refresh the form with the given values, validate
 and generate back the response. When validating, there is a special mode which runs the validations only for fields
 with filled-in values, not to show the user validation errors for fields which haven't been yet edited at all.
-This can be done with the convenience `personForm(person).refresh(receivedJson)` method. This simply runs apply,
-validate and generate JSON in succession.
+This can be done with the convenience `personForm(person).reload(receivedJson)` method. This simply invokes apply,
+validate, run action and generate JSON in succession.
 
 ### Adding custom behavior to the form
 
