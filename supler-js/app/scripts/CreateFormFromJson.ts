@@ -40,7 +40,7 @@ class CreateFormFromJson {
         var validators = [];
 
         var typeValidator = this.validatorFnFactories['type_' + fieldJson.type];
-        if (typeValidator) validators.push(typeValidator());
+        if (typeValidator) validators.push(typeValidator.apply(this));
 
         var validatorsJson = fieldJson.validate;
         if (validatorsJson) {
