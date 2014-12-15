@@ -15,7 +15,8 @@ case class BasicField[T, U](
   label: Option[String],
   required: Boolean,
   transformer: FullTransformer[U, _],
-  renderHint: Option[RenderHint with BasicFieldCompatible]) extends Field[T] with NonNestedFieldJSON[T, U] {
+  renderHint: Option[RenderHint with BasicFieldCompatible],
+  emptyValue: Option[U]) extends Field[T] with NonNestedFieldJSON[T, U] {
 
   def label(newLabel: String): BasicField[T, U] = this.copy(label = Some(newLabel))
 
@@ -28,11 +29,13 @@ case class BasicField[T, U](
     case None => this.copy(valuesProvider = Some(values))
   }
 
+  def emptyValue(newEmptyValue: Option[U]): BasicField[T, U] = this.copy(emptyValue = newEmptyValue)
+
   override def doValidate(parentPath: FieldPath, obj: T, mode: ValidationMode): List[FieldErrorMessage] = {
     val v = read(obj)
-    val valueMissing = v == null || v == None || v == ""
+    val valueMissing = v == null || v == None || v == emptyValue
 
-    if (valueMissing && mode == ValidationMode.OnlyFilled) Nil else {
+    if (mode == ValidationMode.OnlyFilled) Nil else {
       val ves = if (v != null) validators.flatMap(_.doValidate(obj, v)) else Nil
 
       val allVes = if (required && valueMissing) {

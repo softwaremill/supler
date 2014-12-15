@@ -23,7 +23,7 @@ object SuplerFormMacros {
         } {
           val constructorParams: List[c.Tree] = for (param <- targetConstructorParams) yield {
             val pTpe = param.typeSignature.substituteTypes(sym.asClass.typeParams, tpeArgs)
-            defaultForType(c)(pTpe).getOrElse(reify { null }).tree
+            SuplerFieldMacros.defaultForType(c)(pTpe).getOrElse(reify { null }).tree
           }
 
           newT = Apply(newT, constructorParams)
@@ -35,22 +35,5 @@ object SuplerFormMacros {
     reify {
       Form(rows.splice(new Supler[T] {}), () => empty.splice)
     }
-  }
-
-  private def defaultForType(c: blackbox.Context)(tpe: c.universe.Type): Option[c.universe.Expr[_]] = {
-    import c.universe._
-
-    if (tpe <:< typeOf[Int]) return Some(reify { 0 })
-    if (tpe <:< typeOf[Long]) return Some(reify { 0L })
-    if (tpe <:< typeOf[Float]) return Some(reify { 0.0f })
-    if (tpe <:< typeOf[Double]) return Some(reify { 0.0d })
-    if (tpe <:< typeOf[String]) return Some(reify { "" })
-    if (tpe <:< typeOf[Boolean]) return Some(reify { false })
-
-    if (tpe <:< typeOf[Option[_]]) return Some(reify { None })
-    if (tpe <:< typeOf[List[_]]) return Some(reify { Nil })
-    if (tpe <:< typeOf[Set[_]]) return Some(reify { Set() })
-
-    None
   }
 }

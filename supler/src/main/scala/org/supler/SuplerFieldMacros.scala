@@ -21,15 +21,23 @@ object SuplerFieldMacros {
 
     val writeFieldValueExpr = generateFieldWrite[T, U](c)(fieldName, classSymbol)
 
-    val isOption = implicitly[WeakTypeTag[U]].tpe.typeSymbol.asClass.fullName == "scala.Option"
+    val fieldValueType = implicitly[WeakTypeTag[U]].tpe
+
+    val isOption = fieldValueType.typeSymbol.asClass.fullName == "scala.Option"
     val isRequiredExpr = c.Expr[Boolean](Literal(Constant(!isOption)))
+
+    val emptyValue = defaultForType(c)(fieldValueType) match {
+      case Some(defaultExpr) => c.Expr[Option[U]](reify { Some(defaultExpr.splice) }.tree)
+      case None => c.Expr[Option[U]](reify { None }.tree)
+    }
 
     reify {
       FactoryMethods.newBasicField(paramRepExpr.splice,
         readFieldValueExpr.splice,
         writeFieldValueExpr.splice,
         isRequiredExpr.splice,
-        transformer.splice)
+        transformer.splice,
+        emptyValue.splice)
     }
   }
 
@@ -91,9 +99,9 @@ object SuplerFieldMacros {
 
   object FactoryMethods {
     def newBasicField[T, U, S](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,
-      transformer: FullTransformer[U, S]): BasicField[T, U] = {
+      transformer: FullTransformer[U, S], emptyValue: Option[U]): BasicField[T, U] = {
 
-      BasicField[T, U](fieldName, read, write, List(), None, None, required, transformer, None)
+      BasicField[T, U](fieldName, read, write, List(), None, None, required, transformer, None, emptyValue)
     }
 
     def newSubformField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T,
@@ -168,5 +176,22 @@ object SuplerFieldMacros {
     }
 
     c.Expr[(T, U) => T](writeFieldValueTree)
+  }
+
+  def defaultForType(c: blackbox.Context)(tpe: c.universe.Type): Option[c.universe.Expr[_]] = {
+    import c.universe._
+
+    if (tpe <:< typeOf[Int]) return Some(reify { 0 })
+    if (tpe <:< typeOf[Long]) return Some(reify { 0L })
+    if (tpe <:< typeOf[Float]) return Some(reify { 0.0f })
+    if (tpe <:< typeOf[Double]) return Some(reify { 0.0d })
+    if (tpe <:< typeOf[String]) return Some(reify { "" })
+    if (tpe <:< typeOf[Boolean]) return Some(reify { false })
+
+    if (tpe <:< typeOf[Option[_]]) return Some(reify { None })
+    if (tpe <:< typeOf[List[_]]) return Some(reify { Nil })
+    if (tpe <:< typeOf[Set[_]]) return Some(reify { Set() })
+
+    None
   }
 }
