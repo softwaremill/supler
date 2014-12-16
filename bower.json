@@ -1,7 +1,7 @@
 {
     "name": "supler",
     "version": "0.1.0",
-    "main": "app/scripts/compiled/supler.out.js",
+    "main": "supler-js/app/scripts/compiled/supler.out.js",
     "keywords": [ "forms", "power user", "scala", "supler" ],
     "dependencies": {
 
