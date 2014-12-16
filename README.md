@@ -36,6 +36,20 @@ On the frontend side Supler provides:
 
 ![Supler diagram](https://raw.githubusercontent.com/softwaremill/supler/master/design/supler%20diagram.png)
 
+## Using Supler
+
+As Supler has two parts, they are deployed in different repositories. The backend can be found in
+[Sonatype’s OSS repository](https://oss.sonatype.org/content/repositories/releases/com/softwaremill/supler_2.11/),
+and if you have e.g. an SBT build you just need to add:
+
+````scala
+libraryDependencies += "com.softwaremill" %% "supler" % "0.1.0"
+````
+
+The frontend is deployed to [Bower](http://bower.io/search/?q=supler), and you can install it simply using
+`bower install supler`. Or you can just grab `supler.js` directly from the
+[GitHub tag](https://github.com/softwaremill/supler/blob/0.1.0/supler.js).
+
 ## Server-side
 
 All examples assume that all members of the `Supler` objects are available in the current scope
@@ -380,3 +394,14 @@ validate, run action and generate JSON in succession.
 
 By setting the `after_render_function` option to a no-argument function, it is possible to get notified after a form
 is rendered (or refreshed), and customize the form or add some custom dynamic behavior.
+
+## Version history
+
+0.1.0 - 16/12/2014
+
+* initial release
+
+## Contributors
+
+* [Tomasz Szymański](http://twitter.com/szimano)
+* [Adam Warski](http://twitter.com/adamwarski)
