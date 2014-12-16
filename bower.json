@@ -1,10 +1,14 @@
 {
     "name": "supler",
     "version": "0.1.0",
-    "main": "supler-js/app/scripts/compiled/supler.out.js",
+    "main": "supler.js",
     "keywords": [ "forms", "power user", "scala", "supler" ],
     "ignore": [
-        "./!(supler*.js)"
+        "design",
+        "examples",
+        "project",
+        "supler",
+        "supler-js"
     ],
     "dependencies": {
 
