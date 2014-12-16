@@ -1,5 +1,7 @@
 # supler - Functional Reactive Form Library
 
+[![Build Status](https://travis-ci.org/softwaremill/supler.svg?branch=actions)](https://travis-ci.org/softwaremill/supler)
+
 ## Links
 
 * [the introduction blog](http://www.warski.org/blog/2014/09/introducing-supler-a-functional-reactive-form-library/)
