@@ -4,8 +4,7 @@
     "main": "supler-js/app/scripts/compiled/supler.out.js",
     "keywords": [ "forms", "power user", "scala", "supler" ],
     "ignore": [
-        "**/*",
-        "!supler-js/app/scripts/compiled/supler.out.js"
+        "./**/!(supler.out.js)"
     ],
     "dependencies": {
 
