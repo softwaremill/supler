@@ -9,7 +9,7 @@
 
 ## Introduction
 
-Supler is a **library** which makes writing complex form easier. It has a server-side (Scala) and a client-side
+Supler is a **library** which makes writing complex form easier. It has server-side (Scala) and client-side
 (JavaScript) components.
 
 Supler does not define or mandate how the objects/entities backing the forms should work, how are they persisted,
