@@ -4,6 +4,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-ts');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-mocha');
 
     // Configurable paths
     var config = {
@@ -23,17 +24,30 @@ module.exports = function (grunt) {
         watch: {
             ts: {
                 files: ['<%= config.src %>/**/*.ts'],
-                tasks: ['ts'],
+                tasks: ['tsAndTest'],
                 options: {
                     livereload: true
                 }
             }
         },
-        clean: [ '<%= config.target %>' ]
+        clean: [ '<%= config.target %>' ],
+        mocha: {
+            test: {
+                src: [ 'tests/runner.html'],
+                options: {
+                    run: true,
+                }
+            }
+        }
     });
 
-    grunt.registerTask('dev', [
+    grunt.registerTask('tsAndTest', [
         'ts',
+        'mocha'
+    ]);
+
+    grunt.registerTask('dev', [
+        'tsAndTest',
         'watch'
     ]);
 };
