@@ -29,7 +29,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
   val (port, suplerJsDirective, sourceMapDirective) = if (System.getProperty("supler.demo.production") != null) {
     (8195, getFromResourceDirectory(""), getFromResourceDirectory(""))
   } else {
-    (8080, getFromDirectory("./supler-js/app/scripts/compiled"), getFromDirectory("./supler-js/app/scripts"))
+    (8080, getFromDirectory("./supler-js/target"), getFromDirectory("./supler-js"))
     // compiled by grunt
   }
 
