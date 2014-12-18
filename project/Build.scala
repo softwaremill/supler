@@ -102,9 +102,10 @@ object SuplerBuild extends Build {
     if (result != 0) throw new Exception("Build failed.")
   }
 
-  def updateNpm() = baseDirectory map { bd =>
+  val updateNpm = baseDirectory map { bd =>
     println("Updating NPM dependencies in " + bd)
     haltOnCmdResultError(Process("npm install", bd)!)
+    println("NPM dependencies updated")
   }
 
   def gruntTask(taskName: String) = (baseDirectory, streams) map { (bd, s) =>
@@ -114,12 +115,12 @@ object SuplerBuild extends Build {
     }
     println("Building with Grunt.js : " + taskName)
     haltOnCmdResultError(buildGrunt())
-  }
+  } dependsOn updateNpm
 
   lazy val suplerjs: Project = Project(
     "supler-js",
     file("supler-js"),
     settings = buildSettings ++ Seq(
-      test in Test <<= (test in Test) dependsOn(updateNpm(), gruntTask("test")))
+      test in Test <<= (test in Test) dependsOn gruntTask("test"))
   )
 }
