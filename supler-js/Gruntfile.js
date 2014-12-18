@@ -41,9 +41,11 @@ module.exports = function (grunt) {
         }
     });
 
+    grunt.registerTask('test', [ 'mocha' ]);
+
     grunt.registerTask('tsAndTest', [
         'ts',
-        'mocha'
+        'test'
     ]);
 
     grunt.registerTask('dev', [

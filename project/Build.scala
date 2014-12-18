@@ -64,7 +64,7 @@ object SuplerBuild extends Build {
     "root",
     file("."),
     settings = buildSettings ++ Seq(publishArtifact := false)
-  ) aggregate(supler, examples)
+  ) aggregate(supler, suplerjs, examples)
 
   lazy val supler: Project = Project(
     "supler",
@@ -97,4 +97,29 @@ object SuplerBuild extends Build {
       assembly <<= assembly.dependsOn(createAndCopySuplerJs),
       publishArtifact := false)
   ) dependsOn (supler)
+
+  private def haltOnCmdResultError(result: Int) {
+    if (result != 0) throw new Exception("Build failed.")
+  }
+
+  def updateNpm() = baseDirectory map { bd =>
+    println("Updating NPM dependencies in " + bd)
+    haltOnCmdResultError(Process("npm install", bd)!)
+  }
+
+  def gruntTask(taskName: String) = (baseDirectory, streams) map { (bd, s) =>
+    val localGruntCommand = "./node_modules/.bin/grunt " + taskName
+    def buildGrunt() = {
+      Process(localGruntCommand, bd).!
+    }
+    println("Building with Grunt.js : " + taskName)
+    haltOnCmdResultError(buildGrunt())
+  }
+
+  lazy val suplerjs: Project = Project(
+    "supler-js",
+    file("supler-js"),
+    settings = buildSettings ++ Seq(
+      test in Test <<= (test in Test) dependsOn(updateNpm(), gruntTask("test")))
+  )
 }
