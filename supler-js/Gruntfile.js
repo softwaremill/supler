@@ -5,6 +5,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-ts');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-mocha');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 
     // Configurable paths
     var config = {
@@ -38,6 +39,14 @@ module.exports = function (grunt) {
                     run: true,
                 }
             }
+        },
+        copy: {
+            suplerjs: {
+                expand: true, 
+                src: 'target/supler.js', 
+                dest: '../',
+                flatten: true
+            },
         }
     });
 
@@ -48,8 +57,14 @@ module.exports = function (grunt) {
         'test'
     ]);
 
+    // main tasks
     grunt.registerTask('dev', [
         'tsAndTest',
         'watch'
+    ]);
+
+    grunt.registerTask('dist', [
+        'tsAndTest',
+        'copy'
     ]);
 };
