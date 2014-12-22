@@ -121,6 +121,6 @@ object SuplerBuild extends Build {
     "supler-js",
     file("supler-js"),
     settings = buildSettings ++ Seq(
-      test in Test <<= (test in Test) dependsOn gruntTask("test"))
-  ) dependsOn (supler)
+      test in Test <<= gruntTask("test") dependsOn (test in Test in supler))
+  )
 }
