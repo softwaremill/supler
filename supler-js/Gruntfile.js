@@ -26,7 +26,7 @@ module.exports = function (grunt) {
         watch: {
             ts: {
                 files: [ '<%= config.src %>/**/*.ts', '<%= config.tests %>/**/*.js' ],
-                tasks: [ 'tsAndTest' ],
+                tasks: [ 'test' ],
                 options: {
                     atBegin: true,
                     livereload: true
@@ -60,18 +60,13 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('test', [ 'copy:testforms', 'mocha' ]);
-
-    grunt.registerTask('tsAndTest', [
-        'ts',
-        'test'
-    ]);
+    grunt.registerTask('test', [ 'ts', 'copy:testforms', 'mocha' ]);
 
     // main tasks
     grunt.registerTask('dev', [ 'watch' ]);
 
     grunt.registerTask('dist', [
-        'tsAndTest',
+        'test',
         'copy:suplerjs'
     ]);
 };
