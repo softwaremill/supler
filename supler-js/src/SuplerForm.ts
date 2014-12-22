@@ -9,6 +9,7 @@ class SuplerForm {
 
     constructor(private container: HTMLElement, customOptions: any) {
         // TODO: we shouldn't copy everything everywhere
+        customOptions = customOptions || {};
 
         this.i18n = new I18n();
         Util.copyProperties(this.i18n, customOptions);

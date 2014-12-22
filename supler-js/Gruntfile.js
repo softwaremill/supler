@@ -10,6 +10,7 @@ module.exports = function (grunt) {
     // Configurable paths
     var config = {
         src: 'src',
+        tests: 'tests',
         target: 'target'
     };
 
@@ -18,15 +19,16 @@ module.exports = function (grunt) {
         config: config,
         ts: {
             default: {
-                src: ['<%= config.src %>/**/*.ts'],         
+                src: ['<%= config.src %>/**/*.ts'],
                 out: '<%= config.target %>/supler.js'
             }
         },
         watch: {
             ts: {
-                files: ['<%= config.src %>/**/*.ts'],
-                tasks: ['tsAndTest'],
+                files: [ '<%= config.src %>/**/*.ts', '<%= config.tests %>/**/*.js' ],
+                tasks: [ 'tsAndTest' ],
                 options: {
+                    atBegin: true,
                     livereload: true
                 }
             }
@@ -37,20 +39,28 @@ module.exports = function (grunt) {
                 src: [ 'tests/runner.html'],
                 options: {
                     run: true,
+                    log: true,
+                    logErrors: true
                 }
             }
         },
         copy: {
+            testforms: {
+                expand: true,
+                src: '../supler/target/scala-2.11/test-classes/*.js',
+                dest: 'tests/generated/',
+                flatten: true
+            },
             suplerjs: {
-                expand: true, 
-                src: 'target/supler.js', 
+                expand: true,
+                src: 'target/supler.js',
                 dest: '../',
                 flatten: true
             },
         }
     });
 
-    grunt.registerTask('test', [ 'mocha' ]);
+    grunt.registerTask('test', [ 'copy:testforms', 'mocha' ]);
 
     grunt.registerTask('tsAndTest', [
         'ts',
@@ -58,13 +68,10 @@ module.exports = function (grunt) {
     ]);
 
     // main tasks
-    grunt.registerTask('dev', [
-        'tsAndTest',
-        'watch'
-    ]);
+    grunt.registerTask('dev', [ 'watch' ]);
 
     grunt.registerTask('dist', [
         'tsAndTest',
-        'copy'
+        'copy:suplerjs'
     ]);
 };
