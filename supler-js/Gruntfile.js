@@ -56,13 +56,12 @@ module.exports = function (grunt) {
                 src: 'target/supler.js',
                 dest: '../',
                 flatten: true
-            },
+            }
         }
     });
 
     grunt.registerTask('test', [ 'ts', 'copy:testforms', 'mocha' ]);
 
-    // main tasks
     grunt.registerTask('dev', [ 'watch' ]);
 
     grunt.registerTask('dist', [

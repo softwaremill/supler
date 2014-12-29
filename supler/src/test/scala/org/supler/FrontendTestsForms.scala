@@ -37,12 +37,14 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
 
     val obj1 = Simple1("v1", Some("v2"), 0, field4 = true)
     val obj2 = Simple1("v1", None, 15, field4 = true)
-    val obj3 = Simple1("v11", Some("v21"), 90, field4 = false)
 
     writer.writeForm("simple1form1", simple1Form, obj1)
+    writer.writeValidatedForm("simple1form1validated", simple1Form, obj1)
+
+    writer.writeForm("simple1form2", simple1Form, obj2)
+
     writer.writeObj("simple1obj1", obj1)
     writer.writeObj("simple1obj2", obj2)
-    writer.writeObj("simple1obj3", obj3)
   }
 
   def writeTestData(name: String)(thunk: JsonWriter => Unit): Unit = {
@@ -63,6 +65,11 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
   class JsonWriter(pw: PrintWriter) {
     def writeForm[T](variableName: String, form: Form[T], obj: T): Unit = {
       val toWrite = pretty(render(form(obj).generateJSON))
+      pw.println(s""""$variableName": $toWrite,""")
+    }
+
+    def writeValidatedForm[T](variableName: String, form: Form[T], obj: T): Unit = {
+      val toWrite = pretty(render(form(obj).doValidate().generateJSON))
       pw.println(s""""$variableName": $toWrite,""")
     }
 
