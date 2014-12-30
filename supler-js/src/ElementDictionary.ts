@@ -1,3 +1,3 @@
 interface ElementDictionary {
-    [ elementId: string ]: ElementValidator
+  [ elementId: string ]: ElementValidator
 }

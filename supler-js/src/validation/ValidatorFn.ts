@@ -5,7 +5,7 @@
  * Should return null if validation succeeds.
  */
 interface ValidatorFn {
-    (fieldValue: any): string
+  (fieldValue:any): string
 }
 
 /**
@@ -15,31 +15,44 @@ interface ValidatorFn {
  * configuration.
  */
 class DefaultValidatorFnFactories {
-    constructor(private i18n: I18n) {}
+  constructor(private i18n:I18n) {
+  }
 
-    required(json, fieldJson): ValidatorFn { return (fieldValue: any) => {
-        if (json === true && (fieldValue === null || fieldValue.length == 0 || fieldValue === fieldJson.empty_value)) {
-          return this.i18n.error_valueRequired();
-        } else return null;
-    }}
+  required(json, fieldJson):ValidatorFn {
+    return (fieldValue:any) => {
+      if (json === true && (fieldValue === null || fieldValue.length == 0 || fieldValue === fieldJson.empty_value)) {
+        return this.i18n.error_valueRequired();
+      } else return null;
+    }
+  }
 
-    ge(json): ValidatorFn { return (fieldValue: any) => {
-        if (parseInt(fieldValue) >= json) return null; else return this.i18n.error_number_ge(json);
-    }}
+  ge(json):ValidatorFn {
+    return (fieldValue:any) => {
+      if (parseInt(fieldValue) >= json) return null; else return this.i18n.error_number_ge(json);
+    }
+  }
 
-    gt(json): ValidatorFn { return (fieldValue: any) => {
-        if (parseInt(fieldValue) > json) return null; else return this.i18n.error_number_gt(json);
-    }}
+  gt(json):ValidatorFn {
+    return (fieldValue:any) => {
+      if (parseInt(fieldValue) > json) return null; else return this.i18n.error_number_gt(json);
+    }
+  }
 
-    le(json): ValidatorFn { return (fieldValue: any) => {
-        if (parseInt(fieldValue) <= json) return null; else return this.i18n.error_number_le(json);
-    }}
+  le(json):ValidatorFn {
+    return (fieldValue:any) => {
+      if (parseInt(fieldValue) <= json) return null; else return this.i18n.error_number_le(json);
+    }
+  }
 
-    lt(json): ValidatorFn { return (fieldValue: any) => {
-        if (parseInt(fieldValue) < json) return null; else return this.i18n.error_number_lt(json);
-    }}
+  lt(json):ValidatorFn {
+    return (fieldValue:any) => {
+      if (parseInt(fieldValue) < json) return null; else return this.i18n.error_number_lt(json);
+    }
+  }
 
-    type_integer(): ValidatorFn { return (fieldValue: any) => {
-        if (parseInt(fieldValue) === fieldValue) return null; else return this.i18n.error_type_number();
-    }}
+  type_integer():ValidatorFn {
+    return (fieldValue:any) => {
+      if (parseInt(fieldValue) === fieldValue) return null; else return this.i18n.error_type_number();
+    }
+  }
 }

@@ -1,58 +1,58 @@
 class SuplerForm {
-    private i18n: I18n;
-    private validatorFnFactories: any;
-    private validation: Validation;
-    private validatorRenderOptions: ValidatorRenderOptions;
-    private reloadControllerOptions: ReloadControllerOptions;
-    private elementSearch: ElementSearch;
-    private renderOptionsGetter: RenderOptionsGetter;
+  private i18n:I18n;
+  private validatorFnFactories:any;
+  private validation:Validation;
+  private validatorRenderOptions:ValidatorRenderOptions;
+  private reloadControllerOptions:ReloadControllerOptions;
+  private elementSearch:ElementSearch;
+  private renderOptionsGetter:RenderOptionsGetter;
 
-    constructor(private container: HTMLElement, customOptions: any) {
-        // TODO: we shouldn't copy everything everywhere
-        customOptions = customOptions || {};
+  constructor(private container:HTMLElement, customOptions:any) {
+    // TODO: we shouldn't copy everything everywhere
+    customOptions = customOptions || {};
 
-        this.i18n = new I18n();
-        Util.copyProperties(this.i18n, customOptions);
+    this.i18n = new I18n();
+    Util.copyProperties(this.i18n, customOptions);
 
-        var renderOptions = new DefaultRenderOptions();
-        Util.copyProperties(renderOptions, customOptions);
-        this.renderOptionsGetter = new HTMLRenderTemplateParser(this.container).parse(renderOptions);
+    var renderOptions = new DefaultRenderOptions();
+    Util.copyProperties(renderOptions, customOptions);
+    this.renderOptionsGetter = new HTMLRenderTemplateParser(this.container).parse(renderOptions);
 
-        this.validatorFnFactories = new DefaultValidatorFnFactories(this.i18n);
-        Util.copyProperties(this.validatorFnFactories, customOptions);
+    this.validatorFnFactories = new DefaultValidatorFnFactories(this.i18n);
+    Util.copyProperties(this.validatorFnFactories, customOptions);
 
-        this.validatorRenderOptions = new ValidatorRenderOptions;
-        Util.copyProperties(this.validatorRenderOptions, customOptions);
+    this.validatorRenderOptions = new ValidatorRenderOptions;
+    Util.copyProperties(this.validatorRenderOptions, customOptions);
 
-        this.reloadControllerOptions = new ReloadControllerOptions(customOptions);
+    this.reloadControllerOptions = new ReloadControllerOptions(customOptions);
 
-        this.elementSearch = new ElementSearch(container);
-    }
+    this.elementSearch = new ElementSearch(container);
+  }
 
-    render(json) {
-        var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories).renderForm(json.main_form);
-        this.container.innerHTML = result.html;
-        this.validation = new Validation(this.elementSearch, result.elementDictionary,
-            this.validatorRenderOptions, this.i18n);
+  render(json) {
+    var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories).renderForm(json.main_form);
+    this.container.innerHTML = result.html;
+    this.validation = new Validation(this.elementSearch, result.elementDictionary,
+      this.validatorRenderOptions, this.i18n);
 
-        var reloadController = new ReloadController(this, result.elementDictionary, this.reloadControllerOptions, this.elementSearch,
-            this.validation);
-        reloadController.attachRefreshListeners();
-        reloadController.attachActionListeners();
+    var reloadController = new ReloadController(this, result.elementDictionary, this.reloadControllerOptions, this.elementSearch,
+      this.validation);
+    reloadController.attachRefreshListeners();
+    reloadController.attachActionListeners();
 
-        this.validation.processServer(json.errors);
+    this.validation.processServer(json.errors);
 
-        this.reloadControllerOptions.afterRenderFunction()
-    }
+    this.reloadControllerOptions.afterRenderFunction()
+  }
 
-    getValue(selectedActionId: string = null) {
-        return ReadFormValues.getValueFrom(this.container, selectedActionId);
-    }
+  getValue(selectedActionId:string = null) {
+    return ReadFormValues.getValueFrom(this.container, selectedActionId);
+  }
 
-    /**
-     * @returns True if there were validation errors.
-     */
-    validate(): boolean {
-        return this.validation.processClient();
-    }
+  /**
+   * @returns True if there were validation errors.
+   */
+  validate():boolean {
+    return this.validation.processClient();
+  }
 }
