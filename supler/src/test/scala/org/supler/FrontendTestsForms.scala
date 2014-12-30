@@ -20,6 +20,8 @@ import org.json4s.native.JsonMethods._
  */
 object FrontendTestsForms {
   case class Simple1(field1: String, field2: Option[String], field3: Int, field4: Boolean)
+  case class Select1Required(field1: String)
+  case class Select1Optional(field1: Option[String])
 }
 
 class FrontendTestsForms extends FlatSpec with ShouldMatchers {
@@ -28,7 +30,7 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
   import FrontendTestsForms._
 
   writeTestData("simple1") { writer =>
-    val simple1Form = form[Simple1](f => List(
+    val f = form[Simple1](f => List(
       f.field(_.field1).label("Field 1"),
       f.field(_.field2).label("Field 2"),
       f.field(_.field3).label("Field 3").validate(gt(10)),
@@ -38,13 +40,46 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     val obj1 = Simple1("v1", Some("v2"), 0, field4 = true)
     val obj2 = Simple1("v1", None, 15, field4 = true)
 
-    writer.writeForm("simple1form1", simple1Form, obj1)
-    writer.writeValidatedForm("simple1form1validated", simple1Form, obj1)
+    writer.writeForm("form1", f, obj1)
+    writer.writeValidatedForm("form1validated", f, obj1)
 
-    writer.writeForm("simple1form2", simple1Form, obj2)
+    writer.writeForm("form2", f, obj2)
 
-    writer.writeObj("simple1obj1", obj1)
-    writer.writeObj("simple1obj2", obj2)
+    writer.writeObj("obj1", obj1)
+    writer.writeObj("obj2", obj2)
+  }
+
+  writeTestData("select1") { writer =>
+    val fReq = form[Select1Required](f => List(
+      f.field(_.field1).label("Field 1").possibleValues(_ => List("a", "b", "c"))
+    ))
+
+    val fReqRadio = form[Select1Required](f => List(
+      f.field(_.field1).label("Field 1").possibleValues(_ => List("a", "b", "c")).renderHint(asRadio())
+    ))
+
+    val fOpt = form[Select1Optional](f => List(
+      f.field(_.field1).label("Field 1").possibleValues(_ => List("a", "b", "c").map(Some(_)))
+    ))
+
+    val fOptRadio = form[Select1Optional](f => List(
+      f.field(_.field1).label("Field 1").possibleValues(_ => List("a", "b", "c").map(Some(_))).renderHint(asRadio())
+    ))
+
+    val obj1req = Select1Required("b")
+    val obj2req = Select1Required("")
+
+    val obj1opt = Select1Optional(Some("b"))
+    val obj2opt = Select1Optional(None)
+
+    writer.writeForm("form1req", fReq, obj1req)
+    writer.writeForm("form2req", fReq, obj2req)
+    writer.writeForm("form1reqRadio", fReqRadio, obj1req)
+    writer.writeForm("form2reqRadio", fReqRadio, obj2req)
+    writer.writeForm("form1opt", fOpt, obj1opt)
+    writer.writeForm("form2opt", fOpt, obj2opt)
+    writer.writeForm("form1optRadio", fOptRadio, obj1opt)
+    writer.writeForm("form2optRadio", fOptRadio, obj2opt)
   }
 
   def writeTestData(name: String)(thunk: JsonWriter => Unit): Unit = {
@@ -55,7 +90,7 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
       try {
         pw.write(s"var $name = {")
         thunk(new JsonWriter(pw))
-        pw.write("}")
+        pw.write("};")
       } finally {
         pw.close()
       }

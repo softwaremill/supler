@@ -29,6 +29,7 @@ case class StaticField[T](
           transformer.serialize(msg.key).map(JField("key", _)).toList
       )),
       validationJSON = Nil,
+      emptyValue = None,
       fieldTypeName = SpecialFieldTypes.Static
     )
   }

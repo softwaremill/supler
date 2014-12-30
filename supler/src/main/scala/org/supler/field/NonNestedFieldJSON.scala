@@ -28,6 +28,7 @@ trait NonNestedFieldJSON[T, U] {
       JField(Validate, JObject(data.validationJSON.toList)),
       JField(Path, JString(parentPath.append(name).toString))
     ) ++ data.valueJSONValue.map(JField(Value, _)).toList
+      ++ data.emptyValue.map(JField(EmptyValue, _)).toList
       ++ generateRenderHintJSONValue.map(JField(RenderHint, _)).toList
       ++ data.extraJSON)))
   }
@@ -52,6 +53,7 @@ trait NonNestedFieldJSON[T, U] {
     fieldTypeName: String,
     valueJSONValue: Option[JValue],
     validationJSON: List[JField],
+    emptyValue: Option[JValue],
     extraJSON: List[JField] = Nil
   )
 }

@@ -42,6 +42,7 @@ case class SetField[T, U](
       valueJSONValue = Some(JArray(currentValues.map(JInt(_)).toList)),
       validationJSON = validators.flatMap(_.generateJSON),
       fieldTypeName = SpecialFieldTypes.Select,
+      emptyValue = None,
       extraJSON = JField(JSONFieldNames.Multiple, JBool(value = true)) :: generatePossibleValuesJSON(possibleValues)
     )
   }
@@ -50,6 +51,7 @@ case class SetField[T, U](
     GenerateJSONData(
       valueJSONValue = Some(JArray(read(obj).toList.flatMap(i => transformer.serialize(i)))),
       validationJSON = validators.flatMap(_.generateJSON),
+      emptyValue = None,
       fieldTypeName = transformer.jsonSchemaName
     )
   }

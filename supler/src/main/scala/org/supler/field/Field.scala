@@ -17,6 +17,7 @@ trait Field[T] extends Row[T] {
     val RenderHint = "render_hint"
     val PossibleValues = "possible_values"
     val Path = "path"
+    val EmptyValue = "empty_value"
 
     val ValidateRequired = "required"
   }

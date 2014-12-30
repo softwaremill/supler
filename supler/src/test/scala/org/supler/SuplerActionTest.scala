@@ -3,6 +3,7 @@ package org.supler
 import org.scalatest._
 import org.supler.field.{ValueCompleteActionResult, RunActionContext, ActionResult}
 import org.supler.Supler._
+import org.json4s.native.JsonMethods._
 
 class SuplerActionTest extends FlatSpec with ShouldMatchers {
   case class A(bs: List[B])
@@ -24,7 +25,7 @@ class SuplerActionTest extends FlatSpec with ShouldMatchers {
     // when
     val result = fa.runAction(
       A(List(B(List(C("_"))))),
-      org.json4s.native.JsonMethods.parse("""{"bs": [ { "cs": [ { "a": true } ] } ]}"""),
+      parse("""{"bs": [ { "cs": [ { "a": true } ] } ]}"""),
       RunActionContext(Nil))
 
     // then
@@ -48,7 +49,7 @@ class SuplerActionTest extends FlatSpec with ShouldMatchers {
     // when
     val result = fa.runAction(
       A(List(B(List(C("_"))))),
-      org.json4s.native.JsonMethods.parse( """{"bs": [ { "cs": [ { "a": true } ] } ]}"""),
+      parse("""{"bs": [ { "cs": [ { "a": true } ] } ]}"""),
       RunActionContext(Nil))
 
     // then

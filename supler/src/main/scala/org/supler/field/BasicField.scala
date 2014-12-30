@@ -56,6 +56,7 @@ case class BasicField[T, U](
       valueJSONValue = Some(JInt(currentValue)),
       validationJSON = JField(JSONFieldNames.ValidateRequired, JBool(required)) :: validators.flatMap(_.generateJSON),
       fieldTypeName = SpecialFieldTypes.Select,
+      emptyValue = if (currentValue == -1 || !required) Some(JInt(-1)) else None,
       extraJSON = generatePossibleValuesJSON(possibleValues)
     )
   }
@@ -64,7 +65,8 @@ case class BasicField[T, U](
     GenerateJSONData(
       valueJSONValue = transformer.serialize(read(obj)),
       validationJSON = JField(JSONFieldNames.ValidateRequired, JBool(required)) :: validators.flatMap(_.generateJSON),
-      fieldTypeName = transformer.jsonSchemaName
+      fieldTypeName = transformer.jsonSchemaName,
+      emptyValue = emptyValue.flatMap(transformer.serialize)
     )
   }
 

@@ -17,8 +17,10 @@ interface ValidatorFn {
 class DefaultValidatorFnFactories {
     constructor(private i18n: I18n) {}
 
-    required(json): ValidatorFn { return (fieldValue: any) => {
-        if (json === true && (fieldValue === null || fieldValue.length == 0)) return this.i18n.error_valueRequired(); else return null;
+    required(json, fieldJson): ValidatorFn { return (fieldValue: any) => {
+        if (json === true && (fieldValue === null || fieldValue.length == 0 || fieldValue === fieldJson.empty_value)) {
+          return this.i18n.error_valueRequired();
+        } else return null;
     }}
 
     ge(json): ValidatorFn { return (fieldValue: any) => {

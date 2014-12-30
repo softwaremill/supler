@@ -46,7 +46,7 @@ class CreateFormFromJson {
         if (validatorsJson) {
             Util.foreach(validatorsJson, (validatorName, validatorJson) => {
                 if (this.validatorFnFactories[validatorName]) {
-                    validators.push(this.validatorFnFactories[validatorName](validatorJson));
+                    validators.push(this.validatorFnFactories[validatorName](validatorJson, fieldJson));
                 }
             })
         }
@@ -132,11 +132,15 @@ class CreateFormFromJson {
             return renderOptions.renderMultiChoiceCheckboxField(label, id, validationId, fieldName,
                 fieldJson.value, possibleSelectValues, fieldOptions, compact);
         } else {
-            if (!fieldJson.validate || !fieldJson.validate.required) {
-                possibleSelectValues = [ new SelectValue(null, "") ].concat(possibleSelectValues);
+            var isRequired = fieldJson.validate && fieldJson.validate.required;
+            var noValueSelected = fieldJson.value === fieldJson.empty_value;
+            var isRadio = renderHintName === 'radio';
+
+            if (!isRadio && (!isRequired || noValueSelected)) {
+                possibleSelectValues = [ new SelectValue(-1, "") ].concat(possibleSelectValues);
             }
 
-            if (renderHintName == 'radio') {
+            if (isRadio) {
                 return renderOptions.renderSingleChoiceRadioField(label, id, validationId, fieldName,
                     fieldJson.value, possibleSelectValues, fieldOptions, compact);
             } else {

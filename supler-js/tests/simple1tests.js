@@ -2,19 +2,19 @@ describe('simple1', function(){
   it('should serialize', function(){
     // given
     var sf = new SuplerForm(container);
-    sf.render(simple1.simple1form1);
+    sf.render(simple1.form1);
 
     // when
     var serialized = sf.getValue();
 
     // then
-    serialized.should.deep.equal(simple1.simple1obj1);
+    serialized.should.deep.equal(simple1.obj1);
   });
 
   it('should serialize after changes', function(){
     // given
     var sf = new SuplerForm(container);
-    sf.render(simple1.simple1form1);
+    sf.render(simple1.form1);
 
     // when
     byName('field1').val('v11');
@@ -34,7 +34,7 @@ describe('simple1', function(){
   it('should run client-side validation and add errors if there are some', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(simple1.simple1form1);
+    sf.render(simple1.form1);
 
     // when
     var validationResult = sf.validate();
@@ -49,7 +49,7 @@ describe('simple1', function(){
   it('should run client-side validation and return false if there are none', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(simple1.simple1form1);
+    sf.render(simple1.form1);
 
     // when
     byName('field3').val(11);
@@ -67,7 +67,7 @@ describe('simple1', function(){
     var sf = new SuplerForm(container);
 
     // when
-    sf.render(simple1.simple1form1validated);
+    sf.render(simple1.form1validated);
 
     // then
     var validationElement = validationElementByName('field3');
@@ -77,7 +77,7 @@ describe('simple1', function(){
   it('should reload after field change', function(done) {
     // given
     var reloadFormFn = function reloadForm(formJson, successFn) {
-      successFn(simple1.simple1form2);
+      successFn(simple1.form2);
 
       // then
       byName('field1').val().should.equal('v1');
@@ -92,7 +92,7 @@ describe('simple1', function(){
     });
 
     // when
-    sf.render(simple1.simple1form1);
+    sf.render(simple1.form1);
     byName('field1').change();
 
     // then in callback
