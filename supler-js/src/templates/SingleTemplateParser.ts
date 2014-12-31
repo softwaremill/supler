@@ -26,9 +26,9 @@ class SingleTemplateParser {
   private static parseFieldTemplate(element:HTMLElement):RenderOptionsModifier {
     var template = element.innerHTML;
     return this.createModifierWithOverride(function () {
-      this.renderField = function (input:string, label:string, id:string, validationId:string, compact:boolean) {
-        var renderedLabel = compact ? '' : this.renderLabel(id, label);
-        var renderedValidation = this.renderValidation(validationId);
+      this.renderField = function (input: string, fieldData: FieldData, compact: boolean) {
+        var renderedLabel = compact ? '' : this.renderLabel(fieldData.id, fieldData.label);
+        var renderedValidation = this.renderValidation(fieldData.validationId);
 
         return template
           .replace('{{suplerLabel}}', renderedLabel)
@@ -119,44 +119,32 @@ class SingleTemplateParser {
       };
 
       // no possible values
-      this.renderHtmlInput = function (inputType:string, id:string, name:string, value:any, options:any):string {
-        var attrs = this.defaultHtmlInputOptions(inputType, id, name, value, options);
-        return renderTemplateForAttrs(mainTemplate, attrs, value);
+      this.renderHtmlInput = function (inputType: string, fieldData: FieldData, options: any): string {
+        var attrs = this.defaultHtmlInputOptions(inputType, fieldData.id, fieldData.name, fieldData.value, options);
+        return renderTemplateForAttrs(mainTemplate, attrs, fieldData.value);
       };
 
-      this.renderHtmlTextarea = function (id:string, name:string, value:any, options:any):string {
-        var attrs = this.defaultHtmlTextareaOptions(id, name, options);
-        return renderTemplateForAttrs(mainTemplate, attrs, value);
+      this.renderHtmlTextarea = function (fieldData: FieldData, options: any): string {
+        var attrs = this.defaultHtmlTextareaOptions(fieldData.id, fieldData.name, options);
+        return renderTemplateForAttrs(mainTemplate, attrs, fieldData.value);
       };
 
       // possible values
-      this.renderHtmlSelect = function (id:string,
-        name:string,
-        value:string,
-        possibleValues:SelectValue[],
-        options:any):string {
-        return renderTemplateWithPossibleValues(id, name, possibleValues, options, (v) => {
-          return v.index === value;
+      this.renderHtmlSelect = function (fieldData: FieldData, possibleValues: SelectValue[], options: any): string {
+        return renderTemplateWithPossibleValues(fieldData.id, fieldData.name, possibleValues, options, (v) => {
+          return v.index === fieldData.value;
         });
       };
 
-      this.renderHtmlRadios = function (id:string,
-        name:string,
-        value:number,
-        possibleValues:SelectValue[],
-        options:any):string {
-        return renderTemplateWithPossibleValues(id, name, possibleValues, options, (v) => {
-          return v.index === value;
+      this.renderHtmlRadios = function (fieldData: FieldData, possibleValues: SelectValue[], options: any): string {
+        return renderTemplateWithPossibleValues(fieldData.id, fieldData.name, possibleValues, options, (v) => {
+          return v.index === fieldData.value;
         });
       };
 
-      this.renderHtmlCheckboxes = function (id:string,
-        name:string,
-        values:number[],
-        possibleValues:SelectValue[],
-        options:any):string {
-        return renderTemplateWithPossibleValues(id, name, possibleValues, options, (v) => {
-          return values.indexOf(v.index) >= 0;
+      this.renderHtmlCheckboxes = function (fieldData: FieldData, possibleValues: SelectValue[], options: any): string {
+        return renderTemplateWithPossibleValues(fieldData.id, fieldData.name, possibleValues, options, (v) => {
+          return fieldData.value.indexOf(v.index) >= 0;
         });
       };
     })

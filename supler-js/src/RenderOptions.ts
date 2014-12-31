@@ -1,16 +1,9 @@
 interface RenderAnyValueField {
-  (label:string, id:string, validationId:string, name:string, value:any, options:any, compact:boolean): string
+  (fieldData: FieldData, options: any, compact: boolean): string
 }
 
 interface RenderPossibleValuesField {
-  (label:string,
-    id:string,
-    validationId:string,
-    name:string,
-    value:any,
-    possibleValues:SelectValue[],
-    options:any,
-    compact:boolean): string
+  (fieldData: FieldData, possibleValues: SelectValue[], options: any, compact: boolean): string
 }
 
 interface RenderOptions {
@@ -25,13 +18,13 @@ interface RenderOptions {
   renderMultiChoiceSelectField: RenderPossibleValuesField
   renderSingleChoiceRadioField: RenderPossibleValuesField
   renderSingleChoiceSelectField: RenderPossibleValuesField
-  renderActionField: (label:string, id:string, validationId:string, name:string, options:any, compact:boolean) => string
+  renderActionField: (fieldData: FieldData, options:any, compact:boolean) => string
 
   // templates
   // [label] [input] [validation]
-  renderField: (input:string, label:string, id:string, validationId:string, compact:boolean) => string
-  renderLabel: (forId:string, label:string) => string
-  renderValidation: (validationId:string) => string
+  renderField: (input: string, fieldData: FieldData, compact: boolean) => string
+  renderLabel: (forId: string, label :string) => string
+  renderValidation: (validationId: string) => string
 
   renderStaticField: (label:string, id:string, validationId:string, value:any, compact:boolean) => string
   renderStaticText: (text:string) => string
@@ -41,12 +34,12 @@ interface RenderOptions {
   renderSubformTable: (tableHeaders:string[], cells:string[][], elementOptions:any) => string;
 
   // html form elements
-  renderHtmlInput: (inputType:string, id:string, name:string, value:any, options:any) => string
-  renderHtmlSelect: (id:string, name:string, value:string, possibleValues:SelectValue[], options:any) => string
-  renderHtmlRadios: (id:string, name:string, value:number, possibleValues:SelectValue[], options:any) => string
-  renderHtmlCheckboxes: (id:string, name:string, values:number[], possibleValues:SelectValue[], options:any) => string
-  renderHtmlTextarea: (id:string, name:string, value:any, options:any) => string
-  renderButton: (id:string, name:string, label:string, options:any) => string
+  renderHtmlInput: (inputType: string, fieldData: FieldData, options: any) => string
+  renderHtmlSelect: (fieldData: FieldData, possibleValues:SelectValue[], options:any) => string
+  renderHtmlRadios: (fieldData: FieldData, possibleValues:SelectValue[], options:any) => string
+  renderHtmlCheckboxes: (fieldData: FieldData, possibleValues:SelectValue[], options:any) => string
+  renderHtmlTextarea: (fieldData: FieldData, options:any) => string
+  renderButton: (fieldData: FieldData, options:any) => string
 
   // misc
   defaultFieldOptions: () => any
@@ -58,69 +51,71 @@ class DefaultRenderOptions implements RenderOptions {
   constructor() {
   }
 
-  renderStringField(label, id, validationId, name, value, options, compact) {
-    return this.renderField(this.renderHtmlInput('text', id, name, value, options), label, id, validationId, compact);
+  renderStringField(fieldData, options, compact) {
+    return this.renderField(this.renderHtmlInput('text', fieldData, options), fieldData, compact);
   }
 
-  renderIntegerField(label, id, validationId, name, value, options, compact) {
-    return this.renderField(this.renderHtmlInput('number', id, name, value, options), label, id, validationId, compact);
+  renderIntegerField(fieldData, options, compact) {
+    return this.renderField(this.renderHtmlInput('number', fieldData, options), fieldData, compact);
   }
 
-  renderDoubleField(label, id, validationId, name, value, options, compact) {
-    return this.renderField(this.renderHtmlInput('number', id, name, value, options), label, id, validationId, compact);
+  renderDoubleField(fieldData, options, compact) {
+    return this.renderField(this.renderHtmlInput('number', fieldData, options), fieldData, compact);
   }
 
   // text field render hints
-  renderPasswordField(label, id, validationId, name, value, options, compact) {
-    return this.renderField(this.renderHtmlInput('password', id, name, value, options), label, id, validationId, compact);
+  renderPasswordField(fieldData, options, compact) {
+    return this.renderField(this.renderHtmlInput('password', fieldData, options), fieldData, compact);
   }
 
-  renderTextareaField(label, id, validationId, name, value, options, compact) {
-    return this.renderField(this.renderHtmlTextarea(id, name, value, options), label, id, validationId, compact);
+  renderTextareaField(fieldData, options, compact) {
+    return this.renderField(this.renderHtmlTextarea(fieldData, options), fieldData, compact);
   }
 
-  renderStaticField(label, id, validationId, value, compact) {
-    return this.renderField(this.renderStaticText(value), label, id, validationId, compact);
+  renderStaticField(fieldData, compact) {
+    return this.renderField(this.renderStaticText(fieldData.value), fieldData, compact);
   }
 
   renderStaticText(text) {
     return HtmlUtil.renderTag('div', {'class': 'form-control-static'}, text);
   }
 
-  renderMultiChoiceCheckboxField(label, id, validationId, name, values, possibleValues, options, compact) {
-    return this.renderField(this.renderHtmlCheckboxes(id, name, values, possibleValues, options), label, id, validationId, compact);
+  renderMultiChoiceCheckboxField(fieldData, possibleValues, options, compact) {
+    return this.renderField(this.renderHtmlCheckboxes(fieldData, possibleValues, options), fieldData, compact);
   }
 
-  renderMultiChoiceSelectField(label, id, validationId, name, values, possibleValues, options, compact) {
+  renderMultiChoiceSelectField(fieldData, possibleValues, options, compact) {
     return '';
   }
 
-  renderSingleChoiceRadioField(label, id, validationId, name, value, possibleValues, options, compact) {
-    return this.renderField(this.renderHtmlRadios(id, name, value, possibleValues, options), label, id, validationId, compact);
+  renderSingleChoiceRadioField(fieldData, possibleValues, options, compact) {
+    return this.renderField(this.renderHtmlRadios(fieldData, possibleValues, options), fieldData, compact);
   }
 
-  renderSingleChoiceSelectField(label, id, validationId, name, value, possibleValues, options, compact) {
-    return this.renderField(this.renderHtmlSelect(id, name, value, possibleValues, options), label, id, validationId, compact);
+  renderSingleChoiceSelectField(fieldData, possibleValues, options, compact) {
+    return this.renderField(this.renderHtmlSelect(fieldData, possibleValues, options), fieldData, compact);
   }
 
-  renderActionField(label, id, validationId, name, options, compact) {
-    return this.renderField(this.renderButton(id, name, label, options), '', id, validationId, compact);
+  renderActionField(fieldData, options, compact) {
+    var fieldDataNoLabel = Util.copyObject(fieldData);
+    fieldDataNoLabel.label = '';
+    return this.renderField(this.renderButton(fieldData, options), fieldDataNoLabel, compact);
   }
 
   //
 
-  renderField(input, label, id, validationId, compact) {
+  renderField(input, fieldData: FieldData, compact) {
     var labelPart;
     if (compact) {
       labelPart = '';
     } else {
-      labelPart = this.renderLabel(id, label) + '\n';
+      labelPart = this.renderLabel(fieldData.id, fieldData.label) + '\n';
     }
 
     var divBody = labelPart +
       input +
       '\n' +
-      this.renderValidation(validationId) +
+      this.renderValidation(fieldData.validationId) +
       '\n';
 
     return HtmlUtil.renderTag('div', {'class': 'form-group'}, divBody, false);
@@ -178,52 +173,52 @@ class DefaultRenderOptions implements RenderOptions {
 
   //
 
-  renderHtmlInput(inputType, id, name, value, options) {
-    return HtmlUtil.renderTag('input', this.defaultHtmlInputOptions(inputType, id, name, value, options));
+  renderHtmlInput(inputType, fieldData: FieldData, options) {
+    return HtmlUtil.renderTag('input', this.defaultHtmlInputOptions(inputType, fieldData.id, fieldData.name, fieldData.value, options));
   }
 
-  renderHtmlSelect(id, name, value, possibleValues, options) {
+  renderHtmlSelect(fieldData: FieldData, possibleValues, options) {
     var selectBody = '';
     Util.foreach(possibleValues, (i, v) => {
       var optionOptions = {'value': v.index};
-      if (v.index === value) {
+      if (v.index === fieldData.value) {
         optionOptions['selected'] = 'selected';
       }
 
       selectBody += HtmlUtil.renderTag('option', optionOptions, v.label);
     });
 
-    var html = HtmlUtil.renderTag('select', Util.copyProperties({'id': id, 'name': name}, options), selectBody, false);
+    var html = HtmlUtil.renderTag('select', Util.copyProperties({'id': fieldData.id, 'name': fieldData.name}, options), selectBody, false);
     html += '\n';
     return html;
   }
 
-  renderHtmlRadios(id, name, value, possibleValues, options) {
-    return this.renderCheckable('radio', id, name, possibleValues, options,
+  renderHtmlRadios(fieldData: FieldData, possibleValues, options) {
+    return this.renderCheckable('radio', fieldData, possibleValues, options,
       (v) => {
-        return v.index === value;
+        return v.index === fieldData.value;
       });
   }
 
-  renderHtmlCheckboxes(id, name, values, possibleValues, options) {
-    return this.renderCheckable('checkbox', id, name, possibleValues, options,
+  renderHtmlCheckboxes(fieldData: FieldData, possibleValues, options) {
+    return this.renderCheckable('checkbox', fieldData, possibleValues, options,
       (v) => {
-        return values.indexOf(v.index) >= 0;
+        return fieldData.value.indexOf(v.index) >= 0;
       });
   }
 
-  renderHtmlTextarea(id, name, value, options) {
-    return HtmlUtil.renderTag('textarea', this.defaultHtmlTextareaOptions(id, name, options), value);
+  renderHtmlTextarea(fieldData: FieldData, options) {
+    return HtmlUtil.renderTag('textarea', this.defaultHtmlTextareaOptions(fieldData.id, fieldData.name, options), fieldData.value);
   }
 
-  renderButton(id, name, label, options) {
-    var allOptions = Util.copyProperties({'id': id, 'type': 'button', 'name': name}, options);
+  renderButton(fieldData: FieldData, options) {
+    var allOptions = Util.copyProperties({'id': fieldData.id, 'type': 'button', 'name': fieldData.name}, options);
     allOptions['class'] = allOptions['class'].replace('form-control', 'btn btn-default');
-    return HtmlUtil.renderTag('button', allOptions, label);
+    return HtmlUtil.renderTag('button', allOptions, fieldData.label);
   }
 
-  private renderCheckable(inputType:string, id:string, name:string, possibleValues:SelectValue[], options:any,
-    isChecked:(SelectValue) => boolean) {
+  private renderCheckable(inputType: string, fieldData: FieldData, possibleValues: SelectValue[], options: any,
+    isChecked: (SelectValue) => boolean) {
 
     var html = '';
     Util.foreach(possibleValues, (i, v) => {
@@ -236,14 +231,17 @@ class DefaultRenderOptions implements RenderOptions {
         checkableOptions['checked'] = 'checked';
       }
 
-      var labelBody = this.renderHtmlInput(inputType, id + '.' + v.index, name, v.index, checkableOptions);
+      var checkableFieldData = Util.copyObject(fieldData);
+      checkableFieldData.id = fieldData.id + '.' + v.index;
+      checkableFieldData.value = v.index;
+      var labelBody = this.renderHtmlInput(inputType, checkableFieldData, checkableOptions);
       labelBody += HtmlUtil.renderTag('span', {}, v.label);
 
       var divBody = HtmlUtil.renderTag('label', {}, labelBody, false);
       html += HtmlUtil.renderTag('div', {'class': inputType}, divBody, false);
     });
 
-    return this.renderWithContainingElement(html, id, options);
+    return this.renderWithContainingElement(html, fieldData.id, options);
   }
 
   private renderWithContainingElement(body:string, id:string, options:any):string {

@@ -37,6 +37,19 @@ class Util {
     }
     return null;
   }
+
+  // http://stackoverflow.com/questions/22247799/can-you-write-a-generic-copy-object-function-in-typescript
+  static copyObject(object: {}) {
+    var objectCopy = <any>{};
+
+    for (var key in object) {
+      if (object.hasOwnProperty(key)) {
+        objectCopy[key] = (<any>object)[key];
+      }
+    }
+
+    return objectCopy;
+  }
 }
 
 class SelectValue {
