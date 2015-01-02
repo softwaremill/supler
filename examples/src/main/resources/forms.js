@@ -20,14 +20,15 @@ $(document).ready(function() {
 var feedback = $('#feedback');
 feedback.hide();
 
-function reloadForm(formJson, successFn) {
+function reloadForm(formValue, successFn, errorFn, isAction) {
     $.ajax({
         url: '/rest/form1.json',
         type: 'PUT',
-        data: JSON.stringify(formJson),
+        data: JSON.stringify(formValue),
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
-        success: successFn
+        success: successFn,
+        error: errorFn
     });
 }
 

@@ -368,18 +368,19 @@ The values can be either strings, or functions which format the message using th
 
 The form can be automatically reloaded after each field edit (value change), and when actions are performed.
 To do that, two things are necessary. Firstly, a `reload_form_function` option must be specified. This should be
-a javascript function, accepting the serialized form representation and a success function, to be called when the
-form is successfully refreshed. For example, when using JQuery, this can be:
+a javascript function, accepting form representation (as a JS object) and success/error functions, to be called when
+the form is successfully refreshed or the request fails. For example, when using JQuery, this can be:
 
 ````javascript
-function reloadForm(formJson, successFn) {
+function reloadForm(formValue, successFn, errorFn, isAction) {
     $.ajax({
         url: '/refresh_form.json',
         type: 'POST',
-        data: JSON.stringify(formJson),
+        data: JSON.stringify(formValue),
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
-        success: successFn
+        success: successFn,
+        error: errorFn
     });
 }
 ````
@@ -389,6 +390,11 @@ and generate back the response. When validating, there is a special mode which r
 with filled-in values, not to show the user validation errors for fields which haven't been yet edited at all.
 This can be done with the convenience `personForm(person).reload(receivedJson)` method. This simply invokes apply,
 validate, run action and generate JSON in succession.
+
+Concurrent reloads are handled as well. Only the results of the last reload triggered by value changes will be taken
+into account. Actions will be queued and executed one after another. It could be a good idea to block the UI while
+an action is executing, so that no form changes are made during action execution (which would be lost).
+The `isAction` flag can be used to achieve that (there is usually no need to block the UI for value-change reloads).
 
 ### Adding custom behavior to the form
 

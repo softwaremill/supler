@@ -76,7 +76,7 @@ describe('simple1', function(){
 
   it('should reload after field change', function(done) {
     // given
-    var reloadFormFn = function reloadForm(formJson, successFn) {
+    var reloadFormFn = function reloadForm(formValue, successFn, errorFn, isAction) {
       successFn(simple1.form2);
 
       // then

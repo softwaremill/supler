@@ -7,6 +7,7 @@ import org.json4s.native.Serialization
 import org.scalatest._
 import org.supler.Supler._
 import org.json4s.native.JsonMethods._
+import org.supler.field.ActionResult
 
 /**
  * The frontend tests are run by grunt-mocha in a headless phantomjs browser.
@@ -37,6 +38,11 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
       f.field(_.field4).label("Field 4")
     ))
 
+    val fAction = form[Simple1](f => List(
+      f.field(_.field3).label("Field 3"),
+      f.action("inc") { s => ActionResult(s.copy(field3 = s.field3 + 1)) }
+    ))
+
     val obj1 = Simple1("v1", Some("v2"), 0, field4 = true)
     val obj2 = Simple1("v1", None, 15, field4 = true)
 
@@ -47,6 +53,9 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
 
     writer.writeObj("obj1", obj1)
     writer.writeObj("obj2", obj2)
+
+    writer.writeForm("form1action", fAction, obj1)
+    writer.writeForm("form2action", fAction, obj2)
   }
 
   writeTestData("select1") { writer =>

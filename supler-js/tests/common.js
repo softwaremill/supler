@@ -1,4 +1,6 @@
 chai.should();
+var assert = chai.assert;
+
 var container = document.getElementById('container');
 
 function byName(name, extra) {
