@@ -38,7 +38,7 @@ class Validation {
     var hasErrors = false;
 
     Util.foreach(this.elementDictionary, (elementId:string, validator:ElementValidator) => {
-      hasErrors = hasErrors || this.doProcessClientSingle(elementId, validator);
+      hasErrors = this.doProcessClientSingle(elementId, validator) || hasErrors;
     });
 
     return hasErrors;

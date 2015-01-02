@@ -31,10 +31,11 @@ describe('simple1', function(){
     serialized.field4.should.equal(false);
   });
 
-  it('should run client-side validation and add errors if there are some', function() {
+  it('should run client-side validation and add errors', function() {
     // given
     var sf = new SuplerForm(container);
     sf.render(simple1.form1);
+    byName('field1').val('');
 
     // when
     var validationResult = sf.validate();
@@ -42,8 +43,11 @@ describe('simple1', function(){
     // then
     validationResult.should.equal(true);
 
-    var validationElement = validationElementByName('field3');
-    validationElement.innerText.should.have.length.above(0);
+    var validationElement1 = validationElementByName('field1');
+    validationElement1.innerText.should.have.length.above(0);
+
+    var validationElement3 = validationElementByName('field3');
+    validationElement3.innerText.should.have.length.above(0);
   });
 
   it('should run client-side validation and return false if there are none', function() {
