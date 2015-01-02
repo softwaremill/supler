@@ -356,8 +356,10 @@ validators, but custom ones can be provided as well simply by specifying them as
 ````javascript
 var formContainer = document.getElementById('form-container');
 var form =  = new SuplerForm(formContainer, {
-  error_custom_lastNameLongerThanFirstName: "Last name must be longer than first name!",
-  error_custom_illegalDateFormat: function(detail) { return "Illegal date format: " + detail; }
+  i18n: {
+    error_custom_lastNameLongerThanFirstName: "Last name must be longer than first name!",
+    error_custom_illegalDateFormat: function(detail) { return "Illegal date format: " + detail; }
+  }
 });
 form.render(formJson); // formJson is received from the server
 ````

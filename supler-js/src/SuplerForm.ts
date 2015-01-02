@@ -7,22 +7,21 @@ class SuplerForm {
   private elementSearch:ElementSearch;
   private renderOptionsGetter:RenderOptionsGetter;
 
-  constructor(private container:HTMLElement, customOptions:any) {
-    // TODO: we shouldn't copy everything everywhere
+  constructor(private container: HTMLElement, customOptions: any) {
     customOptions = customOptions || {};
 
     this.i18n = new I18n();
-    Util.copyProperties(this.i18n, customOptions);
+    Util.copyProperties(this.i18n, customOptions.i18n);
 
     var renderOptions = new DefaultRenderOptions();
-    Util.copyProperties(renderOptions, customOptions);
+    Util.copyProperties(renderOptions, customOptions.render_options);
     this.renderOptionsGetter = new HTMLRenderTemplateParser(this.container).parse(renderOptions);
 
     this.validatorFnFactories = new DefaultValidatorFnFactories(this.i18n);
-    Util.copyProperties(this.validatorFnFactories, customOptions);
+    Util.copyProperties(this.validatorFnFactories, customOptions.validators);
 
     this.validatorRenderOptions = new ValidatorRenderOptions;
-    Util.copyProperties(this.validatorRenderOptions, customOptions);
+    Util.copyProperties(this.validatorRenderOptions, customOptions.validation_render);
 
     this.reloadControllerOptions = new ReloadControllerOptions(customOptions);
 

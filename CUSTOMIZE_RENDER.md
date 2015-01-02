@@ -176,8 +176,10 @@ To override how a particular form element is rendered, simply provide a method i
 ````javascript
 var formContainer = document.getElementById('form-container');
 var form =  = new SuplerForm(formContainer, {
-  renderStringField: function(label, id, validationId, name, value, options, compact) {
-    return someHtml;
+  render_options: {
+    renderStringField: function(label, id, validationId, name, value, options, compact) {
+      return someHtml;
+    }
   }
 });
 form.render(formJson); // formJson is received from the server
@@ -187,19 +189,20 @@ How the form and each form fragment is rendered can be customized via options.
 
 ````javascript
 // basic types
-renderStringField: (label: string, id: string, validationId: string, name: string, value: any, options: any, compact: boolean): string
-renderIntegerField: (label: string, id: string, validationId: string, name: string, value: any, options: any, compact: boolean): string
-renderDoubleField: (label: string, id: string, validationId: string, name: string, value: any, options: any, compact: boolean): string
-renderPasswordField: (label: string, id: string, validationId: string, name: string, value: any, options: any, compact: boolean): string
-renderTextareaField: (label: string, id: string, validationId: string, name: string, value: any, options: any, compact: boolean): string
-renderMultiChoiceCheckboxField: (label: string, id: string, validationId: string, name: string, value: any, possibleValues: SelectValue[], options: any, compact: boolean): string
-renderMultiChoiceSelectField: (label: string, id: string, validationId: string, name: string, value: any, possibleValues: SelectValue[], options: any, compact: boolean): string
-renderSingleChoiceRadioField: (label: string, id: string, validationId: string, name: string, value: any, possibleValues: SelectValue[], options: any, compact: boolean): string
-renderSingleChoiceSelectField: (label: string, id: string, validationId: string, name: string, value: any, possibleValues: SelectValue[], options: any, compact: boolean): string
+renderStringField: (fieldData: FieldData, options: any, compact: boolean): string
+renderIntegerField: (fieldData: FieldData, options: any, compact: boolean): string
+renderDoubleField: (fieldData: FieldData, options: any, compact: boolean): string
+renderPasswordField: (fieldData: FieldData, compact: boolean): string
+renderTextareaField: (fieldData: FieldData, compact: boolean): string
+renderMultiChoiceCheckboxField: (fieldData: FieldData, possibleValues: SelectValue[], options: any, compact: boolean): string
+renderMultiChoiceSelectField: (fieldData: FieldData, possibleValues: SelectValue[], options: any, compact: boolean): string
+renderSingleChoiceRadioField: (fieldData: FieldData, possibleValues: SelectValue[], options: any, compact: boolean): string
+renderSingleChoiceSelectField: (fieldData: FieldData, possibleValues: SelectValue[], options: any, compact: boolean): string
+renderActionField: (fieldData: FieldData, options: any, compact: boolean): string
 
 // templates
 // [label] [input] [validation]
-renderField: (input: string, label: string, id: string, validationId: string, compact: boolean) => string
+renderField: (input: string, fieldData: FieldData, compact: boolean) => string
 renderLabel: (forId: string, label: string) => string
 renderValidation: (validationId: string) => string
 
@@ -211,11 +214,11 @@ renderSubformListElement: (subformElement: string, options: any) => string;
 renderSubformTable: (tableHeaders: string[], cells: string[][], elementOptions: any) => string;
 
 // html form elements
-renderHtmlInput: (inputType: string, id: string, name: string, value: any, options: any) => string
-renderHtmlSelect: (id: string, name: string, value: string, possibleValues: SelectValue[], options: any) => string
-renderHtmlRadios: (id: string, name: string, value: number, possibleValues: SelectValue[], options: any) => string
-renderHtmlCheckboxes: (id: string, name: string, values: number[], possibleValues: SelectValue[], options: any) => string
-renderHtmlTextarea: (id: string, name: string, value: any, options: any) => string
+renderHtmlInput: (inputType: string, fieldData: FieldData, options: any) => string
+renderHtmlSelect: (fieldData: FieldData, possibleValues: SelectValue[], options: any) => string
+renderHtmlRadios: (fieldData: FieldData, possibleValues: SelectValue[], options: any) => string
+renderHtmlCheckboxes: (fieldData: FieldData, possibleValues: SelectValue[], options: any) => string
+renderHtmlTextarea: (fieldData: FieldData, options: any) => string
 
 // misc
 defaultFieldOptions: () => any
