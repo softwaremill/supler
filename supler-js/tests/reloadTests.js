@@ -1,4 +1,28 @@
-describe('ajaxqueue', function() {
+describe('reload', function(){
+  it('should reload after field change', function(done) {
+    // given
+    var reloadFormFn = function reloadForm(formValue, successFn, errorFn, isAction) {
+      successFn(simple1.form2);
+
+      // then
+      byName('field1').val().should.equal('v1');
+      byName('field2').val().should.equal('');
+      byName('field3').val().should.equal('15');
+
+      done();
+    };
+
+    var sf = new SuplerForm(container, {
+      reload_form_function: reloadFormFn
+    });
+
+    // when
+    sf.render(simple1.form1);
+    byName('field1').change();
+
+    // then in callback
+  });
+
   it('should apply results of the last refresh-reload started only', function() {
     // given
     var state = 1;
