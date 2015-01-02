@@ -134,7 +134,7 @@ class DefaultRenderOptions implements RenderOptions {
     fieldsetBody += HtmlUtil.renderTag('legend', {}, label);
     fieldsetBody += subform;
 
-    return HtmlUtil.renderTag('fieldset', {'id': id, 'name': name}, fieldsetBody, false);
+    return HtmlUtil.renderTag('fieldset', { 'id': id }, fieldsetBody, false);
   }
 
   renderSubformListElement(subformElement, options) {

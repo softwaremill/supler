@@ -2,8 +2,6 @@ On action validate: nothing, field, subform, form; if not valid -> no action (b/
 
 Ajax actions: button, field change (grace? f/e and b/e?): either during change or after
 
-Document requirements for supler attributes!
-
 Per-field JS settings (e.g. ajax behavior, default ajax behavior)
 
 How to enable specifying text field width/height on the f/e?
