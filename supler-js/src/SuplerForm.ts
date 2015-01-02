@@ -31,17 +31,26 @@ class SuplerForm {
   render(json) {
     var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories).renderForm(json.main_form);
     this.container.innerHTML = result.html;
-    this.validation = new Validation(this.elementSearch, result.elementDictionary,
-      this.validatorRenderOptions, this.i18n);
+
+    this.initializeValidation(result.elementDictionary, json);
 
     var reloadController = new ReloadController(this, result.elementDictionary, this.reloadControllerOptions, this.elementSearch,
       this.validation);
     reloadController.attachRefreshListeners();
     reloadController.attachActionListeners();
 
-    this.validation.processServer(json.errors);
-
     this.reloadControllerOptions.afterRenderFunction()
+  }
+
+  private initializeValidation(elementDictionary: ElementDictionary, json) {
+    var oldValidation = this.validation;
+    this.validation = new Validation(this.elementSearch, elementDictionary,
+      this.validatorRenderOptions, this.i18n);
+
+    this.validation.processServer(json.errors);
+    if (oldValidation) {
+      this.validation.copyFrom(oldValidation);
+    }
   }
 
   getValue(selectedActionId:string = null) {

@@ -1,5 +1,5 @@
 class Validation {
-  private removeValidationFnDictionary:RemoveValidationFnDictionary = {};
+  private addedValidations: AddedValidationsDictionary = {};
 
   constructor(private elementSearch:ElementSearch,
     private elementDictionary:ElementDictionary,
@@ -11,7 +11,7 @@ class Validation {
    * @returns True if there were validation errors.
    */
   processServer(validationJson:any):boolean {
-    this.removeValidationErrors();
+    this.removeAllValidationErrors();
 
     if (validationJson) {
       for (var i = 0; i < validationJson.length; i++) {
@@ -33,7 +33,7 @@ class Validation {
    * @returns True if there were validation errors.
    */
   processClient():boolean {
-    this.removeValidationErrors();
+    this.removeAllValidationErrors();
 
     var hasErrors = false;
 
@@ -47,9 +47,8 @@ class Validation {
   /**
    * @returns True if there were validation errors.
    */
-  processClientSingle(elementId:string):boolean {
-    var removeFn = this.removeValidationFnDictionary[elementId];
-    if (removeFn) removeFn();
+  processClientSingle(elementId: string): boolean {
+    this.removeSingleValidationErrors(elementId);
 
     var validator = this.elementDictionary[elementId];
     if (validator) return this.doProcessClientSingle(elementId, validator); else return false;
@@ -77,23 +76,83 @@ class Validation {
     return document.getElementById(validationId);
   }
 
-  private removeValidationErrors() {
-    Util.foreach(this.removeValidationFnDictionary, (elementId:string, removeFn:() => void) => {
-      removeFn();
+  private removeAllValidationErrors() {
+    Util.foreach(this.addedValidations, (elementId: string, addedValidation: AddedValidation) => {
+      addedValidation.remove();
     });
 
-    this.removeValidationFnDictionary = {};
+    this.addedValidations = {};
+  }
+
+  private removeSingleValidationErrors(elementId: string) {
+    var addedValidation = this.addedValidations[elementId];
+    if (addedValidation) {
+      addedValidation.remove();
+      delete this.addedValidations[elementId];
+    }
   }
 
   private appendValidation(text:string, validationElement:HTMLElement, formElement:HTMLElement) {
-    this.validatorRenderOptions.appendValidation(text, validationElement, formElement);
+    if (!this.addedValidations.hasOwnProperty(formElement.id)) {
+      this.addedValidations[formElement.id] =
+        new AddedValidation(this.validatorRenderOptions, formElement, validationElement);
+    }
 
-    this.removeValidationFnDictionary[formElement.id] = () => {
-      this.validatorRenderOptions.removeValidation(validationElement, formElement);
-    };
+    var addedValidation = this.addedValidations[formElement.id];
+
+    if (addedValidation.addText(text)) {
+      this.validatorRenderOptions.appendValidation(text, validationElement, formElement)
+    }
+  }
+
+  copyFrom(other: Validation) {
+    Util.foreach(other.addedValidations, (otherElementId: string, otherAddedValidation: AddedValidation) => {
+      // checking if the form element with the same path as the one with existing validation exists and
+      // has the same value.
+      var newFormElement = this.elementSearch.byPath(otherAddedValidation.formElementPath());
+      if (newFormElement) {
+        if (Util.deepEqual(otherAddedValidation.invalidValue, ReadFormValues.getValueFrom(newFormElement))) {
+          var newValidationElement = this.lookupValidationElement(newFormElement);
+
+          otherAddedValidation.texts.forEach((text: string) => {
+            this.appendValidation(text, newValidationElement, newFormElement)
+          });
+        }
+      }
+    });
   }
 }
 
-interface RemoveValidationFnDictionary {
-  [ elementId: string ]: () => void
+interface AddedValidationsDictionary {
+  [ elementId: string ]: AddedValidation
+}
+
+class AddedValidation {
+  invalidValue: any;
+  texts: string[] = [];
+
+  constructor(
+    private validatorRenderOptions: ValidatorRenderOptions,
+    private formElement: HTMLElement,
+    private validationElement: HTMLElement) {
+
+    this.invalidValue = ReadFormValues.getValueFrom(formElement);
+  }
+
+  addText(text: string): boolean {
+    if (this.texts.indexOf(text) === -1) {
+      this.texts.push(text);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  formElementPath(): string {
+    return this.formElement.getAttribute(SuplerAttributes.PATH);
+  }
+
+  remove() {
+    this.validatorRenderOptions.removeValidation(this.validationElement, this.formElement)
+  }
 }

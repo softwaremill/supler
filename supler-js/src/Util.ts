@@ -50,6 +50,23 @@ class Util {
 
     return objectCopy;
   }
+
+  static deepEqual(x: any, y: any): boolean {
+    if (x === y) return true;
+    if (!(x instanceof Object) || !(x instanceof Object)) return false;
+    if (x.constructor !== y.constructor) return false;
+    for (var p in x) {
+      if (!x.hasOwnProperty(p)) continue;
+      if (!y.hasOwnProperty(p)) return false;
+      if (x[p] === y[p]) continue;
+      if (typeof(x[p]) !== 'object') return false;
+      if (!this.deepEqual(x[p], y[p])) return false;
+    }
+    for (p in y) {
+      if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) return false;
+    }
+    return true;
+  }
 }
 
 class SelectValue {

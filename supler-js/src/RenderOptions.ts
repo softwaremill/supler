@@ -247,7 +247,11 @@ class DefaultRenderOptions implements RenderOptions {
   private renderWithContainingElement(body:string, id:string, options:any):string {
     // radio buttons and checkboxes need to be grouped inside an element with the form field's id and validation
     // id, so that it could be found e.g. during validation.
-    var containerOptions = {'id': id, 'supler:validationId': options[SuplerAttributes.VALIDATION_ID]};
+    var containerOptions = {
+      'id': id,
+      'supler:validationId': options[SuplerAttributes.VALIDATION_ID],
+      'supler:path': options[SuplerAttributes.PATH]
+    };
     return HtmlUtil.renderTag('span', containerOptions, body, false);
   }
 

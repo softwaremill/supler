@@ -45,4 +45,48 @@ describe('form validation', function(){
     var validationElement = validationElementByName('field3');
     validationElement.innerText.should.have.length.above(0);
   });
+
+  it('should preserve client-side validation for fields with unchanged values after reload', function() {
+    // given
+    var reloadFormFn = function reloadForm(formValue, successFn, errorFn, isAction) {
+      successFn(simple1.form1);
+    };
+
+    var sf = new SuplerForm(container, {
+      reload_form_function: reloadFormFn
+    });
+    sf.render(simple1.form1);
+
+    // when
+    var validationResult = sf.validate();
+    byName('field1').change();
+
+    // then
+    validationResult.should.equal(true);
+
+    var validationElement = validationElementByName('field3');
+    validationElement.innerText.should.have.length.above(0);
+  });
+
+  it('should not preserve client-side validation for fields with changed values after reload', function() {
+    // given
+    var reloadFormFn = function reloadForm(formValue, successFn, errorFn, isAction) {
+      successFn(simple1.form2); // field3 is changed
+    };
+
+    var sf = new SuplerForm(container, {
+      reload_form_function: reloadFormFn
+    });
+    sf.render(simple1.form1);
+
+    // when
+    var validationResult = sf.validate();
+    byName('field1').change();
+
+    // then
+    validationResult.should.equal(true);
+
+    var validationElement = validationElementByName('field3');
+    validationElement.innerText.should.have.length(0);
+  });
 });
