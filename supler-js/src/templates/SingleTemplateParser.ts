@@ -85,20 +85,21 @@ class SingleTemplateParser {
         .replace(SUPLER_FIELD_INPUT_VALUE.toLowerCase(), value);
     }
 
-    function renderTemplateWithPossibleValues(id, name, possibleValues, options, isSelected:(SelectValue) => boolean) {
+    function renderTemplateWithPossibleValues(id, name, possibleValues, containerOptions, elementOptions, isSelected:(SelectValue) => boolean) {
       var singleInput = element.hasAttribute('super:singleInput') &&
         (element.getAttribute('super:singleInput').toLowerCase() === 'true');
 
-      var containerAttrs = Util.copyProperties({'id': id, 'name': name}, options);
-      var possibleValueAttrs = singleInput ? {} : Util.copyProperties({'name': name}, options);
+      if (singleInput) {
+        containerOptions = elementOptions;
+      }
 
       var possibleValueTemplate = HtmlUtil.findElementWithAttr(element, 'supler:possibleValueTemplate').outerHTML;
       var renderedPossibleValues = '';
       Util.foreach(possibleValues, (i, v) => {
-        var attrs = possibleValueAttrs;
+        var attrs = elementOptions;
         if (isSelected(v)) {
           attrs = {};
-          Util.copyProperties(attrs, possibleValueAttrs);
+          Util.copyProperties(attrs, elementOptions);
           attrs[element.getAttribute('supler:selectedAttrName')] = element.getAttribute('supler:selectedAttrValue');
         }
 
@@ -108,8 +109,8 @@ class SingleTemplateParser {
       });
 
       return mainTemplate
-        .replace(SUPLER_FIELD_CONTAINER_ATTRS, HtmlUtil.renderAttrs(containerAttrs))
-        .replace(SUPLER_FIELD_CONTAINER_ATTRS.toLowerCase(), HtmlUtil.renderAttrs(containerAttrs))
+        .replace(SUPLER_FIELD_CONTAINER_ATTRS, HtmlUtil.renderAttrs(containerOptions))
+        .replace(SUPLER_FIELD_CONTAINER_ATTRS.toLowerCase(), HtmlUtil.renderAttrs(containerOptions))
         .replace(possibleValueTemplate, renderedPossibleValues);
     }
 
@@ -130,20 +131,20 @@ class SingleTemplateParser {
       };
 
       // possible values
-      this.renderHtmlSelect = function (fieldData: FieldData, possibleValues: SelectValue[], options: any): string {
-        return renderTemplateWithPossibleValues(fieldData.id, fieldData.name, possibleValues, options, (v) => {
+      this.renderHtmlSelect = function (fieldData: FieldData, possibleValues: SelectValue[], containerOptions: any, elementOptions: any): string {
+        return renderTemplateWithPossibleValues(fieldData.id, fieldData.name, possibleValues, containerOptions, elementOptions, (v) => {
           return v.index === fieldData.value;
         });
       };
 
-      this.renderHtmlRadios = function (fieldData: FieldData, possibleValues: SelectValue[], options: any): string {
-        return renderTemplateWithPossibleValues(fieldData.id, fieldData.name, possibleValues, options, (v) => {
+      this.renderHtmlRadios = function (fieldData: FieldData, possibleValues: SelectValue[], containerOptions: any, elementOptions: any): string {
+        return renderTemplateWithPossibleValues(fieldData.id, fieldData.name, possibleValues, containerOptions, elementOptions, (v) => {
           return v.index === fieldData.value;
         });
       };
 
-      this.renderHtmlCheckboxes = function (fieldData: FieldData, possibleValues: SelectValue[], options: any): string {
-        return renderTemplateWithPossibleValues(fieldData.id, fieldData.name, possibleValues, options, (v) => {
+      this.renderHtmlCheckboxes = function (fieldData: FieldData, possibleValues: SelectValue[], containerOptions: any, elementOptions: any): string {
+        return renderTemplateWithPossibleValues(fieldData.id, fieldData.name, possibleValues, containerOptions, elementOptions, (v) => {
           return fieldData.value.indexOf(v.index) >= 0;
         });
       };

@@ -3,7 +3,7 @@ interface RenderAnyValueField {
 }
 
 interface RenderPossibleValuesField {
-  (fieldData: FieldData, possibleValues: SelectValue[], options: any, compact: boolean): string
+  (fieldData: FieldData, possibleValues: SelectValue[], containerOptions: any, elementOptions: any, compact: boolean): string
 }
 
 interface RenderOptions {
@@ -36,8 +36,8 @@ interface RenderOptions {
   // html form elements
   renderHtmlInput: (inputType: string, fieldData: FieldData, options: any) => string
   renderHtmlSelect: (fieldData: FieldData, possibleValues:SelectValue[], options:any) => string
-  renderHtmlRadios: (fieldData: FieldData, possibleValues:SelectValue[], options:any) => string
-  renderHtmlCheckboxes: (fieldData: FieldData, possibleValues:SelectValue[], options:any) => string
+  renderHtmlRadios: (fieldData: FieldData, possibleValues: SelectValue[], containerOptions: any, elementOptions: any) => string
+  renderHtmlCheckboxes: (fieldData: FieldData, possibleValues: SelectValue[], containerOptions: any, elementOptions: any) => string
   renderHtmlTextarea: (fieldData: FieldData, options:any) => string
   renderButton: (fieldData: FieldData, options:any) => string
 
@@ -63,7 +63,6 @@ class DefaultRenderOptions implements RenderOptions {
     return this.renderField(this.renderHtmlInput('number', fieldData, options), fieldData, compact);
   }
 
-  // text field render hints
   renderPasswordField(fieldData, options, compact) {
     return this.renderField(this.renderHtmlInput('password', fieldData, options), fieldData, compact);
   }
@@ -80,20 +79,20 @@ class DefaultRenderOptions implements RenderOptions {
     return HtmlUtil.renderTag('div', {'class': 'form-control-static'}, text);
   }
 
-  renderMultiChoiceCheckboxField(fieldData, possibleValues, options, compact) {
-    return this.renderField(this.renderHtmlCheckboxes(fieldData, possibleValues, options), fieldData, compact);
+  renderMultiChoiceCheckboxField(fieldData, possibleValues, containerOptions, elementOptions, compact) {
+    return this.renderField(this.renderHtmlCheckboxes(fieldData, possibleValues, containerOptions, elementOptions), fieldData, compact);
   }
 
-  renderMultiChoiceSelectField(fieldData, possibleValues, options, compact) {
+  renderMultiChoiceSelectField(fieldData, possibleValues, containerOptions, elementOptions, compact) {
     return '';
   }
 
-  renderSingleChoiceRadioField(fieldData, possibleValues, options, compact) {
-    return this.renderField(this.renderHtmlRadios(fieldData, possibleValues, options), fieldData, compact);
+  renderSingleChoiceRadioField(fieldData, possibleValues, containerOptions, elementOptions, compact) {
+    return this.renderField(this.renderHtmlRadios(fieldData, possibleValues, containerOptions, elementOptions), fieldData, compact);
   }
 
-  renderSingleChoiceSelectField(fieldData, possibleValues, options, compact) {
-    return this.renderField(this.renderHtmlSelect(fieldData, possibleValues, options), fieldData, compact);
+  renderSingleChoiceSelectField(fieldData, possibleValues, containerOptions, elementOptions, compact) {
+    return this.renderField(this.renderHtmlSelect(fieldData, possibleValues, elementOptions), fieldData, compact);
   }
 
   renderActionField(fieldData, options, compact) {
@@ -193,15 +192,15 @@ class DefaultRenderOptions implements RenderOptions {
     return html;
   }
 
-  renderHtmlRadios(fieldData: FieldData, possibleValues, options) {
-    return this.renderCheckable('radio', fieldData, possibleValues, options,
+  renderHtmlRadios(fieldData: FieldData, possibleValues, containerOptions, elementOptions) {
+    return this.renderCheckable('radio', fieldData, possibleValues, containerOptions, elementOptions,
       (v) => {
         return v.index === fieldData.value;
       });
   }
 
-  renderHtmlCheckboxes(fieldData: FieldData, possibleValues, options) {
-    return this.renderCheckable('checkbox', fieldData, possibleValues, options,
+  renderHtmlCheckboxes(fieldData: FieldData, possibleValues, containerOptions, elementOptions) {
+    return this.renderCheckable('checkbox', fieldData, possibleValues, containerOptions, elementOptions,
       (v) => {
         return fieldData.value.indexOf(v.index) >= 0;
       });
@@ -217,12 +216,12 @@ class DefaultRenderOptions implements RenderOptions {
     return HtmlUtil.renderTag('button', allOptions, fieldData.label);
   }
 
-  private renderCheckable(inputType: string, fieldData: FieldData, possibleValues: SelectValue[], options: any,
-    isChecked: (SelectValue) => boolean) {
+  private renderCheckable(inputType: string, fieldData: FieldData, possibleValues: SelectValue[],
+    containerOptions: any, elementOptions: any, isChecked: (SelectValue) => boolean) {
 
     var html = '';
     Util.foreach(possibleValues, (i, v) => {
-      var checkableOptions = Util.copyProperties({}, options);
+      var checkableOptions = Util.copyProperties({}, elementOptions);
 
       // for checkables we need to remove the form-control default class or they look ugly
       checkableOptions['class'] = checkableOptions['class'].replace('form-control', '');
@@ -241,18 +240,7 @@ class DefaultRenderOptions implements RenderOptions {
       html += HtmlUtil.renderTag('div', {'class': inputType}, divBody, false);
     });
 
-    return this.renderWithContainingElement(html, fieldData.id, options);
-  }
-
-  private renderWithContainingElement(body:string, id:string, options:any):string {
-    // radio buttons and checkboxes need to be grouped inside an element with the form field's id and validation
-    // id, so that it could be found e.g. during validation.
-    var containerOptions = {
-      'id': id,
-      'supler:validationId': options[SuplerAttributes.VALIDATION_ID],
-      'supler:path': options[SuplerAttributes.PATH]
-    };
-    return HtmlUtil.renderTag('span', containerOptions, body, false);
+    return HtmlUtil.renderTag('span', containerOptions, html, false);
   }
 
   //

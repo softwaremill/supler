@@ -114,14 +114,18 @@ class CreateFormFromJson {
 
     fieldData.value = fieldData.value ? 1 : 0;
 
-    return renderOptions.renderSingleChoiceRadioField(fieldData, possibleSelectValues, fieldOptions, compact);
+    return renderOptions.renderSingleChoiceRadioField(fieldData, possibleSelectValues,
+      this.checkableContainerOptions(fieldData.id, fieldOptions), fieldOptions, compact);
   }
 
   private selectFieldFromJson(renderOptions, fieldData: FieldData, fieldOptions, compact) {
     var possibleSelectValues = fieldData.json.possible_values.map(v => new SelectValue(v.index, this.labelFor(v.label)));
 
+    var containerOptions = this.checkableContainerOptions(fieldData.id, fieldOptions);
+
     if (fieldData.multiple) {
-      return renderOptions.renderMultiChoiceCheckboxField(fieldData, possibleSelectValues, fieldOptions, compact);
+      return renderOptions.renderMultiChoiceCheckboxField(fieldData, possibleSelectValues,
+        containerOptions, fieldOptions, compact);
     } else {
       var isRequired = fieldData.json.validate && fieldData.json.validate.required;
       var noValueSelected = fieldData.value === fieldData.json.empty_value;
@@ -132,11 +136,23 @@ class CreateFormFromJson {
       }
 
       if (isRadio) {
-        return renderOptions.renderSingleChoiceRadioField(fieldData, possibleSelectValues, fieldOptions, compact);
+        return renderOptions.renderSingleChoiceRadioField(fieldData, possibleSelectValues,
+          containerOptions, fieldOptions, compact);
       } else {
-        return renderOptions.renderSingleChoiceSelectField(fieldData, possibleSelectValues, fieldOptions, compact);
+        return renderOptions.renderSingleChoiceSelectField(fieldData, possibleSelectValues,
+          containerOptions, fieldOptions, compact);
       }
     }
+  }
+
+  private checkableContainerOptions(id: string, elementOptions) {
+    // radio buttons and checkboxes need to be grouped inside an element with the form field's id and validation
+    // id, so that it could be found e.g. during validation.
+    return {
+      'id': id,
+      'supler:validationId': elementOptions[SuplerAttributes.VALIDATION_ID],
+      'supler:path': elementOptions[SuplerAttributes.PATH]
+    };
   }
 
   private subformFieldFromJson(renderOptions, fieldData: FieldData, elementDictionary) {
