@@ -13,7 +13,7 @@ class SuplerForm {
     this.i18n = new I18n();
     Util.copyProperties(this.i18n, customOptions.i18n);
 
-    var renderOptions = new DefaultRenderOptions();
+    var renderOptions = new Bootstrap3RenderOptions();
     Util.copyProperties(renderOptions, customOptions.render_options);
     this.renderOptionsGetter = new HTMLRenderTemplateParser(this.container).parse(renderOptions);
 

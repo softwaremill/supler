@@ -47,7 +47,7 @@ interface RenderOptions {
   defaultHtmlTextareaOptions: (id:string, name:string, options:any) => any
 }
 
-class DefaultRenderOptions implements RenderOptions {
+class Bootstrap3RenderOptions implements RenderOptions {
   constructor() {
   }
 
