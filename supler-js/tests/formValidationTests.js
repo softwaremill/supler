@@ -89,4 +89,30 @@ describe('form validation', function(){
     var validationElement = validationElementByName('field3');
     validationElement.innerText.should.have.length(0);
   });
+
+  it('should validate fields in subforms', function() {
+    // given
+    var sf = new SuplerForm(container);
+    sf.render(complex1.form1list);
+
+    // when
+    byName('simples[0].field1').val('');
+    byName('simples[2].field3').val('1');
+    var validationResult = sf.validate();
+
+    // then
+    validationResult.should.equal(true);
+
+    var validationElement01 = validationElementByName('simples[0].field1');
+    validationElement01.innerText.should.not.have.length(0);
+
+    var validationElement21 = validationElementByName('simples[2].field1');
+    validationElement21.innerText.should.have.length(0);
+
+    var validationElement03 = validationElementByName('simples[0].field3');
+    validationElement03.innerText.should.have.length(0);
+
+    var validationElement23 = validationElementByName('simples[2].field3');
+    validationElement23.innerText.should.not.have.length(0);
+  })
 });

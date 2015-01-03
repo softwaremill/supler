@@ -103,9 +103,9 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     ))
 
     val obj1 = Complex1("c1", List(
-      Simple1("f11", Some("x"), 10, field4 = true),
-      Simple1("f12", Some("y"), 11, field4 = false),
-      Simple1("f13", Some("z"), 12, field4 = true)))
+      Simple1("f11", Some("x"), 11, field4 = true),
+      Simple1("f12", Some("y"), 12, field4 = false),
+      Simple1("f13", Some("z"), 13, field4 = true)))
     val obj2 = Complex1("c1", Nil)
 
     writer.writeForm("form1table", complex1form, obj1)
