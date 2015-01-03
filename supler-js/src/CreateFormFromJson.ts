@@ -59,12 +59,16 @@ class CreateFormFromJson {
     var renderOptions = this.renderOptionsGetter.forField(fieldData.path, fieldData.type, fieldData.getRenderHintName());
 
     var fieldOptions = Util.copyProperties({
+      'id': fieldData.id,
+      // the field name must be unique for a value, so that e.g. radio button groups in multiple subforms work
+      // correctly, hence we cannot use the field's name.
+      'name': fieldData.path,
       'supler:fieldName': fieldData.name,
       'supler:fieldType': fieldData.type,
       'supler:multiple': fieldData.multiple,
       'supler:validationId': fieldData.validationId,
       'supler:path': fieldData.path
-    }, renderOptions.defaultFieldOptions());
+    }, renderOptions.additionalFieldOptions());
 
     switch (fieldData.type) {
       case FieldTypes.STRING:
@@ -145,6 +149,9 @@ class CreateFormFromJson {
     }
   }
 
+  /**
+   * When using the container options, which include the id, the ids of the elements should be changed.
+   */
   private checkableContainerOptions(id: string, elementOptions) {
     // radio buttons and checkboxes need to be grouped inside an element with the form field's id and validation
     // id, so that it could be found e.g. during validation.

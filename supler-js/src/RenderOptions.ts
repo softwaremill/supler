@@ -34,17 +34,15 @@ interface RenderOptions {
   renderSubformTable: (tableHeaders:string[], cells:string[][], elementOptions:any) => string;
 
   // html form elements
-  renderHtmlInput: (inputType: string, fieldData: FieldData, options: any) => string
-  renderHtmlSelect: (fieldData: FieldData, possibleValues:SelectValue[], options:any) => string
-  renderHtmlRadios: (fieldData: FieldData, possibleValues: SelectValue[], containerOptions: any, elementOptions: any) => string
-  renderHtmlCheckboxes: (fieldData: FieldData, possibleValues: SelectValue[], containerOptions: any, elementOptions: any) => string
-  renderHtmlTextarea: (fieldData: FieldData, options:any) => string
-  renderButton: (fieldData: FieldData, options:any) => string
+  renderHtmlInput: (inputType: string, value: any, options: any) => string
+  renderHtmlSelect: (value: number, possibleValues: SelectValue[], options: any) => string
+  renderHtmlRadios: (value: any, possibleValues: SelectValue[], containerOptions: any, elementOptions: any) => string
+  renderHtmlCheckboxes: (value: any, possibleValues: SelectValue[], containerOptions: any, elementOptions: any) => string
+  renderHtmlTextarea: (value: string, options:any) => string
+  renderHtmlButton: (label: string, options:any) => string
 
   // misc
-  defaultFieldOptions: () => any
-  defaultHtmlInputOptions: (inputType: string, fieldData: FieldData, options:any) => any
-  defaultHtmlTextareaOptions: (fieldData: FieldData, options:any) => any
+  additionalFieldOptions: () => any
 }
 
 class Bootstrap3RenderOptions implements RenderOptions {
@@ -52,23 +50,23 @@ class Bootstrap3RenderOptions implements RenderOptions {
   }
 
   renderStringField(fieldData, options, compact) {
-    return this.renderField(this.renderHtmlInput('text', fieldData, options), fieldData, compact);
+    return this.renderField(this.renderHtmlInput('text', fieldData.value, options), fieldData, compact);
   }
 
   renderIntegerField(fieldData, options, compact) {
-    return this.renderField(this.renderHtmlInput('number', fieldData, options), fieldData, compact);
+    return this.renderField(this.renderHtmlInput('number', fieldData.value, options), fieldData, compact);
   }
 
   renderDoubleField(fieldData, options, compact) {
-    return this.renderField(this.renderHtmlInput('number', fieldData, options), fieldData, compact);
+    return this.renderField(this.renderHtmlInput('number', fieldData.value, options), fieldData, compact);
   }
 
   renderPasswordField(fieldData, options, compact) {
-    return this.renderField(this.renderHtmlInput('password', fieldData, options), fieldData, compact);
+    return this.renderField(this.renderHtmlInput('password', fieldData.value, options), fieldData, compact);
   }
 
   renderTextareaField(fieldData, options, compact) {
-    return this.renderField(this.renderHtmlTextarea(fieldData, options), fieldData, compact);
+    return this.renderField(this.renderHtmlTextarea(fieldData.value, options), fieldData, compact);
   }
 
   renderStaticField(fieldData, compact) {
@@ -80,7 +78,7 @@ class Bootstrap3RenderOptions implements RenderOptions {
   }
 
   renderMultiChoiceCheckboxField(fieldData, possibleValues, containerOptions, elementOptions, compact) {
-    return this.renderField(this.renderHtmlCheckboxes(fieldData, possibleValues, containerOptions, elementOptions), fieldData, compact);
+    return this.renderField(this.renderHtmlCheckboxes(fieldData.value, possibleValues, containerOptions, elementOptions), fieldData, compact);
   }
 
   renderMultiChoiceSelectField(fieldData, possibleValues, containerOptions, elementOptions, compact) {
@@ -88,22 +86,22 @@ class Bootstrap3RenderOptions implements RenderOptions {
   }
 
   renderSingleChoiceRadioField(fieldData, possibleValues, containerOptions, elementOptions, compact) {
-    return this.renderField(this.renderHtmlRadios(fieldData, possibleValues, containerOptions, elementOptions), fieldData, compact);
+    return this.renderField(this.renderHtmlRadios(fieldData.value, possibleValues, containerOptions, elementOptions), fieldData, compact);
   }
 
   renderSingleChoiceSelectField(fieldData, possibleValues, containerOptions, elementOptions, compact) {
-    return this.renderField(this.renderHtmlSelect(fieldData, possibleValues, elementOptions), fieldData, compact);
+    return this.renderField(this.renderHtmlSelect(fieldData.value, possibleValues, elementOptions), fieldData, compact);
   }
 
   renderActionField(fieldData, options, compact) {
     var fieldDataNoLabel = Util.copyObject(fieldData);
     fieldDataNoLabel.label = '';
-    return this.renderField(this.renderButton(fieldData, options), fieldDataNoLabel, compact);
+    return this.renderField(this.renderHtmlButton(fieldData.label, options), fieldDataNoLabel, compact);
   }
 
   //
 
-  renderField(input, fieldData: FieldData, compact) {
+  renderField(input, fieldData, compact) {
     var labelPart;
     if (compact) {
       labelPart = '';
@@ -172,51 +170,52 @@ class Bootstrap3RenderOptions implements RenderOptions {
 
   //
 
-  renderHtmlInput(inputType, fieldData, options) {
-    return HtmlUtil.renderTag('input', this.defaultHtmlInputOptions(inputType, fieldData, options));
+  renderHtmlInput(inputType, value, options) {
+    var inputOptions = Util.copyProperties({'type': inputType, 'value': value}, options);
+    return HtmlUtil.renderTag('input', inputOptions);
   }
 
-  renderHtmlSelect(fieldData, possibleValues, options) {
+  renderHtmlSelect(value, possibleValues, options) {
     var selectBody = '';
     Util.foreach(possibleValues, (i, v) => {
       var optionOptions = {'value': v.index};
-      if (v.index === fieldData.value) {
+      if (v.index === value) {
         optionOptions['selected'] = 'selected';
       }
 
       selectBody += HtmlUtil.renderTag('option', optionOptions, v.label);
     });
 
-    var html = HtmlUtil.renderTag('select', Util.copyProperties({'id': fieldData.id, 'name': fieldData.path}, options), selectBody, false);
+    var html = HtmlUtil.renderTag('select', options, selectBody, false);
     html += '\n';
     return html;
   }
 
-  renderHtmlRadios(fieldData: FieldData, possibleValues, containerOptions, elementOptions) {
-    return this.renderCheckable('radio', fieldData, possibleValues, containerOptions, elementOptions,
+  renderHtmlRadios(value, possibleValues, containerOptions, elementOptions) {
+    return this.renderCheckable('radio', possibleValues, containerOptions, elementOptions,
       (v) => {
-        return v.index === fieldData.value;
+        return v.index === value;
       });
   }
 
-  renderHtmlCheckboxes(fieldData: FieldData, possibleValues, containerOptions, elementOptions) {
-    return this.renderCheckable('checkbox', fieldData, possibleValues, containerOptions, elementOptions,
+  renderHtmlCheckboxes(value, possibleValues, containerOptions, elementOptions) {
+    return this.renderCheckable('checkbox', possibleValues, containerOptions, elementOptions,
       (v) => {
-        return fieldData.value.indexOf(v.index) >= 0;
+        return value.indexOf(v.index) >= 0;
       });
   }
 
-  renderHtmlTextarea(fieldData: FieldData, options) {
-    return HtmlUtil.renderTag('textarea', this.defaultHtmlTextareaOptions(fieldData, options), fieldData.value);
+  renderHtmlTextarea(value, options) {
+    return HtmlUtil.renderTag('textarea', options, value);
   }
 
-  renderButton(fieldData: FieldData, options) {
-    var allOptions = Util.copyProperties({'id': fieldData.id, 'type': 'button', 'name': fieldData.name}, options);
+  renderHtmlButton(label, options) {
+    var allOptions = Util.copyProperties({'type': 'button'}, options);
     allOptions['class'] = allOptions['class'].replace('form-control', 'btn btn-default');
-    return HtmlUtil.renderTag('button', allOptions, fieldData.label);
+    return HtmlUtil.renderTag('button', allOptions, label);
   }
 
-  private renderCheckable(inputType: string, fieldData: FieldData, possibleValues: SelectValue[],
+  private renderCheckable(inputType: string, possibleValues: SelectValue[],
     containerOptions: any, elementOptions: any, isChecked: (SelectValue) => boolean) {
 
     var html = '';
@@ -230,10 +229,8 @@ class Bootstrap3RenderOptions implements RenderOptions {
         checkableOptions['checked'] = 'checked';
       }
 
-      var checkableFieldData = Util.copyObject(fieldData);
-      checkableFieldData.id = fieldData.id + '.' + v.index;
-      checkableFieldData.value = v.index;
-      var labelBody = this.renderHtmlInput(inputType, checkableFieldData, checkableOptions);
+      checkableOptions['id'] = containerOptions['id'] + '.' + v.index;
+      var labelBody = this.renderHtmlInput(inputType, v.index, checkableOptions);
       labelBody += HtmlUtil.renderTag('span', {}, v.label);
 
       var divBody = HtmlUtil.renderTag('label', {}, labelBody, false);
@@ -245,17 +242,7 @@ class Bootstrap3RenderOptions implements RenderOptions {
 
   //
 
-  defaultFieldOptions() {
+  additionalFieldOptions() {
     return {'class': 'form-control'};
-  }
-
-  defaultHtmlInputOptions(inputType, fieldData, options) {
-    // the field name must be unique for a value, so that e.g. radio button groups in multiple subforms work
-    // correctly, hence we cannot use the field's name.
-    return Util.copyProperties({'id': fieldData.id, 'type': inputType, 'name': fieldData.path, 'value': fieldData.value}, options);
-  }
-
-  defaultHtmlTextareaOptions(fieldData, options) {
-    return Util.copyProperties({'id': fieldData.id, 'name': fieldData.path}, options);
   }
 }

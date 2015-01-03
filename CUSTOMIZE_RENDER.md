@@ -214,14 +214,12 @@ renderSubformListElement: (subformElement: string, options: any) => string;
 renderSubformTable: (tableHeaders: string[], cells: string[][], elementOptions: any) => string;
 
 // html form elements
-renderHtmlInput: (inputType: string, fieldData: FieldData, options: any) => string
-renderHtmlSelect: (fieldData: FieldData, possibleValues: SelectValue[], options: any) => string
-renderHtmlRadios: (fieldData: FieldData, possibleValues: SelectValue[], options: any) => string
-renderHtmlCheckboxes: (fieldData: FieldData, possibleValues: SelectValue[], options: any) => string
-renderHtmlTextarea: (fieldData: FieldData, options: any) => string
+renderHtmlInput: (inputType: string, value: any, options: any) => string
+renderHtmlSelect: (value: number, possibleValues: SelectValue[], options: any) => string
+renderHtmlRadios: (value: any, possibleValues: SelectValue[], options: any) => string
+renderHtmlCheckboxes: (value: any, possibleValues: SelectValue[], options: any) => string
+renderHtmlTextarea: (value: string, options: any) => string
 
 // misc
-defaultFieldOptions: () => any
-defaultHtmlInputOptions: (inputType: string, id: string, name: string, value: any, options: any) => any
-defaultHtmlTextareaOptions: (id: string, name: string, options: any) => any
+additionalFieldOptions: () => any
 ````

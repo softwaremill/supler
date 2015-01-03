@@ -85,7 +85,7 @@ class SingleTemplateParser {
         .replace(SUPLER_FIELD_INPUT_VALUE.toLowerCase(), value);
     }
 
-    function renderTemplateWithPossibleValues(id, name, possibleValues, containerOptions, elementOptions, isSelected:(SelectValue) => boolean) {
+    function renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, isSelected:(SelectValue) => boolean) {
       var singleInput = element.hasAttribute('super:singleInput') &&
         (element.getAttribute('super:singleInput').toLowerCase() === 'true');
 
@@ -96,10 +96,9 @@ class SingleTemplateParser {
       var possibleValueTemplate = HtmlUtil.findElementWithAttr(element, 'supler:possibleValueTemplate').outerHTML;
       var renderedPossibleValues = '';
       Util.foreach(possibleValues, (i, v) => {
-        var attrs = elementOptions;
+        var attrs = Util.copyProperties({}, elementOptions);
+        attrs['id'] = elementOptions['id'] + '.' + v.index;
         if (isSelected(v)) {
-          attrs = {};
-          Util.copyProperties(attrs, elementOptions);
           attrs[element.getAttribute('supler:selectedAttrName')] = element.getAttribute('supler:selectedAttrValue');
         }
 
@@ -115,37 +114,36 @@ class SingleTemplateParser {
     }
 
     return this.createModifierWithOverride(function () {
-      this.defaultFieldOptions = function () {
+      this.additionalFieldOptions = function () {
         return {};
       };
 
       // no possible values
-      this.renderHtmlInput = function (inputType: string, fieldData: FieldData, options: any): string {
-        var attrs = this.defaultHtmlInputOptions(inputType, fieldData, options);
-        return renderTemplateForAttrs(mainTemplate, attrs, fieldData.value);
+      this.renderHtmlInput = function (inputType: string, value: any, options: any): string {
+        var attrs = Util.copyProperties({ 'type': inputType }, options);
+        return renderTemplateForAttrs(mainTemplate, attrs, value);
       };
 
-      this.renderHtmlTextarea = function (fieldData: FieldData, options: any): string {
-        var attrs = this.defaultHtmlTextareaOptions(fieldData, options);
-        return renderTemplateForAttrs(mainTemplate, attrs, fieldData.value);
+      this.renderHtmlTextarea = function (value: string, options: any): string {
+        return renderTemplateForAttrs(mainTemplate, options, value);
       };
 
       // possible values
-      this.renderHtmlSelect = function (fieldData: FieldData, possibleValues: SelectValue[], containerOptions: any, elementOptions: any): string {
-        return renderTemplateWithPossibleValues(fieldData.id, fieldData.name, possibleValues, containerOptions, elementOptions, (v) => {
-          return v.index === fieldData.value;
+      this.renderHtmlSelect = function (value: number, possibleValues: SelectValue[], containerOptions: any, elementOptions: any): string {
+        return renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, (v) => {
+          return v.index === value;
         });
       };
 
-      this.renderHtmlRadios = function (fieldData: FieldData, possibleValues: SelectValue[], containerOptions: any, elementOptions: any): string {
-        return renderTemplateWithPossibleValues(fieldData.id, fieldData.name, possibleValues, containerOptions, elementOptions, (v) => {
-          return v.index === fieldData.value;
+      this.renderHtmlRadios = function (value: any, possibleValues: SelectValue[], containerOptions: any, elementOptions: any): string {
+        return renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, (v) => {
+          return v.index === value;
         });
       };
 
-      this.renderHtmlCheckboxes = function (fieldData: FieldData, possibleValues: SelectValue[], containerOptions: any, elementOptions: any): string {
-        return renderTemplateWithPossibleValues(fieldData.id, fieldData.name, possibleValues, containerOptions, elementOptions, (v) => {
-          return fieldData.value.indexOf(v.index) >= 0;
+      this.renderHtmlCheckboxes = function (value: any, possibleValues: SelectValue[], containerOptions: any, elementOptions: any): string {
+        return renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, (v) => {
+          return value.indexOf(v.index) >= 0;
         });
       };
     })
