@@ -23,6 +23,7 @@ object FrontendTestsForms {
   case class Simple1(field1: String, field2: Option[String], field3: Int, field4: Boolean)
   case class Select1Required(field1: String)
   case class Select1Optional(field1: Option[String])
+  case class Complex1(field10: String, simples: List[Simple1])
 }
 
 class FrontendTestsForms extends FlatSpec with ShouldMatchers {
@@ -30,14 +31,14 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
 
   import FrontendTestsForms._
 
+  val simple1Form = form[Simple1](f => List(
+    f.field(_.field1).label("Field 1"),
+    f.field(_.field2).label("Field 2"),
+    f.field(_.field3).label("Field 3").validate(gt(10)),
+    f.field(_.field4).label("Field 4")
+  ))
+  
   writeTestData("simple1") { writer =>
-    val f = form[Simple1](f => List(
-      f.field(_.field1).label("Field 1"),
-      f.field(_.field2).label("Field 2"),
-      f.field(_.field3).label("Field 3").validate(gt(10)),
-      f.field(_.field4).label("Field 4")
-    ))
-
     val fAction = form[Simple1](f => List(
       f.field(_.field3).label("Field 3"),
       f.action("inc") { s => ActionResult(s.copy(field3 = s.field3 + 1)) }
@@ -46,10 +47,10 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     val obj1 = Simple1("v1", Some("v2"), 0, field4 = true)
     val obj2 = Simple1("v1", None, 15, field4 = true)
 
-    writer.writeForm("form1", f, obj1)
-    writer.writeValidatedForm("form1validated", f, obj1)
+    writer.writeForm("form1", simple1Form, obj1)
+    writer.writeValidatedForm("form1validated", simple1Form, obj1)
 
-    writer.writeForm("form2", f, obj2)
+    writer.writeForm("form2", simple1Form, obj2)
 
     writer.writeObj("obj1", obj1)
     writer.writeObj("obj2", obj2)
@@ -89,6 +90,31 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("form2opt", fOpt, obj2opt)
     writer.writeForm("form1optRadio", fOptRadio, obj1opt)
     writer.writeForm("form2optRadio", fOptRadio, obj2opt)
+  }
+  
+  writeTestData("complex1") { writer =>
+    val complex1form = form[Complex1](f => List(
+      f.field(_.field10).label("Field 10"),
+      f.subform(_.simples, simple1Form)
+    ))
+    val complex2form = form[Complex1](f => List(
+      f.field(_.field10).label("Field 10"),
+      f.subform(_.simples, simple1Form).renderHint(asList())
+    ))
+
+    val obj1 = Complex1("c1", List(
+      Simple1("f11", Some("x"), 10, field4 = true),
+      Simple1("f12", Some("y"), 11, field4 = false),
+      Simple1("f13", Some("z"), 12, field4 = true)))
+    val obj2 = Complex1("c1", Nil)
+
+    writer.writeForm("form1table", complex1form, obj1)
+    writer.writeForm("form2table", complex1form, obj2)
+
+    writer.writeForm("form1list", complex2form, obj1)
+    writer.writeForm("form2list", complex2form, obj2)
+
+    writer.writeObj("obj1", obj1)
   }
 
   def writeTestData(name: String)(thunk: JsonWriter => Unit): Unit = {

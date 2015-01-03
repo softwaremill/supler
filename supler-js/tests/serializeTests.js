@@ -1,5 +1,5 @@
-describe('serialization', function(){
-  it('should serialize a basic form', function(){
+describe('serialization', function() {
+  it('should serialize a basic form', function() {
     // given
     var sf = new SuplerForm(container);
     sf.render(simple1.form1);
@@ -11,7 +11,7 @@ describe('serialization', function(){
     serialized.should.deep.equal(simple1.obj1);
   });
 
-  it('should serialize after changes', function(){
+  it('should serialize after changes', function() {
     // given
     var sf = new SuplerForm(container);
     sf.render(simple1.form1);
@@ -29,5 +29,29 @@ describe('serialization', function(){
     serialized.field2.should.equal('');
     serialized.field3.should.equal(15);
     serialized.field4.should.equal(false);
+  });
+
+  it('should serialize a form with subforms rendered as a table', function() {
+    // given
+    var sf = new SuplerForm(container);
+    sf.render(complex1.form1table);
+
+    // when
+    var serialized = sf.getValue();
+
+    // then
+    serialized.should.deep.equal(complex1.obj1);
+  });
+
+  it('should serialize a form with subforms rendered as a list', function() {
+    // given
+    var sf = new SuplerForm(container);
+    sf.render(complex1.form1list);
+
+    // when
+    var serialized = sf.getValue();
+
+    // then
+    serialized.should.deep.equal(complex1.obj1);
   });
 });

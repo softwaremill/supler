@@ -43,8 +43,8 @@ interface RenderOptions {
 
   // misc
   defaultFieldOptions: () => any
-  defaultHtmlInputOptions: (inputType:string, id:string, name:string, value:any, options:any) => any
-  defaultHtmlTextareaOptions: (id:string, name:string, options:any) => any
+  defaultHtmlInputOptions: (inputType: string, fieldData: FieldData, options:any) => any
+  defaultHtmlTextareaOptions: (fieldData: FieldData, options:any) => any
 }
 
 class Bootstrap3RenderOptions implements RenderOptions {
@@ -172,11 +172,11 @@ class Bootstrap3RenderOptions implements RenderOptions {
 
   //
 
-  renderHtmlInput(inputType, fieldData: FieldData, options) {
-    return HtmlUtil.renderTag('input', this.defaultHtmlInputOptions(inputType, fieldData.id, fieldData.name, fieldData.value, options));
+  renderHtmlInput(inputType, fieldData, options) {
+    return HtmlUtil.renderTag('input', this.defaultHtmlInputOptions(inputType, fieldData, options));
   }
 
-  renderHtmlSelect(fieldData: FieldData, possibleValues, options) {
+  renderHtmlSelect(fieldData, possibleValues, options) {
     var selectBody = '';
     Util.foreach(possibleValues, (i, v) => {
       var optionOptions = {'value': v.index};
@@ -187,7 +187,7 @@ class Bootstrap3RenderOptions implements RenderOptions {
       selectBody += HtmlUtil.renderTag('option', optionOptions, v.label);
     });
 
-    var html = HtmlUtil.renderTag('select', Util.copyProperties({'id': fieldData.id, 'name': fieldData.name}, options), selectBody, false);
+    var html = HtmlUtil.renderTag('select', Util.copyProperties({'id': fieldData.id, 'name': fieldData.path}, options), selectBody, false);
     html += '\n';
     return html;
   }
@@ -207,7 +207,7 @@ class Bootstrap3RenderOptions implements RenderOptions {
   }
 
   renderHtmlTextarea(fieldData: FieldData, options) {
-    return HtmlUtil.renderTag('textarea', this.defaultHtmlTextareaOptions(fieldData.id, fieldData.name, options), fieldData.value);
+    return HtmlUtil.renderTag('textarea', this.defaultHtmlTextareaOptions(fieldData, options), fieldData.value);
   }
 
   renderButton(fieldData: FieldData, options) {
@@ -249,11 +249,13 @@ class Bootstrap3RenderOptions implements RenderOptions {
     return {'class': 'form-control'};
   }
 
-  defaultHtmlInputOptions(inputType, id, name, value, options) {
-    return Util.copyProperties({'id': id, 'type': inputType, 'name': name, 'value': value}, options);
+  defaultHtmlInputOptions(inputType, fieldData, options) {
+    // the field name must be unique for a value, so that e.g. radio button groups in multiple subforms work
+    // correctly, hence we cannot use the field's name.
+    return Util.copyProperties({'id': fieldData.id, 'type': inputType, 'name': fieldData.path, 'value': fieldData.value}, options);
   }
 
-  defaultHtmlTextareaOptions(id, name, options) {
-    return Util.copyProperties({'id': id, 'name': name}, options);
+  defaultHtmlTextareaOptions(fieldData, options) {
+    return Util.copyProperties({'id': fieldData.id, 'name': fieldData.path}, options);
   }
 }

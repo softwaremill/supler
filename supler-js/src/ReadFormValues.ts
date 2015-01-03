@@ -7,9 +7,9 @@ class ReadFormValues {
    */
   static getValueFrom(element, selectedActionId = null, result = {}) {
     var fieldType = element.getAttribute(SuplerAttributes.FIELD_TYPE);
-    var multiple = element.getAttribute(SuplerAttributes.MULTIPLE) === "true";
+    var multiple = element.getAttribute(SuplerAttributes.MULTIPLE) === 'true';
     if (fieldType) {
-      var fieldName = element.getAttribute("name");
+      var fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
       switch (fieldType) {
         case FieldTypes.STRING:
           ReadFormValues.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);

@@ -121,12 +121,12 @@ class SingleTemplateParser {
 
       // no possible values
       this.renderHtmlInput = function (inputType: string, fieldData: FieldData, options: any): string {
-        var attrs = this.defaultHtmlInputOptions(inputType, fieldData.id, fieldData.name, fieldData.value, options);
+        var attrs = this.defaultHtmlInputOptions(inputType, fieldData, options);
         return renderTemplateForAttrs(mainTemplate, attrs, fieldData.value);
       };
 
       this.renderHtmlTextarea = function (fieldData: FieldData, options: any): string {
-        var attrs = this.defaultHtmlTextareaOptions(fieldData.id, fieldData.name, options);
+        var attrs = this.defaultHtmlTextareaOptions(fieldData, options);
         return renderTemplateForAttrs(mainTemplate, attrs, fieldData.value);
       };
 
