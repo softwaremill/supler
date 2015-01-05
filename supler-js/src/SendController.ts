@@ -46,7 +46,8 @@ class SendController {
         this.suplerForm.getValue(),
         this.sendSuccessFn(applyRefreshResultsCondition, () => {}),
         () => {}, // do nothing on error
-        false);
+        false,
+        formElement);
     }
   }
 
@@ -61,7 +62,8 @@ class SendController {
           this.suplerForm.getValue(formElement.id),
           this.sendSuccessFn(() => { return true; }, () => this.actionCompleted()),
           () => this.actionCompleted(),
-          true);
+          true,
+          formElement);
       } else {
         this.actionCompleted();
       }
@@ -113,7 +115,8 @@ class SendController {
 }
 
 class SendControllerOptions {
-  sendFormFunction: (formValue: any, renderResponseFn: (data: any) => void, sendErrorFn: () => void, isAction: boolean) => void;
+  sendFormFunction: (formValue: any, renderResponseFn: (data: any) => void, sendErrorFn: () => void,
+    isAction: boolean, triggeringElement: HTMLElement) => void;
 
   constructor(options:any) {
     this.sendFormFunction = options.send_form_function;

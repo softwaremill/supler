@@ -1,7 +1,7 @@
 describe('send', function(){
   it('should refresh after field change', function(done) {
     // given
-    var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
+    var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
       renderResponseFn(simple1.form2);
 
       // then
@@ -29,7 +29,7 @@ describe('send', function(){
     var renderResponseFn1 = null;
     var renderResponseFn2 = null;
 
-    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
+    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
       if (state === 1) {
         // we pretend the request is taking some time, so we are just putting the renderResponseFn aside and allow
         // the test to continue
@@ -71,7 +71,7 @@ describe('send', function(){
     var state = 1;
     var actionRenderResponseFn = null;
 
-    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
+    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
       if (state === 1) {
         actionRenderResponseFn = renderResponseFn;
         state = 2;
@@ -105,7 +105,7 @@ describe('send', function(){
     var actionRenderResponseFn1 = null;
     var actionRenderResponseFn2 = null;
 
-    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
+    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
       if (state === 1) {
         actionRenderResponseFn1 = renderResponseFn;
         state = 2;
@@ -149,7 +149,7 @@ describe('send', function(){
     var sendErrorFn1 = null;
     var renderResponseFn2 = null;
 
-    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
+    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
       if (state === 1) {
         sendErrorFn1 = sendErrorFn;
         state = 2;

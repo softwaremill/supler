@@ -48,7 +48,7 @@ describe('form validation', function(){
 
   it('should preserve client-side validation for fields with unchanged values after send', function() {
     // given
-    var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
+    var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
       renderResponseFn(simple1.form1);
     };
 
@@ -70,7 +70,7 @@ describe('form validation', function(){
 
   it('should not preserve client-side validation for fields with changed values after send', function() {
     // given
-    var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
+    var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
       renderResponseFn(simple1.form2); // field3 is changed
     };
 

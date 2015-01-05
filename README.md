@@ -380,7 +380,7 @@ to be called when the backend responds with an updated form representation or if
 For example, when using JQuery, this can be:
 
 ````javascript
-function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
+function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
     $.ajax({
         url: '/refresh_form.json',
         type: 'POST',
