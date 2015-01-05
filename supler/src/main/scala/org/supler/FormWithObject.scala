@@ -2,8 +2,7 @@ package org.supler
 
 import org.json4s.JValue
 import org.json4s.JsonAST._
-import org.supler.errors.ValidationMode._
-import org.supler.errors.{ValidationMode, FieldErrors}
+import org.supler.errors._
 import org.supler.field._
 
 trait FormWithObject[T] {
@@ -29,9 +28,9 @@ trait FormWithObject[T] {
     }
   }
 
-  def doValidate(mode: ValidationMode = ValidationMode.All): ValidatedFormWithObject[T] = {
+  def doValidate(scope: ValidationScope = ValidateAll): ValidatedFormWithObject[T] = {
     val currentApplyErrors = applyErrors
-    val newValidationErrors = form.doValidate(EmptyPath, obj, mode)
+    val newValidationErrors = form.doValidate(EmptyPath, obj, scope)
 
     new ValidatedFormWithObject(form, obj) {
       override protected def applyErrors = currentApplyErrors
@@ -56,7 +55,7 @@ trait FormWithObject[T] {
   def process(jvalue: JValue): JValue = {
     this
       .applyJSONValues(jvalue)
-      .doValidate(ValidationMode.OnlyFilled)
+      .doValidate(ValidateFilled)
       .runAction(jvalue) match {
       case Left(customJson) => customJson
       case Right(fwo) => fwo.generateJSON

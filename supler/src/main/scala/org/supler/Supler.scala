@@ -2,7 +2,6 @@ package org.supler
 
 import org.json4s.JsonAST.JField
 import org.json4s._
-import org.supler.errors.ValidationMode.ValidationMode
 import org.supler.errors._
 import org.supler.field._
 import org.supler.transformation.FullTransformer
@@ -72,7 +71,7 @@ trait Row[T] {
   
   def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T]
 
-  def doValidate(parentPath: FieldPath, obj: T, mode: ValidationMode): FieldErrors
+  def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors
 
   def runAction(obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext): CompleteActionResult
 }
@@ -98,8 +97,8 @@ object Row {
 case class MultiFieldRow[T](fields: List[Field[T]]) extends Row[T] {
   override def ||(field: Field[T]): Row[T] = MultiFieldRow(fields ++ List(field))
 
-  override def doValidate(parentPath: FieldPath, obj: T, mode: ValidationMode): List[FieldErrorMessage] =
-    fields.flatMap(_.doValidate(parentPath, obj, mode))
+  override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): List[FieldErrorMessage] =
+    fields.flatMap(_.doValidate(parentPath, obj, scope))
 
   override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] =
     Row.applyJSONValues(fields, parentPath, obj, jsonFields)

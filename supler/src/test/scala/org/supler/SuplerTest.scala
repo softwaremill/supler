@@ -2,7 +2,6 @@ package org.supler
 
 import org.json4s.JsonAST._
 import org.scalatest.{FlatSpec, ShouldMatchers}
-import org.supler.errors.ValidationMode
 
 class SuplerTest extends FlatSpec with ShouldMatchers {
   "field" should "create a variable field representation" in {
@@ -84,70 +83,6 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     f4Field.write(p1, "x11").f4 should be ("x11")
     f4Field.write(p2, "x21").f4 should be ("x21")
     f4Field.required should be (true)
-  }
-
-  "field" should "validate required fields" in {
-    // given
-    case class Person(f1: String, f2: Option[String], f3: Int, f4: Option[Int])
-
-    val p1 = Person("s1", Some("x1"), 10, Some(11))
-    val p2 = Person("", None, 12, None)
-    val p3 = Person(null, null, 12, null)
-
-    // when
-    object PersonMeta extends Supler[Person] {
-      val f1Field = field(_.f1)
-      val f2Field = field(_.f2)
-      val f3Field = field(_.f3)
-      val f4Field = field(_.f4)
-    }
-
-    // then
-    import PersonMeta._
-
-    f1Field.doValidate(EmptyPath, p1, ValidationMode.All).size should be (0)
-    f1Field.doValidate(EmptyPath, p2, ValidationMode.All).size should be (1)
-    f1Field.doValidate(EmptyPath, p3, ValidationMode.All).size should be (1)
-
-    f2Field.doValidate(EmptyPath, p1, ValidationMode.All).size should be (0)
-    f2Field.doValidate(EmptyPath, p2, ValidationMode.All).size should be (0)
-    f2Field.doValidate(EmptyPath, p3, ValidationMode.All).size should be (0)
-
-    f3Field.doValidate(EmptyPath, p1, ValidationMode.All).size should be (0)
-    f3Field.doValidate(EmptyPath, p2, ValidationMode.All).size should be (0)
-    f3Field.doValidate(EmptyPath, p3, ValidationMode.All).size should be (0)
-
-    f4Field.doValidate(EmptyPath, p1, ValidationMode.All).size should be (0)
-    f4Field.doValidate(EmptyPath, p2, ValidationMode.All).size should be (0)
-    f4Field.doValidate(EmptyPath, p3, ValidationMode.All).size should be (0)
-  }
-
-  "field" should "not validate empty fields if validating only filled" in {
-    // given
-    case class Person(f1: String)
-
-    val p1 = Person("aaaa")
-    val p2 = Person("aa")
-    val p3 = Person("")
-    val p4 = Person(null)
-
-    // when
-    object PersonMeta extends Supler[Person] {
-      val f1Field = field(_.f1).validate(minLength(3))
-    }
-
-    // then
-    import PersonMeta._
-
-    f1Field.doValidate(EmptyPath, p1, ValidationMode.All).size should be (0)
-    f1Field.doValidate(EmptyPath, p2, ValidationMode.All).size should be (1)
-    f1Field.doValidate(EmptyPath, p3, ValidationMode.All).size should be (2)
-    f1Field.doValidate(EmptyPath, p4, ValidationMode.All).size should be (1)
-
-    f1Field.doValidate(EmptyPath, p1, ValidationMode.OnlyFilled).size should be (0)
-    f1Field.doValidate(EmptyPath, p2, ValidationMode.OnlyFilled).size should be (1)
-    f1Field.doValidate(EmptyPath, p3, ValidationMode.OnlyFilled).size should be (0)
-    f1Field.doValidate(EmptyPath, p4, ValidationMode.OnlyFilled).size should be (0)
   }
 
   "form" should "apply json values to the entity given" in {
@@ -249,7 +184,7 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     val p2 = Person("p2", Nil)
 
     // when
-    import Supler._
+    import org.supler.Supler._
     val carForm = form[Car](f => List(
       f.field(_.make),
       f.field(_.age)
@@ -273,7 +208,7 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
     case class Car(make: String, age: Int)
     case class Person(name: String, cars: List[Car])
 
-    import Supler._
+    import org.supler.Supler._
     val carForm = form[Car](f => List(
       f.field(_.make),
       f.field(_.age)
@@ -312,7 +247,7 @@ class SuplerTest extends FlatSpec with ShouldMatchers {
       colors: List[String], friends: Set[String])
 
     // when
-    import Supler._
+    import org.supler.Supler._
     val carForm = form[Car](f => List())
     val personForm = form[Person](f => List())
 

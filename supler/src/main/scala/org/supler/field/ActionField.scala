@@ -3,8 +3,7 @@ package org.supler.field
 import org.json4s._
 import org.json4s.JsonAST.{JObject, JField}
 import org.supler.FieldPath
-import org.supler.errors.ValidationMode.ValidationMode
-import org.supler.errors.PartiallyAppliedObj
+import org.supler.errors.{ValidationScope, PartiallyAppliedObj}
 
 case class ActionField[T](
   name: String,
@@ -28,7 +27,7 @@ case class ActionField[T](
   override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
     PartiallyAppliedObj.full(obj)
 
-  override def doValidate(parentPath: FieldPath, obj: T, mode: ValidationMode) = Nil
+  override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) = Nil
 
   override def runAction(obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext) = {
     if (jsonFields.get(name) == Some(JBool(value = true))) {

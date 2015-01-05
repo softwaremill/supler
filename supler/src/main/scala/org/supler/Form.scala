@@ -2,7 +2,6 @@ package org.supler
 
 import org.json4s.JsonAST.JObject
 import org.json4s._
-import org.supler.errors.ValidationMode._
 import org.supler.errors._
 import org.supler.field._
 
@@ -11,8 +10,8 @@ case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
 
   def withNewEmpty: FormWithObject[T] = InitialFormWithObject(this, createEmpty())
 
-  private[supler] def doValidate(parentPath: FieldPath, obj: T, mode: ValidationMode): FieldErrors =
-    rows.flatMap(_.doValidate(parentPath, obj, mode))
+  private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors =
+    rows.flatMap(_.doValidate(parentPath, obj, scope))
 
   private[supler] def generateJSON(parentPath: FieldPath, obj: T) = JObject(
     JField("fields", JObject(rows.flatMap(_.generateJSON(parentPath, obj))))

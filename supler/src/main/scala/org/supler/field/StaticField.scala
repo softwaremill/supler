@@ -2,10 +2,9 @@ package org.supler.field
 
 import org.json4s.JValue
 import org.json4s.JsonAST._
-import org.supler.errors.ValidationMode._
 import org.supler.transformation.FullTransformer
 import org.supler.{FieldPath, ValuesProvider, Message}
-import org.supler.errors.PartiallyAppliedObj
+import org.supler.errors.{ValidationScope, PartiallyAppliedObj}
 
 import scala.concurrent.forkjoin.ThreadLocalRandom
 
@@ -37,7 +36,7 @@ case class StaticField[T](
   override protected def generateJSONWithValuesProvider(obj: T, dp: ValuesProvider[T, String]) =
     throw new IllegalStateException()
 
-  override def doValidate(parentPath: FieldPath, obj: T, mode: ValidationMode) = Nil
+  override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) = Nil
 
   override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
     PartiallyAppliedObj.full(obj)
