@@ -62,7 +62,7 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
       put {
         entity(as[JValue]) { jvalue =>
           complete {
-            PersonForm.personForm(person).reload(jvalue)
+            PersonForm.personForm(person).process(jvalue)
           }
         }
       }

@@ -49,10 +49,10 @@ trait FormWithObject[T] {
   }
 
   /**
-   * Shorthand for reloading a form basing on new field values and an optional action call.
+   * Shorthand for processing a form basing on new field values and an optional action call.
    * Calls: apply, validation (only filled), run action, generate json.
    */
-  def reload(jvalue: JValue): JValue = {
+  def process(jvalue: JValue): JValue = {
     this
       .applyJSONValues(jvalue)
       .doValidate(ValidationMode.OnlyFilled)

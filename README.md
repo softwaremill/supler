@@ -391,7 +391,7 @@ function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
 Secondly, we need to provide a server-side endpoint which will refresh the form with the given values, validate
 and generate back the response. When validating, there is a special mode which runs the validations only for fields
 with filled-in values, not to show the user validation errors for fields which haven't been yet edited at all.
-This can be done with the convenience `personForm(person).reload(receivedJson)` method. This simply invokes apply,
+This can be done with the convenience `personForm(person).process(receivedJson)` method. This invokes apply,
 validate, run action and generate JSON in succession.
 
 Concurrent sends are handled as well. Only the results of the last send triggered by value changes will be taken
