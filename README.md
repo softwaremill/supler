@@ -366,23 +366,24 @@ form.render(formJson); // formJson is received from the server
 
 The values can be either strings, or functions which format the message using the error message's arguments.
 
-### Reloading the form basing on server-side form changes
+### Updating the form basing on server-side form changes
 
-The form can be automatically reloaded after each field edit (value change), and when actions are performed.
-To do that, two things are necessary. Firstly, a `reload_form_function` option must be specified. This should be
-a javascript function, accepting form representation (as a JS object) and success/error functions, to be called when
-the form is successfully refreshed or the request fails. For example, when using JQuery, this can be:
+The form can be automatically updated after each field edit (value change), and when actions are performed.
+To do that, two things are necessary. First, a `send_form_function` option must be specified. This should be
+a javascript function, accepting form representation (as a JS object) and callbacks for handling response and errors,
+to be called when the backend responds with an updated form representation or if the request fails.
+For example, when using JQuery, this can be:
 
 ````javascript
-function reloadForm(formValue, successFn, errorFn, isAction) {
+function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
     $.ajax({
         url: '/refresh_form.json',
         type: 'POST',
         data: JSON.stringify(formValue),
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
-        success: successFn,
-        error: errorFn
+        success: renderResponseFn,
+        error: sendErrorFn
     });
 }
 ````
@@ -393,10 +394,11 @@ with filled-in values, not to show the user validation errors for fields which h
 This can be done with the convenience `personForm(person).reload(receivedJson)` method. This simply invokes apply,
 validate, run action and generate JSON in succession.
 
-Concurrent reloads are handled as well. Only the results of the last reload triggered by value changes will be taken
-into account. Actions will be queued and executed one after another. It could be a good idea to block the UI while
-an action is executing, so that no form changes are made during action execution (which would be lost).
-The `isAction` flag can be used to achieve that (there is usually no need to block the UI for value-change reloads).
+Concurrent sends are handled as well. Only the results of the last send triggered by value changes will be taken
+into account. Actions will be queued and executed one after another (hence errors must be reported using `sendErrorFn`).
+It could be a good idea to block the UI while an action is executing, so that no form changes are made during action
+execution (which would be lost). The `isAction` flag can be used to achieve that (there is usually no need to block
+the UI for value-change refreshes).
 
 ### Adding custom behavior to the form
 

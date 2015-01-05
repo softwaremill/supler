@@ -1,8 +1,8 @@
-describe('reload', function(){
-  it('should reload after field change', function(done) {
+describe('send', function(){
+  it('should refresh after field change', function(done) {
     // given
-    var reloadFormFn = function reloadForm(formValue, successFn, errorFn, isAction) {
-      successFn(simple1.form2);
+    var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
+      renderResponseFn(simple1.form2);
 
       // then
       byName('field1').val().should.equal('v1');
@@ -13,7 +13,7 @@ describe('reload', function(){
     };
 
     var sf = new SuplerForm(container, {
-      reload_form_function: reloadFormFn
+      send_form_function: sendFormFn
     });
 
     // when
@@ -23,28 +23,28 @@ describe('reload', function(){
     // then in callback
   });
 
-  it('should apply results of the last refresh-reload started only', function() {
+  it('should apply results of the last refresh started only', function() {
     // given
     var state = 1;
-    var successFn1 = null;
-    var successFn2 = null;
+    var renderResponseFn1 = null;
+    var renderResponseFn2 = null;
 
-    function reloadForm(formValue, successFn, errorFn, isAction) {
+    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
       if (state === 1) {
-        // we pretend the request is taking some time, so we are just putting the successFn aside and allow
+        // we pretend the request is taking some time, so we are just putting the renderResponseFn aside and allow
         // the test to continue
-        successFn1 = successFn;
+        renderResponseFn1 = renderResponseFn;
         state = 2;
       } else if (state === 2) {
-        successFn2 = successFn;
+        renderResponseFn2 = renderResponseFn;
         state = 3;
       } else {
-        assert.fail(0, state, 'Reload called in an illegal state');
+        assert.fail(0, state, 'Send called in an illegal state');
       }
     }
 
     var sf = new SuplerForm(container, {
-      reload_form_function: reloadForm
+      send_form_function: sendForm
     });
 
     // when & then
@@ -58,30 +58,30 @@ describe('reload', function(){
     state.should.equal(3);
 
     // first request completes, but another is started -> results should not be applied
-    successFn1(simple1.form2);
+    renderResponseFn1(simple1.form2);
     byName('field3').val().should.not.equal('15');
 
     // second request completes, results should be applied
-    successFn2(simple1.form2);
+    renderResponseFn2(simple1.form2);
     byName('field3').val().should.equal('15');
   });
 
-  it('should drop refresh-reloads when an action is in progress', function() {
+  it('should drop refreshes when an action is in progress', function() {
     // given
     var state = 1;
-    var actionSuccessFn = null;
+    var actionRenderResponseFn = null;
 
-    function reloadForm(formValue, successFn, errorFn, isAction) {
+    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
       if (state === 1) {
-        actionSuccessFn = successFn;
+        actionRenderResponseFn = renderResponseFn;
         state = 2;
       } else {
-        assert.fail(1, state, 'The refresh-reload should have been dropped!');
+        assert.fail(1, state, 'The refresh should have been dropped!');
       }
     }
 
     var sf = new SuplerForm(container, {
-      reload_form_function: reloadForm
+      send_form_function: sendForm
     });
 
     // when & then
@@ -95,35 +95,35 @@ describe('reload', function(){
     state = 3;
 
     // first request completes, but another is started -> results should not be applied
-    actionSuccessFn(simple1.form2action);
+    actionRenderResponseFn(simple1.form2action);
     byName('field3').val().should.equal('15');
   });
 
   it('should enqueue actions when an action is in progress', function() {
     // given
     var state = 1;
-    var actionSuccessFn1 = null;
-    var actionSuccessFn2 = null;
+    var actionRenderResponseFn1 = null;
+    var actionRenderResponseFn2 = null;
 
-    function reloadForm(formValue, successFn, errorFn, isAction) {
+    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
       if (state === 1) {
-        actionSuccessFn1 = successFn;
+        actionRenderResponseFn1 = renderResponseFn;
         state = 2;
       } else if (state === 2) {
         assert.fail(0, state, 'The action should have been enqueued!');
       } else if (state === 3) {
-        actionSuccessFn2 = successFn;
+        actionRenderResponseFn2 = renderResponseFn;
         state = 4;
 
         // the form value should include the changes from the first action
         formValue.field3.should.equal(15);
       } else {
-        assert.fail(0, state, 'Reload called in an illegal state');
+        assert.fail(0, state, 'Send called in an illegal state');
       }
     }
 
     var sf = new SuplerForm(container, {
-      reload_form_function: reloadForm
+      send_form_function: sendForm
     });
 
     // when & then
@@ -136,33 +136,33 @@ describe('reload', function(){
     state = 3;
 
     // first action completes, second should be started.
-    actionSuccessFn1(simple1.form2action);
+    actionRenderResponseFn1(simple1.form2action);
     state.should.equal(4);
 
-    actionSuccessFn2(simple1.form1action);
+    actionRenderResponseFn2(simple1.form1action);
     byName('field3').val().should.equal('0');
   });
 
   it('should still work after an error', function() {
     // given
     var state = 1;
-    var errorFn1 = null;
-    var successFn2 = null;
+    var sendErrorFn1 = null;
+    var renderResponseFn2 = null;
 
-    function reloadForm(formValue, successFn, errorFn, isAction) {
+    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
       if (state === 1) {
-        errorFn1 = errorFn;
+        sendErrorFn1 = sendErrorFn;
         state = 2;
       } else if (state === 2) {
-        successFn2 = successFn;
+        renderResponseFn2 = renderResponseFn;
         state = 3;
       } else {
-        assert.fail(0, state, 'Reload called in an illegal state');
+        assert.fail(0, state, 'Send called in an illegal state');
       }
     }
 
     var sf = new SuplerForm(container, {
-      reload_form_function: reloadForm
+      send_form_function: sendForm
     });
 
     // when & then
@@ -171,11 +171,11 @@ describe('reload', function(){
 
     byName('field3').change();
     state.should.equal(2);
-    errorFn1();
+    sendErrorFn1();
 
     byName('field3').change();
     state.should.equal(3);
-    successFn2(simple1.form2);
+    renderResponseFn2(simple1.form2);
 
     byName('field3').val().should.equal('15');
   });

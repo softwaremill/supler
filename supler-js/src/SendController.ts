@@ -1,13 +1,13 @@
-class ReloadController {
+class SendController {
   private refreshCounter: number;
   private actionInProgress: boolean;
   private actionQueue: { (): void }[];
 
-  constructor(private suplerForm:SuplerForm,
-    private elementDictionary:ElementDictionary,
-    private options:ReloadControllerOptions,
-    private elementSearch:ElementSearch,
-    private validation:Validation) {
+  constructor(private suplerForm: SuplerForm,
+    private elementDictionary: ElementDictionary,
+    private options: SendControllerOptions,
+    private elementSearch: ElementSearch,
+    private validation: Validation) {
 
     this.refreshCounter = 0;
     this.actionInProgress = false;
@@ -31,7 +31,7 @@ class ReloadController {
   }
 
   private refreshListenerFor(formElement: HTMLElement) {
-    // if an action is in progress, dropping the refresh-reload
+    // if an action is in progress, dropping the send
     if (!this.actionInProgress && !this.validation.processClientSingle(formElement.id)) {
       this.refreshCounter += 1;
       var thisRefreshNumber = this.refreshCounter;
@@ -42,9 +42,9 @@ class ReloadController {
         return !this.actionInProgress && thisRefreshNumber === this.refreshCounter;
       };
 
-      this.options.reloadFormFunction(
+      this.options.sendFormFunction(
         this.suplerForm.getValue(),
-        this.reloadSuccessFn(applyRefreshResultsCondition, () => {}),
+        this.sendSuccessFn(applyRefreshResultsCondition, () => {}),
         () => {}, // do nothing on error
         false);
     }
@@ -57,9 +57,9 @@ class ReloadController {
       this.actionInProgress = true;
 
       if (!this.validation.processClientSingle(formElement.id)) {
-        this.options.reloadFormFunction(
+        this.options.sendFormFunction(
           this.suplerForm.getValue(formElement.id),
-          this.reloadSuccessFn(() => { return true; }, () => this.actionCompleted()),
+          this.sendSuccessFn(() => { return true; }, () => this.actionCompleted()),
           () => this.actionCompleted(),
           true);
       } else {
@@ -78,7 +78,7 @@ class ReloadController {
   }
 
   private ifEnabledForEachFormElement(body:(formElement:HTMLElement) => void) {
-    if (this.options.reloadEnabled()) {
+    if (this.options.sendEnabled()) {
       Util.foreach(this.elementDictionary, (elementId:string, validator:ElementValidator) => {
         var formElement = document.getElementById(elementId);
         if (formElement) {
@@ -88,10 +88,10 @@ class ReloadController {
     }
   }
 
-  private reloadSuccessFn(applyResultsCondition: () => boolean, onComplete: () => void) {
-    return (data:any) => {
+  private sendSuccessFn(applyResultsCondition: () => boolean, onComplete: () => void) {
+    return (data: any) => {
       if (applyResultsCondition()) {
-        var focusOnPath:string;
+        var focusOnPath: string;
         var activeElement = document.activeElement;
         if (activeElement) {
           focusOnPath = activeElement.getAttribute(SuplerAttributes.PATH);
@@ -112,12 +112,12 @@ class ReloadController {
   }
 }
 
-class ReloadControllerOptions {
-  reloadFormFunction: (formValue: any, successFn: (data: any) => void, errorFn: () => void, isAction: boolean) => void;
+class SendControllerOptions {
+  sendFormFunction: (formValue: any, renderResponseFn: (data: any) => void, sendErrorFn: () => void, isAction: boolean) => void;
   afterRenderFunction:() => void;
 
   constructor(options:any) {
-    this.reloadFormFunction = options.reload_form_function;
+    this.sendFormFunction = options.send_form_function;
 
     this.afterRenderFunction = options.after_render_function;
     if (!this.afterRenderFunction) {
@@ -126,7 +126,7 @@ class ReloadControllerOptions {
     }
   }
 
-  reloadEnabled():boolean {
-    return this.reloadFormFunction !== null;
+  sendEnabled():boolean {
+    return this.sendFormFunction !== null;
   }
 }

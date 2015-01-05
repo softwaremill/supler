@@ -46,14 +46,14 @@ describe('form validation', function(){
     validationElement.innerText.should.have.length.above(0);
   });
 
-  it('should preserve client-side validation for fields with unchanged values after reload', function() {
+  it('should preserve client-side validation for fields with unchanged values after send', function() {
     // given
-    var reloadFormFn = function reloadForm(formValue, successFn, errorFn, isAction) {
-      successFn(simple1.form1);
+    var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
+      renderResponseFn(simple1.form1);
     };
 
     var sf = new SuplerForm(container, {
-      reload_form_function: reloadFormFn
+      send_form_function: sendFormFn
     });
     sf.render(simple1.form1);
 
@@ -68,14 +68,14 @@ describe('form validation', function(){
     validationElement.innerText.should.have.length.above(0);
   });
 
-  it('should not preserve client-side validation for fields with changed values after reload', function() {
+  it('should not preserve client-side validation for fields with changed values after send', function() {
     // given
-    var reloadFormFn = function reloadForm(formValue, successFn, errorFn, isAction) {
-      successFn(simple1.form2); // field3 is changed
+    var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction) {
+      renderResponseFn(simple1.form2); // field3 is changed
     };
 
     var sf = new SuplerForm(container, {
-      reload_form_function: reloadFormFn
+      send_form_function: sendFormFn
     });
     sf.render(simple1.form1);
 
