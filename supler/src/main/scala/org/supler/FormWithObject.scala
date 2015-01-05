@@ -1,7 +1,7 @@
 package org.supler
 
 import org.json4s.JValue
-import org.json4s.JsonAST.{JArray, JField, JObject}
+import org.json4s.JsonAST.{JNothing, JArray, JField, JObject}
 import org.supler.errors.ValidationMode._
 import org.supler.errors.{ValidationMode, EmptyPath, FieldErrors}
 import org.supler.field._
@@ -9,6 +9,11 @@ import org.supler.field._
 trait FormWithObject[T] {
   def obj: T
   def form: Form[T]
+  /**
+   * Custom data which will be included in the generated JSON, passed to the frontend.
+   * Not used or manipulated in any other way by Supler.
+   */
+  def customData: Option[JValue]
 
   protected def applyErrors: FieldErrors
   protected def validationErrors: FieldErrors
@@ -20,6 +25,7 @@ trait FormWithObject[T] {
     new AppliedFormWithObject(form, result.obj) {
       override protected def applyErrors = result.errors
       override protected def validationErrors = Nil
+      def customData = FormWithObject.this.customData
     }
   }
 
@@ -30,13 +36,15 @@ trait FormWithObject[T] {
     new ValidatedFormWithObject(form, obj) {
       override protected def applyErrors = currentApplyErrors
       override protected def validationErrors = newValidationErrors
+      def customData = FormWithObject.this.customData
     }
   }
 
   def generateJSON: JValue = {
     JObject(
       JField("main_form", form.generateJSON(EmptyPath, obj)),
-      JField("errors", JArray(allErrors.map(_.generateJSON)))
+      JField("errors", JArray(allErrors.map(_.generateJSON))),
+      JField("custom_data", customData.getOrElse(JNothing))
     )
   }
 
@@ -57,8 +65,8 @@ trait FormWithObject[T] {
   def runAction(jvalue: JValue): Either[JValue, FormWithObject[T]] = {
     form.runAction(obj, jvalue, RunActionContext(Nil)) match {
       case NoActionResult => Right(this)
-      case ValueCompleteActionResult(t) => Right(InitialFormWithObject(form, t.asInstanceOf[T]))
-      case JsonCompleteActionResult(json) => Left(json)
+      case FullCompleteActionResult(t, customData) => Right(InitialFormWithObject(form, t.asInstanceOf[T], customData))
+      case CustomDataCompleteActionResult(json) => Left(json)
     }
   }
 }
@@ -70,7 +78,7 @@ trait ExposeErrors[T] extends FormWithObject[T] {
     if (errors.size > 0) whenErrors(obj) else whenNoErrors(obj)
 }
 
-case class InitialFormWithObject[T](form: Form[T], obj: T) extends FormWithObject[T] {
+case class InitialFormWithObject[T](form: Form[T], obj: T, customData: Option[JValue] = None) extends FormWithObject[T] {
   protected val applyErrors = Nil
   protected val validationErrors = Nil
 }

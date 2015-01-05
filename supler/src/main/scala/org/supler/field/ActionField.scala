@@ -43,9 +43,9 @@ trait ActionResult[+U] {
 }
 
 object ActionResult {
-  def apply[T](t: T): ActionResult[T] = FullResult(t)
+  def apply[T](t: T, customData: Option[JValue] = None): ActionResult[T] = FullResult(t, customData)
 
-  def custom(json: JValue): ActionResult[Nothing] = CustomJsonResult(json)
+  def custom(data: JValue): ActionResult[Nothing] = CustomDataResult(data)
 
   def parentAction[T, U](action: (T, Int, U) => ActionResult[T]): U => ActionResult[U] = { u =>
     new ActionResult[U] {
@@ -57,23 +57,23 @@ object ActionResult {
   }
 }
 
-case class FullResult[U](result: U) extends ActionResult[U] {
+case class FullResult[U](result: U, customData: Option[JValue]) extends ActionResult[U] {
   def completeWith(ctx: RunActionContext): CompleteActionResult = {
     val lastResult = ctx.parentsStack.foldLeft[Any](result) { case (r, (_, _, parentUpdate)) =>
       parentUpdate.asInstanceOf[Any => Any](r)
     }
 
-    ValueCompleteActionResult(lastResult)
+    FullCompleteActionResult(lastResult, customData)
   }
 }
 
-case class CustomJsonResult(json: JValue) extends ActionResult[Nothing] {
-  override def completeWith(ctx: RunActionContext) = JsonCompleteActionResult(json)
+case class CustomDataResult(data: JValue) extends ActionResult[Nothing] {
+  override def completeWith(ctx: RunActionContext) = CustomDataCompleteActionResult(data)
 }
 
 sealed trait CompleteActionResult
-case class JsonCompleteActionResult(json: JValue) extends CompleteActionResult
-case class ValueCompleteActionResult(value: Any) extends CompleteActionResult
+case class CustomDataCompleteActionResult(json: JValue) extends CompleteActionResult
+case class FullCompleteActionResult(value: Any, customData: Option[JValue]) extends CompleteActionResult
 object NoActionResult extends CompleteActionResult
 
 case class RunActionContext(parentsStack: List[(Any, Int, Function1[_, _])]) {

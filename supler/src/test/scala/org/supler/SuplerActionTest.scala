@@ -1,7 +1,7 @@
 package org.supler
 
 import org.scalatest._
-import org.supler.field.{ValueCompleteActionResult, RunActionContext, ActionResult}
+import org.supler.field.{FullCompleteActionResult, RunActionContext, ActionResult}
 import org.supler.Supler._
 import org.json4s.native.JsonMethods._
 
@@ -29,7 +29,7 @@ class SuplerActionTest extends FlatSpec with ShouldMatchers {
       RunActionContext(Nil))
 
     // then
-    result should be (ValueCompleteActionResult(A(List(B(List(C("_*")))))))
+    result should be (FullCompleteActionResult(A(List(B(List(C("_*"))))), None))
   }
 
   it should "run parent actions" in {
@@ -53,7 +53,7 @@ class SuplerActionTest extends FlatSpec with ShouldMatchers {
       RunActionContext(Nil))
 
     // then
-    result should be (ValueCompleteActionResult(A(List(B(List(C("_")))))))
+    result should be (FullCompleteActionResult(A(List(B(List(C("_"))))), None))
     callLog should be (List(
       "a 0 B(List(C(_)))",
       "b 0 C(_*)",
