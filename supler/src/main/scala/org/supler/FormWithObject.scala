@@ -3,7 +3,7 @@ package org.supler
 import org.json4s.JValue
 import org.json4s.JsonAST._
 import org.supler.errors.ValidationMode._
-import org.supler.errors.{ValidationMode, EmptyPath, FieldErrors}
+import org.supler.errors.{ValidationMode, FieldErrors}
 import org.supler.field._
 
 trait FormWithObject[T] {

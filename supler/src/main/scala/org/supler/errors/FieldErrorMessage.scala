@@ -1,7 +1,7 @@
 package org.supler.errors
 
 import org.json4s.JsonAST.{JArray, JString, JField, JObject}
-import org.supler.Message
+import org.supler.{FieldPath, Message}
 import org.supler.field.Field
 
 case class FieldErrorMessage(field: Field[_], path: FieldPath, message: Message) {

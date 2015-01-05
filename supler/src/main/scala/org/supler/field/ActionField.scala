@@ -2,8 +2,9 @@ package org.supler.field
 
 import org.json4s._
 import org.json4s.JsonAST.{JObject, JField}
+import org.supler.FieldPath
 import org.supler.errors.ValidationMode.ValidationMode
-import org.supler.errors.{FieldPath, PartiallyAppliedObj}
+import org.supler.errors.PartiallyAppliedObj
 
 case class ActionField[T](
   name: String,

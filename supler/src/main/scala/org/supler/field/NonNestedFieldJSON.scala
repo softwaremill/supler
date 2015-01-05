@@ -3,7 +3,6 @@ package org.supler.field
 import org.json4s.JsonAST.{JField, JObject}
 import org.json4s._
 import org.supler._
-import org.supler.errors.FieldPath
 import org.supler.transformation.FullTransformer
 
 trait NonNestedFieldJSON[T, U] {

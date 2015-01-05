@@ -4,8 +4,8 @@ import org.json4s.JValue
 import org.json4s.JsonAST._
 import org.supler.errors.ValidationMode._
 import org.supler.transformation.FullTransformer
-import org.supler.{ValuesProvider, Message}
-import org.supler.errors.{PartiallyAppliedObj, FieldPath}
+import org.supler.{FieldPath, ValuesProvider, Message}
+import org.supler.errors.PartiallyAppliedObj
 
 import scala.concurrent.forkjoin.ThreadLocalRandom
 

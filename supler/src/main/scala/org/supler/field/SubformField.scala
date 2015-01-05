@@ -3,7 +3,7 @@ package org.supler.field
 import org.json4s._
 import org.supler.errors.ValidationMode._
 import org.supler.errors._
-import org.supler.{Util, Form}
+import org.supler.{FieldPath, Util, Form}
 
 case class SubformField[T, U](
   name: String,
