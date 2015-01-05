@@ -2,7 +2,8 @@ package org.supler
 
 import java.io.{File, PrintWriter}
 
-import org.json4s.NoTypeHints
+import org.json4s.JsonAST.{JString, JField, JBool, JObject}
+import org.json4s.{Extraction, NoTypeHints}
 import org.json4s.native.Serialization
 import org.scalatest._
 import org.supler.Supler._
@@ -37,26 +38,41 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     f.field(_.field3).label("Field 3").validate(gt(10)),
     f.field(_.field4).label("Field 4")
   ))
+
+  val simpleObj1 = Simple1("v1", Some("v2"), 0, field4 = true)
+  val simpleObj2 = Simple1("v1", None, 15, field4 = true)
   
   writeTestData("simple1") { writer =>
+    writer.writeForm("form1", simple1Form, simpleObj1)
+    writer.writeValidatedForm("form1validated", simple1Form, simpleObj1)
+
+    writer.writeForm("form2", simple1Form, simpleObj2)
+
+    writer.writeObj("obj1", simpleObj1)
+    writer.writeObj("obj2", simpleObj2)
+  }
+
+  writeTestData("simple1action") { writer =>
     val fAction = form[Simple1](f => List(
       f.field(_.field3).label("Field 3"),
       f.action("inc") { s => ActionResult(s.copy(field3 = s.field3 + 1)) }
     ))
 
-    val obj1 = Simple1("v1", Some("v2"), 0, field4 = true)
-    val obj2 = Simple1("v1", None, 15, field4 = true)
+    val fActionFormAndDataResult = form[Simple1](f => List(
+      f.field(_.field3).label("Field 3"),
+      f.action("act") { s => ActionResult(s.copy(field3 = s.field3 + 1), customData = Some(JString("data and form"))) }
+    ))
 
-    writer.writeForm("form1", simple1Form, obj1)
-    writer.writeValidatedForm("form1validated", simple1Form, obj1)
+    val fActionDataResultOnly = form[Simple1](f => List(
+      f.field(_.field3).label("Field 3"),
+      f.action("act") { s => ActionResult.custom(JString("data only")) }
+    ))
 
-    writer.writeForm("form2", simple1Form, obj2)
+    writer.writeForm("form1", fAction, simpleObj1)
+    writer.writeForm("form2", fAction, simpleObj2)
 
-    writer.writeObj("obj1", obj1)
-    writer.writeObj("obj2", obj2)
-
-    writer.writeForm("form1action", fAction, obj1)
-    writer.writeForm("form2action", fAction, obj2)
+    writer.writeFormAfterAction("form1formAndData", fActionFormAndDataResult, simpleObj1, "act")
+    writer.writeFormAfterAction("form1dataOnly", fActionDataResultOnly, simpleObj1, "act")
   }
 
   writeTestData("select1") { writer =>
@@ -133,6 +149,8 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
   }
 
   class JsonWriter(pw: PrintWriter) {
+    implicit val formats = Serialization.formats(NoTypeHints)
+
     def writeForm[T](variableName: String, form: Form[T], obj: T): Unit = {
       val toWrite = pretty(render(form(obj).generateJSON))
       pw.println(s""""$variableName": $toWrite,""")
@@ -144,8 +162,14 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     }
 
     def writeObj(variableName: String, obj: AnyRef): Unit = {
-      implicit val formats = Serialization.formats(NoTypeHints)
       pw.println(s""""$variableName": ${Serialization.writePretty(obj)},""")
+    }
+
+    def writeFormAfterAction[T](variableName: String, form: Form[T], obj: T, actionFieldName: String): Unit = {
+      val JObject(fields) = Extraction.decompose(obj)
+      val actionField = JField(actionFieldName, JBool(value = true))
+      val toWrite = pretty(render(form(obj).process(JObject(fields :+ actionField))))
+      pw.println(s""""$variableName": $toWrite,""")
     }
   }
 }

@@ -1,11 +1,13 @@
 class SuplerForm {
-  private i18n:I18n;
-  private validatorFnFactories:any;
-  private validation:Validation;
-  private validatorRenderOptions:ValidatorRenderOptions;
-  private sendControllerOptions:SendControllerOptions;
-  private elementSearch:ElementSearch;
-  private renderOptionsGetter:RenderOptionsGetter;
+  private i18n: I18n;
+  private validatorFnFactories: any;
+  private validation: Validation;
+  private validatorRenderOptions: ValidatorRenderOptions;
+  private sendControllerOptions: SendControllerOptions;
+  private elementSearch: ElementSearch;
+  private renderOptionsGetter: RenderOptionsGetter;
+  private afterRenderFn: () => void;
+  private customDataHandlerFn: (any) => void;
 
   constructor(private container: HTMLElement, customOptions: any) {
     customOptions = customOptions || {};
@@ -26,20 +28,28 @@ class SuplerForm {
     this.sendControllerOptions = new SendControllerOptions(customOptions);
 
     this.elementSearch = new ElementSearch(container);
+
+    this.afterRenderFn = customOptions.after_render_function || (() => {});
+    this.customDataHandlerFn = customOptions.custom_data_handler || ((data: any) => {});
   }
 
   render(json) {
-    var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories).renderForm(json.main_form);
-    this.container.innerHTML = result.html;
+    if (this.isSuplerForm(json)) { // might be custom-data-only result
+      var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories).renderForm(json.main_form);
+      this.container.innerHTML = result.html;
 
-    this.initializeValidation(result.elementDictionary, json);
+      this.initializeValidation(result.elementDictionary, json);
 
-    var sendController = new SendController(this, result.elementDictionary, this.sendControllerOptions, this.elementSearch,
-      this.validation);
-    sendController.attachRefreshListeners();
-    sendController.attachActionListeners();
+      var sendController = new SendController(this, result.elementDictionary, this.sendControllerOptions, this.elementSearch,
+        this.validation);
+      sendController.attachRefreshListeners();
+      sendController.attachActionListeners();
+    }
 
-    this.sendControllerOptions.afterRenderFunction()
+    var customData = this.getCustomData(json);
+    if (customData) this.customDataHandlerFn(customData);
+
+    this.afterRenderFn();
   }
 
   private initializeValidation(elementDictionary: ElementDictionary, json) {
@@ -60,7 +70,21 @@ class SuplerForm {
   /**
    * @returns True if there were validation errors.
    */
-  validate():boolean {
+  validate(): boolean {
     return this.validation.processClient();
   }
+
+  /**
+   * @param json The json received from the server
+   * @returns Custom data, if the json contained it, or `null`, if the form does not contain custom data
+   */
+  getCustomData(json): any {
+    if (this.isSuplerForm(json)) {
+      return json.custom_data;
+    } else {
+      return json
+    }
+  }
+
+  private isSuplerForm(json): boolean { return json.is_supler_form === true; }
 }

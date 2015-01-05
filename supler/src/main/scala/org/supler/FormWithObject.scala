@@ -1,7 +1,7 @@
 package org.supler
 
 import org.json4s.JValue
-import org.json4s.JsonAST.{JNothing, JArray, JField, JObject}
+import org.json4s.JsonAST._
 import org.supler.errors.ValidationMode._
 import org.supler.errors.{ValidationMode, EmptyPath, FieldErrors}
 import org.supler.field._
@@ -42,6 +42,7 @@ trait FormWithObject[T] {
 
   def generateJSON: JValue = {
     JObject(
+      JField("is_supler_form", JBool(value = true)),
       JField("main_form", form.generateJSON(EmptyPath, obj)),
       JField("errors", JArray(allErrors.map(_.generateJSON))),
       JField("custom_data", customData.getOrElse(JNothing))

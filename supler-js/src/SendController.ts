@@ -114,16 +114,9 @@ class SendController {
 
 class SendControllerOptions {
   sendFormFunction: (formValue: any, renderResponseFn: (data: any) => void, sendErrorFn: () => void, isAction: boolean) => void;
-  afterRenderFunction:() => void;
 
   constructor(options:any) {
     this.sendFormFunction = options.send_form_function;
-
-    this.afterRenderFunction = options.after_render_function;
-    if (!this.afterRenderFunction) {
-      this.afterRenderFunction = () => {
-      };
-    }
   }
 
   sendEnabled():boolean {

@@ -85,7 +85,7 @@ describe('send', function(){
     });
 
     // when & then
-    sf.render(simple1.form1action);
+    sf.render(simple1action.form1);
 
     byName('inc').click();
     state.should.equal(2);
@@ -95,7 +95,7 @@ describe('send', function(){
     state = 3;
 
     // first request completes, but another is started -> results should not be applied
-    actionRenderResponseFn(simple1.form2action);
+    actionRenderResponseFn(simple1action.form2);
     byName('field3').val().should.equal('15');
   });
 
@@ -127,7 +127,7 @@ describe('send', function(){
     });
 
     // when & then
-    sf.render(simple1.form1action);
+    sf.render(simple1action.form1);
 
     byName('inc').click();
     state.should.equal(2);
@@ -136,10 +136,10 @@ describe('send', function(){
     state = 3;
 
     // first action completes, second should be started.
-    actionRenderResponseFn1(simple1.form2action);
+    actionRenderResponseFn1(simple1action.form2);
     state.should.equal(4);
 
-    actionRenderResponseFn2(simple1.form1action);
+    actionRenderResponseFn2(simple1action.form1);
     byName('field3').val().should.equal('0');
   });
 

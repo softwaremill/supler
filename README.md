@@ -199,6 +199,11 @@ val personForm = form[Person](f => List(
 ))
 ````
 
+Actions can result not only in modified objects, but also return some custom data (JSON) to the client. You can either
+return both an object and custom data using `ActionResult(obj, Some(jvalue))`, or only custom data using
+`ActionResult.custom(jvalue)`. Depending on the variant, when the JSON is generated, the custom data will be next
+to the form data, or will replace the whole generated JSON.
+
 To implement some operations on subforms, such as removing a subform element, or moving the elements around, it is
 needed to have access to the parent object. This is possible by using `parentAction`s. The subform is in such case
 parametrised by the action (so it can be reused in different contexts), which is provided in the parent form:
@@ -404,6 +409,16 @@ the UI for value-change refreshes).
 
 By setting the `after_render_function` option to a no-argument function, it is possible to get notified after a form
 is rendered (or refreshed), and customize the form or add some custom dynamic behavior.
+
+### Handling custom data
+
+Actions can result in custom data being returned by the server. Custom data can come either together with a form, or
+without. There are two ways to handle custom data. First, you can specify the `custom_data_handler` option, which
+should be a function accepting the data object. The function will be invoked after rendering the form with `render`
+(or calling the `renderResponseFn`).
+
+The second way is to get the custom data by hand, using `SuplerForm.getCustomData(json)`, and if the result is not
+null, handling it as desired.
 
 ## Version history
 
