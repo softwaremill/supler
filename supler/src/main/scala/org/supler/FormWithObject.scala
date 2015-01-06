@@ -5,7 +5,21 @@ import org.json4s.JsonAST._
 import org.supler.errors._
 import org.supler.field._
 
-trait FormWithObject[T] {
+/**
+ * At any stage of processing data with Supler, the result can be serialized to JSON and sent to the server.
+ * The data can be either:
+ * - form with an object, and optional errors and custom data
+ * - custom data only, represented as json. This can be a result of running an action.
+ */
+sealed trait SuplerData[+T] {
+  def generateJSON: JValue
+}
+
+case class CustomDataOnly private[supler] (customData: JValue) extends SuplerData[Nothing] {
+  override def generateJSON = customData
+}
+
+trait FormWithObject[T] extends SuplerData[T] {
   def obj: T
   def form: Form[T]
   /**
@@ -18,28 +32,20 @@ trait FormWithObject[T] {
   protected def validationErrors: FieldErrors
   protected def allErrors: FieldErrors = applyErrors ++ validationErrors
 
-  def applyJSONValues(jvalue: JValue): AppliedFormWithObject[T] = {
+  def applyJSONValues(jvalue: JValue): FormWithObjectAndErrors[T] = {
     val result = form.applyJSONValues(EmptyPath, obj, jvalue)
 
-    new AppliedFormWithObject(form, result.obj) {
-      override protected def applyErrors = result.errors
-      override protected def validationErrors = Nil
-      def customData = FormWithObject.this.customData
-    }
+    new FormWithObjectAndErrors(form, result.obj, customData, result.errors, Nil)
   }
 
-  def doValidate(scope: ValidationScope = ValidateAll): ValidatedFormWithObject[T] = {
+  def doValidate(scope: ValidationScope = ValidateAll): FormWithObjectAndErrors[T] = {
     val currentApplyErrors = applyErrors
     val newValidationErrors = form.doValidate(EmptyPath, obj, scope)
 
-    new ValidatedFormWithObject(form, obj) {
-      override protected def applyErrors = currentApplyErrors
-      override protected def validationErrors = newValidationErrors
-      def customData = FormWithObject.this.customData
-    }
+    new FormWithObjectAndErrors(form, obj, customData, currentApplyErrors, newValidationErrors)
   }
 
-  def generateJSON: JValue = {
+  override def generateJSON: JValue = {
     JObject(
       JField("is_supler_form", JBool(value = true)),
       JField("main_form", form.generateJSON(EmptyPath, obj)),
@@ -49,39 +55,52 @@ trait FormWithObject[T] {
   }
 
   /**
-   * Shorthand for processing a form basing on new field values and an optional action call.
-   * Calls: apply, validation (only filled), run action, generate json.
+   * Processes a form basing on new field values and an optional action call, preparing a result that can be sent
+   * back to the frontend.
+   *
+   * If there's no action, validation of filled fields is run and the result is returned.
+   * If there's an action, the action result (optional) together with the new form (optional) is returned.
    */
-  def process(jvalue: JValue): JValue = {
-    this
-      .applyJSONValues(jvalue)
-      .doValidate(ValidateFilled)
-      .runAction(jvalue) match {
-      case Left(customJson) => customJson
-      case Right(fwo) => fwo.generateJSON
+  def process(jvalue: JValue): SuplerData[T] = {
+    val applied = this.applyJSONValues(jvalue)
+
+    applied.findAndRunAction(jvalue) match {
+      case Some(actionResult) => actionResult
+      case None => applied.doValidate(ValidateFilled)
     }
   }
 
-  def runAction(jvalue: JValue): Either[JValue, FormWithObject[T]] = {
-    form.runAction(obj, jvalue, RunActionContext(Nil)) match {
-      case NoActionResult => Right(this)
-      case FullCompleteActionResult(t, customData) => Right(InitialFormWithObject(form, t.asInstanceOf[T], customData))
-      case CustomDataCompleteActionResult(json) => Left(json)
+  /**
+   * Finds an action, and if there's one, runs the required validation and if there are no errors, the action itself.
+   * @return `Some` if an action was found. Contains the validated form with errors or the action result.
+   */
+  def findAndRunAction(jvalue: JValue): Option[SuplerData[T]] = {
+    form.findAction(EmptyPath, obj, jvalue, RunActionContext(Nil)).map { runnableAction =>
+      val validated = this.doValidate(runnableAction.validationScope)
+      if (validated.hasErrors) {
+        validated
+      } else {
+        runnableAction.run() match {
+          case FullCompleteActionResult(t, customData) => InitialFormWithObject(form, t.asInstanceOf[T], customData)
+          case CustomDataCompleteActionResult(json) => CustomDataOnly(json)
+        }
+      }
     }
   }
 }
 
-trait ExposeErrors[T] extends FormWithObject[T] {
+case class InitialFormWithObject[T](form: Form[T], obj: T, customData: Option[JValue]) extends FormWithObject[T] {
+  override protected val applyErrors = Nil
+  override protected val validationErrors = Nil
+}
+
+case class FormWithObjectAndErrors[T](
+  form: Form[T],
+  obj: T,
+  customData: Option[JValue],
+  applyErrors: FieldErrors,
+  validationErrors: FieldErrors) extends FormWithObject[T] {
+
   def errors: FieldErrors = allErrors
   def hasErrors: Boolean = allErrors.size > 0
-  def fold[U](whenErrors: T => U)(whenNoErrors: T => U): U =
-    if (errors.size > 0) whenErrors(obj) else whenNoErrors(obj)
 }
-
-case class InitialFormWithObject[T](form: Form[T], obj: T, customData: Option[JValue] = None) extends FormWithObject[T] {
-  protected val applyErrors = Nil
-  protected val validationErrors = Nil
-}
-
-abstract case class AppliedFormWithObject[T](form: Form[T], obj: T) extends FormWithObject[T] with ExposeErrors[T]
-abstract case class ValidatedFormWithObject[T](form: Form[T], obj: T) extends FormWithObject[T] with ExposeErrors[T]

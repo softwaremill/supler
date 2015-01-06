@@ -49,7 +49,12 @@ case class SubformField[T, U](
       embeddedForm.doValidate(parentPath.appendWithIndex(name, i), el, scope)
     }
 
-  override def runAction(obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext): CompleteActionResult = {
+  override def findAction(
+    parentPath: FieldPath,
+    obj: T,
+    jsonFields: Map[String, JValue],
+    ctx: RunActionContext) = {
+
     val values = read(obj)
 
     val valuesJValuesIndex = (for {
@@ -57,12 +62,11 @@ case class SubformField[T, U](
     } yield values.zip(formJValues).zipWithIndex).flatten
 
     Util
-      .findFirstMapped[((U, JValue), Int), CompleteActionResult](valuesJValuesIndex, { case ((v, jvalue), i) =>
+      .findFirstMapped[((U, JValue), Int), Option[RunnableAction]](valuesJValuesIndex, { case ((v, jvalue), i) =>
         val updatedCtx = ctx.push(obj, i, (v: U) => write(obj, values.updated(i, v)))
         // assuming that the values matches the json (that is, that the json values were previously applied)
-        embeddedForm.runAction(values(i), jvalue, updatedCtx)
+        embeddedForm.findAction(parentPath.appendWithIndex(name, i), values(i), jvalue, updatedCtx)
       },
-      _ != NoActionResult)
-      .getOrElse(super.runAction(obj, jsonFields, ctx))
+      _.isDefined).flatten
   }
 }

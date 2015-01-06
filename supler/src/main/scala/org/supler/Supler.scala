@@ -25,7 +25,8 @@ object Supler extends Validators {
   def subform[T, U](param: T => List[U], form: Form[U], createEmpty: () => U): SubformField[T, U] =
     macro SuplerFieldMacros.subform_createempty_impl[T, U]
 
-  def action[T](name: String)(action: T => ActionResult[T]): ActionField[T] = ActionField(name, action, None)
+  def action[T](name: String)(action: T => ActionResult[T]): ActionField[T] =
+    ActionField(name, action, None, BeforeActionValidateNone)
 
   def parentAction[T, U](action: (T, Int, U) => ActionResult[T]): U => ActionResult[U] = ActionResult.parentAction(action)
 
@@ -57,7 +58,7 @@ trait Supler[T] extends Validators {
   def subform[U](param: T => List[U], form: Form[U], createEmpty: () => U): SubformField[T, U] =
     macro SuplerFieldMacros.subform_createempty_impl[T, U]
 
-  def action(name: String)(action: T => ActionResult[T]): ActionField[T] = ActionField(name, action, None)
+  def action(name: String)(action: T => ActionResult[T]): ActionField[T] = ActionField(name, action, None, BeforeActionValidateNone)
 
   def parentAction[U](action: (T, Int, U) => ActionResult[T]): U => ActionResult[U] = ActionResult.parentAction(action)
 
@@ -73,7 +74,7 @@ trait Row[T] {
 
   def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors
 
-  def runAction(obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext): CompleteActionResult
+  def findAction(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext): Option[RunnableAction]
 }
 
 object Row {
@@ -85,12 +86,13 @@ object Row {
     }
   }
 
-  def runActionsUntilResult[T](rows: Iterable[Row[T]], obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext): CompleteActionResult = {
+  def findFirstAction[T](parentPath: FieldPath, rows: Iterable[Row[T]], obj: T, jsonFields: Map[String, JValue],
+    ctx: RunActionContext): Option[RunnableAction] = {
+
     Util.findFirstMapped(
       rows,
-      (_: Row[T]).runAction(obj, jsonFields, ctx),
-      (_: CompleteActionResult) != NoActionResult)
-      .getOrElse(NoActionResult)
+      (_: Row[T]).findAction(parentPath, obj, jsonFields, ctx),
+      (_: Option[RunnableAction]).isDefined).flatten
   }
 }
 
@@ -105,6 +107,6 @@ case class MultiFieldRow[T](fields: List[Field[T]]) extends Row[T] {
 
   override def generateJSON(parentPath: FieldPath, obj: T) = fields.flatMap(_.generateJSON(parentPath, obj))
 
-  override def runAction(obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext) =
-    Row.runActionsUntilResult(fields, obj, jsonFields, ctx)
+  override def findAction(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext) =
+    Row.findFirstAction(parentPath, fields, obj, jsonFields, ctx)
 }

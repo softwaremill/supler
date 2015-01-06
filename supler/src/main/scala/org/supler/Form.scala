@@ -6,9 +6,9 @@ import org.supler.errors._
 import org.supler.field._
 
 case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
-  def apply(obj: T): FormWithObject[T] = InitialFormWithObject(this, obj)
+  def apply(obj: T): FormWithObject[T] = InitialFormWithObject(this, obj, None)
 
-  def withNewEmpty: FormWithObject[T] = InitialFormWithObject(this, createEmpty())
+  def withNewEmpty: FormWithObject[T] = InitialFormWithObject(this, createEmpty(), None)
 
   private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors =
     rows.flatMap(_.doValidate(parentPath, obj, scope))
@@ -24,10 +24,15 @@ case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
     }
   }
 
-  private[supler] def runAction(obj: T, jvalue: JValue, ctx: RunActionContext): CompleteActionResult = {
+  /**
+   * Finds the action specified in the given json (`jvalue`), if any. The action finding and action running has to be
+   * separated, so that after the action is found, validation of the correct scope can be run (e.g. the whole form),
+   * and only then the action can be executed.
+   */
+  private[supler] def findAction(parentPath: FieldPath, obj: T, jvalue: JValue, ctx: RunActionContext): Option[RunnableAction] = {
     jvalue match {
-      case JObject(jsonFields) => Row.runActionsUntilResult(rows, obj, jsonFields.toMap, ctx)
-      case _ => NoActionResult
+      case JObject(jsonFields) => Row.findFirstAction(parentPath, rows, obj, jsonFields.toMap, ctx)
+      case _ => None
     }
   }
 

@@ -1,7 +1,7 @@
 package org.supler.field
 
-import org.json4s.JsonAST.JValue
-import org.supler.{MultiFieldRow, Row}
+import org.json4s
+import org.supler.{FieldPath, MultiFieldRow, Row}
 
 trait Field[T] extends Row[T] {
   def name: String
@@ -29,6 +29,9 @@ trait Field[T] extends Row[T] {
     val Action = "action"
   }
 
-  override def runAction(obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext): CompleteActionResult =
-    NoActionResult
+  override def findAction(
+    parentPath: FieldPath,
+    obj: T,
+    jsonFields: Map[String, json4s.JValue],
+    ctx: RunActionContext): Option[RunnableAction] = None
 }

@@ -168,7 +168,7 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     def writeFormAfterAction[T](variableName: String, form: Form[T], obj: T, actionFieldName: String): Unit = {
       val JObject(fields) = Extraction.decompose(obj)
       val actionField = JField(actionFieldName, JBool(value = true))
-      val toWrite = pretty(render(form(obj).process(JObject(fields :+ actionField))))
+      val toWrite = pretty(render(form(obj).process(JObject(fields :+ actionField)).generateJSON))
       pw.println(s""""$variableName": $toWrite,""")
     }
   }

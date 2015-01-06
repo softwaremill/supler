@@ -23,13 +23,15 @@ class SuplerActionTest extends FlatSpec with ShouldMatchers {
       f.subform(_.bs, fb)))
 
     // when
-    val result = fa.runAction(
+    val Some(runnableAction) = fa.findAction(
+      EmptyPath,
       A(List(B(List(C("_"))))),
       parse("""{"bs": [ { "cs": [ { "a": true } ] } ]}"""),
       RunActionContext(Nil))
 
     // then
-    result should be (FullCompleteActionResult(A(List(B(List(C("_*"))))), None))
+    runnableAction.path should be (EmptyPath.appendWithIndex("bs", 0).appendWithIndex("cs", 0).append("a"))
+    runnableAction.run() should be (FullCompleteActionResult(A(List(B(List(C("_*"))))), None))
   }
 
   it should "run parent actions" in {
@@ -47,13 +49,15 @@ class SuplerActionTest extends FlatSpec with ShouldMatchers {
       f.subform(_.bs, fb(f.parentAction { (a, i, b) => callLog ::= s"a $i $b"; ActionResult(a)}))))
 
     // when
-    val result = fa.runAction(
+    val Some(runnableAction) = fa.findAction(
+      EmptyPath,
       A(List(B(List(C("_"))))),
       parse("""{"bs": [ { "cs": [ { "a": true } ] } ]}"""),
       RunActionContext(Nil))
 
     // then
-    result should be (FullCompleteActionResult(A(List(B(List(C("_"))))), None))
+    runnableAction.path should be (EmptyPath.appendWithIndex("bs", 0).appendWithIndex("cs", 0).append("a"))
+    runnableAction.run() should be (FullCompleteActionResult(A(List(B(List(C("_"))))), None))
     callLog should be (List(
       "a 0 B(List(C(_)))",
       "b 0 C(_*)",
