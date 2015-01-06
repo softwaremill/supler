@@ -15,10 +15,6 @@ sealed trait SuplerData[+T] {
   def generateJSON: JValue
 }
 
-case class CustomDataOnly private[supler] (customData: JValue) extends SuplerData[Nothing] {
-  override def generateJSON = customData
-}
-
 trait FormWithObject[T] extends SuplerData[T] {
   def obj: T
   def form: Form[T]
@@ -103,4 +99,8 @@ case class FormWithObjectAndErrors[T](
 
   def errors: FieldErrors = allErrors
   def hasErrors: Boolean = allErrors.size > 0
+}
+
+case class CustomDataOnly private[supler] (customData: JValue) extends SuplerData[Nothing] {
+  override def generateJSON = customData
 }
