@@ -1,4 +1,4 @@
-describe('form validation', function(){
+describe('form validation', function() {
   it('should run client-side validation and add errors', function() {
     // given
     var sf = new SuplerForm(container);
@@ -16,6 +16,19 @@ describe('form validation', function(){
 
     var validationElement3 = validationElementByName('field3');
     validationElement3.innerText.should.have.length.above(0);
+  });
+
+  it('should run client-side validation and not add errors if the validation scope is none', function() {
+    // given
+    var sf = new SuplerForm(container);
+    sf.render(simple1.form1);
+    byName('field1').val('');
+
+    // when
+    var validationResult = sf.validate(ValidateNone);
+
+    // then
+    validationResult.should.equal(false);
   });
 
   it('should run client-side validation and return false if there are none', function() {
@@ -114,5 +127,29 @@ describe('form validation', function(){
 
     var validationElement23 = validationElementByName('simples[2].field3');
     validationElement23.innerText.should.not.have.length(0);
-  })
+  });
+
+  it('should validate only the subform if the validation scope specifies so', function() {
+    // given
+    var sf = new SuplerForm(container);
+    sf.render(complex1.form1list);
+
+    // when
+    byName('field10').val('');
+    byName('simples[0].field1').val('');
+    byName('simples[1].field1').val('');
+    var validationResult = sf.validate(new ValidateInPath('simples[1]'));
+
+    // then
+    validationResult.should.equal(true);
+
+    var validationElementRoot = validationElementByName('field10');
+    validationElementRoot.innerText.should.have.length(0);
+
+    var validationElementSub01 = validationElementByName('simples[0].field1');
+    validationElementSub01.innerText.should.have.length(0);
+
+    var validationElementSub21 = validationElementByName('simples[1].field1');
+    validationElementSub21.innerText.should.not.have.length(0);
+  });
 });

@@ -32,13 +32,16 @@ class Validation {
   /**
    * @returns True if there were validation errors.
    */
-  processClient():boolean {
+  processClient(validationScope: ValidationScope): boolean {
     this.removeAllValidationErrors();
 
     var hasErrors = false;
 
-    Util.foreach(this.elementDictionary, (elementId:string, validator:ElementValidator) => {
-      hasErrors = this.doProcessClientSingle(elementId, validator) || hasErrors;
+    Util.foreach(this.elementDictionary, (elementId: string, validator: ElementValidator) => {
+      var formElement = document.getElementById(elementId);
+      if (formElement && validationScope.shouldValidate(formElement.getAttribute(SuplerAttributes.PATH))) {
+        hasErrors = this.doProcessClientSingle(formElement, validator) || hasErrors;
+      }
     });
 
     return hasErrors;
@@ -51,28 +54,26 @@ class Validation {
     this.removeSingleValidationErrors(elementId);
 
     var validator = this.elementDictionary[elementId];
-    if (validator) return this.doProcessClientSingle(elementId, validator); else return false;
+    var formElement = document.getElementById(elementId);
+    if (formElement && validator) return this.doProcessClientSingle(formElement, validator); else return false;
   }
 
-  private doProcessClientSingle(elementId:string, validator:ElementValidator):boolean {
-    var formElement = document.getElementById(elementId);
+  private doProcessClientSingle(formElement: HTMLElement, validator:ElementValidator):boolean {
     var hasErrors = false;
-    if (formElement) {
-      var validationElement = this.lookupValidationElement(formElement);
+    var validationElement = this.lookupValidationElement(formElement);
 
-      var errors = validator.validate(formElement);
+    var errors = validator.validate(formElement);
 
-      for (var i = 0; i < errors.length; i++) {
-        this.appendValidation(errors[i], validationElement, formElement);
-        hasErrors = true;
-      }
+    for (var i = 0; i < errors.length; i++) {
+      this.appendValidation(errors[i], validationElement, formElement);
+      hasErrors = true;
     }
 
     return hasErrors;
   }
 
   private lookupValidationElement(formElement:HTMLElement) {
-    var validationId = formElement.getAttribute("supler:validationId");
+    var validationId = formElement.getAttribute(SuplerAttributes.VALIDATION_ID);
     return document.getElementById(validationId);
   }
 

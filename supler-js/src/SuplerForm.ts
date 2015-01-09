@@ -70,8 +70,8 @@ class SuplerForm {
   /**
    * @returns True if there were validation errors.
    */
-  validate(): boolean {
-    return this.validation.processClient();
+  validate(validationScope: ValidationScope = ValidateAll): boolean {
+    return this.validation.processClient(validationScope);
   }
 
   /**
