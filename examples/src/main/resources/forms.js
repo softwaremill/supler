@@ -10,6 +10,10 @@ var form = new SuplerForm(formContainer, {
         label_lego_theme: "Theme",
         label_lego_setnumber: "Set number",
         label_lego_age: "Age"
+    },
+    custom_data_handler: function(data) {
+        feedback.html(data);
+        feedback.show();
     }
 });
 
@@ -22,42 +26,14 @@ $(document).ready(function() {
 var feedback = $('#feedback');
 feedback.hide();
 
-function sendForm(formValue, responseFn, sendErrorFn, isAction) {
+function sendForm(formValue, renderResponseFn, sendErrorFn) {
     $.ajax({
         url: '/rest/form1.json',
-        type: 'PUT',
+        type: 'POST',
         data: JSON.stringify(formValue),
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
-        success: responseFn,
+        success: renderResponseFn,
         error: sendErrorFn
     });
-}
-
-$('#submit').click(function() {
-    var hasErrors = form.validate();
-
-    if (hasErrors) {
-        feedback.html('There are client-side validation errors.');
-        feedback.show();
-    } else {
-        $.ajax({
-            url: '/rest/form1.json',
-            type: 'POST',
-            data: JSON.stringify(form.getValue()),
-            dataType: 'json',
-            contentType: 'application/json; charset=utf-8',
-            success: function (data) {
-                if (data.msg) {
-                    feedback.html(data.msg);
-                } else {
-                    feedback.html('There are server-side apply or validation errors');
-                    form.render(data);
-                }
-                feedback.show();
-            }
-        });
-    }
-
-    return false;
-});
+};

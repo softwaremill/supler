@@ -3,7 +3,9 @@ package org.supler.demo
 import akka.actor.ActorSystem
 import org.joda.time.DateTime
 import org.json4s.JValue
-import org.json4s.JsonAST.{JField, JObject, JString}
+import org.json4s.JsonAST.JString
+import org.supler.Supler
+import org.supler.field.ActionResult
 import spray.http.MediaTypes
 import spray.http.StatusCodes._
 import spray.httpx.Json4sSupport
@@ -33,36 +35,25 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
     // compiled by grunt
   }
 
+  val saveAction = Supler.action[Person]("save") { p =>
+    person = p
+    println(s"Persisted: $person")
+    ActionResult.custom(JString("Persisted: " + person))
+  }.label("Save").validateAll()
+
+  val personFormWithSave = PersonForm.personForm + saveAction
+
   startServer(interface = "localhost", port = port) {
     path("rest" / "form1.json") {
       getJson {
         complete {
-          PersonForm.personForm(person).generateJSON
+          personFormWithSave(person).generateJSON
         }
       } ~
       post {
         entity(as[JValue]) { jvalue =>
           complete {
-            val validated = PersonForm.personForm(person)
-              .applyJSONValues(jvalue)
-              .doValidate()
-
-            if (validated.hasErrors) {
-              validated.generateJSON
-            } else {
-              person = validated.obj
-              println(s"Persisted: $person")
-
-              JObject(
-                JField("msg", JString("Persisted: " + person)))
-            }
-          }
-        }
-      } ~
-      put {
-        entity(as[JValue]) { jvalue =>
-          complete {
-            PersonForm.personForm(person).process(jvalue).generateJSON
+            personFormWithSave(person).process(jvalue).generateJSON
           }
         }
       }
