@@ -33,6 +33,7 @@
   <script src="selectSingleTests.js"></script>
   <script src="sendTests.js"></script>
   <script src="customData.js"></script>
+  <script src="templates.js"></script>
 
   <script>
     // Only tests run in real browser, injected script run if options.run == true
@@ -40,5 +41,11 @@
       mocha.run();
     }
   </script>
+
+  <div id="templates_oneinput" style="visibility: hidden;">
+    <div supler:fieldInputTemplate supler:fieldPath="field1">
+      X<input type="text" {{suplerFieldInputAttrs}} customattr="z" />X
+    </div>
+  </div>
 </body>
 </html>
