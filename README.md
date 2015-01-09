@@ -400,7 +400,7 @@ This can be done with the convenience `personForm(person).process(receivedJson)`
 validate, run action and generate JSON in succession.
 
 Concurrent sends are handled as well. Only the results of the last send triggered by value changes will be taken
-into account. Actions will be queued and executed one after another (hence errors must be reported using `sendErrorFn`).
+into account. Only one action can be in progress at a time (hence errors must be reported using `sendErrorFn`).
 It could be a good idea to block the UI while an action is executing, so that no form changes are made during action
 execution (which would be lost). The `isAction` flag can be used to achieve that (there is usually no need to block
 the UI for value-change refreshes).

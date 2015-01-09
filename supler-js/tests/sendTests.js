@@ -99,24 +99,17 @@ describe('send', function(){
     byName('field3').val().should.equal('15');
   });
 
-  it('should enqueue actions when an action is in progress', function() {
+  it('should drop actions when an action is in progress', function() {
     // given
     var state = 1;
     var actionRenderResponseFn1 = null;
-    var actionRenderResponseFn2 = null;
 
-    function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
+    function sendForm(formValue, renderResponseFn) {
       if (state === 1) {
         actionRenderResponseFn1 = renderResponseFn;
         state = 2;
       } else if (state === 2) {
         assert.fail(0, state, 'The action should have been enqueued!');
-      } else if (state === 3) {
-        actionRenderResponseFn2 = renderResponseFn;
-        state = 4;
-
-        // the form value should include the changes from the first action
-        formValue.field3.should.equal(15);
       } else {
         assert.fail(0, state, 'Send called in an illegal state');
       }
@@ -133,14 +126,11 @@ describe('send', function(){
     state.should.equal(2);
 
     byName('inc').click();
-    state = 3;
+    state.should.equal(2);
 
     // first action completes, second should be started.
     actionRenderResponseFn1(simple1action.form2);
-    state.should.equal(4);
-
-    actionRenderResponseFn2(simple1action.form1);
-    byName('field3').val().should.equal('0');
+    state.should.equal(2);
   });
 
   it('should still work after an error', function() {

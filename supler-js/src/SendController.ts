@@ -1,7 +1,6 @@
 class SendController {
   private refreshCounter: number;
   private actionInProgress: boolean;
-  private actionQueue: { (): void }[];
 
   constructor(private suplerForm: SuplerForm,
     private formElementDictionary: FormElementDictionary,
@@ -11,7 +10,6 @@ class SendController {
 
     this.refreshCounter = 0;
     this.actionInProgress = false;
-    this.actionQueue = [];
   }
 
   attachRefreshListeners() {
@@ -52,9 +50,8 @@ class SendController {
   }
 
   private actionListenerFor(htmlFormElement: HTMLElement) {
-    if (this.actionInProgress) {
-      this.actionQueue.push(() => this.actionListenerFor(htmlFormElement));
-    } else {
+    // allowing at most one action at a time.
+    if (!this.actionInProgress) {
       this.actionInProgress = true;
 
       var id = htmlFormElement.id;
@@ -77,11 +74,6 @@ class SendController {
 
   private actionCompleted() {
     this.actionInProgress = false;
-
-    if (this.actionQueue.length > 0) {
-      var nextAction = this.actionQueue.shift();
-      nextAction();
-    }
   }
 
   private ifEnabledForEachFormElement(body: (htmlFormElement: HTMLElement) => void) {
