@@ -1,5 +1,6 @@
 class FormElement {
   validator: ElementValidator;
+  // validation scope is currently only used by actions
   validationScope: ValidationScope;
 
   constructor() {}

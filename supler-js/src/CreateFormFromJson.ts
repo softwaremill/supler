@@ -89,7 +89,7 @@ class CreateFormFromJson {
         return this.staticFieldFromJson(renderOptions, fieldData, compact);
 
       case FieldTypes.ACTION:
-        return this.actionFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
+        return this.actionFieldFromJson(renderOptions, fieldData, fieldOptions, formElementDictionary, compact);
 
       default:
         return null;
@@ -202,7 +202,12 @@ class CreateFormFromJson {
     return renderOptions.renderStaticField(fieldData, compact);
   }
 
-  private actionFieldFromJson(renderOptions, fieldData: FieldData, fieldOptions, compact) {
+  private actionFieldFromJson(renderOptions, fieldData: FieldData, fieldOptions,
+    formElementDictionary: FormElementDictionary, compact) {
+
+    formElementDictionary.getElement(fieldData.id).validationScope =
+      ValidationScopeParser.fromJson(fieldData.json.validation_scope);
+
     return renderOptions.renderActionField(fieldData, fieldOptions, compact);
   }
 

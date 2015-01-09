@@ -22,10 +22,14 @@ case class ActionField[T](
   override private[supler] def generateJSON(parentPath: FieldPath, obj: T) = {
     import JSONFieldNames._
 
+    val validationScopeJSONData = actionValidationScope.toValidationScope(parentPath).generateJSONData
+    val validationScopeJSON = JObject(JField("name", JString(validationScopeJSONData.name)) :: validationScopeJSONData.extra)
+
     List(JField(name, JObject(List(
       JField(Label, JString(label.getOrElse(""))),
       JField(Type, JString(SpecialFieldTypes.Action)),
-      JField(Path, JString(parentPath.append(name).toString))
+      JField(Path, JString(parentPath.append(name).toString)),
+      JField("validation_scope", validationScopeJSON)
     ))))
   }
 

@@ -22,3 +22,14 @@ class ValidateInPath implements ValidationScope {
   }
 }
 
+class ValidationScopeParser {
+  static fromJson(json: any): ValidationScope {
+    switch (json.name) {
+      case 'none': return ValidateNone;
+      case 'all': return ValidateAll;
+      case 'path': return new ValidateInPath(json.path);
+      // other validation scopes are unsupported and we fall back to the server validation
+      default: return ValidateNone;
+    }
+  }
+}

@@ -179,4 +179,24 @@ describe('send', function(){
 
     byName('field3').val().should.equal('15');
   });
+
+  it('should validate the form before an action according to the validation scope', function() {
+    // given
+    var sendFormFn = function sendForm() {
+      assert.fail(0, state, 'Should not send the form');
+    };
+
+    var sf = new SuplerForm(container, {
+      send_form_function: sendFormFn
+    });
+
+    // when
+    sf.render(simple1action.form1two);
+    byName('field1').val('');
+    byName('save').click();
+
+    // then
+    var validationElement1 = validationElementByName('field1');
+    validationElement1.innerText.should.not.have.length(0);
+  });
 });

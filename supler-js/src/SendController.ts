@@ -57,9 +57,14 @@ class SendController {
     } else {
       this.actionInProgress = true;
 
-      if (!this.validation.processClientSingle(htmlFormElement.id)) {
+      var id = htmlFormElement.id;
+
+      var validationPassed = !this.validation.processClientSingle(id) &&
+        !this.validation.processClient(this.formElementDictionary.getElement(id).validationScope);
+
+      if (validationPassed) {
         this.options.sendFormFunction(
-          this.suplerForm.getValue(htmlFormElement.id),
+          this.suplerForm.getValue(id),
           this.sendSuccessFn(() => { return true; }, () => this.actionCompleted()),
           () => this.actionCompleted(),
           true,

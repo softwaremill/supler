@@ -58,6 +58,12 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
       f.action("inc") { s => ActionResult(s.copy(field3 = s.field3 + 1)) }
     ))
 
+    val fTwoActions = form[Simple1](f => List(
+      f.field(_.field1).label("Field 1"),
+      f.action("inc") { s => ActionResult(s.copy(field1 = s.field1 + "x")) },
+      f.action("save") { s => ActionResult(s.copy(field1 = s.field1 + "y")) }.validateAll()
+    ))
+
     val fActionFormAndDataResult = form[Simple1](f => List(
       f.field(_.field3).label("Field 3"),
       f.action("act") { s => ActionResult(s.copy(field3 = s.field3 + 1), customData = Some(JString("data and form"))) }
@@ -70,6 +76,8 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
 
     writer.writeForm("form1", fAction, simpleObj1)
     writer.writeForm("form2", fAction, simpleObj2)
+
+    writer.writeForm("form1two", fTwoActions, simpleObj1)
 
     writer.writeFormAfterAction("form1formAndData", fActionFormAndDataResult, simpleObj1, "act")
     writer.writeFormAfterAction("form1dataOnly", fActionDataResultOnly, simpleObj1, "act")
