@@ -45,7 +45,7 @@ trait NonNestedFieldJSON[T, U] {
     List(JField(JSONFieldNames.PossibleValues, JArray(possibleJValues)))
   }
 
-  def generateRenderHintJSONValue = renderHint.map(rh => JObject(
+  private def generateRenderHintJSONValue = renderHint.map(rh => JObject(
     JField("name", JString(rh.name)) :: rh.extraJSON))
 
   case class GenerateJSONData(

@@ -30,7 +30,7 @@ case class BasicField[T, U](
 
   def emptyValue(newEmptyValue: Option[U]): BasicField[T, U] = this.copy(emptyValue = newEmptyValue)
 
-  override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): List[FieldErrorMessage] = {
+  private[supler] override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): List[FieldErrorMessage] = {
     val v = read(obj)
     val valueMissing = v == null || v == None || Some(v) == emptyValue
 
@@ -69,7 +69,7 @@ case class BasicField[T, U](
     )
   }
 
-  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+  private[supler] override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     import PartiallyAppliedObj._
     val appliedOpt = valuesProvider match {
       case Some(vp) =>

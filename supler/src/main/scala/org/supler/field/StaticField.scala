@@ -36,8 +36,8 @@ case class StaticField[T](
   override protected def generateJSONWithValuesProvider(obj: T, dp: ValuesProvider[T, String]) =
     throw new IllegalStateException()
 
-  override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) = Nil
+  override private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) = Nil
 
-  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
+  override private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
     PartiallyAppliedObj.full(obj)
 }

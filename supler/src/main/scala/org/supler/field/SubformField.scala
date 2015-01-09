@@ -18,7 +18,7 @@ case class SubformField[T, U](
 
   def renderHint(newRenderHint: RenderHint with SubformFieldCompatible) = this.copy(renderHint = newRenderHint)
 
-  def generateJSON(parentPath: FieldPath, obj: T) = {
+  private[supler] def generateJSON(parentPath: FieldPath, obj: T) = {
     import JSONFieldNames._
     List(JField(name, JObject(
       JField(Type, JString(SpecialFieldTypes.Subform)),
@@ -32,7 +32,7 @@ case class SubformField[T, U](
     )))
   }
 
-  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+  override private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     val paos = for {
       JArray(formJValues) <- jsonFields.get(name).toList
       (formJValue, i) <- formJValues.zipWithIndex
@@ -44,12 +44,12 @@ case class SubformField[T, U](
     PartiallyAppliedObj.flatten(paos).map(write(obj, _))
   }
 
-  override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) =
+  override private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) =
     read(obj).zipWithIndex.flatMap { case (el, i) =>
       embeddedForm.doValidate(parentPath.appendWithIndex(name, i), el, scope)
     }
 
-  override def findAction(
+  override private[supler] def findAction(
     parentPath: FieldPath,
     obj: T,
     jsonFields: Map[String, JValue],

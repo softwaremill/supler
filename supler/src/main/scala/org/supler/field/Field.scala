@@ -29,7 +29,7 @@ trait Field[T] extends Row[T] {
     val Action = "action"
   }
 
-  override def findAction(
+  private[supler] override def findAction(
     parentPath: FieldPath,
     obj: T,
     jsonFields: Map[String, json4s.JValue],

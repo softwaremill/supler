@@ -19,7 +19,7 @@ case class ActionField[T](
   def validateAll() = this.copy(actionValidationScope = BeforeActionValidateAll)
   def validateSubform() = this.copy(actionValidationScope = BeforeActionValidateSubform)
 
-  override private[supler] def generateJSON(parentPath: FieldPath, obj: T) = {
+  private[supler] override def generateJSON(parentPath: FieldPath, obj: T) = {
     import JSONFieldNames._
 
     val validationScopeJSONData = actionValidationScope.toValidationScope(parentPath).generateJSONData
@@ -33,12 +33,12 @@ case class ActionField[T](
     ))))
   }
 
-  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
+  private[supler] override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
     PartiallyAppliedObj.full(obj)
 
-  override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) = Nil
+  private[supler] override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) = Nil
 
-  override def findAction(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext) = {
+  private[supler] override def findAction(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext) = {
     if (jsonFields.get(name) == Some(JBool(value = true))) {
       Some(RunnableAction(
         parentPath.append(name),

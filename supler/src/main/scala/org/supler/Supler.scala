@@ -66,15 +66,15 @@ trait Supler[T] extends Validators {
 }
 
 trait Row[T] {
+  def ||(field: Field[T]): Row[T]
+
   private[supler] def generateJSON(parentPath: FieldPath, obj: T): List[JField]
 
-  def ||(field: Field[T]): Row[T]
-  
-  def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T]
+  private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T]
 
-  def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors
+  private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors
 
-  def findAction(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext): Option[RunnableAction]
+  private[supler] def findAction(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext): Option[RunnableAction]
 }
 
 object Row {
