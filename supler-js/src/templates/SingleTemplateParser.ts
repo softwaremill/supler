@@ -67,7 +67,7 @@ class SingleTemplateParser {
 
     function adjustAttrsValueMapping(template, attrs, value) {
       var containsValueMapping = template.indexOf(SUPLER_FIELD_INPUT_VALUE) > -1;
-      if (containsValueMapping) {
+      if (!value || containsValueMapping) {
         delete attrs['value'];
       } else {
         attrs['value'] = value;
@@ -126,6 +126,10 @@ class SingleTemplateParser {
 
       this.renderHtmlTextarea = function (value: string, options: any): string {
         return renderTemplateForAttrs(mainTemplate, options, value);
+      };
+
+      this.renderHtmlButton = function(label: string, options:any): string {
+        return renderTemplateForAttrs(mainTemplate, options, null);
       };
 
       // possible values

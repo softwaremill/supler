@@ -42,9 +42,15 @@
     }
   </script>
 
-  <div id="templates_oneinput" style="visibility: hidden;">
+  <div id="templates_oneinput_text" style="visibility: hidden;">
     <div supler:fieldInputTemplate supler:fieldPath="field1">
-      X<input type="text" {{suplerFieldInputAttrs}} customattr="z" />X
+      <input type="text" {{suplerFieldInputAttrs}} customattr="z" />
+    </div>
+  </div>
+
+  <div id="templates_oneinput_button" style="visibility: hidden;">
+    <div supler:fieldInputTemplate supler:fieldPath="inc">
+      <button {{suplerFieldInputAttrs}} customattr="custombutton">Press me</button>
     </div>
   </div>
 </body>

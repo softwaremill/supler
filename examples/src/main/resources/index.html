@@ -47,7 +47,9 @@
     <div class="jumbotron">
         <h1>Form 1</h1>
         <div id="form-container">
-
+            <div supler:fieldInputTemplate supler:fieldPath="save">
+                <button class="btn btn-primary btn-lg" role="button" {{suplerFieldInputAttrs}}>Save</button>
+            </div>
         </div>
         <p id="feedback"></p>
     </div>
