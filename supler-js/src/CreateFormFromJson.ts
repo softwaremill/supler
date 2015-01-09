@@ -6,30 +6,29 @@ class CreateFormFromJson {
     private validatorFnFactories:any) {
   }
 
-  renderForm(formJson):RenderFormResult {
+  renderForm(formJson, formElementDictionary: FormElementDictionary = new FormElementDictionary()): RenderFormResult {
     var fields = formJson.fields;
     var html = '';
-    var elementDictionary:ElementDictionary = {};
     Util.foreach(fields, (field, fieldJson) => {
-      var fieldResult = this.fieldFromJson(field, fieldJson, elementDictionary, false);
+      var fieldResult = this.fieldFromJson(field, fieldJson, formElementDictionary, false);
       if (fieldResult) {
         html += fieldResult + '\n';
       }
     });
 
-    return new RenderFormResult(html, elementDictionary);
+    return new RenderFormResult(html, formElementDictionary);
   }
 
-  private fieldFromJson(fieldName: string, fieldJson: any, elementDictionary: ElementDictionary, compact: boolean):string {
+  private fieldFromJson(fieldName: string, fieldJson: any, formElementDictionary: FormElementDictionary, compact: boolean):string {
 
     var id = this.nextId();
     var validationId = this.nextId();
 
     var fieldData = new FieldData(id, validationId, fieldName, fieldJson, this.labelFor(fieldJson.label));
-    var html = this.fieldHtmlFromJson(fieldData, elementDictionary, compact);
+    var html = this.fieldHtmlFromJson(fieldData, formElementDictionary, compact);
 
     if (html) {
-      elementDictionary[id] = new ElementValidator(this.fieldValidatorFns(fieldJson));
+      formElementDictionary.getElement(id).validator = new ElementValidator(this.fieldValidatorFns(fieldJson));
       return html;
     } else {
       return null;
@@ -54,7 +53,7 @@ class CreateFormFromJson {
     return validators;
   }
 
-  private fieldHtmlFromJson(fieldData: FieldData, elementDictionary: ElementDictionary, compact: boolean): string {
+  private fieldHtmlFromJson(fieldData: FieldData, formElementDictionary: FormElementDictionary, compact: boolean): string {
 
     var renderOptions = this.renderOptionsGetter.forField(fieldData.path, fieldData.type, fieldData.getRenderHintName());
 
@@ -84,7 +83,7 @@ class CreateFormFromJson {
         return this.selectFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
 
       case FieldTypes.SUBFORM:
-        return this.subformFieldFromJson(renderOptions, fieldData, elementDictionary);
+        return this.subformFieldFromJson(renderOptions, fieldData, formElementDictionary);
 
       case FieldTypes.STATIC:
         return this.staticFieldFromJson(renderOptions, fieldData, compact);
@@ -162,7 +161,7 @@ class CreateFormFromJson {
     };
   }
 
-  private subformFieldFromJson(renderOptions, fieldData: FieldData, elementDictionary) {
+  private subformFieldFromJson(renderOptions, fieldData: FieldData, formElementDictionary: FormElementDictionary) {
     var subformHtml = '';
     var options = {
       'supler:fieldType': FieldTypes.SUBFORM,
@@ -171,9 +170,7 @@ class CreateFormFromJson {
     };
     if (fieldData.getRenderHintName() === 'list') {
       for (var k in fieldData.value) {
-        var subformResult = this.renderForm(fieldData.value[k]);
-        Util.copyProperties(elementDictionary, subformResult.elementDictionary);
-
+        var subformResult = this.renderForm(fieldData.value[k], formElementDictionary);
         subformHtml += renderOptions.renderSubformListElement(subformResult.html, options);
       }
     } else { // table
@@ -186,7 +183,7 @@ class CreateFormFromJson {
 
         var subfieldsJson = fieldData.value[i].fields;
         Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
-          cells[i][j] = this.fieldFromJson(subfield, subfieldJson, elementDictionary, true);
+          cells[i][j] = this.fieldFromJson(subfield, subfieldJson, formElementDictionary, true);
           j += 1;
         });
       }
@@ -233,6 +230,6 @@ class CreateFormFromJson {
 }
 
 class RenderFormResult {
-  constructor(public html:string, public elementDictionary:ElementDictionary) {
+  constructor(public html: string, public formElementDictionary: FormElementDictionary) {
   }
 }

@@ -1,10 +1,10 @@
 class Validation {
   private addedValidations: AddedValidationsDictionary = {};
 
-  constructor(private elementSearch:ElementSearch,
-    private elementDictionary:ElementDictionary,
-    private validatorRenderOptions:ValidatorRenderOptions,
-    private i18n:I18n) {
+  constructor(private elementSearch: ElementSearch,
+    private formElementDictionary: FormElementDictionary,
+    private validatorRenderOptions: ValidatorRenderOptions,
+    private i18n: I18n) {
   }
 
   /**
@@ -37,10 +37,10 @@ class Validation {
 
     var hasErrors = false;
 
-    Util.foreach(this.elementDictionary, (elementId: string, validator: ElementValidator) => {
-      var formElement = document.getElementById(elementId);
-      if (formElement && validationScope.shouldValidate(formElement.getAttribute(SuplerAttributes.PATH))) {
-        hasErrors = this.doProcessClientSingle(formElement, validator) || hasErrors;
+    this.formElementDictionary.foreach((elementId: string, formElement: FormElement) => {
+      var htmlFormElement = document.getElementById(elementId);
+      if (htmlFormElement && validationScope.shouldValidate(htmlFormElement.getAttribute(SuplerAttributes.PATH))) {
+        hasErrors = this.doProcessClientSingle(htmlFormElement, formElement.validator) || hasErrors;
       }
     });
 
@@ -53,19 +53,19 @@ class Validation {
   processClientSingle(elementId: string): boolean {
     this.removeSingleValidationErrors(elementId);
 
-    var validator = this.elementDictionary[elementId];
-    var formElement = document.getElementById(elementId);
-    if (formElement && validator) return this.doProcessClientSingle(formElement, validator); else return false;
+    var validator = this.formElementDictionary.getElement(elementId).validator;
+    var htmlFormElement = document.getElementById(elementId);
+    if (htmlFormElement && validator) return this.doProcessClientSingle(htmlFormElement, validator); else return false;
   }
 
-  private doProcessClientSingle(formElement: HTMLElement, validator:ElementValidator):boolean {
+  private doProcessClientSingle(htmlFormElement: HTMLElement, validator:ElementValidator):boolean {
     var hasErrors = false;
-    var validationElement = this.lookupValidationElement(formElement);
+    var validationElement = this.lookupValidationElement(htmlFormElement);
 
-    var errors = validator.validate(formElement);
+    var errors = validator.validate(htmlFormElement);
 
     for (var i = 0; i < errors.length; i++) {
-      this.appendValidation(errors[i], validationElement, formElement);
+      this.appendValidation(errors[i], validationElement, htmlFormElement);
       hasErrors = true;
     }
 

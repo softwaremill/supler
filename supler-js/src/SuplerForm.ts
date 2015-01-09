@@ -38,9 +38,9 @@ class SuplerForm {
       var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories).renderForm(json.main_form);
       this.container.innerHTML = result.html;
 
-      this.initializeValidation(result.elementDictionary, json);
+      this.initializeValidation(result.formElementDictionary, json);
 
-      var sendController = new SendController(this, result.elementDictionary, this.sendControllerOptions, this.elementSearch,
+      var sendController = new SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch,
         this.validation);
       sendController.attachRefreshListeners();
       sendController.attachActionListeners();
@@ -52,9 +52,9 @@ class SuplerForm {
     this.afterRenderFn();
   }
 
-  private initializeValidation(elementDictionary: ElementDictionary, json) {
+  private initializeValidation(formElementDictionary: FormElementDictionary, json) {
     var oldValidation = this.validation;
-    this.validation = new Validation(this.elementSearch, elementDictionary,
+    this.validation = new Validation(this.elementSearch, formElementDictionary,
       this.validatorRenderOptions, this.i18n);
 
     this.validation.processServer(json.errors);

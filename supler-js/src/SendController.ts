@@ -4,7 +4,7 @@ class SendController {
   private actionQueue: { (): void }[];
 
   constructor(private suplerForm: SuplerForm,
-    private elementDictionary: ElementDictionary,
+    private formElementDictionary: FormElementDictionary,
     private options: SendControllerOptions,
     private elementSearch: ElementSearch,
     private validation: Validation) {
@@ -15,24 +15,24 @@ class SendController {
   }
 
   attachRefreshListeners() {
-    this.ifEnabledForEachFormElement(formElement => {
-      if (formElement.nodeName != "FIELDSET") {
-        formElement.onchange = () => this.refreshListenerFor(formElement)
+    this.ifEnabledForEachFormElement(htmlFormElement => {
+      if (htmlFormElement.nodeName != "FIELDSET") {
+        htmlFormElement.onchange = () => this.refreshListenerFor(htmlFormElement)
       }
     });
   }
 
   attachActionListeners() {
-    this.ifEnabledForEachFormElement(formElement => {
-      if (formElement.getAttribute(SuplerAttributes.FIELD_TYPE) === FieldTypes.ACTION) {
-        formElement.onclick = () => this.actionListenerFor(formElement)
+    this.ifEnabledForEachFormElement(htmlFormElement => {
+      if (htmlFormElement.getAttribute(SuplerAttributes.FIELD_TYPE) === FieldTypes.ACTION) {
+        htmlFormElement.onclick = () => this.actionListenerFor(htmlFormElement)
       }
     });
   }
 
-  private refreshListenerFor(formElement: HTMLElement) {
+  private refreshListenerFor(htmlFormElement: HTMLElement) {
     // if an action is in progress, dropping the send
-    if (!this.actionInProgress && !this.validation.processClientSingle(formElement.id)) {
+    if (!this.actionInProgress && !this.validation.processClientSingle(htmlFormElement.id)) {
       this.refreshCounter += 1;
       var thisRefreshNumber = this.refreshCounter;
 
@@ -47,23 +47,23 @@ class SendController {
         this.sendSuccessFn(applyRefreshResultsCondition, () => {}),
         () => {}, // do nothing on error
         false,
-        formElement);
+        htmlFormElement);
     }
   }
 
-  private actionListenerFor(formElement: HTMLElement) {
+  private actionListenerFor(htmlFormElement: HTMLElement) {
     if (this.actionInProgress) {
-      this.actionQueue.push(() => this.actionListenerFor(formElement));
+      this.actionQueue.push(() => this.actionListenerFor(htmlFormElement));
     } else {
       this.actionInProgress = true;
 
-      if (!this.validation.processClientSingle(formElement.id)) {
+      if (!this.validation.processClientSingle(htmlFormElement.id)) {
         this.options.sendFormFunction(
-          this.suplerForm.getValue(formElement.id),
+          this.suplerForm.getValue(htmlFormElement.id),
           this.sendSuccessFn(() => { return true; }, () => this.actionCompleted()),
           () => this.actionCompleted(),
           true,
-          formElement);
+          htmlFormElement);
       } else {
         this.actionCompleted();
       }
@@ -79,12 +79,12 @@ class SendController {
     }
   }
 
-  private ifEnabledForEachFormElement(body:(formElement:HTMLElement) => void) {
+  private ifEnabledForEachFormElement(body: (htmlFormElement: HTMLElement) => void) {
     if (this.options.sendEnabled()) {
-      Util.foreach(this.elementDictionary, (elementId:string, validator:ElementValidator) => {
-        var formElement = document.getElementById(elementId);
-        if (formElement) {
-          body(formElement);
+      this.formElementDictionary.foreach((elementId: string, formElement: FormElement) => {
+        var htmlFormElement = document.getElementById(elementId);
+        if (htmlFormElement) {
+          body(htmlFormElement);
         }
       });
     }
