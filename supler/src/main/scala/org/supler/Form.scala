@@ -13,7 +13,7 @@ case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
   private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors =
     rows.flatMap(_.doValidate(parentPath, obj, scope))
 
-  private[supler] def generateJSON(parentPath: FieldPath, obj: T) = JObject(
+  private[supler] def generateJSON(parentPath: FieldPath, obj: T): JValue = JObject(
     JField("fields", JObject(rows.flatMap(_.generateJSON(parentPath, obj))))
   )
 

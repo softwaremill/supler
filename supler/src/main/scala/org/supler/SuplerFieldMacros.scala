@@ -1,6 +1,6 @@
 package org.supler
 
-import org.supler.field.{SubformTableRenderHint, SubformField, SetField, BasicField}
+import org.supler.field._
 import org.supler.transformation.FullTransformer
 
 import scala.language.experimental.macros
@@ -67,24 +67,26 @@ object SuplerFieldMacros {
     }
   }
 
-  def subform_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)(param: c.Expr[T => List[U]],
-    form: c.Expr[Form[U]]): c.Expr[SubformField[T, U]] = {
+  def subform_impl[T: c.WeakTypeTag, U: c.WeakTypeTag, Cont[_]](c: blackbox.Context)
+    (param: c.Expr[T => Cont[U]], form: c.Expr[Form[U]])
+    (container: c.Expr[SubformContainer[Cont]]): c.Expr[SubformField[T, U, Cont]] = {
 
-    subform_createempty_impl[T, U](c)(param, form, null)
+    subform_createempty_impl[T, U, Cont](c)(param, form, null)(container)
   }
 
-  def subform_createempty_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)(param: c.Expr[T => List[U]],
-    form: c.Expr[Form[U]], createEmpty: c.Expr[() => U]): c.Expr[SubformField[T, U]] = {
+  def subform_createempty_impl[T: c.WeakTypeTag, U: c.WeakTypeTag, Cont[_]](c: blackbox.Context)
+    (param: c.Expr[T => Cont[U]], form: c.Expr[Form[U]], createEmpty: c.Expr[() => U])
+    (container: c.Expr[SubformContainer[Cont]]): c.Expr[SubformField[T, U, Cont]] = {
 
     import c.universe._
 
     val (fieldName, paramRepExpr) = extractFieldName(c)(param)
 
-    val readFieldValueExpr = generateFieldRead[T, List[U]](c)(fieldName)
+    val readFieldValueExpr = generateFieldRead[T, Cont[U]](c)(fieldName)
 
     val classSymbol = implicitly[WeakTypeTag[T]].tpe.typeSymbol.asClass
 
-    val writeFieldValueExpr = generateFieldWrite[T, List[U]](c)(fieldName, classSymbol)
+    val writeFieldValueExpr = generateFieldWrite[T, Cont[U]](c)(fieldName, classSymbol)
 
     val createEmptyOpt = if (createEmpty == null) {
       reify { None }
@@ -93,7 +95,9 @@ object SuplerFieldMacros {
     }
 
     reify {
-      FactoryMethods.newSubformField(paramRepExpr.splice,
+      FactoryMethods.newSubformField(
+        container.splice,
+        paramRepExpr.splice,
         readFieldValueExpr.splice,
         writeFieldValueExpr.splice,
         form.splice,
@@ -108,9 +112,11 @@ object SuplerFieldMacros {
       BasicField[T, U](fieldName, read, write, List(), None, None, required, transformer, None, emptyValue)
     }
 
-    def newSubformField[T, U](fieldName: String, read: T => List[U], write: (T, List[U]) => T,
-                            embeddedForm: Form[U], createEmpty: Option[() => U]): SubformField[T, U] = {
-      SubformField[T, U](fieldName, read, write, None, embeddedForm, createEmpty, SubformTableRenderHint)
+    def newSubformField[T, U, Cont[_]](
+      c: SubformContainer[Cont], fieldName: String, read: T => Cont[U], write: (T, Cont[U]) => T,
+      embeddedForm: Form[U], createEmpty: Option[() => U]): SubformField[T, U, Cont] = {
+
+      SubformField[T, U, Cont](c, fieldName, read, write, None, embeddedForm, createEmpty, SubformTableRenderHint)
     }
 
     def newSetField[T, U](fieldName: String, read: T => Set[U], write: (T, Set[U]) => T,

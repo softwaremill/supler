@@ -19,11 +19,11 @@ object Supler extends Validators {
     (implicit transformer: FullTransformer[U, _]): SetField[T, U] =
     macro SuplerFieldMacros.setField_impl[T, U]
 
-  def subform[T, U](param: T => List[U], form: Form[U]): SubformField[T, U] =
-    macro SuplerFieldMacros.subform_impl[T, U]
+  def subform[T, U, Cont[_]](param: T => Cont[U], form: Form[U])(implicit container: SubformContainer[Cont]): SubformField[T, U, Cont] =
+    macro SuplerFieldMacros.subform_impl[T, U, Cont]
 
-  def subform[T, U](param: T => List[U], form: Form[U], createEmpty: () => U): SubformField[T, U] =
-    macro SuplerFieldMacros.subform_createempty_impl[T, U]
+  def subform[T, U, Cont[_]](param: T => Cont[U], form: Form[U], createEmpty: () => U)(implicit container: SubformContainer[Cont]): SubformField[T, U, Cont] =
+    macro SuplerFieldMacros.subform_createempty_impl[T, U, Cont]
 
   def action[T](name: String)(action: T => ActionResult[T]): ActionField[T] =
     ActionField(name, action, None, BeforeActionValidateNone)
@@ -52,11 +52,11 @@ trait Supler[T] extends Validators {
     (implicit transformer: FullTransformer[U, _]): SetField[T, U] =
     macro SuplerFieldMacros.setField_impl[T, U]
 
-  def subform[U](param: T => List[U], form: Form[U]): SubformField[T, U] =
-    macro SuplerFieldMacros.subform_impl[T, U]
+  def subform[U, Cont[_]](param: T => Cont[U], form: Form[U])(implicit container: SubformContainer[Cont]): SubformField[T, U, Cont] =
+    macro SuplerFieldMacros.subform_impl[T, U, Cont]
 
-  def subform[U](param: T => List[U], form: Form[U], createEmpty: () => U): SubformField[T, U] =
-    macro SuplerFieldMacros.subform_createempty_impl[T, U]
+  def subform[U, Cont[_]](param: T => Cont[U], form: Form[U], createEmpty: () => U)(implicit container: SubformContainer[Cont]): SubformField[T, U, Cont] =
+    macro SuplerFieldMacros.subform_createempty_impl[T, U, Cont]
 
   def action(name: String)(action: T => ActionResult[T]): ActionField[T] = ActionField(name, action, None, BeforeActionValidateNone)
 
