@@ -66,4 +66,28 @@ describe('serialization', function() {
     // then
     serialized.should.deep.equal(complex2.obj1);
   });
+
+  it('should serialize a form with an optional subform, if the subform is present', function() {
+    // given
+    var sf = new SuplerForm(container);
+    sf.render(complex3.form1);
+
+    // when
+    var serialized = sf.getValue();
+
+    // then
+    serialized.should.deep.equal(complex3.obj1);
+  });
+
+  it('should serialize a form with an optional subform, if the subform is absent', function() {
+    // given
+    var sf = new SuplerForm(container);
+    sf.render(complex3.form2);
+
+    // when
+    var serialized = sf.getValue();
+
+    // then
+    serialized.should.deep.equal(complex3.obj2);
+  });
 });

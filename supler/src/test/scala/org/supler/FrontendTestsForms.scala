@@ -26,6 +26,7 @@ object FrontendTestsForms {
   case class Select1Optional(field1: Option[String])
   case class Complex1(field10: String, simples: List[Simple1])
   case class Complex2(field10: String, simple: Simple1)
+  case class Complex3(field10: String, simple: Option[Simple1])
 }
 
 class FrontendTestsForms extends FlatSpec with ShouldMatchers {
@@ -153,6 +154,22 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("form1", complexForm1, obj1)
 
     writer.writeObj("obj1", obj1)
+  }
+
+  writeTestData("complex3") { writer =>
+    val complexForm1 = form[Complex3](f => List(
+      f.field(_.field10).label("Field 10"),
+      f.subform(_.simple, simple1Form).renderHint(asList())
+    ))
+
+    val obj1 = Complex3("c1", Some(Simple1("f11", Some("x"), 11, field4 = true)))
+    val obj2 = Complex3("c1", None)
+
+    writer.writeForm("form1", complexForm1, obj1)
+    writer.writeForm("form2", complexForm1, obj2)
+
+    writer.writeObj("obj1", obj1)
+    writer.writeObj("obj2", obj2)
   }
 
   def writeTestData(name: String)(thunk: JsonWriter => Unit): Unit = {
