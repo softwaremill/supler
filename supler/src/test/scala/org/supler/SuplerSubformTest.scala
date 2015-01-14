@@ -16,6 +16,9 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
   val pmc1 = PersonManyCars("p1", List(Car("m1", 10), Car("m2", 20)))
   val pmc2 = PersonManyCars("p2", Nil)
 
+  case class PersonManyCarsVector(name: String, cars: Vector[Car])
+  val pmcv1 = PersonManyCarsVector("p1", Vector(Car("m1", 10), Car("m2", 20)))
+
   case class PersonOneCar(name: String, car: Car)
   val pc1 = PersonOneCar("p1", Car("m1", 10))
 
@@ -37,6 +40,20 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
     carsField.read(pmc2) should be (Nil)
     carsField.write(pmc1, Nil).cars should be (Nil)
     carsField.write(pmc2, List(Car("m3", 30))).cars should be (List(Car("m3", 30)))
+  }
+
+  "subform" should "create a case class vector field representation" in {
+    // when
+    object PersonMeta extends Supler[PersonManyCarsVector] {
+      val carsField = subform(_.cars, carForm)
+    }
+
+    // then
+    import PersonMeta.carsField
+
+    carsField.name should be ("cars")
+    carsField.read(pmcv1) should be (Vector(Car("m1", 10), Car("m2", 20)))
+    carsField.write(pmcv1, Vector()).cars should be (Vector())
   }
 
   "subform" should "create a case class single field representation" in {

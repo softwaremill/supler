@@ -3,8 +3,7 @@ package org.supler.field
 import org.json4s.JsonAST.JValue
 import org.json4s._
 import org.supler.errors._
-import org.supler.{FieldPath, Form, Util}
-import org.supler.Id
+import org.supler.{FieldPath, Form, Id, Util}
 
 case class SubformField[T, ContU, U, Cont[_]](
   c: SubformContainer[ContU, U, Cont],
@@ -160,6 +159,22 @@ object SubformContainer {
     }
     def combineJValues(jvalues: List[JValue]) = Some(JArray(jvalues))
     def combinePaos[R](paosInCont: List[PartiallyAppliedObj[R]]) = PartiallyAppliedObj.flatten(paosInCont)
+
+    def isMultiple = true
+  }
+
+  implicit def vectorSubformContainer[U]: SubformContainer[Vector[U], U, Vector] = new SubformContainer[Vector[U], U, Vector] {
+    def map[R, S](c: Vector[R])(f: (R) => S) = c.map(f)
+    def toList[R](c: Vector[R]) = c.toList
+    def zipWithIndex[R](values: Vector[R]) = values.zipWithIndex.map { case (v, i) => (v, Some(i))}
+    def update[R](cont: Vector[R])(v: R, i: Int) = cont.updated(i, v)
+
+    def valuesWithIndexFromJSON(jvalue: Option[JValue]) = jvalue match {
+      case Some(JArray(jvalues)) => jvalues.zipWithIndex.toVector.map { case (v, i) => (v, Some(i))}
+      case _ => Vector.empty
+    }
+    def combineJValues(jvalues: Vector[JValue]) = Some(JArray(jvalues.toList))
+    def combinePaos[R](paosInCont: Vector[PartiallyAppliedObj[R]]) = PartiallyAppliedObj.flatten(paosInCont.toList).map(_.toVector)
 
     def isMultiple = true
   }
