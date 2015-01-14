@@ -115,7 +115,7 @@ object SuplerFieldMacros {
       (fieldName: String, read: T => Cont[U], write: (T, Cont[U]) => T,
         embeddedForm: Form[U], createEmpty: Option[() => U]): SubformField[T, ContU, U, Cont] = {
 
-      SubformField[T, ContU, U, Cont](c, fieldName, read, write, None, embeddedForm, createEmpty, SubformTableRenderHint)
+      SubformField[T, ContU, U, Cont](c, fieldName, read, write, None, embeddedForm, createEmpty, SubformListRenderHint)
     }
 
     def newSetField[T, U](fieldName: String, read: T => Set[U], write: (T, Set[U]) => T,

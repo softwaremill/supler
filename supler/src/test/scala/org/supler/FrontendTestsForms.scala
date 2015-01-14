@@ -121,7 +121,7 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
   writeTestData("complex1") { writer =>
     val complexForm1 = form[Complex1](f => List(
       f.field(_.field10).label("Field 10"),
-      f.subform(_.simples, simple1Form)
+      f.subform(_.simples, simple1Form).renderHint(asTable())
     ))
     val complexForm2 = form[Complex1](f => List(
       f.field(_.field10).label("Field 10"),
@@ -146,7 +146,7 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
   writeTestData("complex2") { writer =>
     val complexForm1 = form[Complex2](f => List(
       f.field(_.field10).label("Field 10"),
-      f.subform(_.simple, simple1Form).renderHint(asList())
+      f.subform(_.simple, simple1Form)
     ))
 
     val obj1 = Complex2("c1", Simple1("f11", Some("x"), 11, field4 = true))
@@ -159,7 +159,7 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
   writeTestData("complex3") { writer =>
     val complexForm1 = form[Complex3](f => List(
       f.field(_.field10).label("Field 10"),
-      f.subform(_.simple, simple1Form).renderHint(asList())
+      f.subform(_.simple, simple1Form)
     ))
 
     val obj1 = Complex3("c1", Some(Simple1("f11", Some("x"), 11, field4 = true)))
