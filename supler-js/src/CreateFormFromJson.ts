@@ -168,20 +168,23 @@ class CreateFormFromJson {
       'supler:fieldName': fieldData.name,
       'supler:multiple': fieldData.multiple
     };
+
+    var values = fieldData.multiple ? fieldData.value : [ fieldData.value ];
+
     if (fieldData.getRenderHintName() === 'list') {
-      for (var k in fieldData.value) {
-        var subformResult = this.renderForm(fieldData.value[k], formElementDictionary);
+      for (var k in values) {
+        var subformResult = this.renderForm(values[k], formElementDictionary);
         subformHtml += renderOptions.renderSubformListElement(subformResult.html, options);
       }
     } else { // table
       var headers = this.getTableHeaderLabels(fieldData.json);
       var cells:string[][] = [];
 
-      for (var i = 0; i < fieldData.value.length; i++) {
+      for (var i = 0; i < values.length; i++) {
         var j = 0;
         cells[i] = [];
 
-        var subfieldsJson = fieldData.value[i].fields;
+        var subfieldsJson = values[i].fields;
         Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
           cells[i][j] = this.fieldFromJson(subfield, subfieldJson, formElementDictionary, true);
           j += 1;

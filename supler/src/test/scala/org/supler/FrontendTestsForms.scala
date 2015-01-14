@@ -25,6 +25,7 @@ object FrontendTestsForms {
   case class Select1Required(field1: String)
   case class Select1Optional(field1: Option[String])
   case class Complex1(field10: String, simples: List[Simple1])
+  case class Complex2(field10: String, simple: Simple1)
 }
 
 class FrontendTestsForms extends FlatSpec with ShouldMatchers {
@@ -117,11 +118,11 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
   }
   
   writeTestData("complex1") { writer =>
-    val complex1form = form[Complex1](f => List(
+    val complexForm1 = form[Complex1](f => List(
       f.field(_.field10).label("Field 10"),
       f.subform(_.simples, simple1Form)
     ))
-    val complex2form = form[Complex1](f => List(
+    val complexForm2 = form[Complex1](f => List(
       f.field(_.field10).label("Field 10"),
       f.subform(_.simples, simple1Form).renderHint(asList())
     ))
@@ -132,11 +133,24 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
       Simple1("f13", Some("z"), 13, field4 = true)))
     val obj2 = Complex1("c1", Nil)
 
-    writer.writeForm("form1table", complex1form, obj1)
-    writer.writeForm("form2table", complex1form, obj2)
+    writer.writeForm("form1table", complexForm1, obj1)
+    writer.writeForm("form2table", complexForm1, obj2)
 
-    writer.writeForm("form1list", complex2form, obj1)
-    writer.writeForm("form2list", complex2form, obj2)
+    writer.writeForm("form1list", complexForm2, obj1)
+    writer.writeForm("form2list", complexForm2, obj2)
+
+    writer.writeObj("obj1", obj1)
+  }
+
+  writeTestData("complex2") { writer =>
+    val complexForm1 = form[Complex2](f => List(
+      f.field(_.field10).label("Field 10"),
+      f.subform(_.simple, simple1Form).renderHint(asList())
+    ))
+
+    val obj1 = Complex2("c1", Simple1("f11", Some("x"), 11, field4 = true))
+
+    writer.writeForm("form1", complexForm1, obj1)
 
     writer.writeObj("obj1", obj1)
   }

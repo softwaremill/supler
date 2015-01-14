@@ -103,7 +103,7 @@ describe('form validation', function() {
     validationElement.innerText.should.have.length(0);
   });
 
-  it('should validate fields in subforms', function() {
+  it('should validate fields in subforms list', function() {
     // given
     var sf = new SuplerForm(container);
     sf.render(complex1.form1list);
@@ -151,5 +151,25 @@ describe('form validation', function() {
 
     var validationElementSub21 = validationElementByName('simples[1].field1');
     validationElementSub21.innerText.should.not.have.length(0);
+  });
+
+  it('should validate fields in a single subform', function() {
+    // given
+    var sf = new SuplerForm(container);
+    sf.render(complex2.form1);
+
+    // when
+    byName('simple.field1').val('');
+    byName('simple.field3').val('1');
+    var validationResult = sf.validate();
+
+    // then
+    validationResult.should.equal(true);
+
+    var validationElement01 = validationElementByName('simple.field1');
+    validationElement01.innerText.should.not.have.length(0);
+
+    var validationElement23 = validationElementByName('simple.field3');
+    validationElement23.innerText.should.not.have.length(0);
   });
 });

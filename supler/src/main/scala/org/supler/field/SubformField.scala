@@ -33,7 +33,7 @@ case class SubformField[T, ContU, U, Cont[_]](
       List(JField(name, JObject(
         JField(Type, JString(SpecialFieldTypes.Subform)),
         JField(RenderHint, JObject(JField("name", JString(renderHint.name)) :: renderHint.extraJSON)),
-        JField(Multiple, JBool(value = true)),
+        JField(Multiple, JBool(c.isMultiple)),
         JField(Label, JString(_label.getOrElse(""))),
         JField(Path, JString(parentPath.append(name).toString)),
         JField(Value, combinedValuesAsJValue)
@@ -114,6 +114,8 @@ trait SubformContainer[ContU, U, Cont[_]] {
   def valuesWithIndexFromJSON(jvalue: Option[JValue]): Cont[(JValue, Option[Int])]
   def combineJValues(jvalues: Cont[JValue]): Option[JValue]
   def combinePaos[R](paosInCont: Cont[PartiallyAppliedObj[R]]): PartiallyAppliedObj[Cont[R]]
+
+  def isMultiple: Boolean
 }
 
 object SubformContainer {
@@ -126,6 +128,8 @@ object SubformContainer {
     def valuesWithIndexFromJSON(jvalue: Option[JValue]) = (jvalue.getOrElse(JNothing), None)
     def combineJValues(jvalues: JValue) = Some(jvalues)
     def combinePaos[R](paosInCont: PartiallyAppliedObj[R]) = paosInCont
+
+    def isMultiple = false
   }
 
   implicit def optionSubformContainer[U]: SubformContainer[Option[U], U, Option] = new SubformContainer[Option[U], U, Option] {
@@ -140,6 +144,8 @@ object SubformContainer {
       case None => PartiallyAppliedObj.full(None)
       case Some(paos) => paos.map(Some(_))
     }
+
+    def isMultiple = false
   }
 
   implicit def listSubformContainer[U]: SubformContainer[List[U], U, List] = new SubformContainer[List[U], U, List] {
@@ -154,5 +160,7 @@ object SubformContainer {
     }
     def combineJValues(jvalues: List[JValue]) = Some(JArray(jvalues))
     def combinePaos[R](paosInCont: List[PartiallyAppliedObj[R]]) = PartiallyAppliedObj.flatten(paosInCont)
+
+    def isMultiple = true
   }
 }

@@ -31,7 +31,7 @@ describe('serialization', function() {
     serialized.field4.should.equal(false);
   });
 
-  it('should serialize a form with subforms rendered as a table', function() {
+  it('should serialize a form with a list of subforms rendered as a table', function() {
     // given
     var sf = new SuplerForm(container);
     sf.render(complex1.form1table);
@@ -43,7 +43,7 @@ describe('serialization', function() {
     serialized.should.deep.equal(complex1.obj1);
   });
 
-  it('should serialize a form with subforms rendered as a list', function() {
+  it('should serialize a form with a list of subforms rendered as a list', function() {
     // given
     var sf = new SuplerForm(container);
     sf.render(complex1.form1list);
@@ -53,5 +53,17 @@ describe('serialization', function() {
 
     // then
     serialized.should.deep.equal(complex1.obj1);
+  });
+
+  it('should serialize a form with a single subform', function() {
+    // given
+    var sf = new SuplerForm(container);
+    sf.render(complex2.form1);
+
+    // when
+    var serialized = sf.getValue();
+
+    // then
+    serialized.should.deep.equal(complex2.obj1);
   });
 });
