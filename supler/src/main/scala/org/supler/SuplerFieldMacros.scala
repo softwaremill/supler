@@ -67,16 +67,16 @@ object SuplerFieldMacros {
     }
   }
 
-  def subform_impl[T: c.WeakTypeTag, U: c.WeakTypeTag, Cont[_]](c: blackbox.Context)
-    (param: c.Expr[T => Cont[U]], form: c.Expr[Form[U]])
-    (container: c.Expr[SubformContainer[Cont]]): c.Expr[SubformField[T, U, Cont]] = {
+  def subform_impl[T: c.WeakTypeTag, ContU, U: c.WeakTypeTag, Cont[_]](c: blackbox.Context)
+    (param: c.Expr[T => ContU], form: c.Expr[Form[U]])
+    (container: c.Expr[SubformContainer[ContU, U, Cont]]): c.Expr[SubformField[T, ContU, U, Cont]] = {
 
-    subform_createempty_impl[T, U, Cont](c)(param, form, null)(container)
+    subform_createempty_impl[T, ContU, U, Cont](c)(param, form, null)(container)
   }
 
-  def subform_createempty_impl[T: c.WeakTypeTag, U: c.WeakTypeTag, Cont[_]](c: blackbox.Context)
-    (param: c.Expr[T => Cont[U]], form: c.Expr[Form[U]], createEmpty: c.Expr[() => U])
-    (container: c.Expr[SubformContainer[Cont]]): c.Expr[SubformField[T, U, Cont]] = {
+  def subform_createempty_impl[T: c.WeakTypeTag, ContU, U: c.WeakTypeTag, Cont[_]](c: blackbox.Context)
+    (param: c.Expr[T => ContU], form: c.Expr[Form[U]], createEmpty: c.Expr[() => U])
+    (container: c.Expr[SubformContainer[ContU, U, Cont]]): c.Expr[SubformField[T, ContU, U, Cont]] = {
 
     import c.universe._
 
@@ -95,8 +95,7 @@ object SuplerFieldMacros {
     }
 
     reify {
-      FactoryMethods.newSubformField(
-        container.splice,
+      FactoryMethods.newSubformField(container.splice)(
         paramRepExpr.splice,
         readFieldValueExpr.splice,
         writeFieldValueExpr.splice,
@@ -112,11 +111,11 @@ object SuplerFieldMacros {
       BasicField[T, U](fieldName, read, write, List(), None, None, required, transformer, None, emptyValue)
     }
 
-    def newSubformField[T, U, Cont[_]](
-      c: SubformContainer[Cont], fieldName: String, read: T => Cont[U], write: (T, Cont[U]) => T,
-      embeddedForm: Form[U], createEmpty: Option[() => U]): SubformField[T, U, Cont] = {
+    def newSubformField[T, ContU, U, Cont[_]](c: SubformContainer[ContU, U, Cont])
+      (fieldName: String, read: T => Cont[U], write: (T, Cont[U]) => T,
+        embeddedForm: Form[U], createEmpty: Option[() => U]): SubformField[T, ContU, U, Cont] = {
 
-      SubformField[T, U, Cont](c, fieldName, read, write, None, embeddedForm, createEmpty, SubformTableRenderHint)
+      SubformField[T, ContU, U, Cont](c, fieldName, read, write, None, embeddedForm, createEmpty, SubformTableRenderHint)
     }
 
     def newSetField[T, U](fieldName: String, read: T => Set[U], write: (T, Set[U]) => T,

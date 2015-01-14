@@ -4,9 +4,10 @@ import org.json4s.JsonAST.JValue
 import org.json4s._
 import org.supler.errors._
 import org.supler.{FieldPath, Form, Util}
+import org.supler.Id
 
-case class SubformField[T, U, Cont[_]](
-  c: SubformContainer[Cont],
+case class SubformField[T, ContU, U, Cont[_]](
+  c: SubformContainer[ContU, U, Cont],
   name: String,
   read: T => Cont[U],
   write: (T, Cont[U]) => T,
@@ -88,7 +89,14 @@ case class SubformField[T, U, Cont[_]](
   }
 }
 
-trait SubformContainer[Cont[_]] {
+/**
+ * The three type parameters are needed to extract the container type from the value. This is a bit more complicated
+ * as we also want to support values without a container, then we need to artificially add the `Id` container.
+ * @tparam ContU Container applied to a type. The type only serves as an example and doesn't matter.
+ * @tparam U Example type to which the container is applied
+ * @tparam Cont Type of the container
+ */
+trait SubformContainer[ContU, U, Cont[_]] {
   // operations on any value type
   def map[R, S](c: Cont[R])(f: R => S): Cont[S]
   def toList[R](c: Cont[R]): List[R]
@@ -109,7 +117,7 @@ trait SubformContainer[Cont[_]] {
 }
 
 object SubformContainer {
-  implicit object SingleSubformContainer extends SubformContainer[({type Id[a]=a})#Id] {
+  implicit def singleSubformContainer[U]: SubformContainer[U, U, Id] = new SubformContainer[U, U, Id] {
     def map[R, S](c: R)(f: (R) => S) = f(c)
     def toList[R](c: R) = List(c)
     def update[R](cont: R)(v: R, i: Int) = v
@@ -120,7 +128,7 @@ object SubformContainer {
     def combinePaos[R](paosInCont: PartiallyAppliedObj[R]) = paosInCont
   }
 
-  implicit object OptionSubformContainer extends SubformContainer[Option] {
+  implicit def optionSubformContainer[U]: SubformContainer[Option[U], U, Option] = new SubformContainer[Option[U], U, Option] {
     def map[R, S](c: Option[R])(f: (R) => S) = c.map(f)
     def toList[R](c: Option[R]) = c.toList
     def zipWithIndex[R](values: Option[R]) = values.map((_, None))
@@ -134,7 +142,7 @@ object SubformContainer {
     }
   }
 
-  implicit object ListSubformContainer extends SubformContainer[List] {
+  implicit def listSubformContainer[U]: SubformContainer[List[U], U, List] = new SubformContainer[List[U], U, List] {
     def map[R, S](c: List[R])(f: (R) => S) = c.map(f)
     def toList[R](c: List[R]) = c
     def zipWithIndex[R](values: List[R]) = values.zipWithIndex.map { case (v, i) => (v, Some(i))}

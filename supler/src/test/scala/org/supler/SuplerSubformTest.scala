@@ -39,19 +39,19 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
     carsField.write(pmc2, List(Car("m3", 30))).cars should be (List(Car("m3", 30)))
   }
 
-//  "subform" should "create a case class single field representation" in {
-//    // when
-//    object PersonMeta extends Supler[PersonOneCar] {
-//      val carField = subform(_.car, carForm)
-//    }
-//
-//    // then
-//    import PersonMeta.carField
-//
-//    carField.name should be ("car")
-//    carField.read(pc1) should be (Car("m1", 10))
-//    carField.write(pc1, Car("m2", 20)).car should be (Car("m2", 20))
-//  }
+  "subform" should "create a case class single field representation" in {
+    // when
+    object PersonMeta extends Supler[PersonOneCar] {
+      val carField = subform(_.car, carForm)
+    }
+
+    // then
+    import PersonMeta.carField
+
+    carField.name should be ("car")
+    carField.read(pc1) should be (Car("m1", 10))
+    carField.write(pc1, Car("m2", 20)).car should be (Car("m2", 20))
+  }
 
   "subform" should "create a case class optional field representation" in {
     // when
@@ -100,29 +100,29 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
     result.obj should be (PersonManyCars("", List(Car("m1", 10), Car("m2", 20))))
   }
 
-//  "subform" should "apply json values to a single field" in {
-//    // given
-//    import org.supler.Supler._
-//    val personForm = form[PersonOneCar](f => List(
-//      f.field(_.name),
-//      f.subform(_.car, carForm)
-//    ))
-//
-//    val json = parseJson("""
-//        |{
-//        | "car": {
-//        |  "make": "m1",
-//        |  "age": 10
-//        | }
-//        |}""".stripMargin)
-//
-//    // when
-//    val result = personForm(PersonOneCar("", Car("m2", 20))).applyJSONValues(json)
-//
-//    // then
-//    result.errors should be ('empty)
-//    result.obj should be (PersonOneCar("", Car("m1", 10)))
-//  }
+  "subform" should "apply json values to a single field" in {
+    // given
+    import org.supler.Supler._
+    val personForm = form[PersonOneCar](f => List(
+      f.field(_.name),
+      f.subform(_.car, carForm)
+    ))
+
+    val json = parseJson("""
+        |{
+        | "car": {
+        |  "make": "m1",
+        |  "age": 10
+        | }
+        |}""".stripMargin)
+
+    // when
+    val result = personForm(PersonOneCar("", Car("m2", 20))).applyJSONValues(json)
+
+    // then
+    result.errors should be ('empty)
+    result.obj should be (PersonOneCar("", Car("m1", 10)))
+  }
 
   "subform" should "apply json values to an optional field" in {
     // given
