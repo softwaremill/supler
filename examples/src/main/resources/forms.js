@@ -14,6 +14,12 @@ var form = new SuplerForm(formContainer, {
     custom_data_handler: function(data) {
         feedback.html(data);
         feedback.show();
+    },
+    after_render_function: function() {
+        $('[name = "birthday"]').datepicker({
+            autoclose: true,
+            format: 'yyyy-mm-dd'
+        });
     }
 });
 
