@@ -27,7 +27,7 @@ On the server side Supler provides:
 On the frontend side Supler provides:
 
 * generating HTML basing on JSON form description
-* serializing a form to HTML
+* serializing a form to JSON
 * running client-side validations
 * customizability of the HTML generation process
 * automatically refresh the form with server-side changes after a field is edited
