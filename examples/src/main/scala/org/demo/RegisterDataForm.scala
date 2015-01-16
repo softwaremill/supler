@@ -1,4 +1,4 @@
-package org.supler.demo
+package org.demo
 
 import org.supler.{Message, Supler}
 import Supler._

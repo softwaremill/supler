@@ -1,4 +1,4 @@
-package org.supler.demo
+package org.demo
 
 import akka.actor.ActorSystem
 import org.joda.time.DateTime
