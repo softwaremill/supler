@@ -1,0 +1,17 @@
+Frontend: i18n
+==============
+
+Both the labels and the conversion/validation errors may be i18n keys. Some default keys are provided for the standard validators, but custom ones can be provided as well simply by specifying them as keys in the options to ``SuplerForm``:
+
+.. code-block:: javascript
+ 
+  var formContainer = document.getElementById('form-container');
+  var form =  = new SuplerForm(formContainer, {
+    i18n: {
+      error_custom_lastNameLongerThanFirstName: "Last name must be longer than first name!",
+      error_custom_illegalDateFormat: function(detail) { return "Illegal date format: " + detail; }
+    }
+  });
+  form.render(formJson); // formJson is received from the server
+
+The values can be either strings, or functions which format the message using the error message's arguments.
