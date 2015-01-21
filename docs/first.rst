@@ -1,3 +1,5 @@
+.. _first:
+
 Your first Supler form
 ======================
 
