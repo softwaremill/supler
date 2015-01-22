@@ -1,9 +1,10 @@
 Form definition: Render hints
 =============================
 
-In some cases there are a couple possible rendering of a field. In such case, you can specify a render hint, which will influence how the field is rendered. It will also be possible to specify custom rendering (not yet implemented).
+In some cases there are a couple possible renderings of a field. In such case, you can specify a render hint, which
+will influence how the field is rendered. It is also possible to specify custom rendering.
 
-For example, to render a password field as a password::
+For example, to render a text field as a password::
 
   case class Login(username: String, password: String)
   

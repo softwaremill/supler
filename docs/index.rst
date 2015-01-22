@@ -41,16 +41,15 @@ Complete documentation
    setup
    livedemo
    backend/formdef/basics
+   backend/formdef/typetransformations
    backend/formdef/subforms
    backend/formdef/validation
    backend/formdef/possiblevalues
-   backend/formdef/typetransformations
    backend/formdef/collections
-   backend/formdef/static
-   backend/formdef/actions
    backend/formdef/renderhints
-   backend/serializing
-   backend/applying
+   backend/formdef/actions
+   backend/formdef/static
+   backend/formwithobject
    frontend/rendering
    frontend/clientsideval
    frontend/serializing

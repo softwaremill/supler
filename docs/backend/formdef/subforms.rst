@@ -1,7 +1,9 @@
 Form definition: Subforms
 =========================
 
-Fields can also correspond to other forms. Already defined forms can be freely re-used multiple times (forms are immutable). Currently this is limited to a list of sub-objects/sub-forms::
+Fields can also have "complex" types and correspond to other forms. Already defined forms can be freely re-used
+multiple times (forms are immutable). Currently single-valued subforms, optional subforms, and `List`s/`Vector`s of
+subforms are supported. For example::
 
   case class Car(make: String, year: Int)
   case class Person(name: String, cars: List[Var])
