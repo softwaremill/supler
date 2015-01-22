@@ -10,7 +10,7 @@ Let's say we have the following class on the backend::
 
   case class Person(name: String, age: Int, address: Option[String], likesChocolate: Boolean)
 
-A form definition for the user's details may then be::
+A form backed by instances of the ``Person`` class for editing a user's details can then have the following definition::
 
   import org.supler.Supler._
   
@@ -25,29 +25,43 @@ A form definition for the user's details may then be::
     }.label("Save").validateAll()
   ))
 
-As you can see, a form contains a list of fields. Here we are using a convenience function, ``form``, to capture the class of the object once, so that we can later specify the fields using ``_.fieldName``.
+As you can see, a form contains a list of fields. Here we are using a convenience function, ``form``, to capture the
+class of the object once, so that we can later specify the fields using closures like: ``_.fieldName``, without any
+type annotations.
 
-Each field can be customized. For example, here every field has a label. Also, the ``age`` field has two validators: age must be > 1 and <= 150 (we are optimistic about the development of education and medicine). All fields which are not wrapped in an ``Option`` have also a "required" validation added.
+Each field can be customized. For example, here every field has a label. Also, the ``age`` field has two validators:
+age must be > 1 and <= 150 (we are optimistic about the development of education and medicine). All fields which are
+not wrapped in an ``Option`` have also a "required" validation added.
 
-Finally, besides the four fields, we have an action, which - as the label probably reveals - is supposed to save the form. Here we just print the object to the console. How you handle actions, and you actually "save" object is up to you, all you need to do is provide a closure accepting the modified data. We also specify that to invoke the action, the whole form must be valid.
+Finally, besides the four fields, we have an action, which - as the label probably reveals - is supposed to save the
+form. Here we just print the object to the console. How you handle actions, and how you actually "save" objects is up
+to you, all you need to do is provide a closure accepting the modified data. We also specify that to invoke the action,
+the whole form must be valid (using ``validateAll()``).
 
-The result of the save action is a custom JSON. Supler uses `json4s <http://json4s.org>`_ for JSON with the native backend; in fact, it is the only dependency of Supler. The custom JSON in this case is just a string message, "Saved" (presumably to be displayed to the user).
+The result of the save action is a custom JSON. Supler uses `json4s <http://json4s.org>`_ for parsing & creating JSON
+with the native backend; in fact, it is the only dependency of Supler. The custom JSON in this case is just a string
+message, "Saved" (presumably to be displayed to the user on the frontend).
 
-Having the form defined, we need to expose it to the world, most probably using some web or REST framework. You can use `servlets with JAX-RS <https://jax-rs-spec.java.net>`_, `Spray <http://spray.io>`_, `Play <https://www.playframework.com>`_, `Scalatra <http://www.scalatra.org>`_, or any custom framework you want. To keep the tutorial simple, let's assume we have two methods mapped to appropriate paths & http methods:
+Having the form defined, we need to expose it to the world, which is typically done using some web or REST framework.
+You can use `servlets with JAX-RS <https://jax-rs-spec.java.net>`_, `Spray <http://spray.io>`_,
+`Play <https://www.playframework.com>`_, `Scalatra <http://www.scalatra.org>`_, or any custom framework you want.
+To keep the tutorial simple, let's assume we have two methods mapped to appropriate paths & http methods:
 
 * ``getPersonForm(): JValue``, invoked on a ``GET /personform``
 * ``postPersonForm(body: JValue): JValue``, invoked on a ``POST /personform`` with the body parsed as JSON
 
-The implementation of get is quite straighforward::
+The implementation of get is quite straightforward::
 
   def getPersonForm(): JValue = {
     val person = lookupCurrentPerson()
     personForm(person).generateJSON
   }
 
-Again, where do the specific ``Person`` instances come from, do they come from the session, or if they are looked up basing on HTP parameters, is outside the scope of Supler.
+Again, where do the specific ``Person`` instances come from, do they come from the session, or if they are looked up
+basing on HTTP parameters, is outside the scope of Supler.
 
-Once we have a ``Person`` instance, we apply it to the form (``personForm(person)``), and generate the description of the form, reading values from the given object.
+Once we have a ``Person`` instance, we apply it to the form (``personForm(person)``), and generate the JSON description
+of the form, reading field values from the given object.
 
 The post method is similarly simple::
 
@@ -62,7 +76,10 @@ What ``process`` does is:
 * run validations
 * if there are no errors, run the actions (if any)
 
-If no action is invoked, this method can be used for doing server-side validation of a form; the result will contain any validation errors, which can be the displayed to the user. In our example, if the ``"save"`` action was invoked and the data was valid, the result of ``process(body).generateJSON`` would be the action's result: ``JString("Saved")``.
+If no action is invoked (``body`` has only field value mappings), this method can be used for doing server-side
+validation of a form; the result will contain any validation errors, which can be the displayed to the user. In our
+example, if the ``"save"`` action was invoked and the data was valid, the result of ``process(body).generateJSON``
+would be the action's result: ``JString("Saved")``.
 
 You can also invoke any of the processing steps by hand; this is covered later in the docs.
 
@@ -74,13 +91,16 @@ Time to display something! First we need a designated space on our HTML page whe
 .. code-block:: html
 
   <html>
-  <head>...</head>
+  <head>
+    <script src="/supler.js"></script>
+  </head>
   <body>
     <div id="person_form_container"></div>
   </body>
   </html>
 
-Then, when the page opens, we need to fetch and display the form. I will use [JQuery]() here, but of course any way of doing AJAX calls/networking will work, you don't need to use JQuery:
+Then, when the page opens, we need to fetch and display the form. I will use `JQuery <http://jquery.com>`_ here, but
+of course any way of doing AJAX calls/networking will work, JQuery is not a dependency of Supler:
 
 .. code-block:: javascript
 
@@ -94,9 +114,13 @@ Then, when the page opens, we need to fetch and display the form. I will use [JQ
     });
   });
 
-Here we are creating a ``SuplerForm`` instance which as the first arguments requires the HTML element where the form should be rendered, and as the second options, which we'll be using shortly. Then, when the document is ready, we are calling the endpoint to get the JSON form description, and we render the results. This will display a 4-field & 1-button form to the user.
+Here we are creating a ``SuplerForm`` instance which as the first arguments requires the HTML element where the form
+should be rendered, and as the second options, which we'll be using shortly. Then, when the document is ready, we are
+calling the endpoint to get the JSON form description, and we render the results. This will display a 4-field &
+1-button form to the user.
 
-What about sending user changes, when the "Save" button is clicked? Well, we need to provide a way to send data back to the backend. This is done via the ``send_form_function`` option:
+What about sending user changes, when the "Save" button is clicked? Well, we need to provide a way to send data back
+to the backend. This is configured via the ``send_form_function`` option:
 
 .. code-block:: javascript
 
@@ -118,13 +142,18 @@ What about sending user changes, when the "Save" button is clicked? Well, we nee
     });
   };
 
-This is a fairly standard JQuery AJAX call. What is important, is that we are POSTing the form value (received as a parameter) serialized as JSON to the backend, and for handling responses we are using the provided ``renderResponseFn`` which will re-render the form if there are conversion/validation errors.
+This is a fairly standard JQuery AJAX call. What is important, is that we are POSTing the form value (received as a
+parameter) serialized as JSON to the backend, and for handling responses we are using the provided ``renderResponseFn``
+which will re-render the form if there are conversion/validation errors.
 
-After a field is edited, and before an action is invoked, client-side validations are run. If they fail, a message is displayed to the user. Of course, validations are also run on the server, before actually running the action code.
+After a field is edited, and before an action is invoked, client-side validations are run. If they fail, a message is
+displayed to the user. Of course, validations are also run on the server, before actually running the action code.
 
-Not all validations are both client- and server-side. Most of the built-in are, but you can also provide custom validations, which are server-side only, or which perform a simplified client-side validation. 
+Not all validations are both client- and server-side. Most of the built-in are, but you can also provide custom
+validations, which are server-side only, or which perform a simplified client-side validation.
 
-Finally, what if an action returns a custom JSON? This must be handled somehow as well. We need to provide a method which will handle such responses:
+Finally, what if an action returns a custom JSON? This must be handled somehow as well. We need to provide a method
+which will handle such responses:
 
 .. code-block:: javascript 
 
@@ -137,4 +166,12 @@ Finally, what if an action returns a custom JSON? This must be handled somehow a
     })
   );
 
-And that's it! Like on the server-side, you can call any of the stages (serializing a form to JSON, validating, re-rendering with new data) by hand; this will also be covered later in the docs.
+And that's it! Like on the server-side, you can call any of the stages (serializing a form to JSON, validating,
+re-rendering with new data) by hand; this will also be covered later in the docs.
+
+What's next?
+------------
+
+The various Supler components are described in more detail in further sections. If you'd like to add Supler to your
+project, head over to :ref:`setup <setup>`. If you have any questions, feel free to ask on the
+`forum <https://groups.google.com/forum/#!forum/supler>`_.

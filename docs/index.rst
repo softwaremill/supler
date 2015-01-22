@@ -1,7 +1,8 @@
 What is Supler?
 ===============
 
-`Supler <https://github.com/softwaremill/supler>`_ is an open-source library which makes writing complex forms easier. It has a server-side (Scala) and a client-side (JavaScript) component.
+`Supler <https://github.com/softwaremill/supler>`_ is an open-source library which makes writing complex forms easier.
+It has a server-side (Scala) and a client-side (JavaScript) component.
 
 Writing your first Supler form is just :ref:`a link away <first>`!
 
@@ -21,9 +22,14 @@ On the frontend side Supler provides:
 * customization of the HTML generation process
 * automatically refreshing the form after a field is changed or an action invoked
 
-As important as Supler's features, are things that Supler **does not** do. Supler does not define or mandate how the objects backing the forms should work, how are they persisted, what is their lifecycle; it is agnostic as to which Javascript/web framework you use or how HTTP sessions are managed. The generated HTML has elements with predictable names and can be easily customized.
+As important as Supler's features, are things that Supler **does not** do. Supler does not define or mandate how the
+objects backing the forms should work, how are they persisted, what is their lifecycle; it is agnostic as to which
+Javascript/web framework you use or how HTTP sessions are managed. The generated HTML has elements with predictable
+names and can be easily customized.
 
 License: `Apache2 <https://github.com/softwaremill/supler/blob/master/LICENSE>`_.
+
+`Head over to our user/development forum <https://groups.google.com/forum/#!forum/supler>`_ if you have any questions.
 
 Complete documentation
 ======================
@@ -33,6 +39,7 @@ Complete documentation
 
    first
    setup
+   livedemo
    backend/formdef/basics
    backend/formdef/subforms
    backend/formdef/validation
