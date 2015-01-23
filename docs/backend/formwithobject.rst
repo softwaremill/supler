@@ -1,3 +1,5 @@
+.. _formwithobject:
+
 Backend: form with object
 =========================
 
@@ -23,6 +25,11 @@ This can then be chained with validation, or validation can be run on any object
 The resulting type of each method is a ``FormWithObject[Person]``, which contains potential conversion/validation
 errors and the current state of the object.
 
+When validating, there is a special mode which runs the validations only for fields with filled-in values, not to show
+the user validation errors for fields which haven't been yet edited at all: ``doValidate(ValidateFilled)``. This is
+useful when validating partially-filled forms, and is also what ``process`` (described below) does when no action is
+invoked.
+
 Serializing a form to JSON
 --------------------------
 
@@ -47,7 +54,7 @@ The ``FormWithObject.process(JValue)`` method was already described in the :ref:
 recap; process:
 
 * converts and applies values from the given json to the backing object
-* runs validations
+* runs validations (if no action, only for filled fields, otherwise for the scope specified by the action)
 * if there are no errors, runs the actions (if any)
 
 This represents the most common flow when working with Supler. The result of ``process`` is a ``SuplerData`` instance,

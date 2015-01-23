@@ -1,12 +1,15 @@
 Frontend: Customizing the rendering process
 ===========================================
 
-The rendering process is fully customizable. By default, [Bootstrap](http://getbootstrap.com/)-based HTML is rendered, but this can be changed either by providing HTML templates, or by overriding any of the rendering functions using the options.
+The rendering process is fully customizable. By default, `Bootstrap <http://getbootstrap.com/>`_-based HTML is rendered,
+but this can be changed either by providing HTML templates, or by overriding any of the rendering functions using the
+options.
 
 Customizing via HTML templates
 ------------------------------
 
-The generated HTML can be customized by providing templates, which will be used during the rendering process. All templates should be nested inside the element that will contain the form. For example:
+The generated HTML can be customized by providing templates, which will be used during the rendering process. All
+templates should be nested inside the element that will contain the form. For example:
 
 .. code-block:: html
  
@@ -20,21 +23,25 @@ The generated HTML can be customized by providing templates, which will be used 
     </div>
   </div>
 
+The templates are stacked top-to-bottom, that is the tempaltes that are defined higher will take precedence, if
+multiple templates match a given field.
+
 Matching templates to fields
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The templates are applied to all matching fields. The matchers should be specified as attributes of the template. Currently the following matchers are allowed:
+The templates are applied to all matching fields. The matchers should be specified as attributes of the template.
+Currently the following matchers are allowed:
 
 * ``supler:fieldPath="..."`` where field path can be e.g. ``cars.model.name``
 * ``supler:fieldType="..."`` where type can be e.g. ``string``, ``integer``, ``double``, ``static`` etc.
-* ``supler:fieldRenderHint="..."`` where the render hint can be e.g. ``extarea``, ``password``, ``radio`` etc.
+* ``supler:fieldRenderHint="..."`` where the render hint can be e.g. ``textarea``, ``password``, ``radio`` etc.
 
 That way templates for a specific field or field type can be specified.
 
 Types of templates
 ^^^^^^^^^^^^^^^^^^
 
-* re-define the template of rendering fields
+* re-define the template for rendering fields
 
 .. code-block:: html
  
@@ -82,7 +89,10 @@ Types of templates
     </div>
   </div>
 
-This should always be combined with a filter to make sense. The attributes will contain normal attributes such as ``id``, ``name``, as well as supler-specific meta-data. If ``{{suplerFieldInputValue}}`` is used, the attributes won't include the field value (useful e.g. for textarea fields). Otherwise the attributes will contain the value mapping.
+This should always be combined with a filter to make sense. The attributes will contain normal attributes such
+as ``id``, ``name``, as well as supler-specific meta-data. If ``{{suplerFieldInputValue}}`` is used,
+the attributes won't include the field value (useful e.g. for textarea fields). Otherwise the attributes will
+contain the value mapping.
 
 * re-define how a field's input with possible values is rendered
 
@@ -98,9 +108,12 @@ This should always be combined with a filter to make sense. The attributes will 
     </div>
   </div>
 
-To properly render a field with possible values, Supler needs to know if the element is rendered as a single input (e.g. drop-down) or multiple inputs (e.g. radio/checkboxes).
+To properly render a field with possible values, Supler needs to know if the element is rendered as a single input
+(e.g. drop-down) or multiple inputs (e.g. radio/checkboxes).
 
-Also, if an element is already selected, it must have an additional attribute, which will be added to the possible value template. The attribute name & value are specified using ``supler:selectedAttrName`` and ``supler:selectedAttrValue``.
+Also, if an element is already selected, it must have an additional attribute, which will be added to the possible
+value template. The attribute name & value are specified using ``supler:selectedAttrName`` and
+``supler:selectedAttrValue``.
 
 Not yet implemented
 ^^^^^^^^^^^^^^^^^^^
@@ -169,7 +182,8 @@ The table cells are a series of ``<tr><td></td><td></td>..></tr>...`` tags.
 Customizing via options
 -----------------------
 
-To override how a particular form element is rendered, simply provide a method in the options passed to ``SuplerForm``:
+To override how a particular type of form elements are rendered, simply provide a method in the ``render_options``
+option passed to ``SuplerForm``:
  
 .. code-block:: javascript 
 
@@ -183,7 +197,7 @@ To override how a particular form element is rendered, simply provide a method i
   });
   form.render(formJson); // formJson is received from the server
 
-How the form and each form fragment is rendered can be customized via options.
+Methods available for overriding:
  
 .. code-block:: javascript 
 

@@ -1,3 +1,5 @@
+.. _example:
+
 Live demo/example
 =================
 

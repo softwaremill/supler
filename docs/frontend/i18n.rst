@@ -3,7 +3,10 @@
 Frontend: i18n
 ==============
 
-Both the labels and the conversion/validation errors may be i18n keys. Some default keys are provided for the standard validators, but custom ones can be provided as well simply by specifying them as keys in the options to ``SuplerForm``:
+Both the labels and the conversion/validation errors may be i18n keys (any place on the backend of frontend that takes
+a user-visible string, can be a i18n key instead). Some default keys are provided for the standard
+validators, but custom ones can be provided as well simply by specifying them as members of the ``i18n`` option to
+``SuplerForm``:
 
 .. code-block:: javascript
  
