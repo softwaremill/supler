@@ -89,8 +89,8 @@ object SuplerBuild extends Build {
         println("Running grunt")
         Process(List("grunt", "ts"), suplerJsDir.getCanonicalFile).!
 
-        val suplerJsSource = suplerJsDir / "app" / "scripts" / "compiled" / "supler.out.js"
-        val suplerJsTarget = (classDirectory in Compile).value / "supler.out.js"
+        val suplerJsSource = suplerJsDir / "target" / "supler.js"
+        val suplerJsTarget = (classDirectory in Compile).value / "supler.js"
         println(s"Copying supler.js to resources from $suplerJsSource to $suplerJsTarget")
         IO.copy(List((suplerJsSource, suplerJsTarget)))
       },
