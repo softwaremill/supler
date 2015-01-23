@@ -82,7 +82,7 @@ object SuplerBuild extends Build {
     settings = buildSettings ++ assemblySettings ++ Seq(
       libraryDependencies ++= Seq(akka, sprayCan, sprayRouting, sprayHttpx, jodaTime, jodaConvert),
       jarName in assembly := "supler-example.jar",
-      mainClass in assembly := Some("org.supler.demo.DemoServer"),
+      mainClass in assembly := Some("org.demo.DemoServer"),
       createAndCopySuplerJs := {
         val suplerJsDir = baseDirectory.value / ".." / "supler-js"
 
