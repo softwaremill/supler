@@ -3,6 +3,9 @@
 Your first Supler form
 ======================
 
+.. raw:: html
+   :file: first.html
+
 Server-side
 -----------
 
