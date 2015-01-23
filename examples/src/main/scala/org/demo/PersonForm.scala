@@ -62,33 +62,44 @@ object PersonForm {
 
   def deleteCar(p: Person, c: Car): Person = p.copy(cars = p.cars diff List(c))
   def deleteLegoSet(p: Person, ls: LegoSet): Person = p.copy(legoSets = p.legoSets diff List(ls))
+
+  case class Person(
+    firstName: String,
+    lastName: String,
+    birthday: DateTime,
+    age: Int,
+    address1: Option[String],
+    address2: Option[String],
+    gender: String,
+    secret: Option[String],
+    bio: Option[String],
+    favoriteColors: Set[String],
+    likesBroccoli: Boolean,
+    cars: List[Car],
+    legoSets: List[LegoSet],
+    registrationDate: DateTime)
+
+  case class Car(
+    make: String,
+    model: String,
+    year: Int
+    )
+
+  case class LegoSet(
+    name: String,
+    theme: String,
+    number: Int,
+    age: Int
+    )
+
+  val aPerson = Person("Adam", "", new DateTime(), 10, None, None, null, None, None,
+    Set("red", "blue"), likesBroccoli = false,
+    List(
+      Car("Ford", "Focus", 1990),
+      Car("Toyota", "Avensis", 2004)),
+    List(
+      LegoSet("Motorcycle", "Technic", 1924, 31),
+      LegoSet("Arctic Supply Plane", "City", 60064, 1),
+      LegoSet("Princess and Horse", "Duplo", 4825, 7)),
+    new DateTime(2012, 2, 19, 0, 0))
 }
-
-case class Person(
-  firstName: String,
-  lastName: String,
-  birthday: DateTime,
-  age: Int,
-  address1: Option[String],
-  address2: Option[String],
-  gender: String,
-  secret: Option[String],
-  bio: Option[String],
-  favoriteColors: Set[String],
-  likesBroccoli: Boolean,
-  cars: List[Car],
-  legoSets: List[LegoSet],
-  registrationDate: DateTime)
-
-case class Car(
-  make: String,
-  model: String,
-  year: Int
-)
-
-case class LegoSet(
-  name: String,
-  theme: String,
-  number: Int,
-  age: Int
-)

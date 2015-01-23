@@ -1,41 +1,20 @@
 package org.demo
 
 import akka.actor.ActorSystem
-import org.joda.time.DateTime
-import org.json4s.JValue
-import org.json4s.JsonAST.JString
+import org.json4s.JsonAST.{JValue, JString}
 import org.supler.Supler
 import org.supler.field.ActionResult
 import spray.http.MediaTypes
 import spray.http.StatusCodes._
 import spray.httpx.Json4sSupport
 import spray.routing.{Route, SimpleRoutingApp}
+import Directives._
 
-object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
-  implicit val actorSystem = ActorSystem()
-  implicit val json4sFormats = org.json4s.DefaultFormats
+object DemoServer extends App with SuplerServerSupport with Json4sSupport with DocsForm {
 
-  var person = Person("Adam", "", new DateTime(), 10, None, None, null, None, None,
-    Set("red", "blue"), likesBroccoli = false,
-    List(
-      Car("Ford", "Focus", 1990),
-      Car("Toyota", "Avensis", 2004)),
-    List(
-      LegoSet("Motorcycle", "Technic", 1924, 31),
-      LegoSet("Arctic Supply Plane", "City", 60064, 1),
-      LegoSet("Princess and Horse", "Duplo", 4825, 7)),
-    new DateTime(2012, 2, 19, 0, 0))
+  var person = PersonForm.aPerson
 
-  def getJson(route: Route) = get { respondWithMediaType(MediaTypes.`application/json`) { route } }
-
-  val (port, suplerJsDirective, sourceMapDirective) = if (System.getProperty("supler.demo.production") != null) {
-    (8195, getFromResourceDirectory(""), getFromResourceDirectory(""))
-  } else {
-    (8080, getFromDirectory("./supler-js/target"), getFromDirectory("./supler-js"))
-    // compiled by grunt
-  }
-
-  val saveAction = Supler.action[Person]("save") { p =>
+  val saveAction = Supler.action[PersonForm.Person]("save") { p =>
     person = p
     println(s"Persisted: $person")
     ActionResult.custom(JString("Persisted: " + person))
@@ -57,7 +36,24 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
           }
         }
       }
-    } ~
+    } ~ htmlJsRoutes ~ docsFormRoutes
+  }
+
+  println(s"Server starting... open http://localhost:$port")
+}
+
+trait SuplerServerSupport extends SimpleRoutingApp {
+  implicit val actorSystem = ActorSystem()
+  implicit val json4sFormats = org.json4s.DefaultFormats
+
+  lazy val (port, suplerJsDirective, sourceMapDirective) = if (System.getProperty("supler.demo.production") != null) {
+    (8195, getFromResourceDirectory(""), getFromResourceDirectory(""))
+  } else {
+    (8080, getFromDirectory("./supler-js/target"), getFromDirectory("./supler-js"))
+    // compiled by grunt
+  }
+
+  lazy val htmlJsRoutes = {
     pathSuffixTest(".+\\.ts".r) { id =>
       sourceMapDirective
     } ~
@@ -71,6 +67,31 @@ object DemoServer extends App with SimpleRoutingApp with Json4sSupport {
       redirect("/site/index.html", Found)
     }
   }
+}
 
-  println(s"Server starting... open http://localhost:$port")
+trait DocsForm extends SimpleRoutingApp with Json4sSupport {
+  import DocsPersonForm._
+
+  lazy val docsFormRoutes = {
+    path("rest" / "docsform.json") {
+      getJson {
+        complete {
+          docsPersonForm(aDocsPerson).generateJSON
+        }
+      } ~
+      post {
+        entity(as[JValue]) { jvalue =>
+          complete {
+            docsPersonForm(aDocsPerson).process(jvalue).generateJSON
+          }
+        }
+      }
+    }
+  }
+}
+
+object Directives {
+  import spray.routing.directives.MethodDirectives._
+  import spray.routing.directives.RespondWithDirectives._
+  def getJson(route: Route) = get { respondWithMediaType(MediaTypes.`application/json`) { route } }
 }
