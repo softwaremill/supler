@@ -99,7 +99,7 @@ contain the value mapping.
 .. code-block:: html
  
   <div id="form-container">
-    <div supler:fieldInputTemplate super:singleInput="true|false" supler:selectedAttrName="selected" supler:selectedAttrValue="selected">
+    <div supler:fieldInputTemplate supler:singleInput="true|false" supler:selectedAttrName="selected" supler:selectedAttrValue="selected">
       // html with placeholders:
       // {{suplerFieldInputContainerAttrs}}
       // must contain an element with the "supler:possibleValueTemplate" attribute;
