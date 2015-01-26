@@ -4,7 +4,8 @@ import akka.actor.ActorSystem
 import org.json4s.JsonAST.{JValue, JString}
 import org.supler.Supler
 import org.supler.field.ActionResult
-import spray.http.MediaTypes
+import spray.http.HttpHeaders._
+import spray.http.{AllOrigins, MediaTypes}
 import spray.http.StatusCodes._
 import spray.httpx.Json4sSupport
 import spray.routing.{Route, SimpleRoutingApp}
@@ -72,7 +73,7 @@ trait SuplerServerSupport extends SimpleRoutingApp {
 trait DocsForm extends SimpleRoutingApp with Json4sSupport {
   import DocsPersonForm._
 
-  lazy val docsFormRoutes = {
+  lazy val docsFormRoutes = corsSupport {
     path("rest" / "docsform.json") {
       getJson {
         complete {
@@ -85,7 +86,17 @@ trait DocsForm extends SimpleRoutingApp with Json4sSupport {
             docsPersonForm(aDocsPerson).process(jvalue).generateJSON
           }
         }
+      } ~
+      // http://stackoverflow.com/questions/1256593/jquery-why-am-i-getting-an-options-request-instead-of-a-get-request
+      options {
+        complete { "" }
       }
+    }
+  }
+
+  def corsSupport(r: Route) = respondWithHeader(`Access-Control-Allow-Origin`(AllOrigins)) {
+    respondWithHeader(`Access-Control-Allow-Headers`(`Content-Type`.name)) {
+      r
     }
   }
 }
