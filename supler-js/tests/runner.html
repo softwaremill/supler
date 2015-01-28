@@ -55,5 +55,21 @@
       <button {{suplerFieldInputAttrs}} customattr="custombutton">Press me</button>
     </div>
   </div>
+
+  <div id="templates_oneinput_boolean" style="visibility: hidden;">
+    <div supler:fieldInputTemplate
+         supler:fieldPath="field4"
+         supler:singleInput="false"
+         supler:selectedAttrName="checked"
+         supler:selectedAttrValue="checked">
+
+      <div {{suplerFieldInputContainerAttrs}}>
+            <span supler:possibleValueTemplate>
+                <label>
+                  <input type="radio" {{suplerFieldInputAttrs}} customattr="y"> {{suplerFieldInputLabel}}
+                </label>
+            </span>
+        </d
+  </div>
 </body>
 </html>

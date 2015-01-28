@@ -1,6 +1,6 @@
 describe('templates', function() {
   after(function(){
-    container.innerHTML = '';
+    //container.innerHTML = '';
   });
 
   it('should use an input template for the specified text field', function() {
@@ -36,5 +36,32 @@ describe('templates', function() {
     byName('inc').attr('customattr').should.equal('custombutton');
     byName('inc').click();
     state.should.equal(2);
+  });
+
+  it('should use an input template for the specified boolean field', function() {
+    // given
+    container.innerHTML = document.getElementById('templates_oneinput_boolean').innerHTML;
+
+    // when
+    var sf = new SuplerForm(container);
+    sf.render(simple1.form1);
+    byName('field3').val(15);
+
+    var serialized1 = sf.getValue();
+    var validate1 = sf.validate();
+
+    byName('field4').prop('checked', function( i, val ) { return i === 0; });
+
+    var serialized2 = sf.getValue();
+    var validate2 = sf.validate();
+
+    // then
+    byName('field4').attr('customattr').should.equal('y');
+
+    serialized1.field4.should.equal(true);
+    validate1.should.equal(false);
+
+    serialized2.field4.should.equal(false);
+    validate2.should.equal(false);
   });
 });

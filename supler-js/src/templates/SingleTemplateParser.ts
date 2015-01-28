@@ -67,7 +67,7 @@ class SingleTemplateParser {
 
     function adjustAttrsValueMapping(template, attrs, value) {
       var containsValueMapping = template.indexOf(SUPLER_FIELD_INPUT_VALUE) > -1;
-      if (!value || containsValueMapping) {
+      if ((value === null) || containsValueMapping) {
         delete attrs['value'];
       } else {
         attrs['value'] = value;
