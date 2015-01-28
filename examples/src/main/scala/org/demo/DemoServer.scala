@@ -95,8 +95,8 @@ trait DocsForm extends SimpleRoutingApp with Json4sSupport {
   }
 
   def corsSupport(r: Route) = respondWithHeader(`Access-Control-Allow-Origin`(AllOrigins)) {
-    headerValuePF { case `Access-Control-Request-Headers`(hdrs) => hdrs } { hdrs =>
-      respondWithHeader(`Access-Control-Allow-Headers`(hdrs)) {
+    optionalHeaderValueByName("Access-Control-Request-Headers") { hdrs =>
+      respondWithHeader(`Access-Control-Allow-Headers`(hdrs.getOrElse("").split(",").toList)) {
         r
       }
     }
