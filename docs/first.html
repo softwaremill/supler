@@ -1,8 +1,66 @@
-<script src="https://supler.softwaremill.com/supler-js/supler.out.js" ></script>
+<script src="http://demo.supler.io/supler-js/supler.js" ></script>
 
+<div style="width: 100%; text-align: center;">
+<div id="firstform" style="display: inline-block; visibility: hidden;">
+    <div supler:fieldTemplate>
+        <div>
+        {{suplerLabel}} {{suplerInput}} {{suplerValidation}}
+        </div>
+    </div>
+    <div supler:fieldValidationTemplate>
+        <div id="{{suplerValidationId}}" style="display: inline-block; font-size: 90%; color: #dd5555; width: 0; white-space: nowrap; overflow: visible;"></div>
+    </div>
+    <div supler:fieldLabelTemplate>
+        <label for="{{suplerLabelForId}}" style="display: inline-block; text-align: right; width: 150px;">{{suplerLabelText}}</label>
+    </div>
+    <div supler:fieldInputTemplate
+         supler:fieldPath="likesChocolate"
+         supler:singleInput="false"
+         supler:selectedAttrName="checked"
+         supler:selectedAttrValue="checked">
 
-<div id="firstaaa"></div>
+        <div {{suplerFieldInputContainerAttrs}} style="display: inline-block; width: 156px; font-size: 80%;">
+            <span supler:possibleValueTemplate>
+                <label style="display: inline-block;">
+                    <input type="radio" {{suplerFieldInputAttrs}}>
+                </label>
+                {{suplerFieldInputLabel}} &nbsp;
+            </span>
+        </div>
+    </div>
+    <div supler:fieldInputTemplate supler:fieldPath="save">
+        <div style="display: inline-block; width: 156px;">
+            <button class="btn-small btn-neutral btn" role="button" {{suplerFieldInputAttrs}}>Save</button>
+        </div>
+        <div id="feedback" style="display: inline-block; font-size: 90%; color: #55dd55; width: 0; white-space: nowrap; overflow: visible;"></div>
+    </div>
+</div>
+</div>
 
 <script>
-    //document.getElementById("firstaaa").innerHTML = SuplerForm.toString()
+    var docsFormEndpoint = 'http://demo.supler.io/rest/docsform.json';
+
+    function sendForm(formValue, renderResponseFn, sendErrorFn) {
+        $.ajax({
+            url: docsFormEndpoint,
+            type: 'POST',
+            data: JSON.stringify(formValue),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            success: renderResponseFn,
+            error: sendErrorFn
+        });
+    }
+
+    window.onload = function() {
+        $.get(docsFormEndpoint, function(data) {
+            new SuplerForm(document.getElementById('firstform'), {
+                send_form_function: sendForm,
+                custom_data_handler: function(data) {
+                    $('#feedback').html(data);
+                }
+            }).render(data);
+            $('#firstform').css('visibility', 'visible');
+        });
+    };
 </script>
