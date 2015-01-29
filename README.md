@@ -51,6 +51,14 @@ running tests and a live-reload server:
 
 ## Version history
 
+0.2.0 - 29/01/2015
+
+* subforms extensions
+* ajax queueing
+* tests
+* bug fixes
+* docs
+
 0.1.0 - 16/12/2014
 
 * initial release
