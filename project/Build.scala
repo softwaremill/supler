@@ -6,7 +6,7 @@ import AssemblyKeys._
 object BuildSettings {
   val buildSettings = Defaults.coreDefaultSettings ++ Seq(
     organization := "com.softwaremill",
-    version := "0.1.0",
+    version := "0.2.0",
     scalaVersion := "2.11.4",
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:existentials", "-language:higherKinds"),
 
