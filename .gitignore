@@ -25,5 +25,6 @@ project/plugins/project/
 
 **/node_modules
 supler.js
+supler.min.js
 
 .DS_Store

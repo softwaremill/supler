@@ -5,10 +5,13 @@
     "keywords": [ "forms", "power user", "scala", "supler" ],
     "ignore": [
         "design",
+        "docs",
         "examples",
         "project",
+        "src",
         "supler",
-        "supler-js"
+        "supler-js",
+        "target"
     ],
     "dependencies": {
 

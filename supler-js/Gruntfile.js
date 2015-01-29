@@ -6,6 +6,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-mocha');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
 
     // Configurable paths
     var config = {
@@ -53,9 +54,16 @@ module.exports = function (grunt) {
             },
             suplerjs: {
                 expand: true,
-                src: 'target/supler.js',
+                src: 'target/supler*.js',
                 dest: '../',
                 flatten: true
+            }
+        },
+        uglify: {
+            suplerjs: {
+                files: {
+                    'target/supler.min.js': ['target/supler.js']
+                }
             }
         }
     });
@@ -66,6 +74,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('dist', [
         'test',
+        'uglify:suplerjs',
         'copy:suplerjs'
     ]);
 };
