@@ -4,6 +4,9 @@
     "main": "supler.js",
     "keywords": [ "forms", "power user", "scala", "supler" ],
     "ignore": [
+        ".idea",
+        ".travis.yml",
+        ".gitignore",
         "design",
         "docs",
         "examples",
