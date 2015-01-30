@@ -16,5 +16,5 @@ object DocsPersonForm {
     f.action("save") { p => ActionResult.custom(JString("Saved")) }.label("Save").validateAll()
   ))
 
-  val aDocsPerson = Person("Brenda Walsh", 28, Some("Beverly Hills 90210, CA, USA"), likesChocolate = true)
+  val aDocsPerson = Person("Tyrion Lannister", 34, Some("Casterly Rock"), likesChocolate = true)
 }
