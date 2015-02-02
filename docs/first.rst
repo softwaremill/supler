@@ -64,7 +64,8 @@ Again, where do the specific ``Person`` instances come from, do they come from t
 basing on HTTP parameters, is outside the scope of Supler.
 
 Once we have a ``Person`` instance, we apply it to the form (``personForm(person)``), and generate the JSON description
-of the form, reading field values from the given object.
+of the form, reading field values from the given object (if you are curious how the JSON looks like, check out the
+:ref:`JSON section <json>` of the docs).
 
 The post method is similarly simple::
 

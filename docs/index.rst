@@ -58,3 +58,4 @@ Complete documentation
    frontend/refreshes
    frontend/custombehavior
    frontend/customdata
+   json
