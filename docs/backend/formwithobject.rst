@@ -30,6 +30,20 @@ the user validation errors for fields which haven't been yet edited at all: ``do
 useful when validating partially-filled forms, and is also what ``process`` (described below) does when no action is
 invoked.
 
+Creating new objects
+--------------------
+
+If you don't have a starting object, you can create an "empty" one and apply values to it::
+
+  personForm.withNewEmpty.applyValuesFromJSON(receivedJson)
+
+The ``withNewEmpty`` method returns a ``FormWithObject[Person]``, just as applying an existing object, so you can
+use it in the same way.
+
+By default, all fields in the object will have "empty" values (depending on their type); most probably, validation for
+such an empty object will fail. You can also customize how to create new empty objects, using the
+``Form.useNewEmpty(newCreateEmpty: => T)`` method.
+
 Serializing a form to JSON
 --------------------------
 
