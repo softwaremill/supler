@@ -19,18 +19,18 @@ case class ActionField[T](
   def validateAll() = this.copy(actionValidationScope = BeforeActionValidateAll)
   def validateSubform() = this.copy(actionValidationScope = BeforeActionValidateSubform)
 
-  private[supler] override def generateJSON(parentPath: FieldPath, obj: T) = {
+  private[supler] override def generateFieldJSON(parentPath: FieldPath, obj: T) = {
     import JSONFieldNames._
 
     val validationScopeJSONData = actionValidationScope.toValidationScope(parentPath).generateJSONData
     val validationScopeJSON = JObject(JField("name", JString(validationScopeJSONData.name)) :: validationScopeJSONData.extra)
 
-    List(JField(name, JObject(List(
+    JObject(List(
       JField(Label, JString(label.getOrElse(""))),
       JField(Type, JString(SpecialFieldTypes.Action)),
       JField(Path, JString(parentPath.append(name).toString)),
       JField("validation_scope", validationScopeJSON)
-    ))))
+    ))
   }
 
   private[supler] override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =

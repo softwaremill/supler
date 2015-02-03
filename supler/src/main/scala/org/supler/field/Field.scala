@@ -1,12 +1,18 @@
 package org.supler.field
 
 import org.json4s
+import org.json4s.JsonAST._
 import org.supler.{FieldPath, MultiFieldRow, Row}
 
 trait Field[T] extends Row[T] {
   def name: String
 
   override def ||(field: Field[T]): Row[T] = MultiFieldRow(this :: field :: Nil)
+
+  private[supler] override def generateJSON(parentPath: FieldPath, obj: T): List[JField] = 
+    List(JField(name, generateFieldJSON(parentPath, obj)))
+
+  private[supler] def generateFieldJSON(parentPath: FieldPath, obj: T): JObject
 
   protected object JSONFieldNames {
     val Type = "type"

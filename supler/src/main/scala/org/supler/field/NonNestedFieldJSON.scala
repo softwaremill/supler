@@ -13,7 +13,7 @@ trait NonNestedFieldJSON[T, U] {
   def transformer: FullTransformer[U, _]
   def renderHint: Option[RenderHint]
 
-  private[supler] override def generateJSON(parentPath: FieldPath, obj: T): List[JField] = {
+  private[supler] override def generateFieldJSON(parentPath: FieldPath, obj: T) = {
     val data = valuesProvider match {
       case Some(vp) => generateJSONWithValuesProvider(obj, vp)
       case None => generateJSONWithoutValuesProvider(obj)
@@ -21,7 +21,7 @@ trait NonNestedFieldJSON[T, U] {
 
     import JSONFieldNames._
 
-    List(JField(name, JObject(List(
+    JObject(List(
       JField(Label, JString(label.getOrElse(""))),
       JField(Type, JString(data.fieldTypeName)),
       JField(Validate, JObject(data.validationJSON.toList)),
@@ -29,7 +29,7 @@ trait NonNestedFieldJSON[T, U] {
     ) ++ data.valueJSONValue.map(JField(Value, _)).toList
       ++ data.emptyValue.map(JField(EmptyValue, _)).toList
       ++ generateRenderHintJSONValue.map(JField(RenderHint, _)).toList
-      ++ data.extraJSON)))
+      ++ data.extraJSON)
   }
 
   protected def generateJSONWithValuesProvider(obj: T, dp: ValuesProvider[T, U]): GenerateJSONData

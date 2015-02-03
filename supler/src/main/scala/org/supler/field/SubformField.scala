@@ -22,20 +22,20 @@ case class SubformField[T, ContU, U, Cont[_]](
 
   def renderHint(newRenderHint: RenderHint with SubformFieldCompatible) = this.copy(renderHint = newRenderHint)
 
-  private[supler] def generateJSON(parentPath: FieldPath, obj: T) = {
+  private[supler] def generateFieldJSON(parentPath: FieldPath, obj: T) = {
     val valuesAsJValue = read(obj).zipWithIndex.map { case (v, indexOpt) =>
       embeddedForm.generateJSON(pathWithOptionalIndex(parentPath, indexOpt), v)
     }
 
     import JSONFieldNames._
-    List(JField(name, JObject(
+    JObject(
       JField(Type, JString(SpecialFieldTypes.Subform)),
       JField(RenderHint, JObject(JField("name", JString(renderHint.name)) :: renderHint.extraJSON)),
       JField(Multiple, JBool(c.isMultiple)),
       JField(Label, JString(_label.getOrElse(""))),
       JField(Path, JString(parentPath.append(name).toString)),
       JField(Value, c.combineJValues(valuesAsJValue))
-    )))
+    )
   }
 
   override private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
