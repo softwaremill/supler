@@ -27,17 +27,15 @@ case class SubformField[T, ContU, U, Cont[_]](
       embeddedForm.generateJSON(pathWithOptionalIndex(parentPath, indexOpt), v)
     }
 
-    c.combineJValues(valuesAsJValue).map { combinedValuesAsJValue =>
-      import JSONFieldNames._
-      List(JField(name, JObject(
-        JField(Type, JString(SpecialFieldTypes.Subform)),
-        JField(RenderHint, JObject(JField("name", JString(renderHint.name)) :: renderHint.extraJSON)),
-        JField(Multiple, JBool(c.isMultiple)),
-        JField(Label, JString(_label.getOrElse(""))),
-        JField(Path, JString(parentPath.append(name).toString)),
-        JField(Value, combinedValuesAsJValue)
-      )))
-    }.getOrElse(Nil)
+    import JSONFieldNames._
+    List(JField(name, JObject(
+      JField(Type, JString(SpecialFieldTypes.Subform)),
+      JField(RenderHint, JObject(JField("name", JString(renderHint.name)) :: renderHint.extraJSON)),
+      JField(Multiple, JBool(c.isMultiple)),
+      JField(Label, JString(_label.getOrElse(""))),
+      JField(Path, JString(parentPath.append(name).toString)),
+      JField(Value, c.combineJValues(valuesAsJValue))
+    )))
   }
 
   override private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
@@ -111,7 +109,7 @@ trait SubformContainer[ContU, U, Cont[_]] {
 
   // operations on specific types
   def valuesWithIndexFromJSON(jvalue: Option[JValue]): Cont[(JValue, Option[Int])]
-  def combineJValues(jvalues: Cont[JValue]): Option[JValue]
+  def combineJValues(jvalues: Cont[JValue]): JValue
   def combinePaos[R](paosInCont: Cont[PartiallyAppliedObj[R]]): PartiallyAppliedObj[Cont[R]]
 
   def isMultiple: Boolean
@@ -125,7 +123,7 @@ object SubformContainer {
     def zipWithIndex[R](values: R) = (values, None)
 
     def valuesWithIndexFromJSON(jvalue: Option[JValue]) = (jvalue.getOrElse(JNothing), None)
-    def combineJValues(jvalues: JValue) = Some(jvalues)
+    def combineJValues(jvalues: JValue) = jvalues
     def combinePaos[R](paosInCont: PartiallyAppliedObj[R]) = paosInCont
 
     def isMultiple = false
@@ -138,7 +136,7 @@ object SubformContainer {
     def update[R](cont: Option[R])(v: R, i: Int) = Some(v)
 
     def valuesWithIndexFromJSON(jvalue: Option[JValue]) = jvalue.map((_, None))
-    def combineJValues(jvalues: Option[JValue]) = jvalues
+    def combineJValues(jvalues: Option[JValue]) = jvalues.getOrElse(JNothing)
     def combinePaos[R](paosInCont: Option[PartiallyAppliedObj[R]]) = paosInCont match {
       case None => PartiallyAppliedObj.full(None)
       case Some(paos) => paos.map(Some(_))
@@ -157,7 +155,7 @@ object SubformContainer {
       case Some(JArray(jvalues)) => jvalues.zipWithIndex.map { case (v, i) => (v, Some(i))}
       case _ => Nil
     }
-    def combineJValues(jvalues: List[JValue]) = Some(JArray(jvalues))
+    def combineJValues(jvalues: List[JValue]) = JArray(jvalues)
     def combinePaos[R](paosInCont: List[PartiallyAppliedObj[R]]) = PartiallyAppliedObj.flatten(paosInCont)
 
     def isMultiple = true
@@ -173,7 +171,7 @@ object SubformContainer {
       case Some(JArray(jvalues)) => jvalues.zipWithIndex.toVector.map { case (v, i) => (v, Some(i))}
       case _ => Vector.empty
     }
-    def combineJValues(jvalues: Vector[JValue]) = Some(JArray(jvalues.toList))
+    def combineJValues(jvalues: Vector[JValue]) = JArray(jvalues.toList)
     def combinePaos[R](paosInCont: Vector[PartiallyAppliedObj[R]]) = PartiallyAppliedObj.flatten(paosInCont.toList).map(_.toVector)
 
     def isMultiple = true

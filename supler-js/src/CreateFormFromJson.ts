@@ -169,7 +169,11 @@ class CreateFormFromJson {
       'supler:multiple': fieldData.multiple
     };
 
-    var values = fieldData.multiple ? fieldData.value : [ fieldData.value ];
+    var values;
+    // value can be undefined for an optional subform
+    if (fieldData.value !== undefined) {
+      values = fieldData.multiple ? fieldData.value : [ fieldData.value ];
+    } else values = [];
 
     if (fieldData.getRenderHintName() === 'list') {
       for (var k in values) {
