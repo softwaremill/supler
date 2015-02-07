@@ -14,13 +14,18 @@ case class SubformField[T, ContU, U, Cont[_]](
   embeddedForm: Form[U],
   // if not specified, `embeddedForm.createEmpty` will be used
   createEmpty: Option[() => U],
-  renderHint: RenderHint with SubformFieldCompatible) extends Field[T] {
+  renderHint: RenderHint with SubformFieldCompatible,
+  enabledIf: T => Boolean,
+  includeIf: T => Boolean) extends Field[T] {
   
   import c._
   
   def label(newLabel: String) = this.copy(_label = Some(newLabel))
 
   def renderHint(newRenderHint: RenderHint with SubformFieldCompatible) = this.copy(renderHint = newRenderHint)
+
+  def enabledIf(condition: T => Boolean): SubformField[T, ContU, U, Cont] = this.copy(enabledIf = condition)
+  def includeIf(condition: T => Boolean): SubformField[T, ContU, U, Cont] = this.copy(includeIf = condition)
 
   private[supler] def generateFieldJSON(parentPath: FieldPath, obj: T) = {
     val valuesAsJValue = read(obj).zipWithIndex.map { case (v, indexOpt) =>
@@ -38,7 +43,7 @@ case class SubformField[T, ContU, U, Cont[_]](
     )
   }
 
-  override private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+  override private[supler] def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     def valuesWithIndex = c.valuesWithIndexFromJSON(jsonFields.get(name))
     val paos = valuesWithIndex.map { case (formJValue, indexOpt) =>
       embeddedForm.applyJSONValues(pathWithOptionalIndex(parentPath, indexOpt),

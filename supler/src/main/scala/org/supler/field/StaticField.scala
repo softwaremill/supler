@@ -10,7 +10,8 @@ import scala.concurrent.forkjoin.ThreadLocalRandom
 
 case class StaticField[T](
   createMessage: T => Message,
-  label: Option[String]) extends Field[T] with NonNestedFieldJSON[T, String] {
+  label: Option[String],
+  includeIf: T => Boolean) extends Field[T] with NonNestedFieldJSON[T, String] {
 
   val name = "_supler_static_" + ThreadLocalRandom.current().nextInt()
   val renderHint = None
@@ -18,6 +19,9 @@ case class StaticField[T](
   val transformer = implicitly[FullTransformer[String, String]]
 
   def label(newLabel: String): StaticField[T] = this.copy(label = Some(newLabel))
+
+  val enabledIf: T => Boolean = AlwaysCondition
+  def includeIf(condition: T => Boolean): StaticField[T] = this.copy(includeIf = condition)
 
   override protected def generateJSONWithoutValuesProvider(obj: T) = {
     val msg = createMessage(obj)
@@ -38,6 +42,6 @@ case class StaticField[T](
 
   override private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) = Nil
 
-  override private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
+  override private[supler] def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
     PartiallyAppliedObj.full(obj)
 }

@@ -9,7 +9,9 @@ case class ActionField[T](
   name: String,
   action: T => ActionResult[T],
   label: Option[String],
-  actionValidationScope: ActionValidationScope) extends Field[T] {
+  actionValidationScope: ActionValidationScope,
+  enabledIf: T => Boolean,
+  includeIf: T => Boolean) extends Field[T] {
 
   require(name.matches("\\w+"), "Action name must contain only word characters (letters, numbers, _)")
 
@@ -18,6 +20,9 @@ case class ActionField[T](
   def validateNone() = this.copy(actionValidationScope = BeforeActionValidateNone)
   def validateAll() = this.copy(actionValidationScope = BeforeActionValidateAll)
   def validateSubform() = this.copy(actionValidationScope = BeforeActionValidateSubform)
+
+  def enabledIf(condition: T => Boolean): ActionField[T] = this.copy(enabledIf = condition)
+  def includeIf(condition: T => Boolean): ActionField[T] = this.copy(includeIf = condition)
 
   private[supler] override def generateFieldJSON(parentPath: FieldPath, obj: T) = {
     import JSONFieldNames._
@@ -33,7 +38,7 @@ case class ActionField[T](
     ))
   }
 
-  private[supler] override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
+  private[supler] override def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
     PartiallyAppliedObj.full(obj)
 
   private[supler] override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) = Nil

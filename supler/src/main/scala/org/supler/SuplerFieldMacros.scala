@@ -108,20 +108,23 @@ object SuplerFieldMacros {
     def newBasicField[T, U, S](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,
       transformer: FullTransformer[U, S], emptyValue: Option[U]): BasicField[T, U] = {
 
-      BasicField[T, U](fieldName, read, write, List(), None, None, required, transformer, None, emptyValue)
+      BasicField[T, U](fieldName, read, write, List(), None, None, required, transformer, None, emptyValue,
+        AlwaysCondition, AlwaysCondition)
     }
 
     def newSubformField[T, ContU, U, Cont[_]](c: SubformContainer[ContU, U, Cont])
       (fieldName: String, read: T => Cont[U], write: (T, Cont[U]) => T,
         embeddedForm: Form[U], createEmpty: Option[() => U]): SubformField[T, ContU, U, Cont] = {
 
-      SubformField[T, ContU, U, Cont](c, fieldName, read, write, None, embeddedForm, createEmpty, SubformListRenderHint)
+      SubformField[T, ContU, U, Cont](c, fieldName, read, write, None, embeddedForm, createEmpty, SubformListRenderHint,
+        AlwaysCondition, AlwaysCondition)
     }
 
     def newSetField[T, U](fieldName: String, read: T => Set[U], write: (T, Set[U]) => T,
       transformer: FullTransformer[U, _]): SetField[T, U] = {
 
-      SetField[T, U](fieldName, read, write, Nil, None, None, transformer, None)
+      SetField[T, U](fieldName, read, write, Nil, None, None, transformer, None,
+        AlwaysCondition, AlwaysCondition)
     }
   }
 

@@ -28,11 +28,12 @@ object Supler extends Validators {
     macro SuplerFieldMacros.subform_createempty_impl[T, ContU, U, Cont]
 
   def action[T](name: String)(action: T => ActionResult[T]): ActionField[T] =
-    ActionField(name, action, None, BeforeActionValidateNone)
+    ActionField(name, action, None, BeforeActionValidateNone, AlwaysCondition, AlwaysCondition)
 
   def parentAction[T, U](action: (T, Int, U) => ActionResult[T]): U => ActionResult[U] = ActionResult.parentAction(action)
 
-  def staticField[T](createMessage: T => Message) = new StaticField[T](createMessage, None)
+  def staticField[T](createMessage: T => Message) = new StaticField[T](createMessage, None,
+    AlwaysCondition)
 
   def asList() = SubformListRenderHint
   def asTable() = SubformTableRenderHint
@@ -62,11 +63,13 @@ trait Supler[T] extends Validators {
     (implicit container: SubformContainer[ContU, U, Cont]): SubformField[T, ContU, U, Cont] =
     macro SuplerFieldMacros.subform_createempty_impl[T, ContU, U, Cont]
 
-  def action(name: String)(action: T => ActionResult[T]): ActionField[T] = ActionField(name, action, None, BeforeActionValidateNone)
+  def action(name: String)(action: T => ActionResult[T]): ActionField[T] = ActionField(name, action, None,
+    BeforeActionValidateNone, AlwaysCondition, AlwaysCondition)
 
   def parentAction[U](action: (T, Int, U) => ActionResult[T]): U => ActionResult[U] = ActionResult.parentAction(action)
 
-  def staticField(createMessage: T => Message) = new StaticField[T](createMessage, None)
+  def staticField(createMessage: T => Message) = new StaticField[T](createMessage, None,
+    AlwaysCondition)
 }
 
 trait Row[T] {

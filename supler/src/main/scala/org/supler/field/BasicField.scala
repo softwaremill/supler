@@ -15,7 +15,9 @@ case class BasicField[T, U](
   required: Boolean,
   transformer: FullTransformer[U, _],
   renderHint: Option[RenderHint with BasicFieldCompatible],
-  emptyValue: Option[U]) extends Field[T] with NonNestedFieldJSON[T, U] {
+  emptyValue: Option[U],
+  enabledIf: T => Boolean,
+  includeIf: T => Boolean) extends Field[T] with NonNestedFieldJSON[T, U] {
 
   def label(newLabel: String): BasicField[T, U] = this.copy(label = Some(newLabel))
 
@@ -29,6 +31,9 @@ case class BasicField[T, U](
   }
 
   def emptyValue(newEmptyValue: Option[U]): BasicField[T, U] = this.copy(emptyValue = newEmptyValue)
+
+  def enabledIf(condition: T => Boolean): BasicField[T, U] = this.copy(enabledIf = condition)
+  def includeIf(condition: T => Boolean): BasicField[T, U] = this.copy(includeIf = condition)
 
   private[supler] override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): List[FieldErrorMessage] = {
     val v = read(obj)
@@ -69,7 +74,7 @@ case class BasicField[T, U](
     )
   }
 
-  private[supler] override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+  private[supler] override def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     import PartiallyAppliedObj._
     val appliedOpt = valuesProvider match {
       case Some(vp) =>

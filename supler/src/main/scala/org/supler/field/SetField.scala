@@ -14,7 +14,9 @@ case class SetField[T, U](
   valuesProvider: Option[ValuesProvider[T, U]],
   label: Option[String],
   transformer: FullTransformer[U, _],
-  renderHint: Option[RenderHint with SetFieldCompatible]) extends Field[T] with NonNestedFieldJSON[T, U] {
+  renderHint: Option[RenderHint with SetFieldCompatible],
+  enabledIf: T => Boolean,
+  includeIf: T => Boolean) extends Field[T] with NonNestedFieldJSON[T, U] {
 
   def label(newLabel: String): SetField[T, U] = this.copy(label = Some(newLabel))
 
@@ -26,6 +28,9 @@ case class SetField[T, U](
     case Some(_) => throw new IllegalStateException("A values provider is already defined!")
     case None => this.copy(valuesProvider = Some(values))
   }
+
+  def enabledIf(condition: T => Boolean): SetField[T, U] = this.copy(enabledIf = condition)
+  def includeIf(condition: T => Boolean): SetField[T, U] = this.copy(includeIf = condition)
 
   private[supler] override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): List[FieldErrorMessage] = {
     if (scope.shouldValidate(parentPath, valueMissing = false)) {
@@ -57,7 +62,7 @@ case class SetField[T, U](
     )
   }
 
-  private[supler] override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+  private[supler] override def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     import PartiallyAppliedObj._
 
     valuesProvider match {
