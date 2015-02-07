@@ -10,12 +10,14 @@ class FieldData {
     this.path = json.path;
     this.multiple = json.multiple;
     this.type = json.type;
+    this.enabled = json.enabled;
   }
 
   public value: any;
   public path: string;
   public multiple: boolean;
   public type: string;
+  public enabled: boolean;
 
   getRenderHintName(): string {
     if (this.json.render_hint) {

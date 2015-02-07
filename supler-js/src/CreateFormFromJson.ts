@@ -69,6 +69,10 @@ class CreateFormFromJson {
       'supler:path': fieldData.path
     }, renderOptions.additionalFieldOptions());
 
+    if (!fieldData.enabled) {
+      fieldOptions['disabled'] = true;
+    }
+
     switch (fieldData.type) {
       case FieldTypes.STRING:
         return this.stringFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
@@ -175,6 +179,8 @@ class CreateFormFromJson {
       values = fieldData.multiple ? fieldData.value : [ fieldData.value ];
     } else values = [];
 
+    this.propagateDisabled(fieldData, values);
+
     if (fieldData.getRenderHintName() === 'list') {
       for (var k in values) {
         var subformResult = this.renderForm(values[k], formElementDictionary);
@@ -199,6 +205,14 @@ class CreateFormFromJson {
     }
 
     return renderOptions.renderSubformDecoration(subformHtml, fieldData.label, fieldData.id, fieldData.name);
+  }
+
+  private propagateDisabled(fromFieldData: FieldData, toSubforms: any) {
+    if (!fromFieldData.enabled) {
+      for (var k in toSubforms) {
+        Util.foreach(toSubforms[k].fields, (k, v) => v.enabled = false);
+      }
+    }
   }
 
   private staticFieldFromJson(renderOptions, fieldData: FieldData, compact) {

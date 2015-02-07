@@ -8,6 +8,12 @@ class ReadFormValues {
   static getValueFrom(element, selectedActionId = null, result = {}) {
     var fieldType = element.getAttribute(SuplerAttributes.FIELD_TYPE);
     var multiple = element.getAttribute(SuplerAttributes.MULTIPLE) === 'true';
+
+    // disabled element values are not included in the form's value
+    if (element.disabled) {
+      return result;
+    }
+
     if (fieldType) {
       var fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
       switch (fieldType) {

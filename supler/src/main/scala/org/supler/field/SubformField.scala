@@ -20,9 +20,9 @@ case class SubformField[T, ContU, U, Cont[_]](
   
   import c._
   
-  def label(newLabel: String) = this.copy(_label = Some(newLabel))
+  def label(newLabel: String): SubformField[T, ContU, U, Cont] = this.copy(_label = Some(newLabel))
 
-  def renderHint(newRenderHint: RenderHint with SubformFieldCompatible) = this.copy(renderHint = newRenderHint)
+  def renderHint(newRenderHint: RenderHint with SubformFieldCompatible): SubformField[T, ContU, U, Cont] = this.copy(renderHint = newRenderHint)
 
   def enabledIf(condition: T => Boolean): SubformField[T, ContU, U, Cont] = this.copy(enabledIf = condition)
   def includeIf(condition: T => Boolean): SubformField[T, ContU, U, Cont] = this.copy(includeIf = condition)
