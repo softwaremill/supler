@@ -49,6 +49,7 @@ Complete documentation
    backend/formdef/renderhints
    backend/formdef/actions
    backend/formdef/static
+   backend/formdef/conditional
    backend/formwithobject
    frontend/rendering
    frontend/clientsideval
