@@ -123,8 +123,10 @@ should be rendered, and as the second options, which we'll be using shortly. The
 calling the endpoint to get the JSON form description, and we render the results. This will display a 4-field &
 1-button form to the user.
 
-What about sending user changes, when the "Save" button is clicked? Well, we need to provide a way to send data back
-to the backend. This is configured via the ``send_form_function`` option:
+What about sending user changes, when an action is invoked (in our case, when the "Save" button is clicked)? Supler
+doesn't contain any code to e.g. perform AJAX requests. Instead, we need to to provide a way to send data back to the
+backend. This is configured via the ``send_form_function`` option, which is an integration point with whatever way
+of doing network communication we are using:
 
 .. code-block:: javascript
 
