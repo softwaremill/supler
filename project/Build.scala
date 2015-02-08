@@ -7,7 +7,7 @@ object BuildSettings {
   val buildSettings = Defaults.coreDefaultSettings ++ Seq(
     organization := "com.softwaremill",
     version := "0.2.0",
-    scalaVersion := "2.11.4",
+    scalaVersion := "2.11.5",
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:existentials", "-language:higherKinds"),
 
     // Sonatype OSS deployment
