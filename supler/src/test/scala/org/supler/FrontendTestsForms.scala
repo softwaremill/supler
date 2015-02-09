@@ -172,24 +172,26 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeObj("obj2", obj2)
   }
 
-  writeTestData("simple1conditional") { writer =>
-    val conditionalForm1 = form[Simple1](f => List(
-      f.field(_.field1).label("Field 1").enabledIf(_.field4),
-      f.field(_.field2).label("Field 2")
-    ))
-    
-    writer.writeForm("form1enabled", conditionalForm1, simpleObj1)
-    writer.writeForm("form1disabled", conditionalForm1, simpleObj1.copy(field4 = false))
-    writer.writeForm("form2disabled", conditionalForm1, Simple1("", None, 0, field4 = false))
-  }
+  writeTestData("conditional") { writer =>
+    case class ConditionalSimple(f1: String, f2: String)
 
-  writeTestData("complex1conditional") { writer =>
-    val conditionalForm1 = form[Complex1](f => List(
-      f.field(_.field10).label("Field 10"),
-      f.subform(_.simples, simple1Form).label("Simples").enabledIf(_.field10 == "enabled")
+    val simpleForm = form[ConditionalSimple](f => List(
+      f.field(_.f1).label("Field 1").enabledIf(_.f2 == "v2"),
+      f.field(_.f2).label("Field 2")
     ))
 
-    writer.writeForm("form1disabled", conditionalForm1, Complex1("disabled", List(simpleObj1)))
+    case class ConditionalComplex(f1: String, f2: List[ConditionalSimple])
+
+    val complexForm = form[ConditionalComplex](f => List(
+      f.field(_.f1).label("Field 1"),
+      f.subform(_.f2, simpleForm).label("Simples").enabledIf(_.f1 == "enabled")
+    ))
+
+    writer.writeForm("simpleFormEnabled", simpleForm, ConditionalSimple("v1", "v2"))
+    writer.writeForm("simpleFormDisabled1", simpleForm, ConditionalSimple("v1", "v3"))
+    writer.writeForm("simpleFormDisabled2", simpleForm, ConditionalSimple("", ""))
+
+    writer.writeForm("complexFormDisabled", complexForm, ConditionalComplex("disabled", List(ConditionalSimple("v1", "v2"))))
   }
 
   def writeTestData(name: String)(thunk: JsonWriter => Unit): Unit = {
