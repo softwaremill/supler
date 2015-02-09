@@ -119,8 +119,9 @@ class SuplerValidationTest extends FlatSpec with ShouldMatchers {
     // given
     case class Data(f: Option[String])
 
-    val d1 = Data(Some("x1"))
-    val d2 = Data(None)
+    val dataOkSome = Data(Some("abcde"))
+    val dataError = Data(Some("ab"))
+    val dataOkNone = Data(None)
 
     // when
     object DataMeta extends Supler[Data] {
@@ -130,7 +131,8 @@ class SuplerValidationTest extends FlatSpec with ShouldMatchers {
     // then
     import DataMeta._
 
-    field1.doValidate(EmptyPath, d1, ValidateAll).size should be (1)
-    field1.doValidate(EmptyPath, d2, ValidateAll).size should be (0)
+    field1.doValidate(EmptyPath, dataOkSome, ValidateAll).size should be (0)
+    field1.doValidate(EmptyPath, dataError, ValidateAll).size should be (1)
+    field1.doValidate(EmptyPath, dataOkNone, ValidateAll).size should be (0)
   }
 }
