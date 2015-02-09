@@ -1,4 +1,4 @@
-describe('select1', function() {
+describe('selectSingle', function() {
   var selectLabelsWithoutEmptyValue = ['a', 'b', 'c'];
   var selectLabelsWithEmptyValue = ['', 'a', 'b', 'c'];
 
@@ -10,7 +10,7 @@ describe('select1', function() {
       var sf = new SuplerForm(container);
 
       // when
-      sf.render(select1.form1req);
+      sf.render(selectSingle.form1req);
 
       // then
       var options = selectLabels('field1');
@@ -24,7 +24,7 @@ describe('select1', function() {
       var sf = new SuplerForm(container);
 
       // when
-      sf.render(select1.form2req);
+      sf.render(selectSingle.form2req);
 
       // then
       var options = selectLabels('field1');
@@ -36,7 +36,7 @@ describe('select1', function() {
     it('when no option is selected, client-side validation should fail', function () {
       // given
       var sf = new SuplerForm(container);
-      sf.render(select1.form2req);
+      sf.render(selectSingle.form2req);
 
       // when
       var result = sf.validate();
@@ -52,7 +52,7 @@ describe('select1', function() {
       var sf = new SuplerForm(container);
 
       // when
-      sf.render(select1.form1reqRadio);
+      sf.render(selectSingle.form1reqRadio);
 
       // then
       var options = radioValues('field1');
@@ -66,7 +66,7 @@ describe('select1', function() {
       var sf = new SuplerForm(container);
 
       // when
-      sf.render(select1.form2reqRadio);
+      sf.render(selectSingle.form2reqRadio);
 
       // then
       var options = radioValues('field1');
@@ -82,7 +82,7 @@ describe('select1', function() {
       var sf = new SuplerForm(container);
 
       // when
-      sf.render(select1.form1opt);
+      sf.render(selectSingle.form1opt);
 
       // then
       var options = selectLabels('field1');
@@ -96,7 +96,7 @@ describe('select1', function() {
       var sf = new SuplerForm(container);
 
       // when
-      sf.render(select1.form2opt);
+      sf.render(selectSingle.form2opt);
 
       // then
       var options = selectLabels('field1');
@@ -108,7 +108,7 @@ describe('select1', function() {
     it('when no option is selected, client-side validation should succeed', function () {
       // given
       var sf = new SuplerForm(container);
-      sf.render(select1.form2opt);
+      sf.render(selectSingle.form2opt);
 
       // when
       var result = sf.validate();
@@ -122,7 +122,7 @@ describe('select1', function() {
       var sf = new SuplerForm(container);
 
       // when
-      sf.render(select1.form1optRadio);
+      sf.render(selectSingle.form1optRadio);
 
       // then
       var options = radioValues('field1');
@@ -136,7 +136,7 @@ describe('select1', function() {
       var sf = new SuplerForm(container);
 
       // when
-      sf.render(select1.form2optRadio);
+      sf.render(selectSingle.form2optRadio);
 
       // then
       var options = radioValues('field1');

@@ -22,8 +22,6 @@ import org.supler.field.ActionResult
  */
 object FrontendTestsForms {
   case class Simple1(field1: String, field2: Option[String], field3: Int, field4: Boolean)
-  case class Select1Required(field1: String)
-  case class Select1Optional(field1: Option[String])
   case class Complex1(field10: String, simples: List[Simple1])
   case class Complex2(field10: String, simple: Simple1)
   case class Complex3(field10: String, simple: Option[Simple1])
@@ -85,28 +83,31 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeFormAfterAction("form1dataOnly", fActionDataResultOnly, simpleObj1, "act")
   }
 
-  writeTestData("select1") { writer =>
-    val fReq = form[Select1Required](f => List(
+  writeTestData("selectSingle") { writer =>
+    case class SelectSingleRequired(field1: String)
+    case class SelectSingleOptional(field1: Option[String])
+
+    val fReq = form[SelectSingleRequired](f => List(
       f.field(_.field1).label("Field 1").possibleValues(_ => List("a", "b", "c"))
     ))
 
-    val fReqRadio = form[Select1Required](f => List(
+    val fReqRadio = form[SelectSingleRequired](f => List(
       f.field(_.field1).label("Field 1").possibleValues(_ => List("a", "b", "c")).renderHint(asRadio())
     ))
 
-    val fOpt = form[Select1Optional](f => List(
+    val fOpt = form[SelectSingleOptional](f => List(
       f.field(_.field1).label("Field 1").possibleValues(_ => List("a", "b", "c").map(Some(_)))
     ))
 
-    val fOptRadio = form[Select1Optional](f => List(
+    val fOptRadio = form[SelectSingleOptional](f => List(
       f.field(_.field1).label("Field 1").possibleValues(_ => List("a", "b", "c").map(Some(_))).renderHint(asRadio())
     ))
 
-    val obj1req = Select1Required("b")
-    val obj2req = Select1Required("")
+    val obj1req = SelectSingleRequired("b")
+    val obj2req = SelectSingleRequired("")
 
-    val obj1opt = Select1Optional(Some("b"))
-    val obj2opt = Select1Optional(None)
+    val obj1opt = SelectSingleOptional(Some("b"))
+    val obj2opt = SelectSingleOptional(None)
 
     writer.writeForm("form1req", fReq, obj1req)
     writer.writeForm("form2req", fReq, obj2req)
