@@ -106,7 +106,7 @@ describe('form validation', function() {
   it('should validate fields in subforms list', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complex1.form1list);
+    sf.render(complexSubformsList.formListNonEmpty);
 
     // when
     byName('simples[0].field1').val('');
@@ -132,7 +132,7 @@ describe('form validation', function() {
   it('should validate only the subform if the validation scope specifies so', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complex1.form1list);
+    sf.render(complexSubformsList.formListNonEmpty);
 
     // when
     byName('field10').val('');
@@ -156,7 +156,7 @@ describe('form validation', function() {
   it('should validate fields in a single subform', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complex2.form1);
+    sf.render(complexSingleSubform.form1);
 
     // when
     byName('simple.field1').val('');

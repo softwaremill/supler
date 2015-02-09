@@ -22,9 +22,9 @@ import org.supler.field.ActionResult
  */
 object FrontendTestsForms {
   case class Simple1(field1: String, field2: Option[String], field3: Int, field4: Boolean)
-  case class Complex1(field10: String, simples: List[Simple1])
-  case class Complex2(field10: String, simple: Simple1)
-  case class Complex3(field10: String, simple: Option[Simple1])
+  case class ComplexSubformsList(field10: String, simples: List[Simple1])
+  case class ComplexSingleSubform(field10: String, simple: Simple1)
+  case class ComplexOptionalSubform(field10: String, simple: Option[Simple1])
 }
 
 class FrontendTestsForms extends FlatSpec with ShouldMatchers {
@@ -119,58 +119,58 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("form2optRadio", fOptRadio, obj2opt)
   }
   
-  writeTestData("complex1") { writer =>
-    val complexForm1 = form[Complex1](f => List(
+  writeTestData("complexSubformsList") { writer =>
+    val complexFormTable = form[ComplexSubformsList](f => List(
       f.field(_.field10).label("Field 10"),
       f.subform(_.simples, simple1Form).renderHint(asTable())
     ))
-    val complexForm2 = form[Complex1](f => List(
+    val complexFormList = form[ComplexSubformsList](f => List(
       f.field(_.field10).label("Field 10"),
       f.subform(_.simples, simple1Form).renderHint(asList())
     ))
 
-    val obj1 = Complex1("c1", List(
+    val objNonEmpty = ComplexSubformsList("c1", List(
       Simple1("f11", Some("x"), 11, field4 = true),
       Simple1("f12", Some("y"), 12, field4 = false),
       Simple1("f13", Some("z"), 13, field4 = true)))
-    val obj2 = Complex1("c1", Nil)
+    val objEmpty = ComplexSubformsList("c1", Nil)
 
-    writer.writeForm("form1table", complexForm1, obj1)
-    writer.writeForm("form2table", complexForm1, obj2)
+    writer.writeForm("formTableNonEmpty", complexFormTable, objNonEmpty)
+    writer.writeForm("formTableEmpty", complexFormTable, objEmpty)
 
-    writer.writeForm("form1list", complexForm2, obj1)
-    writer.writeForm("form2list", complexForm2, obj2)
+    writer.writeForm("formListNonEmpty", complexFormList, objNonEmpty)
+    writer.writeForm("formListEmpty", complexFormList, objEmpty)
 
-    writer.writeObj("obj1", obj1)
+    writer.writeObj("objNonEmpty", objNonEmpty)
   }
 
-  writeTestData("complex2") { writer =>
-    val complexForm1 = form[Complex2](f => List(
+  writeTestData("complexSingleSubform") { writer =>
+    val complexForm1 = form[ComplexSingleSubform](f => List(
       f.field(_.field10).label("Field 10"),
       f.subform(_.simple, simple1Form)
     ))
 
-    val obj1 = Complex2("c1", Simple1("f11", Some("x"), 11, field4 = true))
+    val obj1 = ComplexSingleSubform("c1", Simple1("f11", Some("x"), 11, field4 = true))
 
     writer.writeForm("form1", complexForm1, obj1)
 
     writer.writeObj("obj1", obj1)
   }
 
-  writeTestData("complex3") { writer =>
-    val complexForm1 = form[Complex3](f => List(
+  writeTestData("complexOptionalSubform") { writer =>
+    val complexForm1 = form[ComplexOptionalSubform](f => List(
       f.field(_.field10).label("Field 10"),
       f.subform(_.simple, simple1Form)
     ))
 
-    val obj1 = Complex3("c1", Some(Simple1("f11", Some("x"), 11, field4 = true)))
-    val obj2 = Complex3("c1", None)
+    val objSome = ComplexOptionalSubform("c1", Some(Simple1("f11", Some("x"), 11, field4 = true)))
+    val objNone = ComplexOptionalSubform("c1", None)
 
-    writer.writeForm("form1", complexForm1, obj1)
-    writer.writeForm("form2", complexForm1, obj2)
+    writer.writeForm("formSome", complexForm1, objSome)
+    writer.writeForm("formNone", complexForm1, objNone)
 
-    writer.writeObj("obj1", obj1)
-    writer.writeObj("obj2", obj2)
+    writer.writeObj("objSome", objSome)
+    writer.writeObj("objNone", objNone)
   }
 
   writeTestData("conditional") { writer =>

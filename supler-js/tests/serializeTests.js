@@ -34,60 +34,60 @@ describe('serialization', function() {
   it('should serialize a form with a list of subforms rendered as a table', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complex1.form1table);
+    sf.render(complexSubformsList.formTableNonEmpty);
 
     // when
     var serialized = sf.getValue();
 
     // then
-    serialized.should.deep.equal(complex1.obj1);
+    serialized.should.deep.equal(complexSubformsList.objNonEmpty);
   });
 
   it('should serialize a form with a list of subforms rendered as a list', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complex1.form1list);
+    sf.render(complexSubformsList.formListNonEmpty);
 
     // when
     var serialized = sf.getValue();
 
     // then
-    serialized.should.deep.equal(complex1.obj1);
+    serialized.should.deep.equal(complexSubformsList.objNonEmpty);
   });
 
   it('should serialize a form with a single subform', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complex2.form1);
+    sf.render(complexSingleSubform.form1);
 
     // when
     var serialized = sf.getValue();
 
     // then
-    serialized.should.deep.equal(complex2.obj1);
+    serialized.should.deep.equal(complexSingleSubform.obj1);
   });
 
   it('should serialize a form with an optional subform, if the subform is present', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complex3.form1);
+    sf.render(complexOptionalSubform.formSome);
 
     // when
     var serialized = sf.getValue();
 
     // then
-    serialized.should.deep.equal(complex3.obj1);
+    serialized.should.deep.equal(complexOptionalSubform.objSome);
   });
 
   it('should serialize a form with an optional subform, if the subform is absent', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complex3.form2);
+    sf.render(complexOptionalSubform.formNone);
 
     // when
     var serialized = sf.getValue();
 
     // then
-    serialized.should.deep.equal(complex3.obj2);
+    serialized.should.deep.equal(complexOptionalSubform.objNone);
   });
 });
