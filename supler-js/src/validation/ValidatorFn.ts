@@ -50,6 +50,18 @@ class DefaultValidatorFnFactories {
     }
   }
 
+  min_length(json):ValidatorFn {
+    return (fieldValue:any) => {
+      if (fieldValue.length >= json) return null; else return this.i18n.error_length_tooShort(json);
+    }
+  }
+
+  max_length(json):ValidatorFn {
+    return (fieldValue:any) => {
+      if (fieldValue.length <= json) return null; else return this.i18n.error_length_tooLong(json);
+    }
+  }
+
   type_integer():ValidatorFn {
     return (fieldValue:any) => {
       if (parseInt(fieldValue) === fieldValue) return null; else return this.i18n.error_type_number();
