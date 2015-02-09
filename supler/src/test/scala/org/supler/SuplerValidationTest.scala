@@ -1,7 +1,7 @@
 package org.supler
 
 import org.scalatest._
-import org.supler.errors.{ValidateInPath, ValidateNone, ValidateFilled, ValidateAll}
+import org.supler.errors._
 import Supler._
 
 class SuplerValidationTest extends FlatSpec with ShouldMatchers {
@@ -113,5 +113,24 @@ class SuplerValidationTest extends FlatSpec with ShouldMatchers {
     cityForm.doValidate(EmptyPath, c1, ValidateInPath(EmptyPath.appendWithIndex("people", 1))).size should be (0)
     cityForm.doValidate(EmptyPath, c2, ValidateInPath(EmptyPath.appendWithIndex("people", 1))).size should be (0)
     cityForm.doValidate(EmptyPath, c3, ValidateInPath(EmptyPath.appendWithIndex("people", 1))).size should be (1)
+  }
+
+  "field" should "validate an optional string field only if the field has a value" in {
+    // given
+    case class Data(f: Option[String])
+
+    val d1 = Data(Some("x1"))
+    val d2 = Data(None)
+
+    // when
+    object DataMeta extends Supler[Data] {
+      val field1 = field(_.f).validate(ifDefined(minLength(3)))
+    }
+
+    // then
+    import DataMeta._
+
+    field1.doValidate(EmptyPath, d1, ValidateAll).size should be (1)
+    field1.doValidate(EmptyPath, d2, ValidateAll).size should be (0)
   }
 }

@@ -18,3 +18,17 @@ You can validate any object at any time using the ``doValidate`` method, which r
 errors found (the object doesn't have to come from the Supler-frontend)::
 
   val validationErrors: Option[FormErrors] = personForm(Person("Adam", "Smith", 18)).doValidate()
+
+Optional fields
+---------------
+
+To validate optional fields, you can use the ``ifDefined`` combinator to create a validator for ``Option[U]``
+basing on a validator for ``U``; such a validator will only run the validation if the value is defined (a ``Some``).
+For example::
+
+  case class Person(..., address: Option[String])
+
+  val personForm = form[Person](f => List(
+    ...,
+    f.field(_.address).label("Address").validate(ifDefined(maxLength(1024))
+  ))

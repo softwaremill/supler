@@ -32,6 +32,13 @@ trait Validators {
     fieldValidator[T, Int](_ > than)(_ => Message("error_number_le", than))(
       List(JField("le", JInt(than))))
 
+  def ifDefined[T, U](v: Validator[T, U]): Validator[T, Option[U]] =
+    new Validator[T, Option[U]] {
+      override def doValidate(objValue: T, fieldValue: Option[U]) =
+        fieldValue.map(v.doValidate(objValue, _)).getOrElse(Nil)
+      override def generateJSON = v.generateJSON
+    }
+
   def custom[T, U](errorTest: (T, U) => Boolean, createError: (T, U) => Message): Validator[T, U] = new Validator[T, U] {
     override def doValidate(objValue: T, fieldValue: U) = {
       if (errorTest(objValue, fieldValue)) {
