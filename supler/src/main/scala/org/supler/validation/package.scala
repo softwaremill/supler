@@ -1,5 +1,5 @@
 package org.supler
 
-package object errors {
+package object validation {
   type FieldErrors = List[FieldErrorMessage]
 }

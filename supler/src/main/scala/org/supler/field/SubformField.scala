@@ -2,7 +2,7 @@ package org.supler.field
 
 import org.json4s.JsonAST.JValue
 import org.json4s._
-import org.supler.errors._
+import org.supler.validation._
 import org.supler.{FieldPath, Form, Id, Util}
 
 case class SubformField[T, ContU, U, Cont[_]](

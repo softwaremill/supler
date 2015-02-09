@@ -1,7 +1,7 @@
 package org.supler
 
 import org.scalatest._
-import org.supler.errors._
+import org.supler.validation._
 import Supler._
 
 class SuplerValidationTest extends FlatSpec with ShouldMatchers {

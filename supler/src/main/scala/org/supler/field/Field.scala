@@ -2,7 +2,7 @@ package org.supler.field
 
 import org.json4s
 import org.json4s.JsonAST._
-import org.supler.errors.PartiallyAppliedObj
+import org.supler.validation.PartiallyAppliedObj
 import org.supler.{FieldPath, MultiFieldRow, Row}
 
 trait Field[T] extends Row[T] {

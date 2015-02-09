@@ -1,4 +1,4 @@
-package org.supler.errors
+package org.supler.validation
 
 import org.json4s.JsonAST.{JArray, JString, JField, JObject}
 import org.supler.{FieldPath, Message}

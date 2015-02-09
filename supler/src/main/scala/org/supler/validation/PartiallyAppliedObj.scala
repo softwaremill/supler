@@ -1,4 +1,4 @@
-package org.supler.errors
+package org.supler.validation
 
 case class PartiallyAppliedObj[T] private (errors: FieldErrors, obj: T) {
   def flatMap[U](f: T => PartiallyAppliedObj[U]): PartiallyAppliedObj[U] = {

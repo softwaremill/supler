@@ -2,7 +2,7 @@ package org.supler
 
 import org.json4s.JValue
 import org.json4s.JsonAST._
-import org.supler.errors._
+import org.supler.validation._
 import org.supler.field._
 
 /**

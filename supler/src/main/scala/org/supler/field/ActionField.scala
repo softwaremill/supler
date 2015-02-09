@@ -3,7 +3,7 @@ package org.supler.field
 import org.json4s._
 import org.json4s.JsonAST.{JObject, JField}
 import org.supler.FieldPath
-import org.supler.errors._
+import org.supler.validation._
 
 case class ActionField[T](
   name: String,
