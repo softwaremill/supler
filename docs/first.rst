@@ -109,7 +109,8 @@ of course any way of doing AJAX calls/networking will work, JQuery is not a depe
 .. code-block:: javascript
 
   var form = new SuplerForm(
-    document.getElementById('person_form_container', {})
+    document.getElementById('person_form_container'),
+    {}
   );
   
   $(document).ready(function() {
@@ -131,7 +132,8 @@ of doing network communication we are using:
 .. code-block:: javascript
 
   var form = new SuplerForm(
-    document.getElementById('person_form_container', {
+    document.getElementById('person_form_container'),
+    {
       send_form_function: sendForm
     })
   );
@@ -164,7 +166,8 @@ which will handle such responses:
 .. code-block:: javascript 
 
   var form = new SuplerForm(
-    document.getElementById('person_form_container', {
+    document.getElementById('person_form_container'),
+    {
       send_form_function: sendForm,
       custom_data_handler: function(data) {
         $("#user_feedback").html(data);
