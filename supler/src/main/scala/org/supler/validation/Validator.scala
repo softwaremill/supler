@@ -6,31 +6,31 @@ import org.supler.Message
 
 trait Validator[T, U] {
   def doValidate(objValue: T, fieldValue: U): List[Message]
-  def generateJSON: List[JField]
+  def generateJSON: Option[JField]
 }
 
 trait Validators {
   def minLength[T](minLength: Int) =
-    fieldValidator[T, String](_.length < minLength)(_ => Message("error_length_tooShort", minLength))(List(JField("min_length", JInt(minLength))))
+    fieldValidator[T, String](_.length < minLength)(_ => Message("error_length_tooShort", minLength))(Some(JField("min_length", JInt(minLength))))
 
   def maxLength[T](maxLength: Int) =
-    fieldValidator[T, String](_.length > maxLength)(_ => Message("error_length_tooLong", maxLength))(List(JField("max_length", JInt(maxLength))))
+    fieldValidator[T, String](_.length > maxLength)(_ => Message("error_length_tooLong", maxLength))(Some(JField("max_length", JInt(maxLength))))
 
   def gt[T](than: Int) =
     fieldValidator[T, Int](_ <= than)(_ => Message("error_number_gt", than))(
-      List(JField("gt", JInt(than))))
+      Some(JField("gt", JInt(than))))
 
   def lt[T](than: Int) =
     fieldValidator[T, Int](_ >= than)(_ => Message("error_number_lt", than))(
-      List(JField("lt", JInt(than))))
+      Some(JField("lt", JInt(than))))
 
   def ge[T](than: Int) =
     fieldValidator[T, Int](_ < than)(_ => Message("error_number_ge", than))(
-      List(JField("ge", JInt(than))))
+      Some(JField("ge", JInt(than))))
 
   def le[T](than: Int) =
     fieldValidator[T, Int](_ > than)(_ => Message("error_number_le", than))(
-      List(JField("le", JInt(than))))
+      Some(JField("le", JInt(than))))
 
   def ifDefined[T, U](v: Validator[T, U]): Validator[T, Option[U]] =
     new Validator[T, Option[U]] {
@@ -47,10 +47,10 @@ trait Validators {
         Nil
       }
     }
-    override def generateJSON = Nil
+    override def generateJSON = None
   }
 
-  private def fieldValidator[T, U](errorTest: U => Boolean)(createError: U => Message)(json: List[JField]) =
+  private def fieldValidator[T, U](errorTest: U => Boolean)(createError: U => Message)(json: Some[JField]) =
     new Validator[T, U] {
       override def doValidate(objValue: T, fieldValue: U) = {
         if (errorTest(fieldValue)) {
