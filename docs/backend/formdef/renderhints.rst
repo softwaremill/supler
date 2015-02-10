@@ -1,3 +1,5 @@
+.. _renderhints:
+
 Form definition: Render hints
 =============================
 

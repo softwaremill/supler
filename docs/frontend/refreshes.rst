@@ -1,3 +1,5 @@
+.. _refreshes:
+
 Frontend: Updating the form basing on server-side form changes
 ==============================================================
 

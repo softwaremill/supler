@@ -14,3 +14,6 @@ subforms are supported. For example::
     f.field(_.name).label("Name"),
     f.subform(_.cars, carForm).label("Cars")
   ))
+
+By default subforms are rendered as a list. You can also render subforms as a table, see the section on
+:ref:`render hints <renderhints>`.
