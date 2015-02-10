@@ -40,7 +40,7 @@ case class BasicField[T, U](
     val valueMissing = v == null || v == None || Some(v) == emptyValue
 
     if (scope.shouldValidate(parentPath, valueMissing)) {
-      val ves = if (v != null) validators.flatMap(_.doValidate(obj, v)) else Nil
+      val ves = if (v != null) validators.flatMap(_.doValidate(v, obj)) else Nil
 
       val allVes = if (required && valueMissing) {
         Message("error_valueRequired") :: ves

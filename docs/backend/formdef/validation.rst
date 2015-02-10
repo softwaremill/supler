@@ -6,7 +6,7 @@ also specify custom ones. Validators have access to the value of the field and t
 
   val personForm = form[Person](f => List(
     f.field(_.firstName).label("First name")
-      .validate(custom((e, v) => v.startsWith("A"), (e, v) => ErrorMessage("First name cannot start with an 'A'!"))),
+      .validate(custom((v, e) => v.startsWith("A"), (v, e) => ErrorMessage("First name cannot start with an 'A'!"))),
     f.field(_.lastName).label("Last name"),
     f.field(_.age).label("Age").validate(ge(0), le(120))
   ))

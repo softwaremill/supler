@@ -43,7 +43,7 @@ object PersonForm {
   val personForm = form[Person](f => List(
     f.field(_.firstName).label("label_person_firstname"),
     f.field(_.lastName).label("label_person_lastname")
-      .validate(custom((e, v) => v.length > e.firstName.length, (e, v) => Message("error_custom_lastNameLongerThanFirstName"))),
+      .validate(custom((v, e) => v.length > e.firstName.length, (v, e) => Message("error_custom_lastNameLongerThanFirstName"))),
     f.field(_.age).label("Age"),
     f.field(_.birthday).label("Birthday"),
     f.field(_.likesBroccoli).label("Likes broccoli"),

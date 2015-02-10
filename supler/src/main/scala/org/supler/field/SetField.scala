@@ -35,7 +35,7 @@ case class SetField[T, U](
   private[supler] override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): List[FieldErrorMessage] = {
     if (scope.shouldValidate(parentPath, valueMissing = false)) {
       val v = read(obj)
-      val ves = validators.flatMap(_.doValidate(obj, v))
+      val ves = validators.flatMap(_.doValidate(v, obj))
       ves.map(toFieldErrorMessage(parentPath))
     } else Nil
   }

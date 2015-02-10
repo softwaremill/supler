@@ -12,7 +12,7 @@ object RegisterDataForm {
       .label("Password:")
       .validate(minLength(8)),
     f.field(_.confirmPasswd).label("Confirm password:")
-      .validate(custom((e, v) => v == e.passwd, (e, v) => Message("Passwords must match!")))
+      .validate(custom((v, e) => v == e.passwd, (v, e) => Message("Passwords must match!")))
   ))
 }
 

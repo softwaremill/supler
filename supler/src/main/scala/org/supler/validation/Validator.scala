@@ -5,7 +5,7 @@ import org.json4s.JsonAST.JInt
 import org.supler.Message
 
 trait Validator[T, U] {
-  def doValidate(objValue: T, fieldValue: U): List[Message]
+  def doValidate(fieldValue: U, objValue: T): List[Message]
   def generateJSON: List[JField]
 }
 
@@ -34,15 +34,15 @@ trait Validators {
 
   def ifDefined[T, U](vs: Validator[T, U]*): Validator[T, Option[U]] =
     new Validator[T, Option[U]] {
-      override def doValidate(objValue: T, fieldValue: Option[U]) =
-        fieldValue.map(fv => vs.toList.flatMap(_.doValidate(objValue, fv))).getOrElse(Nil)
+      override def doValidate(fieldValue: Option[U], objValue: T) =
+        fieldValue.map(fv => vs.toList.flatMap(_.doValidate(fv, objValue))).getOrElse(Nil)
       override def generateJSON = vs.flatMap(_.generateJSON).toList
     }
 
-  def custom[T, U](validityTest: (T, U) => Boolean, createError: (T, U) => Message): Validator[T, U] = new Validator[T, U] {
-    override def doValidate(objValue: T, fieldValue: U) = {
-      if (!validityTest(objValue, fieldValue)) {
-        List(createError(objValue, fieldValue))
+  def custom[T, U](validityTest: (U, T) => Boolean, createError: (U, T) => Message): Validator[T, U] = new Validator[T, U] {
+    override def doValidate(fieldValue: U, objValue: T) = {
+      if (!validityTest(fieldValue, objValue)) {
+        List(createError(fieldValue, objValue))
       } else {
         Nil
       }
@@ -52,7 +52,7 @@ trait Validators {
 
   private def fieldValidator[T, U](validityTest: U => Boolean)(createError: U => Message)(json: Some[JField]) =
     new Validator[T, U] {
-      override def doValidate(objValue: T, fieldValue: U) = {
+      override def doValidate(fieldValue: U, objValue: T) = {
         if (!validityTest(fieldValue)) {
           List(createError(fieldValue))
         } else {
