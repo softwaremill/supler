@@ -45,7 +45,6 @@ describe('templates', function() {
     // when
     var sf = new SuplerForm(container);
     sf.render(simple1.form1);
-    byName('field3').val(15);
 
     var serialized1 = sf.getValue();
     var validate1 = sf.validate();

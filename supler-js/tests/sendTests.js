@@ -157,7 +157,6 @@ describe('send', function(){
 
     // when & then
     sf.render(simple1.form1);
-    byName('field3').val(20);
 
     byName('field3').change();
     state.should.equal(2);

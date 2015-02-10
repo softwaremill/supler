@@ -2,7 +2,7 @@ describe('form validation', function() {
   it('should run client-side validation and add errors', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(simple1.form1);
+    sf.render(simple1.form3invalid);
     byName('field1').val('');
 
     // when
@@ -21,7 +21,7 @@ describe('form validation', function() {
   it('should run client-side validation and not add errors if the validation scope is none', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(simple1.form1);
+    sf.render(simple1.form3invalid);
     byName('field1').val('');
 
     // when
@@ -34,7 +34,7 @@ describe('form validation', function() {
   it('should run client-side validation and return false if there are none', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(simple1.form1);
+    sf.render(simple1.form3invalid);
 
     // when
     byName('field3').val(11);
@@ -52,7 +52,7 @@ describe('form validation', function() {
     var sf = new SuplerForm(container);
 
     // when
-    sf.render(simple1.form1validated);
+    sf.render(simple1.form3invalidValidated);
 
     // then
     var validationElement = validationElementByName('field3');
@@ -62,13 +62,13 @@ describe('form validation', function() {
   it('should preserve client-side validation for fields with unchanged values after send', function() {
     // given
     var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
-      renderResponseFn(simple1.form1);
+      renderResponseFn(simple1.form3invalid);
     };
 
     var sf = new SuplerForm(container, {
       send_form_function: sendFormFn
     });
-    sf.render(simple1.form1);
+    sf.render(simple1.form3invalid);
 
     // when
     var validationResult = sf.validate();
@@ -90,7 +90,7 @@ describe('form validation', function() {
     var sf = new SuplerForm(container, {
       send_form_function: sendFormFn
     });
-    sf.render(simple1.form1);
+    sf.render(simple1.form3invalid);
 
     // when
     var validationResult = sf.validate();

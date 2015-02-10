@@ -40,17 +40,21 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     f.field(_.field4).label("Field 4")
   ))
 
-  val simpleObj1 = Simple1("v1", Some("v2"), 0, field4 = true)
-  val simpleObj2 = Simple1("v1", None, 15, field4 = true)
-  
   writeTestData("simple1") { writer =>
+    val simpleObj1 = Simple1("v1", Some("v2"), 12, field4 = true)
+    val simpleObj2 = Simple1("v1", None, 15, field4 = true)
+    val simpleObj3Invalid = Simple1("v1", None, 0, field4 = true)
+
     writer.writeForm("form1", simple1Form, simpleObj1)
-    writer.writeValidatedForm("form1validated", simple1Form, simpleObj1)
 
     writer.writeForm("form2", simple1Form, simpleObj2)
 
+    writer.writeForm("form3invalid", simple1Form, simpleObj3Invalid)
+    writer.writeValidatedForm("form3invalidValidated", simple1Form, simpleObj3Invalid)
+
     writer.writeObj("obj1", simpleObj1)
     writer.writeObj("obj2", simpleObj2)
+    writer.writeObj("obj3invalid", simpleObj3Invalid)
   }
 
   writeTestData("actionSimple") { writer =>
