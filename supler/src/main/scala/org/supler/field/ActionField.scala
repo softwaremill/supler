@@ -17,9 +17,9 @@ case class ActionField[T](
 
   def label(newLabel: String): ActionField[T] = this.copy(label = Some(newLabel))
 
-  def validateNone() = this.copy(actionValidationScope = BeforeActionValidateNone)
-  def validateAll() = this.copy(actionValidationScope = BeforeActionValidateAll)
-  def validateSubform() = this.copy(actionValidationScope = BeforeActionValidateSubform)
+  def validateNone(): ActionField[T] = this.copy(actionValidationScope = BeforeActionValidateNone)
+  def validateAll(): ActionField[T] = this.copy(actionValidationScope = BeforeActionValidateAll)
+  def validateSubform(): ActionField[T] = this.copy(actionValidationScope = BeforeActionValidateSubform)
 
   def enabledIf(condition: T => Boolean): ActionField[T] = this.copy(enabledIf = condition)
   def includeIf(condition: T => Boolean): ActionField[T] = this.copy(includeIf = condition)
