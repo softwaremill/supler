@@ -2,7 +2,7 @@ Form definition: Basics
 =======================
 
 You can use any object and class as the backing object for a Supler form. The fields of the class which are editable
-in the form must be either ``var``s, provide a Scala-style getter/setter, or immutable ``val``s in a ``case class``.
+in the form must be either ``var``-s, provide a Scala-style getter/setter, or immutable ``val``-s in a ``case class``.
 We recommend the latter, immutable approach.
 
 A form consists of a list of fields belonging to a single class. Supler provides a convenience method, ``form``, which
@@ -23,6 +23,11 @@ The fields can be further customized. Almost always you'll want to specify the l
 
 The label can also be a key which will be looked up in the :ref:`i18n <i18n>` component on the frontend.
 
+.. note::
+
+  All Supler objects (fields, forms, ...) are immutable and can be freely re-used (or shared between threads). Adding a
+  new validator to a field, changing the label, adding fields to forms creates new field/forms instances.
+
 Stand-alone fields
 ------------------
 
@@ -36,5 +41,3 @@ of some common fields. For example::
   
   val personForm = form(_ => List(nameField, ageField))
 
-Fields are immutable and can be freely re-used multiple times; e.g. adding a new validator, or changing the label,
-creates a new field instance.

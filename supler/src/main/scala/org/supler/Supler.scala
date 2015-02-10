@@ -7,6 +7,10 @@ import org.supler.validation._
 import scala.language.experimental.macros
 
 // when editing javadocs, remember to synchronize with the methods on the trait!
+/**
+ * All Supler objects are immutable and can be freely re-used. Customizing fields/forms (such as adding a validator
+ * to a field, specifying a field's label etc.) creates new instances.
+ */
 object Supler extends Validators with RenderHints {
   def form[T](rows: Supler[T] => List[Row[T]]): Form[T] = macro SuplerFormMacros.form_impl[T]
 
