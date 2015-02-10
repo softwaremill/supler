@@ -30,11 +30,11 @@ describe('templates', function() {
     });
 
     // when
-    sf.render(simple1action.form1);
+    sf.render(actionSimple.formOneActionValidateNone);
 
     // then
-    byName('inc').attr('customattr').should.equal('custombutton');
-    byName('inc').click();
+    byName('addx').attr('customattr').should.equal('custombutton');
+    byName('addx').click();
     state.should.equal(2);
   });
 

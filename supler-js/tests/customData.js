@@ -24,9 +24,8 @@ describe('customData', function(){
       }
     });
 
-
     // when
-    sf.render(simple1action.form1formAndData);
+    sf.render(actionSimple.formAfterActionFormAndData);
 
     // then
     handlerCalled.should.equal("data and form");
@@ -42,7 +41,7 @@ describe('customData', function(){
     });
 
     // when
-    sf.render(simple1action.form1dataOnly);
+    sf.render(actionSimple.formAfterActionDataOnly);
 
     // then
     handlerCalled.should.equal("data only");

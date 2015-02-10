@@ -85,18 +85,18 @@ describe('send', function(){
     });
 
     // when & then
-    sf.render(simple1action.form1);
+    sf.render(actionSimple.formOneActionValidateNone);
 
-    byName('inc').click();
+    byName('addx').click();
     state.should.equal(2);
 
-    byName('field3').val(1);
-    byName('field3').change();
+    byName('f1').val('w');
+    byName('f1').change();
     state = 3;
 
     // first request completes, but another is started -> results should not be applied
-    actionRenderResponseFn(simple1action.form2);
-    byName('field3').val().should.equal('15');
+    actionRenderResponseFn(actionSimple.formOneActionValidateNone2);
+    byName('f1').val().should.equal('u');
   });
 
   it('should drop actions when an action is in progress', function() {
@@ -120,16 +120,16 @@ describe('send', function(){
     });
 
     // when & then
-    sf.render(simple1action.form1);
+    sf.render(actionSimple.formOneActionValidateNone);
 
-    byName('inc').click();
+    byName('addx').click();
     state.should.equal(2);
 
-    byName('inc').click();
+    byName('addx').click();
     state.should.equal(2);
 
     // first action completes, second should be started.
-    actionRenderResponseFn1(simple1action.form2);
+    actionRenderResponseFn1(actionSimple.formOneActionValidateNone2);
     state.should.equal(2);
   });
 
@@ -181,12 +181,12 @@ describe('send', function(){
     });
 
     // when
-    sf.render(simple1action.form1two);
-    byName('field1').val('');
-    byName('save').click();
+    sf.render(actionSimple.formTwoActionsOneValidateAll);
+    byName('f1').val('');
+    byName('addy').click();
 
     // then
-    var validationElement1 = validationElementByName('field1');
+    var validationElement1 = validationElementByName('f1');
     validationElement1.innerText.should.not.have.length(0);
   });
 });

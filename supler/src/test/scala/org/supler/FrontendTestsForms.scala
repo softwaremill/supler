@@ -21,6 +21,7 @@ import org.supler.field.ActionResult
  * 5. `runner.html` includes all the generated data via `script` tags and then the tests
  */
 object FrontendTestsForms {
+  case class SimpleSingleField(f1: String)
   case class Simple1(field1: String, field2: Option[String], field3: Int, field4: Boolean)
   case class ComplexSubformsList(field10: String, simples: List[Simple1])
   case class ComplexSingleSubform(field10: String, simple: Simple1)
@@ -52,35 +53,38 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeObj("obj2", simpleObj2)
   }
 
-  writeTestData("simple1action") { writer =>
-    val fAction = form[Simple1](f => List(
-      f.field(_.field3).label("Field 3"),
-      f.action("inc") { s => ActionResult(s.copy(field3 = s.field3 + 1)) }
+  writeTestData("actionSimple") { writer =>
+    val obj1 = SimpleSingleField("z")
+    val obj2 = SimpleSingleField("u")
+
+    val fOneActionValidateNone = form[SimpleSingleField](f => List(
+      f.field(_.f1).label("Field 1"),
+      f.action("addx") { s => ActionResult(s.copy(f1 = s.f1 + "x")) }
     ))
 
-    val fTwoActions = form[Simple1](f => List(
-      f.field(_.field1).label("Field 1"),
-      f.action("inc") { s => ActionResult(s.copy(field1 = s.field1 + "x")) },
-      f.action("save") { s => ActionResult(s.copy(field1 = s.field1 + "y")) }.validateAll()
+    val fTwoActionsOneValidateAll = form[SimpleSingleField](f => List(
+      f.field(_.f1).label("Field 1"),
+      f.action("addx") { s => ActionResult(s.copy(f1 = s.f1 + "x")) },
+      f.action("addy") { s => ActionResult(s.copy(f1 = s.f1 + "y")) }.validateAll()
     ))
 
-    val fActionFormAndDataResult = form[Simple1](f => List(
-      f.field(_.field3).label("Field 3"),
-      f.action("act") { s => ActionResult(s.copy(field3 = s.field3 + 1), customData = Some(JString("data and form"))) }
+    val fActionFormAndDataResult = form[SimpleSingleField](f => List(
+      f.field(_.f1).label("Field 1"),
+      f.action("act") { s => ActionResult(s.copy(f1 = s.f1 + "x"), customData = Some(JString("data and form"))) }
     ))
 
-    val fActionDataResultOnly = form[Simple1](f => List(
-      f.field(_.field3).label("Field 3"),
+    val fActionDataResultOnly = form[SimpleSingleField](f => List(
+      f.field(_.f1).label("Field 1"),
       f.action("act") { s => ActionResult.custom(JString("data only")) }
     ))
 
-    writer.writeForm("form1", fAction, simpleObj1)
-    writer.writeForm("form2", fAction, simpleObj2)
+    writer.writeForm("formOneActionValidateNone", fOneActionValidateNone, obj1)
+    writer.writeForm("formOneActionValidateNone2", fOneActionValidateNone, obj2)
 
-    writer.writeForm("form1two", fTwoActions, simpleObj1)
+    writer.writeForm("formTwoActionsOneValidateAll", fTwoActionsOneValidateAll, obj1)
 
-    writer.writeFormAfterAction("form1formAndData", fActionFormAndDataResult, simpleObj1, "act")
-    writer.writeFormAfterAction("form1dataOnly", fActionDataResultOnly, simpleObj1, "act")
+    writer.writeFormAfterAction("formAfterActionFormAndData", fActionFormAndDataResult, obj1, "act")
+    writer.writeFormAfterAction("formAfterActionDataOnly", fActionDataResultOnly, obj1, "act")
   }
 
   writeTestData("selectSingle") { writer =>
