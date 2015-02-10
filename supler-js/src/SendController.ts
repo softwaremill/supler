@@ -120,6 +120,6 @@ class SendControllerOptions {
   }
 
   sendEnabled():boolean {
-    return this.sendFormFunction !== null && this.sendFormFunction !== undefined;
+    return this.sendFormFunction !== null && typeof this.sendFormFunction !== 'undefined';
   }
 }

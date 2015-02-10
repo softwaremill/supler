@@ -76,6 +76,6 @@ class SelectValue {
 
 class FieldUtil {
   static fieldIsEmpty(fieldValue: any, emptyValue: any): boolean {
-    return fieldValue === null || fieldValue.length == 0 || fieldValue === emptyValue;
+    return fieldValue === null || typeof fieldValue === 'undefined' || fieldValue.length == 0 || fieldValue === emptyValue;
   }
 }

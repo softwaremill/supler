@@ -176,7 +176,7 @@ class CreateFormFromJson {
 
     var values;
     // value can be undefined for an optional subform
-    if (fieldData.value !== undefined) {
+    if (typeof fieldData.value !== 'undefined') {
       values = fieldData.multiple ? fieldData.value : [ fieldData.value ];
     } else values = [];
 
