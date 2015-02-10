@@ -219,6 +219,18 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("intError", intOptForm, IntOptData(Some(20)))
   }
 
+  writeTestData("optionalInt") { writer =>
+    case class IntOptData(f1: String, f2: Option[Int])
+
+    val intOptForm = form[IntOptData](f => List(
+      f.field(_.f1).label("Field 1"),
+      f.field(_.f2).label("Field 2")
+    ))
+
+    writer.writeForm("formIntSome", intOptForm, IntOptData("a", Some(8)))
+    writer.writeForm("formIntNone", intOptForm, IntOptData("b", None))
+  }
+
   def writeTestData(name: String)(thunk: JsonWriter => Unit): Unit = {
     it should s"write forms & jsons: $name" in {
       val file = new File(testClassesDir, s"$name.js")

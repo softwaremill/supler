@@ -72,15 +72,18 @@ class ReadFormValues {
   }
 
   private static appendFieldValue(result, fieldName, fieldValue, multiple) {
-    if (fieldValue !== null) {
-      if (result[fieldName] && multiple) {
+    if (multiple) {
+      // Always initializing to an empty array, if not yet set
+      result[fieldName] = result[fieldName] || [];
+
+      if (fieldValue !== null) {
         result[fieldName].push(fieldValue);
-      } else {
-        if (multiple) {
-          result[fieldName] = [fieldValue];
-        } else {
-          result[fieldName] = fieldValue;
-        }
+      }
+    } else {
+      // We need to serialize the null values for optional non-string fields. However, if the field already has
+      // a non-null, non-undefined value, keeping it. This is needed e.g. for radios and checkboxes.
+      if (result[fieldName] === null || typeof result[fieldName] === 'undefined') {
+        result[fieldName] = fieldValue;
       }
     }
   }

@@ -90,4 +90,36 @@ describe('serialization', function() {
     // then
     serialized.should.deep.equal(complexOptionalSubform.objNone);
   });
+
+  it('should serialize a form with an optional int when there is no value initially', function() {
+    // given
+    var sf = new SuplerForm(container);
+    sf.render(optionalInt.formIntNone);
+
+    // when
+    var serialized = sf.getValue();
+
+    // then
+    serialized.f1.should.equal('b');
+    assert.isNull(serialized.f2);
+  });
+
+  it('should serialize a form with an optional int when there is a value initially', function() {
+    // given
+    var sf = new SuplerForm(container);
+    sf.render(optionalInt.formIntSome);
+
+    // when
+    var serialized1 = sf.getValue();
+
+    byName('f2').val('');
+    var serialized2 = sf.getValue();
+
+    // then
+    serialized1.f1.should.equal('a');
+    serialized1.f2.should.equal(8);
+
+    serialized2.f1.should.equal('a');
+    assert.isNull(serialized2.f2);
+  });
 });
