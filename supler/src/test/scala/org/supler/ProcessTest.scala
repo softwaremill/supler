@@ -5,7 +5,7 @@ import Supler._
 import org.supler.field.ActionResult
 import org.json4s.native._
 
-class SuplerDataTest extends FlatSpec with ShouldMatchers {
+class ProcessTest extends FlatSpec with ShouldMatchers {
 
   case class Person(firstName: String, lastName: String)
 
