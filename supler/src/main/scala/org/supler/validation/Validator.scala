@@ -6,7 +6,7 @@ import org.supler.Message
 
 trait Validator[T, U] {
   def doValidate(objValue: T, fieldValue: U): List[Message]
-  def generateJSON: Option[JField]
+  def generateJSON: List[JField]
 }
 
 trait Validators {
@@ -32,11 +32,11 @@ trait Validators {
     fieldValidator[T, Int](_ > than)(_ => Message("error_number_le", than))(
       Some(JField("le", JInt(than))))
 
-  def ifDefined[T, U](v: Validator[T, U]): Validator[T, Option[U]] =
+  def ifDefined[T, U](vs: Validator[T, U]*): Validator[T, Option[U]] =
     new Validator[T, Option[U]] {
       override def doValidate(objValue: T, fieldValue: Option[U]) =
-        fieldValue.map(v.doValidate(objValue, _)).getOrElse(Nil)
-      override def generateJSON = v.generateJSON
+        fieldValue.map(fv => vs.toList.flatMap(_.doValidate(objValue, fv))).getOrElse(Nil)
+      override def generateJSON = vs.flatMap(_.generateJSON).toList
     }
 
   def custom[T, U](errorTest: (T, U) => Boolean, createError: (T, U) => Message): Validator[T, U] = new Validator[T, U] {
@@ -47,7 +47,7 @@ trait Validators {
         Nil
       }
     }
-    override def generateJSON = None
+    override def generateJSON = Nil
   }
 
   private def fieldValidator[T, U](errorTest: U => Boolean)(createError: U => Message)(json: Some[JField]) =
@@ -60,6 +60,6 @@ trait Validators {
         }
       }
 
-      override def generateJSON = json
+      override def generateJSON = json.toList
     }
 }
