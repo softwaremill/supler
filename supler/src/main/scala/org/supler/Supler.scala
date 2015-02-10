@@ -7,7 +7,7 @@ import org.supler.validation._
 import scala.language.experimental.macros
 
 // when editing javadocs, remember to synchronize with the methods on the trait!
-object Supler extends Validators {
+object Supler extends Validators with RenderHints {
   def form[T](rows: Supler[T] => List[Row[T]]): Form[T] = macro SuplerFormMacros.form_impl[T]
 
   def field[T, U](param: T => U)
@@ -55,16 +55,6 @@ object Supler extends Validators {
 
   def staticField[T](createMessage: T => Message) = new StaticField[T](createMessage, None,
     AlwaysCondition)
-
-  def asList() = SubformListRenderHint
-  def asTable() = SubformTableRenderHint
-
-  def asPassword() = BasicFieldPasswordRenderHint
-  def asTextarea(rows: Int = -1, cols: Int = -1) = {
-    def toOption(d: Int) = if (d == -1) None else Some(d)
-    BasicFieldTextareaRenderHint(toOption(rows), toOption(cols))
-  }
-  def asRadio() = BasicFieldRadioRenderHint
 }
 
 trait Supler[T] extends Validators {
@@ -113,4 +103,16 @@ trait Supler[T] extends Validators {
 
   def staticField(createMessage: T => Message) = new StaticField[T](createMessage, None,
     AlwaysCondition)
+}
+
+trait RenderHints {
+  def asList() = SubformListRenderHint
+  def asTable() = SubformTableRenderHint
+
+  def asPassword() = BasicFieldPasswordRenderHint
+  def asTextarea(rows: Int = -1, cols: Int = -1) = {
+    def toOption(d: Int) = if (d == -1) None else Some(d)
+    BasicFieldTextareaRenderHint(toOption(rows), toOption(cols))
+  }
+  def asRadio() = BasicFieldRadioRenderHint
 }
