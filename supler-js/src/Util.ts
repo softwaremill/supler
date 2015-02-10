@@ -73,3 +73,9 @@ class SelectValue {
   constructor(public index:number, public label:string) {
   }
 }
+
+class FieldUtil {
+  static fieldIsEmpty(fieldValue: any, emptyValue: any): boolean {
+    return fieldValue === null || fieldValue.length == 0 || fieldValue === emptyValue;
+  }
+}

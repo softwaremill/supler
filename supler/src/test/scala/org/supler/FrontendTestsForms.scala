@@ -195,6 +195,22 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("complexFormDisabled", complexForm, ConditionalComplex("disabled", List(ConditionalSimple("v1", "v2"))))
   }
 
+  writeTestData("validateIfDefinedOpt") { writer =>
+    case class StringOptData(f: Option[String])
+    case class IntOptData(f: Option[Int])
+
+    val stringOptForm = form[StringOptData](f => List(f.field(_.f).validate(ifDefined(minLength(5)))))
+    val intOptForm = form[IntOptData](f => List(f.field(_.f).validate(ifDefined(lt(10)))))
+
+    writer.writeForm("stringOkSome", stringOptForm, StringOptData(Some("abcdefghij")))
+    writer.writeForm("stringOkNone", stringOptForm, StringOptData(None))
+    writer.writeForm("stringError", stringOptForm, StringOptData(Some("abc")))
+
+    writer.writeForm("intOkSome", intOptForm, IntOptData(Some(8)))
+    writer.writeForm("intOkNone", intOptForm, IntOptData(None))
+    writer.writeForm("intError", intOptForm, IntOptData(Some(20)))
+  }
+
   def writeTestData(name: String)(thunk: JsonWriter => Unit): Unit = {
     it should s"write forms & jsons: $name" in {
       val file = new File(testClassesDir, s"$name.js")

@@ -172,4 +172,44 @@ describe('form validation', function() {
     var validationElement23 = validationElementByName('simple.field3');
     validationElement23.innerText.should.not.have.length(0);
   });
+
+  it('should validate optional string fields', function() {
+    // given
+    var sf = new SuplerForm(container);
+
+    // when
+    sf.render(validateIfDefinedOpt.stringOkSome);
+    var validationResultStringOkSome = sf.validate();
+
+    sf.render(validateIfDefinedOpt.stringOkNone);
+    var validationResultStringOkNone = sf.validate();
+
+    sf.render(validateIfDefinedOpt.stringError);
+    var validationResultStringError = sf.validate();
+
+    // then
+    validationResultStringOkSome.should.equal(false);
+    validationResultStringOkNone.should.equal(false);
+    validationResultStringError.should.equal(true);
+  });
+
+  it('should validate optional int fields', function() {
+    // given
+    var sf = new SuplerForm(container);
+
+    // when
+    sf.render(validateIfDefinedOpt.intOkSome);
+    var validationResultIntOkSome = sf.validate();
+
+    sf.render(validateIfDefinedOpt.intOkNone);
+    var validationResultIntOkNone = sf.validate();
+
+    sf.render(validateIfDefinedOpt.intError);
+    var validationResultIntError = sf.validate();
+
+    // then
+    validationResultIntOkSome.should.equal(false);
+    validationResultIntOkNone.should.equal(false);
+    validationResultIntError.should.equal(true);
+  });
 });

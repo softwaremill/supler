@@ -28,27 +28,28 @@ class CreateFormFromJson {
     var html = this.fieldHtmlFromJson(fieldData, formElementDictionary, compact);
 
     if (html) {
-      formElementDictionary.getElement(id).validator = new ElementValidator(this.fieldValidatorFns(fieldJson));
+      formElementDictionary.getElement(id).validator = new ElementValidator(
+        this.fieldValidatorFns(fieldData),
+        fieldData.validate.required,
+        fieldJson.empty_value);
       return html;
     } else {
       return null;
     }
   }
 
-  private fieldValidatorFns(fieldJson):ValidatorFn[] {
+  private fieldValidatorFns(fieldData: FieldData):ValidatorFn[] {
     var validators = [];
 
-    var typeValidator = this.validatorFnFactories['type_' + fieldJson.type];
+    var typeValidator = this.validatorFnFactories['type_' + fieldData.type];
     if (typeValidator) validators.push(typeValidator.apply(this));
 
-    var validatorsJson = fieldJson.validate;
-    if (validatorsJson) {
-      Util.foreach(validatorsJson, (validatorName, validatorJson) => {
-        if (this.validatorFnFactories[validatorName]) {
-          validators.push(this.validatorFnFactories[validatorName](validatorJson, fieldJson));
-        }
-      })
-    }
+    var validatorsJson = fieldData.validate;
+    Util.foreach(validatorsJson, (validatorName, validatorJson) => {
+      if (this.validatorFnFactories[validatorName]) {
+        validators.push(this.validatorFnFactories[validatorName](validatorJson, fieldData.json));
+      }
+    });
 
     return validators;
   }

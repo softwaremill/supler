@@ -14,13 +14,13 @@ interface ValidatorFn {
  * Type-specific validation functions don't accept configuration as they have special handling and don't need
  * configuration.
  */
-class DefaultValidatorFnFactories {
+class ValidatorFnFactories {
   constructor(private i18n:I18n) {
   }
 
   required(json, fieldJson):ValidatorFn {
     return (fieldValue:any) => {
-      if (json === true && (fieldValue === null || fieldValue.length == 0 || fieldValue === fieldJson.empty_value)) {
+      if (json === true && FieldUtil.fieldIsEmpty(fieldValue, fieldJson.empty_value)) {
         return this.i18n.error_valueRequired();
       } else return null;
     }

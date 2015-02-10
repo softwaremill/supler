@@ -11,6 +11,7 @@ class FieldData {
     this.multiple = json.multiple;
     this.type = json.type;
     this.enabled = json.enabled;
+    this.validate = json.validate || {};
   }
 
   public value: any;
@@ -18,6 +19,7 @@ class FieldData {
   public multiple: boolean;
   public type: string;
   public enabled: boolean;
+  public validate: any;
 
   getRenderHintName(): string {
     if (this.json.render_hint) {

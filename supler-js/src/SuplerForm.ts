@@ -19,7 +19,7 @@ class SuplerForm {
     Util.copyProperties(renderOptions, customOptions.render_options);
     this.renderOptionsGetter = new HTMLRenderTemplateParser(this.container).parse(renderOptions);
 
-    this.validatorFnFactories = new DefaultValidatorFnFactories(this.i18n);
+    this.validatorFnFactories = new ValidatorFnFactories(this.i18n);
     Util.copyProperties(this.validatorFnFactories, customOptions.validators);
 
     this.validatorRenderOptions = new ValidatorRenderOptions;
