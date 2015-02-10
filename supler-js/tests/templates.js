@@ -9,7 +9,7 @@ describe('templates', function() {
 
     // when
     var sf = new SuplerForm(container);
-    sf.render(simple1.form1);
+    sf.render(data.simple1.form1);
 
     // then
     byName('field1').attr('customattr').should.equal('z');
@@ -30,7 +30,7 @@ describe('templates', function() {
     });
 
     // when
-    sf.render(actionSimple.formOneActionValidateNone);
+    sf.render(data.actionSimple.formOneActionValidateNone);
 
     // then
     byName('addx').attr('customattr').should.equal('custombutton');
@@ -44,7 +44,7 @@ describe('templates', function() {
 
     // when
     var sf = new SuplerForm(container);
-    sf.render(simple1.form1);
+    sf.render(data.simple1.form1);
 
     var serialized1 = sf.getValue();
     var validate1 = sf.validate();

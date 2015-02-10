@@ -2,7 +2,7 @@ describe('conditional', function(){
   it('should render and serialize a form with a conditional enabled field normally', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(conditional.simpleFormEnabled);
+    sf.render(data.conditional.simpleFormEnabled);
 
     // when
     var serialized = sf.getValue();
@@ -20,7 +20,7 @@ describe('conditional', function(){
     var sf = new SuplerForm(container);
 
     // when
-    sf.render(conditional.simpleFormDisabled1);
+    sf.render(data.conditional.simpleFormDisabled1);
 
     // then
     var field1disabled = byName('f1').prop('disabled');
@@ -30,7 +30,7 @@ describe('conditional', function(){
   it('should not include disable fields when serializing', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(conditional.simpleFormDisabled1);
+    sf.render(data.conditional.simpleFormDisabled1);
 
     // when
     var serialized = sf.getValue();
@@ -42,7 +42,7 @@ describe('conditional', function(){
   it('should validate disabled fields', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(conditional.simpleFormDisabled2);
+    sf.render(data.conditional.simpleFormDisabled2);
 
     // when
     var validationResult = sf.validate();
@@ -59,7 +59,7 @@ describe('conditional', function(){
     var sf = new SuplerForm(container);
 
     // when
-    sf.render(conditional.complexFormDisabled);
+    sf.render(data.conditional.complexFormDisabled);
 
     // then
     var field1disabled = byName('f2[0].f1').prop('disabled');

@@ -2,19 +2,19 @@ describe('serialization', function() {
   it('should serialize a basic form', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(simple1.form1);
+    sf.render(data.simple1.form1);
 
     // when
     var serialized = sf.getValue();
 
     // then
-    serialized.should.deep.equal(simple1.obj1);
+    serialized.should.deep.equal(data.simple1.obj1);
   });
 
   it('should serialize after changes', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(simple1.form1);
+    sf.render(data.simple1.form1);
 
     // when
     byName('field1').val('v11');
@@ -34,67 +34,67 @@ describe('serialization', function() {
   it('should serialize a form with a list of subforms rendered as a table', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complexSubformsList.formTableNonEmpty);
+    sf.render(data.complexSubformsList.formTableNonEmpty);
 
     // when
     var serialized = sf.getValue();
 
     // then
-    serialized.should.deep.equal(complexSubformsList.objNonEmpty);
+    serialized.should.deep.equal(data.complexSubformsList.objNonEmpty);
   });
 
   it('should serialize a form with a list of subforms rendered as a list', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complexSubformsList.formListNonEmpty);
+    sf.render(data.complexSubformsList.formListNonEmpty);
 
     // when
     var serialized = sf.getValue();
 
     // then
-    serialized.should.deep.equal(complexSubformsList.objNonEmpty);
+    serialized.should.deep.equal(data.complexSubformsList.objNonEmpty);
   });
 
   it('should serialize a form with a single subform', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complexSingleSubform.form1);
+    sf.render(data.complexSingleSubform.form1);
 
     // when
     var serialized = sf.getValue();
 
     // then
-    serialized.should.deep.equal(complexSingleSubform.obj1);
+    serialized.should.deep.equal(data.complexSingleSubform.obj1);
   });
 
   it('should serialize a form with an optional subform, if the subform is present', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complexOptionalSubform.formSome);
+    sf.render(data.complexOptionalSubform.formSome);
 
     // when
     var serialized = sf.getValue();
 
     // then
-    serialized.should.deep.equal(complexOptionalSubform.objSome);
+    serialized.should.deep.equal(data.complexOptionalSubform.objSome);
   });
 
   it('should serialize a form with an optional subform, if the subform is absent', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complexOptionalSubform.formNone);
+    sf.render(data.complexOptionalSubform.formNone);
 
     // when
     var serialized = sf.getValue();
 
     // then
-    serialized.should.deep.equal(complexOptionalSubform.objNone);
+    serialized.should.deep.equal(data.complexOptionalSubform.objNone);
   });
 
   it('should serialize a form with an optional int when there is no value initially', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(optionalInt.formIntNone);
+    sf.render(data.optionalInt.formIntNone);
 
     // when
     var serialized = sf.getValue();
@@ -107,7 +107,7 @@ describe('serialization', function() {
   it('should serialize a form with an optional int when there is a value initially', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(optionalInt.formIntSome);
+    sf.render(data.optionalInt.formIntSome);
 
     // when
     var serialized1 = sf.getValue();

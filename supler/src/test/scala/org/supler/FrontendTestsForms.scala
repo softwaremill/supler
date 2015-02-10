@@ -237,7 +237,8 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
       println("Writing to file: " + file.getPath)
       val pw = new PrintWriter(file)
       try {
-        pw.write(s"var $name = {")
+        pw.write("var data = data || {};\n")
+        pw.write(s"data.$name = {")
         thunk(new JsonWriter(pw))
         pw.write("};")
       } finally {

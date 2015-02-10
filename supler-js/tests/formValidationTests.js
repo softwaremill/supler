@@ -2,7 +2,7 @@ describe('form validation', function() {
   it('should run client-side validation and add errors', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(simple1.form3invalid);
+    sf.render(data.simple1.form3invalid);
     byName('field1').val('');
 
     // when
@@ -21,7 +21,7 @@ describe('form validation', function() {
   it('should run client-side validation and not add errors if the validation scope is none', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(simple1.form3invalid);
+    sf.render(data.simple1.form3invalid);
     byName('field1').val('');
 
     // when
@@ -34,7 +34,7 @@ describe('form validation', function() {
   it('should run client-side validation and return false if there are none', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(simple1.form3invalid);
+    sf.render(data.simple1.form3invalid);
 
     // when
     byName('field3').val(11);
@@ -52,7 +52,7 @@ describe('form validation', function() {
     var sf = new SuplerForm(container);
 
     // when
-    sf.render(simple1.form3invalidValidated);
+    sf.render(data.simple1.form3invalidValidated);
 
     // then
     var validationElement = validationElementByName('field3');
@@ -62,13 +62,13 @@ describe('form validation', function() {
   it('should preserve client-side validation for fields with unchanged values after send', function() {
     // given
     var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
-      renderResponseFn(simple1.form3invalid);
+      renderResponseFn(data.simple1.form3invalid);
     };
 
     var sf = new SuplerForm(container, {
       send_form_function: sendFormFn
     });
-    sf.render(simple1.form3invalid);
+    sf.render(data.simple1.form3invalid);
 
     // when
     var validationResult = sf.validate();
@@ -84,13 +84,13 @@ describe('form validation', function() {
   it('should not preserve client-side validation for fields with changed values after send', function() {
     // given
     var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
-      renderResponseFn(simple1.form2); // field3 is changed
+      renderResponseFn(data.simple1.form2); // field3 is changed
     };
 
     var sf = new SuplerForm(container, {
       send_form_function: sendFormFn
     });
-    sf.render(simple1.form3invalid);
+    sf.render(data.simple1.form3invalid);
 
     // when
     var validationResult = sf.validate();
@@ -106,7 +106,7 @@ describe('form validation', function() {
   it('should validate fields in subforms list', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complexSubformsList.formListNonEmpty);
+    sf.render(data.complexSubformsList.formListNonEmpty);
 
     // when
     byName('simples[0].field1').val('');
@@ -132,7 +132,7 @@ describe('form validation', function() {
   it('should validate only the subform if the validation scope specifies so', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complexSubformsList.formListNonEmpty);
+    sf.render(data.complexSubformsList.formListNonEmpty);
 
     // when
     byName('field10').val('');
@@ -156,7 +156,7 @@ describe('form validation', function() {
   it('should validate fields in a single subform', function() {
     // given
     var sf = new SuplerForm(container);
-    sf.render(complexSingleSubform.form1);
+    sf.render(data.complexSingleSubform.form1);
 
     // when
     byName('simple.field1').val('');
@@ -178,13 +178,13 @@ describe('form validation', function() {
     var sf = new SuplerForm(container);
 
     // when
-    sf.render(validateIfDefinedOpt.stringOkSome);
+    sf.render(data.validateIfDefinedOpt.stringOkSome);
     var validationResultStringOkSome = sf.validate();
 
-    sf.render(validateIfDefinedOpt.stringOkNone);
+    sf.render(data.validateIfDefinedOpt.stringOkNone);
     var validationResultStringOkNone = sf.validate();
 
-    sf.render(validateIfDefinedOpt.stringError);
+    sf.render(data.validateIfDefinedOpt.stringError);
     var validationResultStringError = sf.validate();
 
     // then
@@ -198,13 +198,13 @@ describe('form validation', function() {
     var sf = new SuplerForm(container);
 
     // when
-    sf.render(validateIfDefinedOpt.intOkSome);
+    sf.render(data.validateIfDefinedOpt.intOkSome);
     var validationResultIntOkSome = sf.validate();
 
-    sf.render(validateIfDefinedOpt.intOkNone);
+    sf.render(data.validateIfDefinedOpt.intOkNone);
     var validationResultIntOkNone = sf.validate();
 
-    sf.render(validateIfDefinedOpt.intError);
+    sf.render(data.validateIfDefinedOpt.intError);
     var validationResultIntError = sf.validate();
 
     // then

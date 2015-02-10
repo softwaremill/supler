@@ -2,7 +2,7 @@ describe('send', function(){
   it('should refresh after field change', function(done) {
     // given
     var sendFormFn = function sendForm(formValue, renderResponseFn, sendErrorFn, isAction, triggeringElement) {
-      renderResponseFn(simple1.form2);
+      renderResponseFn(data.simple1.form2);
 
       // then
       byName('field1').val().should.equal('v1');
@@ -17,7 +17,7 @@ describe('send', function(){
     });
 
     // when
-    sf.render(simple1.form1);
+    sf.render(data.simple1.form1);
     byName('field1').change();
 
     // then in callback
@@ -48,7 +48,7 @@ describe('send', function(){
     });
 
     // when & then
-    sf.render(simple1.form1);
+    sf.render(data.simple1.form1);
     byName('field3').val(20);
 
     byName('field3').change();
@@ -58,11 +58,11 @@ describe('send', function(){
     state.should.equal(3);
 
     // first request completes, but another is started -> results should not be applied
-    renderResponseFn1(simple1.form2);
+    renderResponseFn1(data.simple1.form2);
     byName('field3').val().should.not.equal('15');
 
     // second request completes, results should be applied
-    renderResponseFn2(simple1.form2);
+    renderResponseFn2(data.simple1.form2);
     byName('field3').val().should.equal('15');
   });
 
@@ -85,7 +85,7 @@ describe('send', function(){
     });
 
     // when & then
-    sf.render(actionSimple.formOneActionValidateNone);
+    sf.render(data.actionSimple.formOneActionValidateNone);
 
     byName('addx').click();
     state.should.equal(2);
@@ -95,7 +95,7 @@ describe('send', function(){
     state = 3;
 
     // first request completes, but another is started -> results should not be applied
-    actionRenderResponseFn(actionSimple.formOneActionValidateNone2);
+    actionRenderResponseFn(data.actionSimple.formOneActionValidateNone2);
     byName('f1').val().should.equal('u');
   });
 
@@ -120,7 +120,7 @@ describe('send', function(){
     });
 
     // when & then
-    sf.render(actionSimple.formOneActionValidateNone);
+    sf.render(data.actionSimple.formOneActionValidateNone);
 
     byName('addx').click();
     state.should.equal(2);
@@ -129,7 +129,7 @@ describe('send', function(){
     state.should.equal(2);
 
     // first action completes, second should be started.
-    actionRenderResponseFn1(actionSimple.formOneActionValidateNone2);
+    actionRenderResponseFn1(data.actionSimple.formOneActionValidateNone2);
     state.should.equal(2);
   });
 
@@ -156,7 +156,7 @@ describe('send', function(){
     });
 
     // when & then
-    sf.render(simple1.form1);
+    sf.render(data.simple1.form1);
 
     byName('field3').change();
     state.should.equal(2);
@@ -164,7 +164,7 @@ describe('send', function(){
 
     byName('field3').change();
     state.should.equal(3);
-    renderResponseFn2(simple1.form2);
+    renderResponseFn2(data.simple1.form2);
 
     byName('field3').val().should.equal('15');
   });
@@ -180,7 +180,7 @@ describe('send', function(){
     });
 
     // when
-    sf.render(actionSimple.formTwoActionsOneValidateAll);
+    sf.render(data.actionSimple.formTwoActionsOneValidateAll);
     byName('f1').val('');
     byName('addy').click();
 
