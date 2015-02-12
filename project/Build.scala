@@ -2,22 +2,18 @@ import sbt.Keys._
 import sbt._
 import sbtassembly.Plugin._
 import AssemblyKeys._
+import bintray.Plugin.bintraySettings
+import bintray.Keys._
 
 object BuildSettings {
-  val buildSettings = Defaults.coreDefaultSettings ++ Seq(
-    organization := "com.softwaremill",
-    version := "0.3.0-SNAPSHOT",
+  val buildSettings = Defaults.coreDefaultSettings ++ bintraySettings ++ Seq(
+    organization := "com.softwaremill.supler",
+    version := "0.2.1",
     scalaVersion := "2.11.5",
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:existentials", "-language:higherKinds"),
-
-    // Sonatype OSS deployment
-    publishTo := {
-      val nexus = "https://oss.sonatype.org/"
-      val (name, url) = if (isSnapshot.value) ("snapshots", nexus + "content/repositories/snapshots")
-      else ("releases", nexus + "service/local/staging/deploy/maven2")
-      Some(name at url)
-    },
-    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+    // bintray
+    bintrayOrganization in bintray := Some("softwaremill"),
+    repository in bintray := "softwaremill",
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomExtra := <scm>
@@ -38,7 +34,7 @@ object BuildSettings {
       </developers>,
     parallelExecution := false,
     homepage := Some(new java.net.URL("https://github.com/softwaremill/supler")),
-    licenses := ("Apache2", new java.net.URL("http://www.apache.org/licenses/LICENSE-2.0.txt")) :: Nil
+    licenses := ("Apache-2.0", new java.net.URL("http://www.apache.org/licenses/LICENSE-2.0.txt")) :: Nil
   )
 }
 
