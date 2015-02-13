@@ -46,27 +46,25 @@ var CreateFormFromJson = (function () {
         var fieldData = new FieldData(id, validationId, fieldName, fieldJson, this.labelFor(fieldJson.label));
         var html = this.fieldHtmlFromJson(fieldData, formElementDictionary, compact);
         if (html) {
-            formElementDictionary.getElement(id).validator = new ElementValidator(this.fieldValidatorFns(fieldJson));
+            formElementDictionary.getElement(id).validator = new ElementValidator(this.fieldValidatorFns(fieldData), fieldData.validate.required, fieldJson.empty_value);
             return html;
         }
         else {
             return null;
         }
     };
-    CreateFormFromJson.prototype.fieldValidatorFns = function (fieldJson) {
+    CreateFormFromJson.prototype.fieldValidatorFns = function (fieldData) {
         var _this = this;
         var validators = [];
-        var typeValidator = this.validatorFnFactories['type_' + fieldJson.type];
+        var typeValidator = this.validatorFnFactories['type_' + fieldData.type];
         if (typeValidator)
             validators.push(typeValidator.apply(this));
-        var validatorsJson = fieldJson.validate;
-        if (validatorsJson) {
-            Util.foreach(validatorsJson, function (validatorName, validatorJson) {
-                if (_this.validatorFnFactories[validatorName]) {
-                    validators.push(_this.validatorFnFactories[validatorName](validatorJson, fieldJson));
-                }
-            });
-        }
+        var validatorsJson = fieldData.validate;
+        Util.foreach(validatorsJson, function (validatorName, validatorJson) {
+            if (_this.validatorFnFactories[validatorName]) {
+                validators.push(_this.validatorFnFactories[validatorName](validatorJson, fieldData.json));
+            }
+        });
         return validators;
     };
     CreateFormFromJson.prototype.fieldHtmlFromJson = function (fieldData, formElementDictionary, compact) {
@@ -80,6 +78,9 @@ var CreateFormFromJson = (function () {
             'supler:validationId': fieldData.validationId,
             'supler:path': fieldData.path
         }, renderOptions.additionalFieldOptions());
+        if (!fieldData.enabled) {
+            fieldOptions['disabled'] = true;
+        }
         switch (fieldData.type) {
             case FieldTypes.STRING:
                 return this.stringFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
@@ -156,7 +157,13 @@ var CreateFormFromJson = (function () {
             'supler:fieldName': fieldData.name,
             'supler:multiple': fieldData.multiple
         };
-        var values = fieldData.multiple ? fieldData.value : [fieldData.value];
+        var values;
+        if (typeof fieldData.value !== 'undefined') {
+            values = fieldData.multiple ? fieldData.value : [fieldData.value];
+        }
+        else
+            values = [];
+        this.propagateDisabled(fieldData, values);
         if (fieldData.getRenderHintName() === 'list') {
             for (var k in values) {
                 var subformResult = this.renderForm(values[k], formElementDictionary);
@@ -178,6 +185,13 @@ var CreateFormFromJson = (function () {
             subformHtml += renderOptions.renderSubformTable(headers, cells, options);
         }
         return renderOptions.renderSubformDecoration(subformHtml, fieldData.label, fieldData.id, fieldData.name);
+    };
+    CreateFormFromJson.prototype.propagateDisabled = function (fromFieldData, toSubforms) {
+        if (!fromFieldData.enabled) {
+            for (var k in toSubforms) {
+                Util.foreach(toSubforms[k].fields, function (k, v) { return v.enabled = false; });
+            }
+        }
     };
     CreateFormFromJson.prototype.staticFieldFromJson = function (renderOptions, fieldData, compact) {
         var value = this.i18n.fromKeyAndParams(fieldData.value.key, fieldData.value.params);
@@ -289,6 +303,8 @@ var FieldData = (function () {
         this.path = json.path;
         this.multiple = json.multiple;
         this.type = json.type;
+        this.enabled = json.enabled;
+        this.validate = json.validate || {};
     }
     FieldData.prototype.getRenderHintName = function () {
         if (this.json.render_hint) {
@@ -430,6 +446,9 @@ var ReadFormValues = (function () {
         if (result === void 0) { result = {}; }
         var fieldType = element.getAttribute(SuplerAttributes.FIELD_TYPE);
         var multiple = element.getAttribute(SuplerAttributes.MULTIPLE) === 'true';
+        if (element.disabled) {
+            return result;
+        }
         if (fieldType) {
             var fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
             switch (fieldType) {
@@ -478,17 +497,15 @@ var ReadFormValues = (function () {
         }
     };
     ReadFormValues.appendFieldValue = function (result, fieldName, fieldValue, multiple) {
-        if (fieldValue !== null) {
-            if (result[fieldName] && multiple) {
+        if (multiple) {
+            result[fieldName] = result[fieldName] || [];
+            if (fieldValue !== null) {
                 result[fieldName].push(fieldValue);
             }
-            else {
-                if (multiple) {
-                    result[fieldName] = [fieldValue];
-                }
-                else {
-                    result[fieldName] = fieldValue;
-                }
+        }
+        else {
+            if (result[fieldName] === null || typeof result[fieldName] === 'undefined') {
+                result[fieldName] = fieldValue;
             }
         }
     };
@@ -754,7 +771,7 @@ var SendControllerOptions = (function () {
         this.sendFormFunction = options.send_form_function;
     }
     SendControllerOptions.prototype.sendEnabled = function () {
-        return this.sendFormFunction !== null;
+        return this.sendFormFunction !== null && typeof this.sendFormFunction !== 'undefined';
     };
     return SendControllerOptions;
 })();
@@ -767,7 +784,7 @@ var SuplerForm = (function () {
         var renderOptions = new Bootstrap3RenderOptions();
         Util.copyProperties(renderOptions, customOptions.render_options);
         this.renderOptionsGetter = new HTMLRenderTemplateParser(this.container).parse(renderOptions);
-        this.validatorFnFactories = new DefaultValidatorFnFactories(this.i18n);
+        this.validatorFnFactories = new ValidatorFnFactories(this.i18n);
         Util.copyProperties(this.validatorFnFactories, customOptions.validators);
         this.validatorRenderOptions = new ValidatorRenderOptions;
         Util.copyProperties(this.validatorRenderOptions, customOptions.validation_render);
@@ -899,6 +916,14 @@ var SelectValue = (function () {
         this.label = label;
     }
     return SelectValue;
+})();
+var FieldUtil = (function () {
+    function FieldUtil() {
+    }
+    FieldUtil.fieldIsEmpty = function (fieldValue, emptyValue) {
+        return fieldValue === null || typeof fieldValue === 'undefined' || fieldValue.length == 0 || fieldValue === emptyValue;
+    };
+    return FieldUtil;
 })();
 var AllFieldMatcher = (function () {
     function AllFieldMatcher() {
@@ -1141,11 +1166,16 @@ var SingleTemplateParser = (function () {
     return SingleTemplateParser;
 })();
 var ElementValidator = (function () {
-    function ElementValidator(validatorFns) {
+    function ElementValidator(validatorFns, required, emptyValue) {
         this.validatorFns = validatorFns;
+        this.required = required;
+        this.emptyValue = emptyValue;
     }
     ElementValidator.prototype.validate = function (element) {
         var value = Util.getSingleProperty(ReadFormValues.getValueFrom(element));
+        if (this.required !== true && FieldUtil.fieldIsEmpty(value, this.emptyValue)) {
+            return [];
+        }
         var errors = [];
         for (var i = 0; i < this.validatorFns.length; i++) {
             var r = this.validatorFns[i](value);
@@ -1319,21 +1349,21 @@ var ValidationScopeParser = (function () {
     };
     return ValidationScopeParser;
 })();
-var DefaultValidatorFnFactories = (function () {
-    function DefaultValidatorFnFactories(i18n) {
+var ValidatorFnFactories = (function () {
+    function ValidatorFnFactories(i18n) {
         this.i18n = i18n;
     }
-    DefaultValidatorFnFactories.prototype.required = function (json, fieldJson) {
+    ValidatorFnFactories.prototype.required = function (json, fieldJson) {
         var _this = this;
         return function (fieldValue) {
-            if (json === true && (fieldValue === null || fieldValue.length == 0 || fieldValue === fieldJson.empty_value)) {
+            if (json === true && FieldUtil.fieldIsEmpty(fieldValue, fieldJson.empty_value)) {
                 return _this.i18n.error_valueRequired();
             }
             else
                 return null;
         };
     };
-    DefaultValidatorFnFactories.prototype.ge = function (json) {
+    ValidatorFnFactories.prototype.ge = function (json) {
         var _this = this;
         return function (fieldValue) {
             if (parseInt(fieldValue) >= json)
@@ -1342,7 +1372,7 @@ var DefaultValidatorFnFactories = (function () {
                 return _this.i18n.error_number_ge(json);
         };
     };
-    DefaultValidatorFnFactories.prototype.gt = function (json) {
+    ValidatorFnFactories.prototype.gt = function (json) {
         var _this = this;
         return function (fieldValue) {
             if (parseInt(fieldValue) > json)
@@ -1351,7 +1381,7 @@ var DefaultValidatorFnFactories = (function () {
                 return _this.i18n.error_number_gt(json);
         };
     };
-    DefaultValidatorFnFactories.prototype.le = function (json) {
+    ValidatorFnFactories.prototype.le = function (json) {
         var _this = this;
         return function (fieldValue) {
             if (parseInt(fieldValue) <= json)
@@ -1360,7 +1390,7 @@ var DefaultValidatorFnFactories = (function () {
                 return _this.i18n.error_number_le(json);
         };
     };
-    DefaultValidatorFnFactories.prototype.lt = function (json) {
+    ValidatorFnFactories.prototype.lt = function (json) {
         var _this = this;
         return function (fieldValue) {
             if (parseInt(fieldValue) < json)
@@ -1369,7 +1399,25 @@ var DefaultValidatorFnFactories = (function () {
                 return _this.i18n.error_number_lt(json);
         };
     };
-    DefaultValidatorFnFactories.prototype.type_integer = function () {
+    ValidatorFnFactories.prototype.min_length = function (json) {
+        var _this = this;
+        return function (fieldValue) {
+            if (fieldValue.length >= json)
+                return null;
+            else
+                return _this.i18n.error_length_tooShort(json);
+        };
+    };
+    ValidatorFnFactories.prototype.max_length = function (json) {
+        var _this = this;
+        return function (fieldValue) {
+            if (fieldValue.length <= json)
+                return null;
+            else
+                return _this.i18n.error_length_tooLong(json);
+        };
+    };
+    ValidatorFnFactories.prototype.type_integer = function () {
         var _this = this;
         return function (fieldValue) {
             if (parseInt(fieldValue) === fieldValue)
@@ -1378,7 +1426,7 @@ var DefaultValidatorFnFactories = (function () {
                 return _this.i18n.error_type_number();
         };
     };
-    return DefaultValidatorFnFactories;
+    return ValidatorFnFactories;
 })();
 var ValidatorRenderOptions = (function () {
     function ValidatorRenderOptions() {

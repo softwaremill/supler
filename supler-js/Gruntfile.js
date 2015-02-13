@@ -68,13 +68,7 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('test', [ 'ts', 'copy:testforms', 'mocha' ]);
+    grunt.registerTask('test', [ 'ts', 'copy:testforms', 'mocha', 'uglify:suplerjs', 'copy:suplerjs' ]);
 
     grunt.registerTask('dev', [ 'watch' ]);
-
-    grunt.registerTask('dist', [
-        'test',
-        'uglify:suplerjs',
-        'copy:suplerjs'
-    ]);
 };
