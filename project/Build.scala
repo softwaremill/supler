@@ -8,7 +8,7 @@ import bintray.Keys._
 object BuildSettings {
   val buildSettings = Defaults.coreDefaultSettings ++ bintraySettings ++ Seq(
     organization := "com.softwaremill.supler",
-    version := "0.2.1",
+    version := "0.3.0-SNAPSHOT",
     scalaVersion := "2.11.5",
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:existentials", "-language:higherKinds"),
     // bintray
@@ -34,6 +34,8 @@ object BuildSettings {
       </developers>,
     parallelExecution := false,
     homepage := Some(new java.net.URL("https://github.com/softwaremill/supler")),
+    publishTo := (if (isSnapshot.value) Some("Artifactory Realm" at "http://oss.jfrog.org/artifactory/oss-snapshot-local") else publishTo.value),
+    credentials := (if (isSnapshot.value) Credentials(Path.userHome / ".bintray" / ".artifactory") :: Nil else credentials.value),
     licenses := ("Apache-2.0", new java.net.URL("http://www.apache.org/licenses/LICENSE-2.0.txt")) :: Nil
   )
 }
