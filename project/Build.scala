@@ -8,7 +8,7 @@ import bintray.Keys._
 object BuildSettings {
   val buildSettings = Defaults.coreDefaultSettings ++ bintraySettings ++ Seq(
     organization := "com.softwaremill.supler",
-    version := "0.3.0-SNAPSHOT",
+    version := "0.2.2",
     scalaVersion := "2.11.5",
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:existentials", "-language:higherKinds"),
     // bintray
