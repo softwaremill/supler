@@ -26,3 +26,5 @@ project/plugins/project/
 **/node_modules
 
 .DS_Store
+
+.project.version.sh

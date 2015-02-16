@@ -41,16 +41,16 @@ object BuildSettings {
 }
 
 object Dependencies {
-  val scalaTest     = "org.scalatest"     %% "scalatest"      % "2.1.6"   % "test"
-  val json4sNative  = "org.json4s"        %% "json4s-native"  % "3.2.10"
-  val akka          = "com.typesafe.akka" %% "akka-actor"     % "2.3.4"
-  val jodaTime      = "joda-time"          % "joda-time"      % "2.5"
-  val jodaConvert   = "org.joda"           % "joda-convert"   % "1.7"
+  val scalaTest = "org.scalatest" %% "scalatest" % "2.1.6" % "test"
+  val json4sNative = "org.json4s" %% "json4s-native" % "3.2.10"
+  val akka = "com.typesafe.akka" %% "akka-actor" % "2.3.4"
+  val jodaTime = "joda-time" % "joda-time" % "2.5"
+  val jodaConvert = "org.joda" % "joda-convert" % "1.7"
 
-  val sprayVersion  = "1.3.1"
-  val sprayCan      = "io.spray"          %% "spray-can"      % sprayVersion
-  val sprayRouting  = "io.spray"          %% "spray-routing"  % sprayVersion
-  val sprayHttpx    = "io.spray"          %% "spray-httpx"    % sprayVersion
+  val sprayVersion = "1.3.1"
+  val sprayCan = "io.spray" %% "spray-can" % sprayVersion
+  val sprayRouting = "io.spray" %% "spray-routing" % sprayVersion
+  val sprayHttpx = "io.spray" %% "spray-httpx" % sprayVersion
 }
 
 object SuplerBuild extends Build {
@@ -64,12 +64,23 @@ object SuplerBuild extends Build {
     settings = buildSettings ++ Seq(publishArtifact := false)
   ) aggregate(supler, suplerjs, examples)
 
+  lazy val makeVersionSh = taskKey[Seq[File]]("Creates .project.version.sh file.")
+
   lazy val supler: Project = Project(
     "supler",
     file("supler"),
     settings = buildSettings ++ Seq(
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _),
-      libraryDependencies ++= Seq(json4sNative, scalaTest))
+      libraryDependencies ++= Seq(json4sNative, scalaTest),
+      makeVersionSh := {
+        val pf = new java.io.File(".project.version.sh")
+        val content = s"""
+                         |#!/bin/bash
+                         |export PROJECT_VERSION=${version.value}
+                      """.stripMargin
+        IO.write(pf, content)
+        Seq(pf)
+      })
   )
 
   lazy val createAndCopySuplerJs = taskKey[Unit]("Create and copy the supler js files.")
@@ -102,7 +113,7 @@ object SuplerBuild extends Build {
 
   val updateNpm = baseDirectory map { bd =>
     println("Updating NPM dependencies in " + bd)
-    haltOnCmdResultError(Process("npm install", bd)!)
+    haltOnCmdResultError(Process("npm install", bd) !)
     println("NPM dependencies updated")
   }
 

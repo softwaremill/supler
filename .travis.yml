@@ -2,8 +2,10 @@ language: scala
 scala:
 - 2.11.5
 after_success:
-- sh "$TRAVIS_BUILD_DIR/.travis.credentials.sh" && sbt publish
+- sh "$TRAVIS_BUILD_DIR/.travis.credentials.sh" && sbt publish && sbt makeVersionSh && sh .project.version.sh && sh .central.synchro.sh
 env:
   global:
   - secure: rI0yiqoisNVKhH/ofJ00Ymj47Uw4FYvxhiNmCv5LObfu6dQQohaMi9BAVzpr+aVvBeXfWT5As9giTuDZfcxkHoXXMM0VIEgp5XpLxRFDOJBmvgagJqN/tM22yU3aDexQm/ORBpETLnYtvbazbo6q7fYT+pfc8HEtu8BfbpLe4ro=
   - secure: f2iy9eo7ZQThWGNW1kCllTEFaGi9EuiJKYnRe6SsbXZjmxeo8Q+KvPvbqOjkvdH43krFySnrF1VO/fdhDMcP2XmnCkyyX37K/c/iOZSWoyCydYeydM0YgNoUpoxiFC9WCgffSWI4q1Tn0RsC+yzXrysXf6/ii4S8SBuRv4yBTHA=
+  - secure: f3IJrafmfHgCY5HNep4/jO6K0KBpc4wkKm4yG3sK/lzcRS0oD9t1/rY1YbO7msUcIp4YcLOVJvBIKIwfNSI5yA+5RTogeW1LllE5WawvxsRPfeH1MJneb/eTpRzBjAVyK/9u3l9KzuPt+GDJuILK2Sc7XaihKj5mhXmQ5mI2aoI=
+  - secure: FTcC++wfkERq/HWopJQyG6BctvhUUw2EySyshksN3B5aVekztT+fx55OFM0BmZ75EyGhq4r0SFJvirCcmq9+uUwQse++OqZbNEGw/71FB55FD1Wzo5Xg+XaO6FS2YU+J58dPWhBTHCurP+ETqxFz/oPIOAPbHSIvGsvESlLshrA=
