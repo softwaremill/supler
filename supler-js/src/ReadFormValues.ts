@@ -25,6 +25,10 @@ class ReadFormValues {
           ReadFormValues.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
           break;
 
+        case FieldTypes.FLOAT:
+          ReadFormValues.appendFieldValue(result, fieldName, this.parseFloatOrNull(this.getElementValue(element)), multiple);
+          break;
+
         case FieldTypes.SELECT:
           ReadFormValues.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
           break;
@@ -90,6 +94,15 @@ class ReadFormValues {
 
   private static parseIntOrNull(v):number {
     var p = parseInt(v);
+    if (isNaN(p)) {
+      return null;
+    } else {
+      return p;
+    }
+  }
+
+  private static parseFloatOrNull(v):number {
+    var p = parseFloat(v);
     if (isNaN(p)) {
       return null;
     } else {

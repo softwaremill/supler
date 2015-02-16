@@ -219,6 +219,20 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("intError", intOptForm, IntOptData(Some(20)))
   }
 
+  writeTestData("validateNumbers") { writer =>
+    case class Data(f1: Int, f2: Long, f3: Float, f4: Double)
+
+    val validateNumbersForm = form[Data](f => List(
+      f.field(_.f1).validate(ge(10)),
+      f.field(_.f2).validate(ge(10L)),
+      f.field(_.f3).validate(ge(10.2f)),
+      f.field(_.f4).validate(ge(10.2d))
+    ))
+
+    writer.writeForm("formOk", validateNumbersForm, Data(20, 20L, 10.3f, 10.3d))
+    writer.writeForm("formError", validateNumbersForm, Data(2, 2L, 10.1f, 10.1d))
+  }
+
   writeTestData("optionalInt") { writer =>
     case class IntOptData(f1: String, f2: Option[Int])
 

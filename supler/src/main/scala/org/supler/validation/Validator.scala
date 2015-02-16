@@ -1,7 +1,7 @@
 package org.supler.validation
 
 import org.json4s.JField
-import org.json4s.JsonAST.JInt
+import org.json4s.JsonAST.{JDouble, JInt}
 import org.supler.Message
 
 trait Validator[T, U] {
@@ -16,21 +16,21 @@ trait Validators {
   def maxLength[T](maxLength: Int) =
     fieldValidator[T, String](_.length <= maxLength)(_ => Message("error_length_tooLong", maxLength))(Some(JField("max_length", JInt(maxLength))))
 
-  def gt[T](than: Int) =
-    fieldValidator[T, Int](_ > than)(_ => Message("error_number_gt", than))(
-      Some(JField("gt", JInt(than))))
+  def gt[T, U](than: U)(implicit num: Numeric[U]) =
+    fieldValidator[T, U](num.gt(_, than))(_ => Message("error_number_gt", than))(
+      Some(JField("gt", JDouble(num.toDouble(than)))))
 
-  def lt[T](than: Int) =
-    fieldValidator[T, Int](_ < than)(_ => Message("error_number_lt", than))(
-      Some(JField("lt", JInt(than))))
+  def lt[T, U](than: U)(implicit num: Numeric[U]) =
+    fieldValidator[T, U](num.lt(_, than))(_ => Message("error_number_lt", than))(
+      Some(JField("lt", JDouble(num.toDouble(than)))))
 
-  def ge[T](than: Int) =
-    fieldValidator[T, Int](_ >= than)(_ => Message("error_number_ge", than))(
-      Some(JField("ge", JInt(than))))
+  def ge[T, U](than: U)(implicit num: Numeric[U]) =
+    fieldValidator[T, U](num.gteq(_, than))(_ => Message("error_number_ge", than))(
+      Some(JField("ge", JDouble(num.toDouble(than)))))
 
-  def le[T](than: Int) =
-    fieldValidator[T, Int](_ <= than)(_ => Message("error_number_le", than))(
-      Some(JField("le", JInt(than))))
+  def le[T, U](than: U)(implicit num: Numeric[U]) =
+    fieldValidator[T, U](num.lteq(_, than))(_ => Message("error_number_le", than))(
+      Some(JField("le", JDouble(num.toDouble(than)))))
 
   def ifDefined[T, U](vs: Validator[T, U]*): Validator[T, Option[U]] =
     new Validator[T, Option[U]] {

@@ -28,25 +28,25 @@ class ValidatorFnFactories {
 
   ge(json):ValidatorFn {
     return (fieldValue:any) => {
-      if (parseInt(fieldValue) >= json) return null; else return this.i18n.error_number_ge(json);
+      if (parseFloat(fieldValue) >= json) return null; else return this.i18n.error_number_ge(json);
     }
   }
 
   gt(json):ValidatorFn {
     return (fieldValue:any) => {
-      if (parseInt(fieldValue) > json) return null; else return this.i18n.error_number_gt(json);
+      if (parseFloat(fieldValue) > json) return null; else return this.i18n.error_number_gt(json);
     }
   }
 
   le(json):ValidatorFn {
     return (fieldValue:any) => {
-      if (parseInt(fieldValue) <= json) return null; else return this.i18n.error_number_le(json);
+      if (parseFloat(fieldValue) <= json) return null; else return this.i18n.error_number_le(json);
     }
   }
 
   lt(json):ValidatorFn {
     return (fieldValue:any) => {
-      if (parseInt(fieldValue) < json) return null; else return this.i18n.error_number_lt(json);
+      if (parseFloat(fieldValue) < json) return null; else return this.i18n.error_number_lt(json);
     }
   }
 
@@ -65,6 +65,12 @@ class ValidatorFnFactories {
   type_integer():ValidatorFn {
     return (fieldValue:any) => {
       if (parseInt(fieldValue) === fieldValue) return null; else return this.i18n.error_type_number();
+    }
+  }
+
+  type_float():ValidatorFn {
+    return (fieldValue:any) => {
+      if (parseFloat(fieldValue) === fieldValue) return null; else return this.i18n.error_type_number();
     }
   }
 }

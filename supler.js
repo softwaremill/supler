@@ -3,6 +3,7 @@ var FieldTypes = (function () {
     }
     FieldTypes.STRING = 'string';
     FieldTypes.INTEGER = 'integer';
+    FieldTypes.FLOAT = 'float';
     FieldTypes.BOOLEAN = 'boolean';
     FieldTypes.SELECT = 'select';
     FieldTypes.SUBFORM = 'subform';
@@ -86,6 +87,8 @@ var CreateFormFromJson = (function () {
                 return this.stringFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
             case FieldTypes.INTEGER:
                 return renderOptions.renderIntegerField(fieldData, fieldOptions, compact);
+            case FieldTypes.FLOAT:
+                return renderOptions.renderFloatField(fieldData, fieldOptions, compact);
             case FieldTypes.BOOLEAN:
                 return this.booleanFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
             case FieldTypes.SELECT:
@@ -458,6 +461,9 @@ var ReadFormValues = (function () {
                 case FieldTypes.INTEGER:
                     ReadFormValues.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
                     break;
+                case FieldTypes.FLOAT:
+                    ReadFormValues.appendFieldValue(result, fieldName, this.parseFloatOrNull(this.getElementValue(element)), multiple);
+                    break;
                 case FieldTypes.SELECT:
                     ReadFormValues.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
                     break;
@@ -518,6 +524,15 @@ var ReadFormValues = (function () {
             return p;
         }
     };
+    ReadFormValues.parseFloatOrNull = function (v) {
+        var p = parseFloat(v);
+        if (isNaN(p)) {
+            return null;
+        }
+        else {
+            return p;
+        }
+    };
     ReadFormValues.parseBooleanOrNull = function (v) {
         var p = parseInt(v);
         if (isNaN(p)) {
@@ -538,7 +553,7 @@ var Bootstrap3RenderOptions = (function () {
     Bootstrap3RenderOptions.prototype.renderIntegerField = function (fieldData, options, compact) {
         return this.renderField(this.renderHtmlInput('number', fieldData.value, options), fieldData, compact);
     };
-    Bootstrap3RenderOptions.prototype.renderDoubleField = function (fieldData, options, compact) {
+    Bootstrap3RenderOptions.prototype.renderFloatField = function (fieldData, options, compact) {
         return this.renderField(this.renderHtmlInput('number', fieldData.value, options), fieldData, compact);
     };
     Bootstrap3RenderOptions.prototype.renderPasswordField = function (fieldData, options, compact) {
@@ -1362,7 +1377,7 @@ var ValidatorFnFactories = (function () {
     ValidatorFnFactories.prototype.ge = function (json) {
         var _this = this;
         return function (fieldValue) {
-            if (parseInt(fieldValue) >= json)
+            if (parseFloat(fieldValue) >= json)
                 return null;
             else
                 return _this.i18n.error_number_ge(json);
@@ -1371,7 +1386,7 @@ var ValidatorFnFactories = (function () {
     ValidatorFnFactories.prototype.gt = function (json) {
         var _this = this;
         return function (fieldValue) {
-            if (parseInt(fieldValue) > json)
+            if (parseFloat(fieldValue) > json)
                 return null;
             else
                 return _this.i18n.error_number_gt(json);
@@ -1380,7 +1395,7 @@ var ValidatorFnFactories = (function () {
     ValidatorFnFactories.prototype.le = function (json) {
         var _this = this;
         return function (fieldValue) {
-            if (parseInt(fieldValue) <= json)
+            if (parseFloat(fieldValue) <= json)
                 return null;
             else
                 return _this.i18n.error_number_le(json);
@@ -1389,7 +1404,7 @@ var ValidatorFnFactories = (function () {
     ValidatorFnFactories.prototype.lt = function (json) {
         var _this = this;
         return function (fieldValue) {
-            if (parseInt(fieldValue) < json)
+            if (parseFloat(fieldValue) < json)
                 return null;
             else
                 return _this.i18n.error_number_lt(json);
@@ -1417,6 +1432,15 @@ var ValidatorFnFactories = (function () {
         var _this = this;
         return function (fieldValue) {
             if (parseInt(fieldValue) === fieldValue)
+                return null;
+            else
+                return _this.i18n.error_type_number();
+        };
+    };
+    ValidatorFnFactories.prototype.type_float = function () {
+        var _this = this;
+        return function (fieldValue) {
+            if (parseFloat(fieldValue) === fieldValue)
                 return null;
             else
                 return _this.i18n.error_type_number();

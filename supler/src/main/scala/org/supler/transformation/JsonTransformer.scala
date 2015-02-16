@@ -32,13 +32,13 @@ object JsonTransformer {
   }
 
   implicit object FloatJsonTransformer extends JsonTransformer[Float] {
-    val jsonSchemaName = "double"
+    val jsonSchemaName = "float"
     def toNonNullJValue(value: Float) = Some(JDouble(value))
     def fromJValue = { case JDouble(v) => v.toFloat }
   }
 
   implicit object DoubleJsonTransformer extends JsonTransformer[Double] {
-    val jsonSchemaName = "double"
+    val jsonSchemaName = "float"
     def toNonNullJValue(value: Double) = Some(JDouble(value))
     def fromJValue = { case JDouble(v) => v }
   }

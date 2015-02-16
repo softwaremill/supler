@@ -212,4 +212,19 @@ describe('form validation', function() {
     validationResultIntOkNone.should.equal(false);
     validationResultIntError.should.equal(true);
   });
+
+  it('should validate all types of numeric fields', function() {
+    var sf = new SuplerForm(container);
+
+    sf.render(data.validateNumbers.formOk);
+    sf.validate().should.equal(false);
+
+    sf.render(data.validateNumbers.formError);
+    sf.validate().should.equal(true);
+
+    validationElementByName('f1').innerText.should.not.have.length(0);
+    validationElementByName('f2').innerText.should.not.have.length(0);
+    validationElementByName('f3').innerText.should.not.have.length(0);
+    validationElementByName('f4').innerText.should.not.have.length(0);
+  })
 });

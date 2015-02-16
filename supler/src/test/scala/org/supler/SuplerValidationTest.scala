@@ -135,4 +135,43 @@ class SuplerValidationTest extends FlatSpec with ShouldMatchers {
     field1.doValidate(EmptyPath, dataError, ValidateAll).size should be (1)
     field1.doValidate(EmptyPath, dataOkNone, ValidateAll).size should be (0)
   }
+
+  "field" should "validate ints, longs, doubles and floats" in {
+    // given
+    case class IntData(f1: Int)
+    case class LongData(f1: Long)
+    case class DoubleData(f1: Double)
+    case class FloatData(f1: Float)
+
+    val intDataOk = IntData(20)
+    val intDataError = IntData(5)
+
+    val longDataOk = LongData(20L)
+    val longDataError = LongData(5L)
+
+    val doubleDataOk = DoubleData(10.3d)
+    val doubleDataError = DoubleData(10.1d)
+
+    val floatDataOk = FloatData(10.3f)
+    val floatDataError = FloatData(10.1f)
+
+    // when
+    val intForm = form[IntData](f => List(f.field(_.f1).validate(gt(10))))
+    val longForm = form[LongData](f => List(f.field(_.f1).validate(gt(10L))))
+    val doubleForm = form[DoubleData](f => List(f.field(_.f1).validate(gt(10.2d))))
+    val floatForm = form[FloatData](f => List(f.field(_.f1).validate(gt(10.2f))))
+
+    // then
+    intForm(intDataOk).doValidate().errors.size should be (0)
+    intForm(intDataError).doValidate().errors.size should be (1)
+
+    longForm(longDataOk).doValidate().errors.size should be (0)
+    longForm(longDataError).doValidate().errors.size should be (1)
+
+    doubleForm(doubleDataOk).doValidate().errors.size should be (0)
+    doubleForm(doubleDataError).doValidate().errors.size should be (1)
+
+    floatForm(floatDataOk).doValidate().errors.size should be (0)
+    floatForm(floatDataError).doValidate().errors.size should be (1)
+  }
 }

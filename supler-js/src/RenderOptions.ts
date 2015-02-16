@@ -11,7 +11,7 @@ interface RenderOptions {
   // basic types
   renderStringField: RenderAnyValueField
   renderIntegerField: RenderAnyValueField
-  renderDoubleField: RenderAnyValueField
+  renderFloatField: RenderAnyValueField
   renderPasswordField: RenderAnyValueField
   renderTextareaField: RenderAnyValueField
   renderMultiChoiceCheckboxField: RenderPossibleValuesField
@@ -57,7 +57,7 @@ class Bootstrap3RenderOptions implements RenderOptions {
     return this.renderField(this.renderHtmlInput('number', fieldData.value, options), fieldData, compact);
   }
 
-  renderDoubleField(fieldData, options, compact) {
+  renderFloatField(fieldData, options, compact) {
     return this.renderField(this.renderHtmlInput('number', fieldData.value, options), fieldData, compact);
   }
 

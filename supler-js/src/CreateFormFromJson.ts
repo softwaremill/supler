@@ -81,6 +81,9 @@ class CreateFormFromJson {
       case FieldTypes.INTEGER:
         return renderOptions.renderIntegerField(fieldData, fieldOptions, compact);
 
+      case FieldTypes.FLOAT:
+        return renderOptions.renderFloatField(fieldData, fieldOptions, compact);
+
       case FieldTypes.BOOLEAN:
         return this.booleanFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
 
