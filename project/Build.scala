@@ -64,7 +64,7 @@ object SuplerBuild extends Build {
     settings = buildSettings ++ Seq(publishArtifact := false)
   ) aggregate(supler, suplerjs, examples)
 
-  lazy val makeVersionSh = taskKey[Seq[File]]("Creates .project.version.sh file.")
+  lazy val makeVersionSh = taskKey[Seq[File]]("Creates .run.central.synchro.sh file.")
 
   lazy val supler: Project = Project(
     "supler",
@@ -73,10 +73,11 @@ object SuplerBuild extends Build {
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _),
       libraryDependencies ++= Seq(json4sNative, scalaTest),
       makeVersionSh := {
-        val pf = new java.io.File(".project.version.sh")
+        val pf = new java.io.File(".run.central.synchro.sh")
         val content = s"""
                          |#!/bin/bash
                          |export PROJECT_VERSION=${version.value}
+                         |sh .central.synchro.sh
                       """.stripMargin
         IO.write(pf, content)
         Seq(pf)
