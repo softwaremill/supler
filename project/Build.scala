@@ -74,10 +74,8 @@ object SuplerBuild extends Build {
       libraryDependencies ++= Seq(json4sNative, scalaTest),
       makeVersionSh := {
         val pf = new java.io.File(".run.central.synchro.sh")
-        val content = s"""
-                         |#!/bin/bash
-                         |export PROJECT_VERSION=${version.value}
-                         |sh .central.synchro.sh
+        val content = s"""|#!/bin/bash
+                          |PROJECT_VERSION=${version.value} sh .central.synchro.sh
                       """.stripMargin
         IO.write(pf, content)
         Seq(pf)
