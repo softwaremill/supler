@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 if [[ ${PROJECT_VERSION} != *-SNAPSHOT ]]
 then
     curl -vvf -u$BINTRAY_USER:$BINTRAY_PASSWORD -H "Content-Type: application/json" \
