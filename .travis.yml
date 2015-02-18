@@ -2,7 +2,7 @@ language: scala
 scala:
 - 2.11.5
 after_success:
-- sh "$TRAVIS_BUILD_DIR/.travis.credentials.sh" && sbt publish && sbt makeVersionSh && cat .run.central.synchro.sh && sh .run.central.synchro.sh
+- /bin/bash "$TRAVIS_BUILD_DIR/.travis.credentials.sh" && sbt publish && sbt makeVersionSh && /bin/bash .run.central.synchro.sh
 env:
   global:
   - secure: rI0yiqoisNVKhH/ofJ00Ymj47Uw4FYvxhiNmCv5LObfu6dQQohaMi9BAVzpr+aVvBeXfWT5As9giTuDZfcxkHoXXMM0VIEgp5XpLxRFDOJBmvgagJqN/tM22yU3aDexQm/ORBpETLnYtvbazbo6q7fYT+pfc8HEtu8BfbpLe4ro=

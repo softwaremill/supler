@@ -8,7 +8,7 @@ import bintray.Keys._
 object BuildSettings {
   val buildSettings = Defaults.coreDefaultSettings ++ bintraySettings ++ Seq(
     organization := "com.softwaremill.supler",
-    version := "0.2.2",
+    version := "0.2.3",
     scalaVersion := "2.11.5",
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:existentials", "-language:higherKinds"),
     // bintray
@@ -75,7 +75,7 @@ object SuplerBuild extends Build {
       makeVersionSh := {
         val pf = new java.io.File(".run.central.synchro.sh")
         val content = s"""|#!/bin/bash
-                          |PROJECT_VERSION=${version.value} sh .central.synchro.sh
+                          |PROJECT_VERSION=${version.value} /bin/bash .central.synchro.sh
                       """.stripMargin
         IO.write(pf, content)
         Seq(pf)
