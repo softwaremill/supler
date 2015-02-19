@@ -1,4 +1,8 @@
 class Util {
+  static thisMethodShouldKillTheBuild() {
+    return 42;
+  }
+
   static foreach(obj:any, fn:(k:any, v:any) => void) {
     for (var k in obj) {
       if (obj.hasOwnProperty(k)) {
