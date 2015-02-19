@@ -1,7 +1,7 @@
 #!/bin/bash
 if [[ `git status --porcelain supler.js` != "" ]] || [[ `git status --porcelain supler.min.js` != "" ]]
 then
-    return -100
+    exit 100
 else
-    return 0
+    exit 0
 fi
