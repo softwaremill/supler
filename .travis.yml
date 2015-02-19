@@ -1,7 +1,8 @@
 language: scala
 scala:
 - 2.11.5
-before_script:
+script:
+- sbt ++$TRAVIS_SCALA_VERSION test
 - /bin/bash .check.supler.commited.sh
 after_success:
 - /bin/bash "$TRAVIS_BUILD_DIR/.travis.credentials.sh" && sbt publish && sbt makeVersionSh && /bin/bash .run.central.synchro.sh
