@@ -112,6 +112,8 @@ class CreateFormFromJson {
         {rows: fieldData.json.render_hint.rows, cols: fieldData.json.render_hint.cols},
         fieldOptions);
       return renderOptions.renderTextareaField(fieldData, fieldOptionsWithDim, compact);
+    } else if (fieldData.getRenderHintName() === 'hidden') {
+      return renderOptions.renderHiddenField(fieldData, fieldOptions, compact);
     } else {
       return renderOptions.renderStringField(fieldData, fieldOptions, compact);
     }

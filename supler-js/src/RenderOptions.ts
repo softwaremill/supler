@@ -13,6 +13,7 @@ interface RenderOptions {
   renderIntegerField: RenderAnyValueField
   renderFloatField: RenderAnyValueField
   renderPasswordField: RenderAnyValueField
+  renderHiddenField: RenderAnyValueField
   renderTextareaField: RenderAnyValueField
   renderMultiChoiceCheckboxField: RenderPossibleValuesField
   renderMultiChoiceSelectField: RenderPossibleValuesField
@@ -63,6 +64,10 @@ class Bootstrap3RenderOptions implements RenderOptions {
 
   renderPasswordField(fieldData, options, compact) {
     return this.renderField(this.renderHtmlInput('password', fieldData.value, options), fieldData, compact);
+  }
+
+  renderHiddenField(fieldData, options, compact) {
+    return this.renderField(this.renderHtmlInput('hidden', fieldData.value, options), fieldData, compact);
   }
 
   renderTextareaField(fieldData, options, compact) {

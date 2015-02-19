@@ -1,5 +1,7 @@
 package org.demo
 
+import java.util.UUID
+
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.supler.field.ActionResult
@@ -57,7 +59,8 @@ object PersonForm {
     f.action("addcar")(p => ActionResult(p.copy(cars = p.cars :+ Car("", "", 0)))).label("Add car"),
     f.subform(_.legoSets, legoSetForm(f.parentAction((person, index, ls) => ActionResult(deleteLegoSet(person, ls))))).label("Lego sets").renderHint(asTable()),
     f.action("addlegoset")(p => ActionResult(p.copy(legoSets = p.legoSets :+ LegoSet("", "", 0, 0)))).label("Add lego set"),
-    f.staticField(p => Message(p.registrationDate)).label("Registration date")
+    f.staticField(p => Message(p.registrationDate)).label("Registration date"),
+    f.field(_.id).renderHint(asHidden())
   ))
 
   def deleteCar(p: Person, c: Car): Person = p.copy(cars = p.cars diff List(c))
@@ -77,7 +80,8 @@ object PersonForm {
     likesBroccoli: Boolean,
     cars: List[Car],
     legoSets: List[LegoSet],
-    registrationDate: DateTime)
+    registrationDate: DateTime,
+    id : String)
 
   case class Car(
     make: String,
@@ -101,5 +105,5 @@ object PersonForm {
       LegoSet("Motorcycle", "Technic", 1924, 31),
       LegoSet("Arctic Supply Plane", "City", 60064, 1),
       LegoSet("Princess and Horse", "Duplo", 4825, 7)),
-    new DateTime(2012, 2, 19, 0, 0))
+    new DateTime(2012, 2, 19, 0, 0), UUID.randomUUID().toString)
 }

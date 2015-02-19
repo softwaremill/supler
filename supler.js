@@ -111,6 +111,9 @@ var CreateFormFromJson = (function () {
             var fieldOptionsWithDim = Util.copyProperties({ rows: fieldData.json.render_hint.rows, cols: fieldData.json.render_hint.cols }, fieldOptions);
             return renderOptions.renderTextareaField(fieldData, fieldOptionsWithDim, compact);
         }
+        else if (fieldData.getRenderHintName() === 'hidden') {
+            return renderOptions.renderHiddenField(fieldData, fieldOptions, compact);
+        }
         else {
             return renderOptions.renderStringField(fieldData, fieldOptions, compact);
         }
@@ -558,6 +561,9 @@ var Bootstrap3RenderOptions = (function () {
     };
     Bootstrap3RenderOptions.prototype.renderPasswordField = function (fieldData, options, compact) {
         return this.renderField(this.renderHtmlInput('password', fieldData.value, options), fieldData, compact);
+    };
+    Bootstrap3RenderOptions.prototype.renderHiddenField = function (fieldData, options, compact) {
+        return this.renderField(this.renderHtmlInput('hidden', fieldData.value, options), fieldData, compact);
     };
     Bootstrap3RenderOptions.prototype.renderTextareaField = function (fieldData, options, compact) {
         return this.renderField(this.renderHtmlTextarea(fieldData.value, options), fieldData, compact);

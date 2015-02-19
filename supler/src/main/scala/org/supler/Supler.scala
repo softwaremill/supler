@@ -119,4 +119,5 @@ trait RenderHints {
     BasicFieldTextareaRenderHint(toOption(rows), toOption(cols))
   }
   def asRadio() = BasicFieldRadioRenderHint
+  def asHidden() = BasicFieldHiddenRenderHint
 }
