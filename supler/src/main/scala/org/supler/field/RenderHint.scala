@@ -10,8 +10,11 @@ case object BasicFieldPasswordRenderHint extends RenderHint("password") with Bas
 case class BasicFieldTextareaRenderHint(rows: Option[Int], cols: Option[Int]) extends RenderHint("textarea") with BasicFieldCompatible {
   override def extraJSON = rows.map(r => JField("rows", JInt(r))).toList ++ cols.map(c => JField("cols", JInt(c))).toList
 }
-case object BasicFieldRadioRenderHint extends RenderHint("radio") with BasicFieldCompatible
+
 case object BasicFieldHiddenRenderHint extends RenderHint("hidden") with BasicFieldCompatible
+
+case object SelectOneFieldRadioRenderHint extends RenderHint("radio") with SelectOneFieldCompatible
+case object SelectOneFieldDropdownRenderHint extends RenderHint("dropdown") with SelectOneFieldCompatible
 
 case object SubformTableRenderHint extends RenderHint("table") with SubformFieldCompatible
 case object SubformListRenderHint extends RenderHint("list") with SubformFieldCompatible

@@ -1,5 +1,6 @@
 package org.supler.field
 
 trait BasicFieldCompatible
-trait SetFieldCompatible
+trait SelectOneFieldCompatible
+trait SelectManyFieldCompatible
 trait SubformFieldCompatible

@@ -22,18 +22,8 @@ object SuplerFieldMacros {
     val writeFieldValueExpr = generateFieldWrite[T, U](c)(fieldName, classSymbol)
 
     val fieldValueType = implicitly[WeakTypeTag[U]].tpe
-
-    val isOption = fieldValueType.typeSymbol.asClass.fullName == "scala.Option"
-    val isRequiredExpr = c.Expr[Boolean](Literal(Constant(!isOption)))
-
-    // If the field is a boolean, both values are non-empty by default. For other types, there's a reasonable default
-    // which can be considered as "empty" (for "required" validation).
-    val emptyValue = if (fieldValueType <:< typeOf[Boolean]) reify[Option[U]] { None } else {
-      defaultForType(c)(fieldValueType) match {
-        case Some(defaultExpr) => c.Expr[Option[U]](reify { Some(defaultExpr.splice) }.tree)
-        case None => c.Expr[Option[U]](reify { None }.tree)
-      }
-    }
+    val isRequiredExpr = generateIsRequired(c)(fieldValueType)
+    val emptyValue = generateEmptyValue[U](c)(fieldValueType)
 
     reify {
       FactoryMethods.newBasicField(paramRepExpr.splice,
@@ -45,9 +35,38 @@ object SuplerFieldMacros {
     }
   }
 
-  def setField_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)
-    (param: c.Expr[T => Set[U]])
-    (transformer: c.Expr[FullTransformer[U, _]]): c.Expr[SetField[T, U]] = {
+  def selectOneField_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)
+    (param: c.Expr[T => U])(labelForValue: c.Expr[U => String])
+    (valuesProvider: c.Expr[ValuesProvider[T, U]]): c.Expr[SelectOneField[T, U]] = {
+
+    import c.universe._
+
+    val (fieldName, paramRepExpr) = extractFieldName(c)(param)
+
+    val readFieldValueExpr = generateFieldRead[T, U](c)(fieldName)
+
+    val classSymbol = implicitly[WeakTypeTag[T]].tpe.typeSymbol.asClass
+
+    val writeFieldValueExpr = generateFieldWrite[T, U](c)(fieldName, classSymbol)
+
+    val fieldValueType = implicitly[WeakTypeTag[U]].tpe
+    val isRequiredExpr = generateIsRequired(c)(fieldValueType)
+    val emptyValue = generateEmptyValue[U](c)(fieldValueType)
+
+    reify {
+      FactoryMethods.newSelectOneField(paramRepExpr.splice,
+        readFieldValueExpr.splice,
+        writeFieldValueExpr.splice,
+        isRequiredExpr.splice,
+        emptyValue.splice,
+        labelForValue.splice,
+        valuesProvider.splice)
+    }
+  }
+
+  def selectManyField_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)
+    (param: c.Expr[T => Set[U]])(labelForValue: c.Expr[U => String])
+    (valuesProvider: c.Expr[ValuesProvider[T, U]]): c.Expr[SelectManyField[T, U]] = {
 
     import c.universe._
 
@@ -60,10 +79,11 @@ object SuplerFieldMacros {
     val writeFieldValueExpr = generateFieldWrite[T, Set[U]](c)(fieldName, classSymbol)
 
     reify {
-      FactoryMethods.newSetField(paramRepExpr.splice,
+      FactoryMethods.newSelectManyField(paramRepExpr.splice,
         readFieldValueExpr.splice,
         writeFieldValueExpr.splice,
-        transformer.splice)
+        labelForValue.splice,
+        valuesProvider.splice)
     }
   }
 
@@ -108,7 +128,7 @@ object SuplerFieldMacros {
     def newBasicField[T, U, S](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,
       transformer: FullTransformer[U, S], emptyValue: Option[U]): BasicField[T, U] = {
 
-      BasicField[T, U](fieldName, read, write, List(), None, None, required, transformer, None, emptyValue,
+      BasicField[T, U](fieldName, read, write, List(), None, required, transformer, None, emptyValue,
         AlwaysCondition, AlwaysCondition)
     }
 
@@ -120,10 +140,17 @@ object SuplerFieldMacros {
         AlwaysCondition, AlwaysCondition)
     }
 
-    def newSetField[T, U](fieldName: String, read: T => Set[U], write: (T, Set[U]) => T,
-      transformer: FullTransformer[U, _]): SetField[T, U] = {
+    def newSelectOneField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,
+      emptyValue: Option[U], labelForValue: U => String, valuesProvider: ValuesProvider[T, U]): SelectOneField[T, U] = {
 
-      SetField[T, U](fieldName, read, write, Nil, None, None, transformer, None,
+      SelectOneField[T, U](fieldName, read, write, Nil, valuesProvider, None, labelForValue, required, None,
+        emptyValue, AlwaysCondition, AlwaysCondition)
+    }
+
+    def newSelectManyField[T, U](fieldName: String, read: T => Set[U], write: (T, Set[U]) => T,
+      labelForValue: U => String, valuesProvider: ValuesProvider[T, U]): SelectManyField[T, U] = {
+
+      SelectManyField[T, U](fieldName, read, write, Nil, valuesProvider, None, labelForValue, None,
         AlwaysCondition, AlwaysCondition)
     }
   }
@@ -188,6 +215,26 @@ object SuplerFieldMacros {
     }
 
     c.Expr[(T, U) => T](writeFieldValueTree)
+  }
+
+  private def generateIsRequired(c: blackbox.Context)(fieldValueType: c.universe.Type): c.Expr[Boolean] = {
+    import c.universe._
+
+    val isOption = fieldValueType.typeSymbol.asClass.fullName == "scala.Option"
+    c.Expr[Boolean](Literal(Constant(!isOption)))
+  }
+
+  private def generateEmptyValue[U: c.WeakTypeTag](c: blackbox.Context)(fieldValueType: c.universe.Type): c.Expr[Option[U]] = {
+    import c.universe._
+
+    // If the field is a boolean, both values are non-empty by default. For other types, there's a reasonable default
+    // which can be considered as "empty" (for "required" validation).
+    if (fieldValueType <:< typeOf[Boolean]) reify[Option[U]] { None } else {
+      defaultForType(c)(fieldValueType) match {
+        case Some(defaultExpr) => c.Expr[Option[U]](reify { Some(defaultExpr.splice) }.tree)
+        case None => c.Expr[Option[U]](reify { None }.tree)
+      }
+    }
   }
 
   def defaultForType(c: blackbox.Context)(tpe: c.universe.Type): Option[c.universe.Expr[_]] = {

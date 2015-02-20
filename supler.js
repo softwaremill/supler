@@ -1387,10 +1387,14 @@ var ValidationScopeParser = (function () {
     }
     ValidationScopeParser.fromJson = function (json) {
         switch (json.name) {
-            case 'none': return ValidateNone;
-            case 'all': return ValidateAll;
-            case 'path': return new ValidateInPath(json.path);
-            default: return ValidateNone;
+            case 'none':
+                return ValidateNone;
+            case 'all':
+                return ValidateAll;
+            case 'path':
+                return new ValidateInPath(json.path);
+            default:
+                return ValidateNone;
         }
     };
     return ValidationScopeParser;

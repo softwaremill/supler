@@ -18,9 +18,29 @@ object Supler extends Validators with RenderHints {
     (implicit transformer: FullTransformer[U, _]): BasicField[T, U] =
     macro SuplerFieldMacros.field_impl[T, U]
 
-  def setField[T, U](param: T => Set[U])
-    (implicit transformer: FullTransformer[U, _]): SetField[T, U] =
-    macro SuplerFieldMacros.setField_impl[T, U]
+  /**
+   * A new select-one field. Available values to select from will be determined using the `valuesProvider`.
+   * The label for each value will be created using `labelForValue`.
+   *
+   * When applying, values are selected basing on their indices on the list returned by `valuesProvider`.
+   *
+   * By default select-one fields are rendered as dropdowns. Use the `.renderHint()` method to customize.
+   */
+  def selectOneField[T, U](param: T => U)(labelForValue: U => String)
+    (valuesProvider: ValuesProvider[T, U]): SelectOneField[T, U] =
+    macro SuplerFieldMacros.selectOneField_impl[T, U]
+
+  /**
+   * A new select-many field. Available values to select from will be determined using the `valuesProvider`.
+   * The label for each value will be created using `labelForValue`.
+   *
+   * When applying, values are selected basing on their indices on the list returned by `valuesProvider`.
+   *
+   * By default select-many fields are rendered as checkboxes. Use the `.renderHint()` method to customize.
+   */
+  def selectManyField[T, U](param: T => Set[U])(labelForValue: U => String)
+    (valuesProvider: ValuesProvider[T, U]): SelectManyField[T, U] =
+    macro SuplerFieldMacros.selectManyField_impl[T, U]
 
   /**
    * A new subform field. Uses an auto-generated method to create "empty" instances of objects backing the subform,
@@ -66,9 +86,29 @@ trait Supler[T] extends Validators {
     (implicit transformer: FullTransformer[U, _]): BasicField[T, U] =
     macro SuplerFieldMacros.field_impl[T, U]
 
-  def setField[U](param: T => Set[U])
-    (implicit transformer: FullTransformer[U, _]): SetField[T, U] =
-    macro SuplerFieldMacros.setField_impl[T, U]
+  /**
+   * A new select-one field. Available values to select from will be determined using the `valuesProvider`.
+   * The label for each value will be created using `labelForValue`.
+   *
+   * When applying, values are selected basing on their indices on the list returned by `valuesProvider`.
+   *
+   * By default select-one fields are rendered as dropdowns. Use the `.renderHint()` method to customize.
+   */
+  def selectOneField[U](param: T => U)(labelForValue: U => String)
+    (valuesProvider: ValuesProvider[T, U]): SelectOneField[T, U] =
+    macro SuplerFieldMacros.selectOneField_impl[T, U]
+
+  /**
+   * A new select-many field. Available values to select from will be determined using the `valuesProvider`.
+   * The label for each value will be created using `labelForValue`.
+   *
+   * When applying, values are selected basing on their indices on the list returned by `valuesProvider`.
+   *
+   * By default select-many fields are rendered as checkboxes. Use the `.renderHint()` method to customize.
+   */
+  def selectManyField[U](param: T => Set[U])(labelForValue: U => String)
+    (valuesProvider: ValuesProvider[T, U]): SelectManyField[T, U] =
+    macro SuplerFieldMacros.selectManyField_impl[T, U]
 
   /**
    * A new subform field. Uses an auto-generated method to create "empty" instances of objects backing the subform,
@@ -118,6 +158,7 @@ trait RenderHints {
     def toOption(d: Int) = if (d == -1) None else Some(d)
     BasicFieldTextareaRenderHint(toOption(rows), toOption(cols))
   }
-  def asRadio() = BasicFieldRadioRenderHint
+  def asRadio() = SelectOneFieldRadioRenderHint
+  def asDropdown() = SelectOneFieldDropdownRenderHint
   def asHidden() = BasicFieldHiddenRenderHint
 }
