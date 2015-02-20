@@ -48,6 +48,11 @@ class ReadFormValues {
           var subResult = this.getValueFromChildren(element, selectedActionId, {});
           ReadFormValues.appendFieldValue(result, fieldName, subResult, multiple);
           break;
+
+        case FieldTypes.META:
+          ReadFormValues.appendMetaValue(result, fieldName, this.getElementValue(element));
+          break;
+
       }
     } else if (element.children.length > 0) {
       // flattening
@@ -90,6 +95,15 @@ class ReadFormValues {
         result[fieldName] = fieldValue;
       }
     }
+  }
+
+  private static appendMetaValue(result, fieldName, fieldValue) {
+    var meta;
+    if (!(meta = result[Sections.META])) {
+      result[Sections.META] = (meta = {});
+    }
+
+    meta[fieldName] = fieldValue;
   }
 
   private static parseIntOrNull(v):number {

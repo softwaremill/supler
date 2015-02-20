@@ -2,8 +2,8 @@ package org.supler
 
 import org.json4s.JValue
 import org.json4s.JsonAST._
-import org.supler.validation._
 import org.supler.field._
+import org.supler.validation._
 
 /**
  * At any stage of processing data with Supler, the result can be serialized to JSON and sent to the server.
@@ -18,6 +18,7 @@ sealed trait SuplerData[+T] {
 trait FormWithObject[T] extends SuplerData[T] {
   def obj: T
   def form: Form[T]
+  def meta: Meta
   /**
    * Custom data which will be included in the generated JSON, passed to the frontend.
    * Not used or manipulated in any other way by Supler.
@@ -28,21 +29,24 @@ trait FormWithObject[T] extends SuplerData[T] {
   protected def validationErrors: FieldErrors
   protected def allErrors: FieldErrors = applyErrors ++ validationErrors
 
+  def withMeta(key: String, value: String): FormWithObject[T]
+
   def applyJSONValues(jvalue: JValue): FormWithObjectAndErrors[T] = {
     val result = form.applyJSONValues(EmptyPath, obj, jvalue)
 
-    new FormWithObjectAndErrors(form, result.obj, customData, result.errors, Nil)
+    new FormWithObjectAndErrors(form, result.obj, customData, result.errors, Nil, Meta.fromJSON(jvalue))
   }
 
   def doValidate(scope: ValidationScope = ValidateAll): FormWithObjectAndErrors[T] = {
     val currentApplyErrors = applyErrors
     val newValidationErrors = form.doValidate(EmptyPath, obj, scope)
 
-    new FormWithObjectAndErrors(form, obj, customData, currentApplyErrors, newValidationErrors)
+    new FormWithObjectAndErrors(form, obj, customData, currentApplyErrors, newValidationErrors, meta)
   }
 
   override def generateJSON: JValue = {
     JObject(
+      meta.toJSON,
       JField("is_supler_form", JBool(value = true)),
       JField("main_form", form.generateJSON(EmptyPath, obj)),
       JField("errors", JArray(allErrors.map(_.generateJSON))),
@@ -77,7 +81,7 @@ trait FormWithObject[T] extends SuplerData[T] {
         validated
       } else {
         runnableAction.run() match {
-          case FullCompleteActionResult(t, customData) => InitialFormWithObject(form, t.asInstanceOf[T], customData)
+          case FullCompleteActionResult(t, customData) => InitialFormWithObject(form, t.asInstanceOf[T], customData, Meta(Map()))
           case CustomDataCompleteActionResult(json) => CustomDataOnly(json)
         }
       }
@@ -85,9 +89,12 @@ trait FormWithObject[T] extends SuplerData[T] {
   }
 }
 
-case class InitialFormWithObject[T](form: Form[T], obj: T, customData: Option[JValue]) extends FormWithObject[T] {
+case class InitialFormWithObject[T](form: Form[T], obj: T, customData: Option[JValue], meta: Meta)
+  extends FormWithObject[T] {
   override protected val applyErrors = Nil
   override protected val validationErrors = Nil
+
+  override def withMeta(key: String, value: String): InitialFormWithObject[T] = this.copy(meta = meta.addMeta(key, value))
 }
 
 case class FormWithObjectAndErrors[T](
@@ -95,10 +102,13 @@ case class FormWithObjectAndErrors[T](
   obj: T,
   customData: Option[JValue],
   applyErrors: FieldErrors,
-  validationErrors: FieldErrors) extends FormWithObject[T] {
+  validationErrors: FieldErrors,
+  meta: Meta) extends FormWithObject[T] {
 
   def errors: FieldErrors = allErrors
   def hasErrors: Boolean = allErrors.size > 0
+
+  override def withMeta(key: String, value: String): FormWithObjectAndErrors[T] = this.copy(meta = meta.addMeta(key, value))
 }
 
 case class CustomDataOnly private[supler] (customData: JValue) extends SuplerData[Nothing] {

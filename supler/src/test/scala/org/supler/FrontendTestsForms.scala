@@ -2,12 +2,12 @@ package org.supler
 
 import java.io.{File, PrintWriter}
 
-import org.json4s.JsonAST.{JString, JField, JBool, JObject}
-import org.json4s.{Extraction, NoTypeHints}
+import org.json4s.JsonAST._
+import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization
+import org.json4s.{Extraction, NoTypeHints}
 import org.scalatest._
 import org.supler.Supler._
-import org.json4s.native.JsonMethods._
 import org.supler.field.ActionResult
 
 /**
@@ -31,7 +31,7 @@ object FrontendTestsForms {
 class FrontendTestsForms extends FlatSpec with ShouldMatchers {
   val testClassesDir = new File(this.getClass.getProtectionDomain.getCodeSource.getLocation.toURI)
 
-  import FrontendTestsForms._
+  import org.supler.FrontendTestsForms._
 
   val simple1Form = form[Simple1](f => List(
     f.field(_.field1).label("Field 1"),
@@ -52,9 +52,9 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("form3invalid", simple1Form, simpleObj3Invalid)
     writer.writeValidatedForm("form3invalidValidated", simple1Form, simpleObj3Invalid)
 
-    writer.writeObj("obj1", simpleObj1)
-    writer.writeObj("obj2", simpleObj2)
-    writer.writeObj("obj3invalid", simpleObj3Invalid)
+    writer.writeObj("obj1", simpleObj1, Meta(Map()).addMeta("entityId", "987"))
+    writer.writeObj("obj2", simpleObj2, Meta(Map()).addMeta("entityId", "987"))
+    writer.writeObj("obj3invalid", simpleObj3Invalid, Meta(Map()).addMeta("entityId", "987"))
   }
 
   writeTestData("actionSimple") { writer =>
@@ -149,7 +149,7 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("formListNonEmpty", complexFormList, objNonEmpty)
     writer.writeForm("formListEmpty", complexFormList, objEmpty)
 
-    writer.writeObj("objNonEmpty", objNonEmpty)
+    writer.writeObj("objNonEmpty", objNonEmpty, Meta(Map()).addMeta("entityId", "987"))
   }
 
   writeTestData("complexSingleSubform") { writer =>
@@ -162,7 +162,7 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
 
     writer.writeForm("form1", complexForm1, obj1)
 
-    writer.writeObj("obj1", obj1)
+    writer.writeObj("obj1", obj1, Meta(Map()).addMeta("entityId", "987"))
   }
 
   writeTestData("complexOptionalSubform") { writer =>
@@ -177,8 +177,8 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("formSome", complexForm1, objSome)
     writer.writeForm("formNone", complexForm1, objNone)
 
-    writer.writeObj("objSome", objSome)
-    writer.writeObj("objNone", objNone)
+    writer.writeObj("objSome", objSome, Meta(Map()).addMeta("entityId", "987"))
+    writer.writeObj("objNone", objNone, Meta(Map()).addMeta("entityId", "987"))
   }
 
   writeTestData("conditional") { writer =>
@@ -265,24 +265,28 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     implicit val formats = Serialization.formats(NoTypeHints)
 
     def writeForm[T](variableName: String, form: Form[T], obj: T): Unit = {
-      val toWrite = pretty(render(form(obj).generateJSON))
-      pw.println(s""""$variableName": $toWrite,""")
+      val toWrite = pretty(render(form(obj).withMeta("entityId", "987").generateJSON))
+      pw.println( s""""$variableName": $toWrite,""")
     }
 
     def writeValidatedForm[T](variableName: String, form: Form[T], obj: T): Unit = {
       val toWrite = pretty(render(form(obj).doValidate().generateJSON))
-      pw.println(s""""$variableName": $toWrite,""")
+      pw.println( s""""$variableName": $toWrite,""")
     }
 
-    def writeObj(variableName: String, obj: AnyRef): Unit = {
-      pw.println(s""""$variableName": ${Serialization.writePretty(obj)},""")
+    def writeObj(variableName: String, obj: AnyRef, meta: Meta = Meta(Map())): Unit = {
+      val withMeta = Extraction.decompose(obj) match {
+        case JObject(fields) => JObject(meta.toJSON :: fields)
+        case _ => throw new RuntimeException(s"Got some weird unexpected object: $obj")
+      }
+      pw.println( s""""$variableName": ${pretty(render(withMeta))},""")
     }
 
     def writeFormAfterAction[T](variableName: String, form: Form[T], obj: T, actionFieldName: String): Unit = {
       val JObject(fields) = Extraction.decompose(obj)
       val actionField = JField(actionFieldName, JBool(value = true))
       val toWrite = pretty(render(form(obj).process(JObject(fields :+ actionField)).generateJSON))
-      pw.println(s""""$variableName": $toWrite,""")
+      pw.println( s""""$variableName": $toWrite,""")
     }
   }
 }

@@ -7,6 +7,7 @@ class FieldTypes {
   static SUBFORM = 'subform';
   static STATIC = 'static';
   static ACTION = 'action';
+  static META = 'meta';
 }
 
 class SuplerAttributes {
@@ -15,4 +16,8 @@ class SuplerAttributes {
   static FIELD_NAME = 'supler:fieldName';
   static VALIDATION_ID = 'supler:validationId';
   static PATH = 'supler:path';
+}
+
+class Sections {
+  static META = 'supler_meta';
 }

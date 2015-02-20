@@ -9,6 +9,7 @@ var FieldTypes = (function () {
     FieldTypes.SUBFORM = 'subform';
     FieldTypes.STATIC = 'static';
     FieldTypes.ACTION = 'action';
+    FieldTypes.META = 'meta';
     return FieldTypes;
 })();
 var SuplerAttributes = (function () {
@@ -21,6 +22,12 @@ var SuplerAttributes = (function () {
     SuplerAttributes.PATH = 'supler:path';
     return SuplerAttributes;
 })();
+var Sections = (function () {
+    function Sections() {
+    }
+    Sections.META = 'supler_meta';
+    return Sections;
+})();
 var CreateFormFromJson = (function () {
     function CreateFormFromJson(renderOptionsGetter, i18n, validatorFnFactories) {
         this.renderOptionsGetter = renderOptionsGetter;
@@ -28,11 +35,11 @@ var CreateFormFromJson = (function () {
         this.validatorFnFactories = validatorFnFactories;
         this.idCounter = 0;
     }
-    CreateFormFromJson.prototype.renderForm = function (formJson, formElementDictionary) {
+    CreateFormFromJson.prototype.renderForm = function (meta, formJson, formElementDictionary) {
         var _this = this;
         if (formElementDictionary === void 0) { formElementDictionary = new FormElementDictionary(); }
         var fields = formJson.fields;
-        var html = '';
+        var html = this.generateMeta(meta);
         Util.foreach(fields, function (field, fieldJson) {
             var fieldResult = _this.fieldFromJson(field, fieldJson, formElementDictionary, false);
             if (fieldResult) {
@@ -40,6 +47,18 @@ var CreateFormFromJson = (function () {
             }
         });
         return new RenderFormResult(html, formElementDictionary);
+    };
+    CreateFormFromJson.prototype.generateMeta = function (meta) {
+        if (meta) {
+            var html = '<div class="supler_meta">\n';
+            Util.foreach(meta, function (metaKey, metaValue) {
+                html += "<input type='hidden' " + SuplerAttributes.FIELD_NAME + "='" + metaKey + "' value='" + metaValue + "' " + SuplerAttributes.FIELD_TYPE + "='" + FieldTypes.META + "' />\n";
+            });
+            return html + '</div>\n';
+        }
+        else {
+            return '';
+        }
     };
     CreateFormFromJson.prototype.fieldFromJson = function (fieldName, fieldJson, formElementDictionary, compact) {
         var id = this.nextId();
@@ -172,7 +191,7 @@ var CreateFormFromJson = (function () {
         this.propagateDisabled(fieldData, values);
         if (fieldData.getRenderHintName() === 'list') {
             for (var k in values) {
-                var subformResult = this.renderForm(values[k], formElementDictionary);
+                var subformResult = this.renderForm(null, values[k], formElementDictionary);
                 subformHtml += renderOptions.renderSubformListElement(subformResult.html, options);
             }
         }
@@ -483,6 +502,9 @@ var ReadFormValues = (function () {
                     var subResult = this.getValueFromChildren(element, selectedActionId, {});
                     ReadFormValues.appendFieldValue(result, fieldName, subResult, multiple);
                     break;
+                case FieldTypes.META:
+                    ReadFormValues.appendMetaValue(result, fieldName, this.getElementValue(element));
+                    break;
             }
         }
         else if (element.children.length > 0) {
@@ -517,6 +539,13 @@ var ReadFormValues = (function () {
                 result[fieldName] = fieldValue;
             }
         }
+    };
+    ReadFormValues.appendMetaValue = function (result, fieldName, fieldValue) {
+        var meta;
+        if (!(meta = result[Sections.META])) {
+            result[Sections.META] = (meta = {});
+        }
+        meta[fieldName] = fieldValue;
     };
     ReadFormValues.parseIntOrNull = function (v) {
         var p = parseInt(v);
@@ -818,7 +847,7 @@ var SuplerForm = (function () {
     }
     SuplerForm.prototype.render = function (json) {
         if (this.isSuplerForm(json)) {
-            var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories).renderForm(json.main_form);
+            var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories).renderForm(json[Sections.META], json.main_form);
             this.container.innerHTML = result.html;
             this.initializeValidation(result.formElementDictionary, json);
             var sendController = new SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, this.validation);

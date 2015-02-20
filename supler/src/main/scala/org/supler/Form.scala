@@ -2,13 +2,15 @@ package org.supler
 
 import org.json4s.JsonAST.JObject
 import org.json4s._
-import org.supler.validation._
 import org.supler.field._
+import org.supler.validation._
 
 case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
-  def apply(obj: T): FormWithObject[T] = InitialFormWithObject(this, obj, None)
+  def apply(obj: T): FormWithObject[T] = InitialFormWithObject(this, obj, None, Meta(Map()))
 
-  def withNewEmpty: FormWithObject[T] = InitialFormWithObject(this, createEmpty(), None)
+  def withNewEmpty: FormWithObject[T] = InitialFormWithObject(this, createEmpty(), None, Meta(Map()))
+
+  def getMeta(jvalue: JValue): Meta = Meta.fromJSON(jvalue)
 
   private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors =
     rows.flatMap(_.doValidate(parentPath, obj, scope))

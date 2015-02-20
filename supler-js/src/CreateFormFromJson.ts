@@ -2,13 +2,13 @@ class CreateFormFromJson {
   private idCounter:number = 0;
 
   constructor(private renderOptionsGetter:RenderOptionsGetter,
-    private i18n:I18n,
-    private validatorFnFactories:any) {
+              private i18n:I18n,
+              private validatorFnFactories:any) {
   }
 
-  renderForm(formJson, formElementDictionary: FormElementDictionary = new FormElementDictionary()): RenderFormResult {
+  renderForm(meta, formJson, formElementDictionary:FormElementDictionary = new FormElementDictionary()):RenderFormResult {
     var fields = formJson.fields;
-    var html = '';
+    var html = this.generateMeta(meta);
     Util.foreach(fields, (field, fieldJson) => {
       var fieldResult = this.fieldFromJson(field, fieldJson, formElementDictionary, false);
       if (fieldResult) {
@@ -19,7 +19,20 @@ class CreateFormFromJson {
     return new RenderFormResult(html, formElementDictionary);
   }
 
-  private fieldFromJson(fieldName: string, fieldJson: any, formElementDictionary: FormElementDictionary, compact: boolean):string {
+  private generateMeta(meta:any) {
+    if (meta) {
+      var html = '<div class="supler_meta">\n';
+      Util.foreach(meta, (metaKey, metaValue) => {
+        html += "<input type='hidden' " + SuplerAttributes.FIELD_NAME + "='" + metaKey + "' value='" + metaValue + "' " +
+        SuplerAttributes.FIELD_TYPE + "='" + FieldTypes.META + "' />\n";
+      });
+      return html + '</div>\n';
+    } else {
+      return '';
+    }
+  }
+
+  private fieldFromJson(fieldName:string, fieldJson:any, formElementDictionary:FormElementDictionary, compact:boolean):string {
 
     var id = this.nextId();
     var validationId = this.nextId();
@@ -38,7 +51,7 @@ class CreateFormFromJson {
     }
   }
 
-  private fieldValidatorFns(fieldData: FieldData):ValidatorFn[] {
+  private fieldValidatorFns(fieldData:FieldData):ValidatorFn[] {
     var validators = [];
 
     var typeValidator = this.validatorFnFactories['type_' + fieldData.type];
@@ -54,7 +67,7 @@ class CreateFormFromJson {
     return validators;
   }
 
-  private fieldHtmlFromJson(fieldData: FieldData, formElementDictionary: FormElementDictionary, compact: boolean): string {
+  private fieldHtmlFromJson(fieldData:FieldData, formElementDictionary:FormElementDictionary, compact:boolean):string {
 
     var renderOptions = this.renderOptionsGetter.forField(fieldData.path, fieldData.type, fieldData.getRenderHintName());
 
@@ -104,7 +117,7 @@ class CreateFormFromJson {
     }
   }
 
-  private stringFieldFromJson(renderOptions, fieldData: FieldData, fieldOptions, compact) {
+  private stringFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions, compact) {
     if (fieldData.getRenderHintName() === 'password') {
       return renderOptions.renderPasswordField(fieldData, fieldOptions, compact);
     } else if (fieldData.getRenderHintName() === 'textarea') {
@@ -119,7 +132,7 @@ class CreateFormFromJson {
     }
   }
 
-  private booleanFieldFromJson(renderOptions, fieldData: FieldData, fieldOptions, compact) {
+  private booleanFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions, compact) {
     var possibleSelectValues = [
       new SelectValue(0, this.i18n.label_boolean_false()),
       new SelectValue(1, this.i18n.label_boolean_true())
@@ -131,7 +144,7 @@ class CreateFormFromJson {
       this.checkableContainerOptions(fieldData.id, fieldOptions), fieldOptions, compact);
   }
 
-  private selectFieldFromJson(renderOptions, fieldData: FieldData, fieldOptions, compact) {
+  private selectFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions, compact) {
     var possibleSelectValues = fieldData.json.possible_values.map(v => new SelectValue(v.index, this.labelFor(v.label)));
 
     var containerOptions = this.checkableContainerOptions(fieldData.id, fieldOptions);
@@ -161,7 +174,7 @@ class CreateFormFromJson {
   /**
    * When using the container options, which include the id, the ids of the elements should be changed.
    */
-  private checkableContainerOptions(id: string, elementOptions) {
+  private checkableContainerOptions(id:string, elementOptions) {
     // radio buttons and checkboxes need to be grouped inside an element with the form field's id and validation
     // id, so that it could be found e.g. during validation.
     return {
@@ -171,7 +184,7 @@ class CreateFormFromJson {
     };
   }
 
-  private subformFieldFromJson(renderOptions, fieldData: FieldData, formElementDictionary: FormElementDictionary) {
+  private subformFieldFromJson(renderOptions, fieldData:FieldData, formElementDictionary:FormElementDictionary) {
     var subformHtml = '';
     var options = {
       'supler:fieldType': FieldTypes.SUBFORM,
@@ -182,14 +195,14 @@ class CreateFormFromJson {
     var values;
     // value can be undefined for an optional subform
     if (typeof fieldData.value !== 'undefined') {
-      values = fieldData.multiple ? fieldData.value : [ fieldData.value ];
+      values = fieldData.multiple ? fieldData.value : [fieldData.value];
     } else values = [];
 
     this.propagateDisabled(fieldData, values);
 
     if (fieldData.getRenderHintName() === 'list') {
       for (var k in values) {
-        var subformResult = this.renderForm(values[k], formElementDictionary);
+        var subformResult = this.renderForm(null, values[k], formElementDictionary);
         subformHtml += renderOptions.renderSubformListElement(subformResult.html, options);
       }
     } else { // table
@@ -213,7 +226,7 @@ class CreateFormFromJson {
     return renderOptions.renderSubformDecoration(subformHtml, fieldData.label, fieldData.id, fieldData.name);
   }
 
-  private propagateDisabled(fromFieldData: FieldData, toSubforms: any) {
+  private propagateDisabled(fromFieldData:FieldData, toSubforms:any) {
     if (!fromFieldData.enabled) {
       for (var k in toSubforms) {
         Util.foreach(toSubforms[k].fields, (k, v) => v.enabled = false);
@@ -221,7 +234,7 @@ class CreateFormFromJson {
     }
   }
 
-  private staticFieldFromJson(renderOptions, fieldData: FieldData, compact) {
+  private staticFieldFromJson(renderOptions, fieldData:FieldData, compact) {
     var value = this.i18n.fromKeyAndParams(fieldData.value.key, fieldData.value.params);
     if (!value) value = '-';
     fieldData.value = value;
@@ -229,8 +242,8 @@ class CreateFormFromJson {
     return renderOptions.renderStaticField(fieldData, compact);
   }
 
-  private actionFieldFromJson(renderOptions, fieldData: FieldData, fieldOptions,
-    formElementDictionary: FormElementDictionary, compact) {
+  private actionFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions,
+                              formElementDictionary:FormElementDictionary, compact) {
 
     formElementDictionary.getElement(fieldData.id).validationScope =
       ValidationScopeParser.fromJson(fieldData.json.validation_scope);
@@ -262,6 +275,6 @@ class CreateFormFromJson {
 }
 
 class RenderFormResult {
-  constructor(public html: string, public formElementDictionary: FormElementDictionary) {
+  constructor(public html:string, public formElementDictionary:FormElementDictionary) {
   }
 }
