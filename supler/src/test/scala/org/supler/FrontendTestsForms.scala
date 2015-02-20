@@ -96,19 +96,19 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     case class SelectSingleOptional(field1: Option[String])
 
     val fReq = form[SelectSingleRequired](f => List(
-      f.selectOneField(_.field1)(identity)(_ => List("a", "b", "c")).label("Field 1")
+      f.selectOneField(_.field1)(identity).possibleValues(_ => List("a", "b", "c")).label("Field 1")
     ))
 
     val fReqRadio = form[SelectSingleRequired](f => List(
-      f.selectOneField(_.field1)(identity)(_ => List("a", "b", "c")).label("Field 1").renderHint(asRadio())
+      f.selectOneField(_.field1)(identity).possibleValues(_ => List("a", "b", "c")).label("Field 1").renderHint(asRadio())
     ))
 
     val fOpt = form[SelectSingleOptional](f => List(
-      f.selectOneField(_.field1)(_.getOrElse(""))(_ => List("a", "b", "c").map(Some(_))).label("Field 1")
+      f.selectOneField(_.field1)(_.getOrElse("")).possibleValues(_ => List("a", "b", "c").map(Some(_))).label("Field 1")
     ))
 
     val fOptRadio = form[SelectSingleOptional](f => List(
-      f.selectOneField(_.field1)(_.getOrElse(""))(_ => List("a", "b", "c").map(Some(_))).label("Field 1").renderHint(asRadio())
+      f.selectOneField(_.field1)(_.getOrElse("")).possibleValues(_ => List("a", "b", "c").map(Some(_))).label("Field 1").renderHint(asRadio())
     ))
 
     val obj1req = SelectSingleRequired("b")

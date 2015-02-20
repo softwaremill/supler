@@ -8,7 +8,7 @@ class PossibleValuesTest extends FlatSpec with ShouldMatchers {
   case class Select1Required(field1: String)
 
   val fReq = form[Select1Required](f => List(
-    f.selectOneField(_.field1)(identity)(_ => List("a", "b", "c")).label("Field 1")
+    f.selectOneField(_.field1)(identity).possibleValues(_ => List("a", "b", "c")).label("Field 1")
   ))
 
   it should "apply a new value from the possible values" in {

@@ -36,8 +36,7 @@ object SuplerFieldMacros {
   }
 
   def selectOneField_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)
-    (param: c.Expr[T => U])(labelForValue: c.Expr[U => String])
-    (valuesProvider: c.Expr[ValuesProvider[T, U]]): c.Expr[SelectOneField[T, U]] = {
+    (param: c.Expr[T => U])(labelForValue: c.Expr[U => String]): c.Expr[AlmostSelectOneField[T, U]] = {
 
     import c.universe._
 
@@ -54,19 +53,17 @@ object SuplerFieldMacros {
     val emptyValue = generateEmptyValue[U](c)(fieldValueType)
 
     reify {
-      FactoryMethods.newSelectOneField(paramRepExpr.splice,
+      FactoryMethods.newAlmostSelectOneField(paramRepExpr.splice,
         readFieldValueExpr.splice,
         writeFieldValueExpr.splice,
         isRequiredExpr.splice,
         emptyValue.splice,
-        labelForValue.splice,
-        valuesProvider.splice)
+        labelForValue.splice)
     }
   }
 
   def selectManyField_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)
-    (param: c.Expr[T => Set[U]])(labelForValue: c.Expr[U => String])
-    (valuesProvider: c.Expr[ValuesProvider[T, U]]): c.Expr[SelectManyField[T, U]] = {
+    (param: c.Expr[T => Set[U]])(labelForValue: c.Expr[U => String]): c.Expr[AlmostSelectManyField[T, U]] = {
 
     import c.universe._
 
@@ -79,11 +76,10 @@ object SuplerFieldMacros {
     val writeFieldValueExpr = generateFieldWrite[T, Set[U]](c)(fieldName, classSymbol)
 
     reify {
-      FactoryMethods.newSelectManyField(paramRepExpr.splice,
+      FactoryMethods.newAlmostSelectManyField(paramRepExpr.splice,
         readFieldValueExpr.splice,
         writeFieldValueExpr.splice,
-        labelForValue.splice,
-        valuesProvider.splice)
+        labelForValue.splice)
     }
   }
 
@@ -140,18 +136,16 @@ object SuplerFieldMacros {
         AlwaysCondition, AlwaysCondition)
     }
 
-    def newSelectOneField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,
-      emptyValue: Option[U], labelForValue: U => String, valuesProvider: ValuesProvider[T, U]): SelectOneField[T, U] = {
+    def newAlmostSelectOneField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,
+      emptyValue: Option[U], labelForValue: U => String): AlmostSelectOneField[T, U] = {
 
-      SelectOneField[T, U](fieldName, read, write, Nil, valuesProvider, None, labelForValue, required, None,
-        emptyValue, AlwaysCondition, AlwaysCondition)
+      new AlmostSelectOneField[T, U](fieldName, read, write, labelForValue, required, None, emptyValue)
     }
 
-    def newSelectManyField[T, U](fieldName: String, read: T => Set[U], write: (T, Set[U]) => T,
-      labelForValue: U => String, valuesProvider: ValuesProvider[T, U]): SelectManyField[T, U] = {
+    def newAlmostSelectManyField[T, U](fieldName: String, read: T => Set[U], write: (T, Set[U]) => T,
+      labelForValue: U => String): AlmostSelectManyField[T, U] = {
 
-      SelectManyField[T, U](fieldName, read, write, Nil, valuesProvider, None, labelForValue, None,
-        AlwaysCondition, AlwaysCondition)
+      new AlmostSelectManyField[T, U](fieldName, read, write, labelForValue, None)
     }
   }
 

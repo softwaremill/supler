@@ -47,3 +47,17 @@ case class SelectOneField[T, U](
     appliedOpt.getOrElse(full(obj))
   }
 }
+
+class AlmostSelectOneField[T, U](
+  name: String,
+  read: T => U,
+  write: (T, U) => T,
+  labelForValue: U => String,
+  required: Boolean,
+  renderHint: Option[RenderHint with SelectOneFieldCompatible],
+  emptyValue: Option[U]) {
+
+  def possibleValues(valuesProvider: ValuesProvider[T, U]): SelectOneField[T, U] =
+    SelectOneField(name, read, write, Nil, valuesProvider, None, labelForValue, required, renderHint, emptyValue,
+      AlwaysCondition, AlwaysCondition)
+}

@@ -19,27 +19,23 @@ object Supler extends Validators with RenderHints {
     macro SuplerFieldMacros.field_impl[T, U]
 
   /**
-   * A new select-one field. Available values to select from will be determined using the `valuesProvider`.
-   * The label for each value will be created using `labelForValue`.
+   * A new select-one field. The label for each value will be created using `labelForValue`.
    *
-   * When applying, values are selected basing on their indices on the list returned by `valuesProvider`.
+   * When applying, values are selected basing on their indices on the list provided by `possibleValues`.
    *
    * By default select-one fields are rendered as dropdowns. Use the `.renderHint()` method to customize.
    */
-  def selectOneField[T, U](param: T => U)(labelForValue: U => String)
-    (valuesProvider: ValuesProvider[T, U]): SelectOneField[T, U] =
+  def selectOneField[T, U](param: T => U)(labelForValue: U => String): AlmostSelectOneField[T, U] =
     macro SuplerFieldMacros.selectOneField_impl[T, U]
 
   /**
-   * A new select-many field. Available values to select from will be determined using the `valuesProvider`.
-   * The label for each value will be created using `labelForValue`.
+   * A new select-many field. The label for each value will be created using `labelForValue`.
    *
-   * When applying, values are selected basing on their indices on the list returned by `valuesProvider`.
+   * When applying, values are selected basing on their indices on the list provided by `possibleValues`.
    *
    * By default select-many fields are rendered as checkboxes. Use the `.renderHint()` method to customize.
    */
-  def selectManyField[T, U](param: T => Set[U])(labelForValue: U => String)
-    (valuesProvider: ValuesProvider[T, U]): SelectManyField[T, U] =
+  def selectManyField[T, U](param: T => Set[U])(labelForValue: U => String): AlmostSelectManyField[T, U] =
     macro SuplerFieldMacros.selectManyField_impl[T, U]
 
   /**
@@ -87,27 +83,23 @@ trait Supler[T] extends Validators {
     macro SuplerFieldMacros.field_impl[T, U]
 
   /**
-   * A new select-one field. Available values to select from will be determined using the `valuesProvider`.
-   * The label for each value will be created using `labelForValue`.
+   * A new select-one field. The label for each value will be created using `labelForValue`.
    *
-   * When applying, values are selected basing on their indices on the list returned by `valuesProvider`.
+   * When applying, values are selected basing on their indices on the list provided by `possibleValues`.
    *
    * By default select-one fields are rendered as dropdowns. Use the `.renderHint()` method to customize.
    */
-  def selectOneField[U](param: T => U)(labelForValue: U => String)
-    (valuesProvider: ValuesProvider[T, U]): SelectOneField[T, U] =
+  def selectOneField[U](param: T => U)(labelForValue: U => String): AlmostSelectOneField[T, U] =
     macro SuplerFieldMacros.selectOneField_impl[T, U]
 
   /**
-   * A new select-many field. Available values to select from will be determined using the `valuesProvider`.
-   * The label for each value will be created using `labelForValue`.
+   * A new select-many field. The label for each value will be created using `labelForValue`.
    *
-   * When applying, values are selected basing on their indices on the list returned by `valuesProvider`.
+   * When applying, values are selected basing on their indices on the list provided by `possibleValues`.
    *
    * By default select-many fields are rendered as checkboxes. Use the `.renderHint()` method to customize.
    */
-  def selectManyField[U](param: T => Set[U])(labelForValue: U => String)
-    (valuesProvider: ValuesProvider[T, U]): SelectManyField[T, U] =
+  def selectManyField[U](param: T => Set[U])(labelForValue: U => String): AlmostSelectManyField[T, U] =
     macro SuplerFieldMacros.selectManyField_impl[T, U]
 
   /**

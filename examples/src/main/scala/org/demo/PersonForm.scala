@@ -18,15 +18,15 @@ object PersonForm {
   )
 
   def carForm(deleteAction: Car => ActionResult[Car]) = form[Car](f => List(
-    f.selectOneField(_.make)(identity)(_ => carMakesAndModels.keys.toList).label("Make"),
-    f.selectOneField(_.model)(identity)(car => carMakesAndModels.getOrElse(car.make, Nil)).label("Model"),
+    f.selectOneField(_.make)(identity).possibleValues(_ => carMakesAndModels.keys.toList).label("Make"),
+    f.selectOneField(_.model)(identity).possibleValues(car => carMakesAndModels.getOrElse(car.make, Nil)).label("Model"),
     f.field(_.year).validate(gt(1900)).label("Year"),
     f.action("delete")(c => { println(s"Running action: delete car $c"); deleteAction(c) }).label("Delete")
   ))
 
   def legoSetForm(deleteAction: LegoSet => ActionResult[LegoSet]) = form[LegoSet](f => List(
     f.field(_.name).label("label_lego_name"),
-    f.selectOneField(_.theme)(identity)(_ => List("City", "Technic", "Duplo", "Space", "Friends", "Universal")).label("label_lego_theme"),
+    f.selectOneField(_.theme)(identity).possibleValues(_ => List("City", "Technic", "Duplo", "Space", "Friends", "Universal")).label("label_lego_theme"),
     f.field(_.number).label("label_lego_setnumber").validate(lt(100000)),
     f.field(_.age).label("label_lego_age").validate(ge(0), le(50)),
     f.action("delete")(deleteAction).label("Delete")
@@ -51,8 +51,8 @@ object PersonForm {
     f.field(_.likesBroccoli).label("Likes broccoli"),
     f.field(_.address1).label("Address 1"),
     f.field(_.address2).label("Address 2"),
-    f.selectManyField(_.favoriteColors)(identity)(_ => List("red", "green", "blue", "magenta")).label("Favorite colors"),
-    f.selectOneField(_.gender)(identity)(_ => List("Male", "Female")).label("Gender").renderHint(asRadio()),
+    f.selectManyField(_.favoriteColors)(identity).possibleValues(_ => List("red", "green", "blue", "magenta")).label("Favorite colors"),
+    f.selectOneField(_.gender)(identity).possibleValues(_ => List("Male", "Female")).label("Gender").renderHint(asRadio()),
     f.field(_.secret).label("Secret").renderHint(asPassword()),
     f.field(_.bio).label("Biography").renderHint(asTextarea(rows = 6)),
     f.subform(_.cars, carForm(f.parentAction((person, index, car) => ActionResult(deleteCar(person, car))))).label("Cars"),

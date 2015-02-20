@@ -53,3 +53,15 @@ case class SelectManyField[T, U](
     full(write(obj, values.toSet))
   }
 }
+
+class AlmostSelectManyField[T, U](
+  name: String,
+  read: T => Set[U],
+  write: (T, Set[U]) => T,
+  labelForValue: U => String,
+  renderHint: Option[RenderHint with SelectManyFieldCompatible]) {
+
+  def possibleValues(valuesProvider: ValuesProvider[T, U]): SelectManyField[T, U] =
+    SelectManyField(name, read, write, Nil, valuesProvider, None, labelForValue, renderHint,
+      AlwaysCondition, AlwaysCondition)
+}
