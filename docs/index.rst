@@ -44,8 +44,7 @@ Complete documentation
    backend/formdef/typetransformations
    backend/formdef/subforms
    backend/formdef/validation
-   backend/formdef/possiblevalues
-   backend/formdef/collections
+   backend/formdef/select
    backend/formdef/renderhints
    backend/formdef/actions
    backend/formdef/static
