@@ -5,8 +5,11 @@ Very often a field can take a value from a restricted range of values. In such c
 need to provide a function which, optionally depending on the backing object, returns a list of possible values.
 
 Unlike normal fields, select fields don't require a full transformer which allows the value to be serialized to JSON
-and back. It is sufficient to provide a label-for-value generating function. When applying, values are looked up on the
-possible values list basing on the selected index.
+and back. It is sufficient to provide a label-for-value generating function.
+
+By default, when applying selections from JSON values are looked up by their index on the list. You can specify custom
+ids for select values by providing a ``idForValue`` function, which given a value, returns a string or number id.
+These ids will then be used instead of list index when rendering and serializing the form on the frontend.
 
 Select one field
 ----------------

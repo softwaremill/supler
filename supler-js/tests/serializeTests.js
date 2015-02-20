@@ -122,4 +122,48 @@ describe('serialization', function() {
     serialized2.f1.should.equal('a');
     assert.isNull(serialized2.f2);
   });
+
+  it('should serialize an optional select when a value is selected', function() {
+    // given
+    var sf = new SuplerForm(container);
+
+    // when
+    sf.render(data.selectSingle.form1opt);
+
+    // then
+    sf.getValue().field1.should.equal('1');
+  });
+
+  it('should serialize an optional select when no value is selected', function() {
+    // given
+    var sf = new SuplerForm(container);
+
+    // when
+    sf.render(data.selectSingle.form2opt);
+
+    // then
+    assert.isNull(sf.getValue().field1);
+  });
+
+  it('should serialize an optional select rendered as radio buttons when a value is selected', function() {
+    // given
+    var sf = new SuplerForm(container);
+
+    // when
+    sf.render(data.selectSingle.form1optRadio);
+
+    // then
+    sf.getValue().field1.should.equal('1');
+  });
+
+  it('should serialize an optional select rendered as radio buttons when no value is selected', function() {
+    // given
+    var sf = new SuplerForm(container);
+
+    // when
+    sf.render(data.selectSingle.form2optRadio);
+
+    // then
+    assert.isNull(sf.getValue().field1);
+  });
 });

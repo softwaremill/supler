@@ -30,7 +30,7 @@ describe('selectSingle', function() {
       var options = selectLabels('field1');
       options.should.have.members(selectLabelsWithEmptyValue);
 
-      byName('field1').val().should.equal('-1');
+      byName('field1').val().should.equal('');
     });
 
     it('when no option is selected, client-side validation should fail', function () {
@@ -102,7 +102,7 @@ describe('selectSingle', function() {
       var options = selectLabels('field1');
       options.should.have.members(selectLabelsWithEmptyValue);
 
-      byName('field1').val().should.equal('-1');
+      byName('field1').val().should.equal('');
     });
 
     it('when no option is selected, client-side validation should succeed', function () {
@@ -117,7 +117,7 @@ describe('selectSingle', function() {
       result.should.equal(false);
     });
 
-    it('when rendered as radio buttons and an option is selected, should contain no empty choice ', function () {
+    it('when rendered as radio buttons and an option is selected, should contain no empty choice', function () {
       // given
       var sf = new SuplerForm(container);
 

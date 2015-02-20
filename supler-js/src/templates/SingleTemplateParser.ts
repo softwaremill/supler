@@ -97,13 +97,13 @@ class SingleTemplateParser {
       var renderedPossibleValues = '';
       Util.foreach(possibleValues, (i, v) => {
         var attrs = Util.copyProperties({}, elementOptions);
-        attrs['id'] = elementOptions['id'] + '.' + v.index;
+        attrs['id'] = elementOptions['id'] + '.' + v.id;
         if (isSelected(v)) {
           attrs[element.getAttribute('supler:selectedAttrName')] = element.getAttribute('supler:selectedAttrValue');
         }
 
         renderedPossibleValues +=
-          renderTemplateForAttrs(possibleValueTemplate, attrs, v.index)
+          renderTemplateForAttrs(possibleValueTemplate, attrs, v.id)
             .replace('{{suplerFieldInputLabel}}', v.label);
       });
 
@@ -135,19 +135,19 @@ class SingleTemplateParser {
       // possible values
       this.renderHtmlSelect = function (value: number, possibleValues: SelectValue[], containerOptions: any, elementOptions: any): string {
         return renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, (v) => {
-          return v.index === value;
+          return v.id === value;
         });
       };
 
       this.renderHtmlRadios = function (value: any, possibleValues: SelectValue[], containerOptions: any, elementOptions: any): string {
         return renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, (v) => {
-          return v.index === value;
+          return v.id === value;
         });
       };
 
       this.renderHtmlCheckboxes = function (value: any, possibleValues: SelectValue[], containerOptions: any, elementOptions: any): string {
         return renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, (v) => {
-          return value.indexOf(v.index) >= 0;
+          return value.indexOf(v.id) >= 0;
         });
       };
     })

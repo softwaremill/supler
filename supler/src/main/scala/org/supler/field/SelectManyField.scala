@@ -1,6 +1,5 @@
 package org.supler.field
 
-import org.json4s.JsonAST.JInt
 import org.json4s._
 import org.supler._
 import org.supler.validation._
@@ -13,6 +12,7 @@ case class SelectManyField[T, U](
   valuesProvider: ValuesProvider[T, U],
   label: Option[String],
   labelForValue: U => String,
+  idForValue: Option[U => String],
   renderHint: Option[RenderHint with SelectManyFieldCompatible],
   enabledIf: T => Boolean,
   includeIf: T => Boolean) extends Field[T] with SelectField[T, U] with ValidateWithValidators[T, Set[U]] {
@@ -24,6 +24,9 @@ case class SelectManyField[T, U](
   def enabledIf(condition: T => Boolean): SelectManyField[T, U] = this.copy(enabledIf = condition)
   def includeIf(condition: T => Boolean): SelectManyField[T, U] = this.copy(includeIf = condition)
 
+  def idForValue[I](idFn: U => I)(implicit idTransformer: SelectValueIdSerializer[I]): SelectManyField[T, U] =
+    this.copy(idForValue = Some(idFn andThen idTransformer.toString))
+
   override def emptyValue = None
   override def required = false
 
@@ -31,24 +34,22 @@ case class SelectManyField[T, U](
 
   protected def generateValueJSONData(obj: T) = {
     val possibleValues = valuesProvider(obj)
-    val currentValues = read(obj).map(possibleValues.indexOf).filter(_ != -1)
+    val currentValues = read(obj)
 
-    ValueJSONData(Some(JArray(currentValues.map(JInt(_)).toList)),
+    ValueJSONData(Some(JArray(currentValues.toList.flatMap(idFromValue(possibleValues, _)).map(JString))),
       None)
   }
 
   private[supler] override def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     import org.supler.validation.PartiallyAppliedObj._
 
-    val possibleValues = valuesProvider(obj).lift
+    val possibleValues = valuesProvider(obj)
     val values = for {
       jsonValue <- jsonFields.get(name).toList
-      indexes <- jsonValue match { case JArray(jindexes) => List(jindexes.collect { case JInt(idx) => idx }); case _ => Nil }
-      index <- indexes
-      value <- possibleValues(index.intValue()).toList
-    } yield {
-      value
-    }
+      ids <- jsonValue match { case JArray(ids) => List(ids.collect { case JString(id) => id }); case _ => Nil }
+      id <- ids
+      value <- valueFromId(possibleValues, id)
+    } yield value
 
     full(write(obj, values.toSet))
   }
@@ -62,6 +63,6 @@ class AlmostSelectManyField[T, U](
   renderHint: Option[RenderHint with SelectManyFieldCompatible]) {
 
   def possibleValues(valuesProvider: ValuesProvider[T, U]): SelectManyField[T, U] =
-    SelectManyField(name, read, write, Nil, valuesProvider, None, labelForValue, renderHint,
+    SelectManyField(name, read, write, Nil, valuesProvider, None, labelForValue, None, renderHint,
       AlwaysCondition, AlwaysCondition)
 }

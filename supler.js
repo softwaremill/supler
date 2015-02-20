@@ -139,15 +139,15 @@ var CreateFormFromJson = (function () {
     };
     CreateFormFromJson.prototype.booleanFieldFromJson = function (renderOptions, fieldData, fieldOptions, compact) {
         var possibleSelectValues = [
-            new SelectValue(0, this.i18n.label_boolean_false()),
-            new SelectValue(1, this.i18n.label_boolean_true())
+            new SelectValue("0", this.i18n.label_boolean_false()),
+            new SelectValue("1", this.i18n.label_boolean_true())
         ];
-        fieldData.value = fieldData.value ? 1 : 0;
+        fieldData.value = fieldData.value ? "1" : "0";
         return renderOptions.renderSingleChoiceRadioField(fieldData, possibleSelectValues, this.checkableContainerOptions(fieldData.id, fieldOptions), fieldOptions, compact);
     };
     CreateFormFromJson.prototype.selectFieldFromJson = function (renderOptions, fieldData, fieldOptions, compact) {
         var _this = this;
-        var possibleSelectValues = fieldData.json.possible_values.map(function (v) { return new SelectValue(v.index, _this.labelFor(v.label)); });
+        var possibleSelectValues = fieldData.json.possible_values.map(function (v) { return new SelectValue(v.id, _this.labelFor(v.label)); });
         var containerOptions = this.checkableContainerOptions(fieldData.id, fieldOptions);
         if (fieldData.multiple) {
             return renderOptions.renderMultiChoiceCheckboxField(fieldData, possibleSelectValues, containerOptions, fieldOptions, compact);
@@ -157,7 +157,7 @@ var CreateFormFromJson = (function () {
             var noValueSelected = fieldData.value === fieldData.json.empty_value;
             var isRadio = fieldData.getRenderHintName() === 'radio';
             if (!isRadio && (!isRequired || noValueSelected)) {
-                possibleSelectValues = [new SelectValue(-1, "")].concat(possibleSelectValues);
+                possibleSelectValues = [new SelectValue(null, "")].concat(possibleSelectValues);
             }
             if (isRadio) {
                 return renderOptions.renderSingleChoiceRadioField(fieldData, possibleSelectValues, containerOptions, fieldOptions, compact);
@@ -487,7 +487,7 @@ var ReadFormValues = (function () {
                     ReadFormValues.appendFieldValue(result, fieldName, this.parseFloatOrNull(this.getElementValue(element)), multiple);
                     break;
                 case FieldTypes.SELECT:
-                    ReadFormValues.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
+                    ReadFormValues.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
                     break;
                 case FieldTypes.BOOLEAN:
                     ReadFormValues.appendFieldValue(result, fieldName, this.parseBooleanOrNull(this.getElementValue(element)), multiple);
@@ -522,6 +522,13 @@ var ReadFormValues = (function () {
     ReadFormValues.getElementValue = function (element) {
         if ((element.type === 'radio' || element.type === 'checkbox') && !element.checked) {
             return null;
+        }
+        else if (element.nodeName === 'SELECT') {
+            var option = element.options[element.selectedIndex];
+            if (option.hasAttribute('value'))
+                return option.value;
+            else
+                return null;
         }
         else {
             return element.value;
@@ -566,13 +573,11 @@ var ReadFormValues = (function () {
         }
     };
     ReadFormValues.parseBooleanOrNull = function (v) {
-        var p = parseInt(v);
-        if (isNaN(p)) {
+        if (v === null) {
             return null;
         }
-        else {
-            return p === 1;
-        }
+        else
+            return v === "1";
     };
     return ReadFormValues;
 })();
@@ -676,8 +681,8 @@ var Bootstrap3RenderOptions = (function () {
     Bootstrap3RenderOptions.prototype.renderHtmlSelect = function (value, possibleValues, options) {
         var selectBody = '';
         Util.foreach(possibleValues, function (i, v) {
-            var optionOptions = { 'value': v.index };
-            if (v.index === value) {
+            var optionOptions = { 'value': v.id };
+            if (v.id === value) {
                 optionOptions['selected'] = 'selected';
             }
             selectBody += HtmlUtil.renderTag('option', optionOptions, v.label);
@@ -688,12 +693,12 @@ var Bootstrap3RenderOptions = (function () {
     };
     Bootstrap3RenderOptions.prototype.renderHtmlRadios = function (value, possibleValues, containerOptions, elementOptions) {
         return this.renderCheckable('radio', possibleValues, containerOptions, elementOptions, function (v) {
-            return v.index === value;
+            return v.id === value;
         });
     };
     Bootstrap3RenderOptions.prototype.renderHtmlCheckboxes = function (value, possibleValues, containerOptions, elementOptions) {
         return this.renderCheckable('checkbox', possibleValues, containerOptions, elementOptions, function (v) {
-            return value.indexOf(v.index) >= 0;
+            return value.indexOf(v.id) >= 0;
         });
     };
     Bootstrap3RenderOptions.prototype.renderHtmlTextarea = function (value, options) {
@@ -713,8 +718,8 @@ var Bootstrap3RenderOptions = (function () {
             if (isChecked(v)) {
                 checkableOptions['checked'] = 'checked';
             }
-            checkableOptions['id'] = containerOptions['id'] + '.' + v.index;
-            var labelBody = _this.renderHtmlInput(inputType, v.index, checkableOptions);
+            checkableOptions['id'] = containerOptions['id'] + '.' + v.id;
+            var labelBody = _this.renderHtmlInput(inputType, v.id, checkableOptions);
             labelBody += HtmlUtil.renderTag('span', {}, v.label);
             var divBody = HtmlUtil.renderTag('label', {}, labelBody, false);
             html += HtmlUtil.renderTag('div', { 'class': inputType }, divBody, false);
@@ -961,8 +966,8 @@ var Util = (function () {
     return Util;
 })();
 var SelectValue = (function () {
-    function SelectValue(index, label) {
-        this.index = index;
+    function SelectValue(id, label) {
+        this.id = id;
         this.label = label;
     }
     return SelectValue;
@@ -1164,11 +1169,11 @@ var SingleTemplateParser = (function () {
             var renderedPossibleValues = '';
             Util.foreach(possibleValues, function (i, v) {
                 var attrs = Util.copyProperties({}, elementOptions);
-                attrs['id'] = elementOptions['id'] + '.' + v.index;
+                attrs['id'] = elementOptions['id'] + '.' + v.id;
                 if (isSelected(v)) {
                     attrs[element.getAttribute('supler:selectedAttrName')] = element.getAttribute('supler:selectedAttrValue');
                 }
-                renderedPossibleValues += renderTemplateForAttrs(possibleValueTemplate, attrs, v.index).replace('{{suplerFieldInputLabel}}', v.label);
+                renderedPossibleValues += renderTemplateForAttrs(possibleValueTemplate, attrs, v.id).replace('{{suplerFieldInputLabel}}', v.label);
             });
             return mainTemplate.replace(SUPLER_FIELD_CONTAINER_ATTRS, HtmlUtil.renderAttrs(containerOptions)).replace(SUPLER_FIELD_CONTAINER_ATTRS.toLowerCase(), HtmlUtil.renderAttrs(containerOptions)).replace(possibleValueTemplate, renderedPossibleValues);
         }
@@ -1188,17 +1193,17 @@ var SingleTemplateParser = (function () {
             };
             this.renderHtmlSelect = function (value, possibleValues, containerOptions, elementOptions) {
                 return renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, function (v) {
-                    return v.index === value;
+                    return v.id === value;
                 });
             };
             this.renderHtmlRadios = function (value, possibleValues, containerOptions, elementOptions) {
                 return renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, function (v) {
-                    return v.index === value;
+                    return v.id === value;
                 });
             };
             this.renderHtmlCheckboxes = function (value, possibleValues, containerOptions, elementOptions) {
                 return renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, function (v) {
-                    return value.indexOf(v.index) >= 0;
+                    return value.indexOf(v.id) >= 0;
                 });
             };
         });

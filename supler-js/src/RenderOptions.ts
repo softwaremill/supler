@@ -183,8 +183,8 @@ class Bootstrap3RenderOptions implements RenderOptions {
   renderHtmlSelect(value, possibleValues, options) {
     var selectBody = '';
     Util.foreach(possibleValues, (i, v) => {
-      var optionOptions = {'value': v.index};
-      if (v.index === value) {
+      var optionOptions = {'value': v.id};
+      if (v.id === value) {
         optionOptions['selected'] = 'selected';
       }
 
@@ -199,14 +199,14 @@ class Bootstrap3RenderOptions implements RenderOptions {
   renderHtmlRadios(value, possibleValues, containerOptions, elementOptions) {
     return this.renderCheckable('radio', possibleValues, containerOptions, elementOptions,
       (v) => {
-        return v.index === value;
+        return v.id === value;
       });
   }
 
   renderHtmlCheckboxes(value, possibleValues, containerOptions, elementOptions) {
     return this.renderCheckable('checkbox', possibleValues, containerOptions, elementOptions,
       (v) => {
-        return value.indexOf(v.index) >= 0;
+        return value.indexOf(v.id) >= 0;
       });
   }
 
@@ -234,8 +234,8 @@ class Bootstrap3RenderOptions implements RenderOptions {
         checkableOptions['checked'] = 'checked';
       }
 
-      checkableOptions['id'] = containerOptions['id'] + '.' + v.index;
-      var labelBody = this.renderHtmlInput(inputType, v.index, checkableOptions);
+      checkableOptions['id'] = containerOptions['id'] + '.' + v.id;
+      var labelBody = this.renderHtmlInput(inputType, v.id, checkableOptions);
       labelBody += HtmlUtil.renderTag('span', {}, v.label);
 
       var divBody = HtmlUtil.renderTag('label', {}, labelBody, false);

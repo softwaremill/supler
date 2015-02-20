@@ -70,7 +70,7 @@ class Util {
 }
 
 class SelectValue {
-  constructor(public index:number, public label:string) {
+  constructor(public id:string, public label:string) {
   }
 }
 

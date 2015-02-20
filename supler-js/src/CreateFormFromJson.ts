@@ -134,18 +134,18 @@ class CreateFormFromJson {
 
   private booleanFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions, compact) {
     var possibleSelectValues = [
-      new SelectValue(0, this.i18n.label_boolean_false()),
-      new SelectValue(1, this.i18n.label_boolean_true())
+      new SelectValue("0", this.i18n.label_boolean_false()),
+      new SelectValue("1", this.i18n.label_boolean_true())
     ];
 
-    fieldData.value = fieldData.value ? 1 : 0;
+    fieldData.value = fieldData.value ? "1" : "0";
 
     return renderOptions.renderSingleChoiceRadioField(fieldData, possibleSelectValues,
       this.checkableContainerOptions(fieldData.id, fieldOptions), fieldOptions, compact);
   }
 
   private selectFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions, compact) {
-    var possibleSelectValues = fieldData.json.possible_values.map(v => new SelectValue(v.index, this.labelFor(v.label)));
+    var possibleSelectValues = fieldData.json.possible_values.map(v => new SelectValue(v.id, this.labelFor(v.label)));
 
     var containerOptions = this.checkableContainerOptions(fieldData.id, fieldOptions);
 
@@ -158,7 +158,7 @@ class CreateFormFromJson {
       var isRadio = fieldData.getRenderHintName() === 'radio';
 
       if (!isRadio && (!isRequired || noValueSelected)) {
-        possibleSelectValues = [new SelectValue(-1, "")].concat(possibleSelectValues);
+        possibleSelectValues = [new SelectValue(null, "")].concat(possibleSelectValues);
       }
 
       if (isRadio) {

@@ -30,7 +30,7 @@ class ReadFormValues {
           break;
 
         case FieldTypes.SELECT:
-          ReadFormValues.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
+          ReadFormValues.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
           break;
 
         case FieldTypes.BOOLEAN:
@@ -75,6 +75,9 @@ class ReadFormValues {
   private static getElementValue(element) {
     if ((element.type === 'radio' || element.type === 'checkbox') && !element.checked) {
       return null;
+    } else if (element.nodeName === 'SELECT') {
+      var option = element.options[element.selectedIndex];
+      if (option.hasAttribute('value')) return option.value; else return null;
     } else {
       return element.value;
     }
@@ -125,11 +128,8 @@ class ReadFormValues {
   }
 
   private static parseBooleanOrNull(v):boolean {
-    var p = parseInt(v);
-    if (isNaN(p)) {
+    if (v === null) {
       return null;
-    } else {
-      return p === 1;
-    }
+    } else return v === "1";
   }
 }
