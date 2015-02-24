@@ -8,13 +8,17 @@ class CreateFormFromJson {
 
   renderForm(meta, formJson, formElementDictionary:FormElementDictionary = new FormElementDictionary()):RenderFormResult {
     var fields = formJson.fields;
+    var fieldCount = fields.length;
+
     var html = this.generateMeta(meta);
-    Util.foreach(fields, (field, fieldJson) => {
-      var fieldResult = this.fieldFromJson(field, fieldJson, formElementDictionary, false);
+
+    for (var i=0; i<fieldCount; i++) {
+      var fieldJson = fields[i];
+      var fieldResult = this.fieldFromJson(fieldJson, formElementDictionary, false);
       if (fieldResult) {
         html += fieldResult + '\n';
       }
-    });
+    }
 
     return new RenderFormResult(html, formElementDictionary);
   }
@@ -35,12 +39,12 @@ class CreateFormFromJson {
     }
   }
 
-  private fieldFromJson(fieldName:string, fieldJson:any, formElementDictionary:FormElementDictionary, compact:boolean):string {
+  private fieldFromJson(fieldJson:any, formElementDictionary:FormElementDictionary, compact:boolean):string {
 
     var id = this.nextId();
     var validationId = this.nextId();
 
-    var fieldData = new FieldData(id, validationId, fieldName, fieldJson, this.labelFor(fieldJson.label));
+    var fieldData = new FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label));
     var html = this.fieldHtmlFromJson(fieldData, formElementDictionary, compact);
 
     if (html) {
@@ -218,7 +222,7 @@ class CreateFormFromJson {
 
         var subfieldsJson = values[i].fields;
         Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
-          cells[i][j] = this.fieldFromJson(subfield, subfieldJson, formElementDictionary, true);
+          cells[i][j] = this.fieldFromJson(subfieldJson, formElementDictionary, true);
           j += 1;
         });
       }

@@ -13,15 +13,18 @@ trait Field[T] extends Row[T] {
 
   override def ||(field: Field[T]): Row[T] = MultiFieldRow(this :: field :: Nil)
 
-  private[supler] override def generateJSON(parentPath: FieldPath, obj: T): List[JField] = {
+  private[supler] override def generateJSON(parentPath: FieldPath, obj: T): List[JObject] = {
     val isIncluded = includeIf(obj)
     if (isIncluded) {
       val isEnabled = enabledIf(obj)
 
-      val fieldJson = generateFieldJSON(parentPath, obj)
-      val fieldJsonWithEnabled = JObject(fieldJson.obj :+ JField("enabled", JBool(isEnabled)))
+      val fieldJsonPartial = generateFieldJSON(parentPath, obj)
+      val fieldJson = JObject(
+        JField(JSONFieldNames.Name, JString(name)) ::
+          JField(JSONFieldNames.Enabled, JBool(isEnabled)) ::
+          fieldJsonPartial.obj)
 
-      List(JField(name, fieldJsonWithEnabled))
+      List(fieldJson)
     } else Nil
   }
 
@@ -35,6 +38,7 @@ trait Field[T] extends Row[T] {
   private[supler] def generateFieldJSON(parentPath: FieldPath, obj: T): JObject
 
   protected object JSONFieldNames {
+    val Name = "name"
     val Type = "type"
     val Label = "label"
     val Multiple = "multiple"
@@ -44,6 +48,7 @@ trait Field[T] extends Row[T] {
     val PossibleValues = "possible_values"
     val Path = "path"
     val EmptyValue = "empty_value"
+    val Enabled = "enabled"
 
     val ValidateRequired = "required"
   }

@@ -1,13 +1,13 @@
 package org.supler
 
-import org.json4s.JsonAST.{JField, JValue}
+import org.json4s.JsonAST.{JObject, JValue}
 import org.supler.field.{Field, RunActionContext, RunnableAction}
 import org.supler.validation._
 
 trait Row[T] {
   def ||(field: Field[T]): Row[T]
 
-  private[supler] def generateJSON(parentPath: FieldPath, obj: T): List[JField]
+  private[supler] def generateJSON(parentPath: FieldPath, obj: T): List[JObject]
 
   private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T]
 

@@ -2,10 +2,10 @@ class FieldData {
   constructor(
     public id: string,
     public validationId: string,
-    public name: string,
     public json: any,
     public label: string) {
 
+    this.name = json.name;
     this.value = json.value;
     this.path = json.path;
     this.multiple = json.multiple;
@@ -14,6 +14,7 @@ class FieldData {
     this.validate = json.validate || {};
   }
 
+  public name: string;
   public value: any;
   public path: string;
   public multiple: boolean;

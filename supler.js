@@ -36,16 +36,17 @@ var CreateFormFromJson = (function () {
         this.idCounter = 0;
     }
     CreateFormFromJson.prototype.renderForm = function (meta, formJson, formElementDictionary) {
-        var _this = this;
         if (formElementDictionary === void 0) { formElementDictionary = new FormElementDictionary(); }
         var fields = formJson.fields;
+        var fieldCount = fields.length;
         var html = this.generateMeta(meta);
-        Util.foreach(fields, function (field, fieldJson) {
-            var fieldResult = _this.fieldFromJson(field, fieldJson, formElementDictionary, false);
+        for (var i = 0; i < fieldCount; i++) {
+            var fieldJson = fields[i];
+            var fieldResult = this.fieldFromJson(fieldJson, formElementDictionary, false);
             if (fieldResult) {
                 html += fieldResult + '\n';
             }
-        });
+        }
         return new RenderFormResult(html, formElementDictionary);
     };
     CreateFormFromJson.prototype.generateMeta = function (meta) {
@@ -63,10 +64,10 @@ var CreateFormFromJson = (function () {
             return '';
         }
     };
-    CreateFormFromJson.prototype.fieldFromJson = function (fieldName, fieldJson, formElementDictionary, compact) {
+    CreateFormFromJson.prototype.fieldFromJson = function (fieldJson, formElementDictionary, compact) {
         var id = this.nextId();
         var validationId = this.nextId();
-        var fieldData = new FieldData(id, validationId, fieldName, fieldJson, this.labelFor(fieldJson.label));
+        var fieldData = new FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label));
         var html = this.fieldHtmlFromJson(fieldData, formElementDictionary, compact);
         if (html) {
             formElementDictionary.getElement(id).validator = new ElementValidator(this.fieldValidatorFns(fieldData), fieldData.validate.required, fieldJson.empty_value);
@@ -206,7 +207,7 @@ var CreateFormFromJson = (function () {
                 cells[i] = [];
                 var subfieldsJson = values[i].fields;
                 Util.foreach(subfieldsJson, function (subfield, subfieldJson) {
-                    cells[i][j] = _this.fieldFromJson(subfield, subfieldJson, formElementDictionary, true);
+                    cells[i][j] = _this.fieldFromJson(subfieldJson, formElementDictionary, true);
                     j += 1;
                 });
             }
@@ -321,12 +322,12 @@ var ElementSearch = (function () {
     return ElementSearch;
 })();
 var FieldData = (function () {
-    function FieldData(id, validationId, name, json, label) {
+    function FieldData(id, validationId, json, label) {
         this.id = id;
         this.validationId = validationId;
-        this.name = name;
         this.json = json;
         this.label = label;
+        this.name = json.name;
         this.value = json.value;
         this.path = json.path;
         this.multiple = json.multiple;
