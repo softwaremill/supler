@@ -5,6 +5,35 @@ The rendering process is fully customizable. By default, `Bootstrap <http://getb
 but this can be changed either by providing HTML templates, or by overriding any of the rendering functions using the
 options.
 
+Defining render hints on the frontend
+-------------------------------------
+
+Render hints can be specified per-field and influence how a field is rendered. All of the render hints supported by
+default can be defined on the :ref:`backend <renderhints>`, but it is also possible to define them on the frontend.
+
+This can be done through the the ``field_options`` option passed when creating a form:
+
+.. code-block:: javascript
+
+  new SuplerForm(container, {
+    field_options: {
+      'secretField': {
+        'render_hint': 'password'
+      },
+      'friends[].bio': {
+        'render_hint': {
+          'name': 'textarea',
+          'rows': 10,
+          'cols': 20
+        }
+      }
+    }
+  });
+
+A render hint can be just a name (string), or an object with a ``name`` property and additional parameters (like
+the textarea example). When dealing with lists of subforms, options for nested fields can be defined using the
+``subformField[].fieldName`` syntax (``[]`` means every subform in subforms list).
+
 Customizing via HTML templates
 ------------------------------
 
