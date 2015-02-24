@@ -1,7 +1,7 @@
 describe('form validation', function() {
   it('should run client-side validation and add errors', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.simple1.form3invalid);
     byName('field1').val('');
 
@@ -20,12 +20,12 @@ describe('form validation', function() {
 
   it('should run client-side validation and not add errors if the validation scope is none', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.simple1.form3invalid);
     byName('field1').val('');
 
     // when
-    var validationResult = sf.validate(ValidateNone);
+    var validationResult = sf.validate(Supler.ValidateNone);
 
     // then
     validationResult.should.equal(false);
@@ -33,7 +33,7 @@ describe('form validation', function() {
 
   it('should run client-side validation and return false if there are none', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.simple1.form3invalid);
 
     // when
@@ -49,7 +49,7 @@ describe('form validation', function() {
 
   it('should render with server-side errors', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
 
     // when
     sf.render(data.simple1.form3invalidValidated);
@@ -65,7 +65,7 @@ describe('form validation', function() {
       renderResponseFn(data.simple1.form3invalid);
     };
 
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       send_form_function: sendFormFn
     });
     sf.render(data.simple1.form3invalid);
@@ -87,7 +87,7 @@ describe('form validation', function() {
       renderResponseFn(data.simple1.form2); // field3 is changed
     };
 
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       send_form_function: sendFormFn
     });
     sf.render(data.simple1.form3invalid);
@@ -105,7 +105,7 @@ describe('form validation', function() {
 
   it('should validate fields in subforms list', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.complexSubformsList.formListNonEmpty);
 
     // when
@@ -131,14 +131,14 @@ describe('form validation', function() {
 
   it('should validate only the subform if the validation scope specifies so', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.complexSubformsList.formListNonEmpty);
 
     // when
     byName('field10').val('');
     byName('simples[0].field1').val('');
     byName('simples[1].field1').val('');
-    var validationResult = sf.validate(new ValidateInPath('simples[1]'));
+    var validationResult = sf.validate(new Supler.ValidateInPath('simples[1]'));
 
     // then
     validationResult.should.equal(true);
@@ -155,7 +155,7 @@ describe('form validation', function() {
 
   it('should validate fields in a single subform', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.complexSingleSubform.form1);
 
     // when
@@ -175,7 +175,7 @@ describe('form validation', function() {
 
   it('should validate optional string fields', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
 
     // when
     sf.render(data.validateIfDefinedOpt.stringOkSome);
@@ -195,7 +195,7 @@ describe('form validation', function() {
 
   it('should validate optional int fields', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
 
     // when
     sf.render(data.validateIfDefinedOpt.intOkSome);
@@ -214,7 +214,7 @@ describe('form validation', function() {
   });
 
   it('should validate all types of numeric fields', function() {
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
 
     sf.render(data.validateNumbers.formOk);
     sf.validate().should.equal(false);

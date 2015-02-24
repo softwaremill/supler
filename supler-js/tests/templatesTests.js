@@ -8,7 +8,7 @@ describe('templates', function() {
     container.innerHTML = document.getElementById('templates_oneinput_text').innerHTML;
 
     // when
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.simple1.form1);
 
     // then
@@ -25,7 +25,7 @@ describe('templates', function() {
       state = 2;
     }
 
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       send_form_function: sendForm
     });
 
@@ -43,7 +43,7 @@ describe('templates', function() {
     container.innerHTML = document.getElementById('templates_oneinput_boolean').innerHTML;
 
     // when
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.simple1.form1);
 
     var serialized1 = sf.getValue();

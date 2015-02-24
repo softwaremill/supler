@@ -7,7 +7,7 @@ describe('selectSingle', function() {
   describe('req', function () {
     it('when an option is selected, empty value should not be a choice', function () {
       // given
-      var sf = new SuplerForm(container);
+      var sf = new Supler.Form(container);
 
       // when
       sf.render(data.selectSingle.form1req);
@@ -21,7 +21,7 @@ describe('selectSingle', function() {
 
     it('when no option is selected, empty value should be the default choice', function () {
       // given
-      var sf = new SuplerForm(container);
+      var sf = new Supler.Form(container);
 
       // when
       sf.render(data.selectSingle.form2req);
@@ -35,7 +35,7 @@ describe('selectSingle', function() {
 
     it('when no option is selected, client-side validation should fail', function () {
       // given
-      var sf = new SuplerForm(container);
+      var sf = new Supler.Form(container);
       sf.render(data.selectSingle.form2req);
 
       // when
@@ -49,7 +49,7 @@ describe('selectSingle', function() {
 
     it('when rendered as radio buttons and an option is selected, should contain no empty choice ', function () {
       // given
-      var sf = new SuplerForm(container);
+      var sf = new Supler.Form(container);
 
       // when
       sf.render(data.selectSingle.form1reqRadio);
@@ -63,7 +63,7 @@ describe('selectSingle', function() {
 
     it('when rendered as radio buttons and no option is selected, should contain no empty choice', function () {
       // given
-      var sf = new SuplerForm(container);
+      var sf = new Supler.Form(container);
 
       // when
       sf.render(data.selectSingle.form2reqRadio);
@@ -79,7 +79,7 @@ describe('selectSingle', function() {
   describe('opt', function () {
     it('when an option is selected, empty value should also be a choice', function () {
       // given
-      var sf = new SuplerForm(container);
+      var sf = new Supler.Form(container);
 
       // when
       sf.render(data.selectSingle.form1opt);
@@ -93,7 +93,7 @@ describe('selectSingle', function() {
 
     it('when no option is selected, empty value should be the default choice', function () {
       // given
-      var sf = new SuplerForm(container);
+      var sf = new Supler.Form(container);
 
       // when
       sf.render(data.selectSingle.form2opt);
@@ -107,7 +107,7 @@ describe('selectSingle', function() {
 
     it('when no option is selected, client-side validation should succeed', function () {
       // given
-      var sf = new SuplerForm(container);
+      var sf = new Supler.Form(container);
       sf.render(data.selectSingle.form2opt);
 
       // when
@@ -119,7 +119,7 @@ describe('selectSingle', function() {
 
     it('when rendered as radio buttons and an option is selected, should contain no empty choice', function () {
       // given
-      var sf = new SuplerForm(container);
+      var sf = new Supler.Form(container);
 
       // when
       sf.render(data.selectSingle.form1optRadio);
@@ -133,7 +133,7 @@ describe('selectSingle', function() {
 
     it('when rendered as radio buttons and no option is selected, should contain no empty choice', function () {
       // given
-      var sf = new SuplerForm(container);
+      var sf = new Supler.Form(container);
 
       // when
       sf.render(data.selectSingle.form2optRadio);

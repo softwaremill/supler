@@ -2,7 +2,7 @@ describe('customData', function(){
   it('should not run the data handler if the json does not contain custom data', function() {
     // given
     var handlerCalled = false;
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       custom_data_handler: function(data) {
         handlerCalled = data;
       }
@@ -18,7 +18,7 @@ describe('customData', function(){
   it('should run the custom data handler if the json contains custom data and the form', function() {
     // given
     var handlerCalled = false;
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       custom_data_handler: function(data) {
         handlerCalled = data;
       }
@@ -34,7 +34,7 @@ describe('customData', function(){
   it('should run the custom data handler if the json contains custom data only', function() {
     // given
     var handlerCalled = false;
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       custom_data_handler: function(data) {
         handlerCalled = data;
       }

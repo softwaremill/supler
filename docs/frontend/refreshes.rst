@@ -23,7 +23,7 @@ this can be:
       });
   }
 
-  var form = new SuplerForm(formContainer, {
+  var form = new Supler.Form(formContainer, {
     send_form_function: sendForm,
     // other options
   });

@@ -14,10 +14,10 @@ with ``render`` (or calling the ``renderResponseFn``):
       $('#messages').html('Server response: ' + data);
   }
 
-  var form = new SuplerForm(formContainer, {
+  var form = new Supler.Form(formContainer, {
     custom_data_handler: handleData,
     // other options
   });
 
-The second way is to get the custom data by hand, using ``SuplerForm.getCustomData(json)`` (where ``json`` is what you
+The second way is to get the custom data by hand, using ``Form.getCustomData(json)`` (where ``json`` is what you
 receive from the server), and if the result is not null, handling it as desired.

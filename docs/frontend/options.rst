@@ -5,7 +5,7 @@ Here's a summary of all options that can be used when defining a Supler form.
 
 .. code-block:: javascript
 
-  new SuplerForm(container, {
+  new Supler.Form(container, {
     send_form_function: doAjax, // [1]
     i18n: { // [2]
       error_custom_someDescription: 'You cannot do that!',

@@ -108,7 +108,7 @@ of course any way of doing AJAX calls/networking will work, JQuery is not a depe
 
 .. code-block:: javascript
 
-  var form = new SuplerForm(
+  var form = new Supler.Form(
     document.getElementById('person_form_container'),
     {}
   );
@@ -119,7 +119,7 @@ of course any way of doing AJAX calls/networking will work, JQuery is not a depe
     });
   });
 
-Here we are creating a ``SuplerForm`` instance which as the first arguments requires the HTML element where the form
+Here we are creating a ``Supler.Form`` instance which as the first arguments requires the HTML element where the form
 should be rendered, and as the second options, which we'll be using shortly. Then, when the document is ready, we are
 calling the endpoint to get the JSON form description, and we render the results. This will display a 4-field &
 1-button form to the user.
@@ -131,7 +131,7 @@ of doing network communication we are using:
 
 .. code-block:: javascript
 
-  var form = new SuplerForm(
+  var form = new Supler.Form(
     document.getElementById('person_form_container'),
     {
       send_form_function: sendForm
@@ -165,7 +165,7 @@ which will handle such responses:
 
 .. code-block:: javascript 
 
-  var form = new SuplerForm(
+  var form = new Supler.Form(
     document.getElementById('person_form_container'),
     {
       send_form_function: sendForm,

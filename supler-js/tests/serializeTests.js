@@ -1,7 +1,7 @@
 describe('serialization', function() {
   it('should serialize a basic form', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.simple1.form1);
 
     // when
@@ -13,7 +13,7 @@ describe('serialization', function() {
 
   it('should serialize a basic form with meta', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.simpleWithMeta.form1);
 
     // when
@@ -25,7 +25,7 @@ describe('serialization', function() {
 
   it('should serialize after changes', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.simple1.form1);
 
     // when
@@ -45,7 +45,7 @@ describe('serialization', function() {
 
   it('should serialize a form with a list of subforms rendered as a table', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.complexSubformsList.formTableNonEmpty);
 
     // when
@@ -57,7 +57,7 @@ describe('serialization', function() {
 
   it('should serialize a form with a list of subforms rendered as a list', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.complexSubformsList.formListNonEmpty);
 
     // when
@@ -69,7 +69,7 @@ describe('serialization', function() {
 
   it('should serialize a form with a single subform', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.complexSingleSubform.form1);
 
     // when
@@ -81,7 +81,7 @@ describe('serialization', function() {
 
   it('should serialize a form with an optional subform, if the subform is present', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.complexOptionalSubform.formSome);
 
     // when
@@ -93,7 +93,7 @@ describe('serialization', function() {
 
   it('should serialize a form with an optional subform, if the subform is absent', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.complexOptionalSubform.formNone);
 
     // when
@@ -105,7 +105,7 @@ describe('serialization', function() {
 
   it('should serialize a form with an optional int when there is no value initially', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.optionalInt.formIntNone);
 
     // when
@@ -118,7 +118,7 @@ describe('serialization', function() {
 
   it('should serialize a form with an optional int when there is a value initially', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
     sf.render(data.optionalInt.formIntSome);
 
     // when
@@ -137,7 +137,7 @@ describe('serialization', function() {
 
   it('should serialize an optional select when a value is selected', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
 
     // when
     sf.render(data.selectSingle.form1opt);
@@ -148,7 +148,7 @@ describe('serialization', function() {
 
   it('should serialize an optional select when no value is selected', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
 
     // when
     sf.render(data.selectSingle.form2opt);
@@ -159,7 +159,7 @@ describe('serialization', function() {
 
   it('should serialize an optional select rendered as radio buttons when a value is selected', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
 
     // when
     sf.render(data.selectSingle.form1optRadio);
@@ -170,7 +170,7 @@ describe('serialization', function() {
 
   it('should serialize an optional select rendered as radio buttons when no value is selected', function() {
     // given
-    var sf = new SuplerForm(container);
+    var sf = new Supler.Form(container);
 
     // when
     sf.render(data.selectSingle.form2optRadio);

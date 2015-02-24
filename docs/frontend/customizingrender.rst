@@ -19,7 +19,7 @@ This can be done through the the ``field_options`` option passed when creating a
 
 .. code-block:: javascript
 
-  new SuplerForm(container, {
+  new Supler.Form(container, {
     field_options: {
       'secretField': {
         'render_hint': 'password'
@@ -215,12 +215,12 @@ Customizing via options
 -----------------------
 
 To override how a particular type of form elements are rendered, simply provide a method in the ``render_options``
-option passed to ``SuplerForm``:
+option passed to ``Supler.Form``:
  
 .. code-block:: javascript 
 
   var formContainer = document.getElementById('form-container');
-  var form =  = new SuplerForm(formContainer, {
+  var form =  = new Supler.Form(formContainer, {
     render_options: {
       renderStringField: function(label, id, validationId, name, value, options, compact) {
         return someHtml;
@@ -234,11 +234,9 @@ Methods available for overriding:
 .. code-block:: javascript 
 
   // basic types
-  renderStringField: (fieldData: FieldData, options: any, compact: boolean): string
-  renderIntegerField: (fieldData: FieldData, options: any, compact: boolean): string
-  renderDoubleField: (fieldData: FieldData, options: any, compact: boolean): string
-  renderPasswordField: (fieldData: FieldData, compact: boolean): string
-  renderTextareaField: (fieldData: FieldData, compact: boolean): string
+  renderTextField: (fieldData: FieldData, options: any, compact: boolean): string
+  renderHiddenField: (fieldData: FieldData, options: any, compact: boolean): string
+  renderTextareaField: (fieldData: FieldData, options: any, compact: boolean): string
   renderMultiChoiceCheckboxField: (fieldData: FieldData, possibleValues: SelectValue[], options: any, compact: boolean): string
   renderMultiChoiceSelectField: (fieldData: FieldData, possibleValues: SelectValue[], options: any, compact: boolean): string
   renderSingleChoiceRadioField: (fieldData: FieldData, possibleValues: SelectValue[], options: any, compact: boolean): string
@@ -267,3 +265,4 @@ Methods available for overriding:
   
   // misc
   additionalFieldOptions: () => any
+  inputTypeFor: (fieldData:FieldData) => string

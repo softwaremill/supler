@@ -1,7 +1,7 @@
 Frontend: Serializing the form
 ==============================
 
-To read the value of a form as a JSON object, simply use the ``SuplerForm.getValue()`` method. The resulting JSON can
+To read the value of a form as a JSON object, simply use the ``Supler.Form.getValue()`` method. The resulting JSON can
 be sent to the server for processing.
 
 The resulting JSON is what you might expect, mirroring the form's structure through objects, JSON arrays, nested

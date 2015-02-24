@@ -51,7 +51,7 @@ Basic form workflow
 
 ````javascript
 // show
-var form = new SuplerForm(
+var form = new Supler.Form(
     document.getElementById("form-container"), 
     {
         // options - see below

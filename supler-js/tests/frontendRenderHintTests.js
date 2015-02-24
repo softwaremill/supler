@@ -1,7 +1,7 @@
 describe('frontend render hints', function() {
   it('should allow specifying simple render hints for top-level fields', function() {
     // given
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       field_options: {
         'field2': {
           'render_hint': 'password'
@@ -19,7 +19,7 @@ describe('frontend render hints', function() {
 
   it('should allow specifying complex render hints for top-level fields', function() {
     // given
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       field_options: {
         'field2': {
           'render_hint': {
@@ -41,7 +41,7 @@ describe('frontend render hints', function() {
 
   it('should allow specifying render hints for all fields nested in subforms list', function() {
     // given
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       field_options: {
         'simples[].field2': {
           'render_hint': 'password'
@@ -62,7 +62,7 @@ describe('frontend render hints', function() {
 
   it('should allow specifying render hints for a single field nested in subforms list', function() {
     // given
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       field_options: {
         'simples[1].field2': {
           'render_hint': 'password'

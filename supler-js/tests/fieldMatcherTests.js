@@ -1,17 +1,17 @@
 describe('matchers by', function() {
   describe('path', function() {
     it('should match exact paths', function() {
-      var m1 = new PathFieldMatcher('field1');
+      var m1 = new Supler.PathFieldMatcher('field1');
       m1.matches('field1', null, null).should.be.true();
       m1.matches('field2', null, null).should.be.false();
 
-      var m2 = new PathFieldMatcher('field1.subfield1');
+      var m2 = new Supler.PathFieldMatcher('field1.subfield1');
       m2.matches('field1.subfield1', null, null).should.be.true();
       m2.matches('field1.subfield2', null, null).should.be.false();
       m2.matches('field2.subfield1', null, null).should.be.false();
       m2.matches('field1', null, null).should.be.false();
 
-      var m3 = new PathFieldMatcher('field1[1].subfield1');
+      var m3 = new Supler.PathFieldMatcher('field1[1].subfield1');
       m3.matches('field1[1].subfield1', null, null).should.be.true();
       m3.matches('field1[0].subfield1', null, null).should.be.false();
       m3.matches('field1[1].subfield2', null, null).should.be.false();
@@ -20,7 +20,7 @@ describe('matchers by', function() {
     });
 
     it('should match single-level subforms lists', function () {
-      var m1 = new PathFieldMatcher('field1[].subfield1');
+      var m1 = new Supler.PathFieldMatcher('field1[].subfield1');
       m1.matches('field1[].subfield1', null, null).should.be.true();
       m1.matches('field1[0].subfield1', null, null).should.be.true();
       m1.matches('field1[1].subfield1', null, null).should.be.true();
@@ -31,7 +31,7 @@ describe('matchers by', function() {
     });
 
     it('should match multi-level subforms lists', function () {
-      var m1 = new PathFieldMatcher('field1[].subfield1[].subsubfield1');
+      var m1 = new Supler.PathFieldMatcher('field1[].subfield1[].subsubfield1');
       m1.matches('field1[0].subfield1[1].subsubfield1', null, null).should.be.true();
       m1.matches('field1[2].subfield1[0].subsubfield1', null, null).should.be.true();
       m1.matches('field1[2].subfield1[0].subsubfield2', null, null).should.be.false();

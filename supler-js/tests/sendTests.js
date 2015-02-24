@@ -12,7 +12,7 @@ describe('send', function(){
       done();
     };
 
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       send_form_function: sendFormFn
     });
 
@@ -43,7 +43,7 @@ describe('send', function(){
       }
     }
 
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       send_form_function: sendForm
     });
 
@@ -80,7 +80,7 @@ describe('send', function(){
       }
     }
 
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       send_form_function: sendForm
     });
 
@@ -115,7 +115,7 @@ describe('send', function(){
       }
     }
 
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       send_form_function: sendForm
     });
 
@@ -151,7 +151,7 @@ describe('send', function(){
       }
     }
 
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       send_form_function: sendForm
     });
 
@@ -175,7 +175,7 @@ describe('send', function(){
       assert.fail(0, state, 'Should not send the form');
     };
 
-    var sf = new SuplerForm(container, {
+    var sf = new Supler.Form(container, {
       send_form_function: sendFormFn
     });
 

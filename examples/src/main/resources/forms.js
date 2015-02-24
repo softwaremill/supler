@@ -1,5 +1,5 @@
 var formContainer = document.getElementById('form-container');
-var form = new SuplerForm(formContainer, {
+var form = new Supler.Form(formContainer, {
     send_form_function: sendForm,
     i18n: {
         error_custom_lastNameLongerThanFirstName: "Last name must be longer than first name!",
