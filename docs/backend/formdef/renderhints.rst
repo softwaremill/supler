@@ -20,3 +20,13 @@ Supported render hints:
 * for subforms: ``asList()`` (default), ``asTable()``
 * for text fields: ``asPassword()``, ``asTextarea(rows = 10)``, ``asHidden()``
 * for single-select fields: ``asRadio()``, ``asDropdown()``
+
+Custom render hints
+-------------------
+
+You can also specify custom render hints which can be used as selectors for field options or for templates, customizing
+how fields are displayed. To create a custom render hint, you can use the ``customRenderHint(name)`` method. If the
+render hint takes additional data, you can provide any number of JSON fields::
+
+  f.field(_.password).label("Password").renderHint(customRenderHint("blinking", JField("interval", JInt(20))))
+

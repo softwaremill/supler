@@ -141,16 +141,3 @@ trait Supler[T] extends Validators {
     AlwaysCondition)
 }
 
-trait RenderHints {
-  def asList() = SubformListRenderHint
-  def asTable() = SubformTableRenderHint
-
-  def asPassword() = BasicFieldPasswordRenderHint
-  def asTextarea(rows: Int = -1, cols: Int = -1) = {
-    def toOption(d: Int) = if (d == -1) None else Some(d)
-    BasicFieldTextareaRenderHint(toOption(rows), toOption(cols))
-  }
-  def asRadio() = SelectOneFieldRadioRenderHint
-  def asDropdown() = SelectOneFieldDropdownRenderHint
-  def asHidden() = BasicFieldHiddenRenderHint
-}

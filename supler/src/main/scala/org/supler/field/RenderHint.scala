@@ -19,3 +19,21 @@ case object SelectOneFieldDropdownRenderHint extends RenderHint("dropdown") with
 case object SubformTableRenderHint extends RenderHint("table") with SubformFieldCompatible
 case object SubformListRenderHint extends RenderHint("list") with SubformFieldCompatible
 
+case class CustomRenderHint(override val name: String, override val extraJSON: List[JField] = Nil) extends RenderHint(name)
+  with BasicFieldCompatible with SelectOneFieldCompatible with SelectManyFieldCompatible
+
+trait RenderHints {
+  def asList() = SubformListRenderHint
+  def asTable() = SubformTableRenderHint
+
+  def asPassword() = BasicFieldPasswordRenderHint
+  def asTextarea(rows: Int = -1, cols: Int = -1) = {
+    def toOption(d: Int) = if (d == -1) None else Some(d)
+    BasicFieldTextareaRenderHint(toOption(rows), toOption(cols))
+  }
+  def asRadio() = SelectOneFieldRadioRenderHint
+  def asDropdown() = SelectOneFieldDropdownRenderHint
+  def asHidden() = BasicFieldHiddenRenderHint
+
+  def customRenderHint(name: String, extraJSON: JField*) = CustomRenderHint(name, extraJSON.toList)
+}

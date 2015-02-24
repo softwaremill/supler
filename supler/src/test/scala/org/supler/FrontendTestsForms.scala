@@ -259,6 +259,23 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("formIntNone", intOptForm, IntOptData("b", None))
   }
 
+  writeTestData("customRenderHint") { writer =>
+    case class TwoFields(f1: String, f2: String)
+
+    val simpleCustomRenderHint = form[TwoFields](f => List(
+      f.field(_.f1).label("Field 1"),
+      f.field(_.f2).label("Field 2").renderHint(customRenderHint("blinking"))
+    ))
+
+    val complexCustomRenderHint = form[TwoFields](f => List(
+      f.field(_.f1).label("Field 1"),
+      f.field(_.f2).label("Field 2").renderHint(customRenderHint("blinking", JField("interval", JInt(20))))
+    ))
+
+    writer.writeForm("simple", simpleCustomRenderHint, TwoFields("a", "b"))
+    writer.writeForm("complex", complexCustomRenderHint, TwoFields("a", "b"))
+  }
+
   def writeTestData(name: String)(thunk: JsonWriter => Unit): Unit = {
     it should s"write forms & jsons: $name" in {
       val file = new File(testClassesDir, s"$name.js")
