@@ -29,10 +29,11 @@ var FormSections = (function () {
     return FormSections;
 })();
 var CreateFormFromJson = (function () {
-    function CreateFormFromJson(renderOptionsGetter, i18n, validatorFnFactories) {
+    function CreateFormFromJson(renderOptionsGetter, i18n, validatorFnFactories, fieldsOptions) {
         this.renderOptionsGetter = renderOptionsGetter;
         this.i18n = i18n;
         this.validatorFnFactories = validatorFnFactories;
+        this.fieldsOptions = fieldsOptions;
         this.idCounter = 0;
     }
     CreateFormFromJson.prototype.renderForm = function (meta, formJson, formElementDictionary) {
@@ -68,6 +69,10 @@ var CreateFormFromJson = (function () {
         var id = this.nextId();
         var validationId = this.nextId();
         var fieldData = new FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label));
+        var fieldOptions = this.fieldsOptions.forField(fieldData);
+        if (fieldOptions && fieldOptions.renderHint) {
+            fieldData = fieldData.withRenderHintOverride(fieldOptions.renderHint);
+        }
         var html = this.fieldHtmlFromJson(fieldData, formElementDictionary, compact);
         if (html) {
             formElementDictionary.getElement(id).validator = new ElementValidator(this.fieldValidatorFns(fieldData), fieldData.validate.required, fieldJson.empty_value);
@@ -107,11 +112,9 @@ var CreateFormFromJson = (function () {
         }
         switch (fieldData.type) {
             case FieldTypes.STRING:
-                return this.stringFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
             case FieldTypes.INTEGER:
-                return renderOptions.renderIntegerField(fieldData, fieldOptions, compact);
             case FieldTypes.FLOAT:
-                return renderOptions.renderFloatField(fieldData, fieldOptions, compact);
+                return this.textFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
             case FieldTypes.BOOLEAN:
                 return this.booleanFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
             case FieldTypes.SELECT:
@@ -126,11 +129,8 @@ var CreateFormFromJson = (function () {
                 return null;
         }
     };
-    CreateFormFromJson.prototype.stringFieldFromJson = function (renderOptions, fieldData, fieldOptions, compact) {
-        if (fieldData.getRenderHintName() === 'password') {
-            return renderOptions.renderPasswordField(fieldData, fieldOptions, compact);
-        }
-        else if (fieldData.getRenderHintName() === 'textarea') {
+    CreateFormFromJson.prototype.textFieldFromJson = function (renderOptions, fieldData, fieldOptions, compact) {
+        if (fieldData.getRenderHintName() === 'textarea') {
             var fieldOptionsWithDim = Util.copyProperties({ rows: fieldData.json.render_hint.rows, cols: fieldData.json.render_hint.cols }, fieldOptions);
             return renderOptions.renderTextareaField(fieldData, fieldOptionsWithDim, compact);
         }
@@ -138,7 +138,7 @@ var CreateFormFromJson = (function () {
             return renderOptions.renderHiddenField(fieldData, fieldOptions, compact);
         }
         else {
-            return renderOptions.renderStringField(fieldData, fieldOptions, compact);
+            return renderOptions.renderTextField(fieldData, fieldOptions, compact);
         }
     };
     CreateFormFromJson.prototype.booleanFieldFromJson = function (renderOptions, fieldData, fieldOptions, compact) {
@@ -322,11 +322,13 @@ var ElementSearch = (function () {
     return ElementSearch;
 })();
 var FieldData = (function () {
-    function FieldData(id, validationId, json, label) {
+    function FieldData(id, validationId, json, label, renderHintOverride) {
+        if (renderHintOverride === void 0) { renderHintOverride = null; }
         this.id = id;
         this.validationId = validationId;
         this.json = json;
         this.label = label;
+        this.renderHintOverride = renderHintOverride;
         this.name = json.name;
         this.value = json.value;
         this.path = json.path;
@@ -336,14 +338,48 @@ var FieldData = (function () {
         this.validate = json.validate || {};
     }
     FieldData.prototype.getRenderHintName = function () {
-        if (this.json.render_hint) {
+        if (this.renderHintOverride) {
+            return this.renderHintOverride.name;
+        }
+        else if (this.json.render_hint) {
             return this.json.render_hint.name;
         }
         else {
             return null;
         }
     };
+    FieldData.prototype.withRenderHintOverride = function (renderHintOverride) {
+        return new FieldData(this.id, this.validationId, this.json, this.label, renderHintOverride);
+    };
     return FieldData;
+})();
+var FieldsOptions = (function () {
+    function FieldsOptions(options) {
+        var _this = this;
+        this.fieldOptions = [];
+        Util.foreach(options || {}, function (path, fieldOpts) {
+            _this.fieldOptions.push(new FieldOptions(new PathFieldMatcher(path), fieldOpts));
+        });
+    }
+    FieldsOptions.prototype.forField = function (fieldData) {
+        return Util.find(this.fieldOptions, function (fo) {
+            return fo.matcher.matches(fieldData.path, fieldData.type, fieldData.getRenderHintName());
+        });
+    };
+    return FieldsOptions;
+})();
+var FieldOptions = (function () {
+    function FieldOptions(matcher, options) {
+        this.matcher = matcher;
+        if (options.render_hint) {
+            if (typeof options.render_hint === 'string') {
+                this.renderHint = { 'name': options.render_hint };
+            }
+            else
+                this.renderHint = options.render_hint;
+        }
+    }
+    return FieldOptions;
 })();
 var FormElement = (function () {
     function FormElement() {
@@ -588,17 +624,9 @@ var ReadFormValues = (function () {
 var Bootstrap3RenderOptions = (function () {
     function Bootstrap3RenderOptions() {
     }
-    Bootstrap3RenderOptions.prototype.renderStringField = function (fieldData, options, compact) {
-        return this.renderField(this.renderHtmlInput('text', fieldData.value, options), fieldData, compact);
-    };
-    Bootstrap3RenderOptions.prototype.renderIntegerField = function (fieldData, options, compact) {
-        return this.renderField(this.renderHtmlInput('number', fieldData.value, options), fieldData, compact);
-    };
-    Bootstrap3RenderOptions.prototype.renderFloatField = function (fieldData, options, compact) {
-        return this.renderField(this.renderHtmlInput('number', fieldData.value, options), fieldData, compact);
-    };
-    Bootstrap3RenderOptions.prototype.renderPasswordField = function (fieldData, options, compact) {
-        return this.renderField(this.renderHtmlInput('password', fieldData.value, options), fieldData, compact);
+    Bootstrap3RenderOptions.prototype.renderTextField = function (fieldData, options, compact) {
+        var inputType = this.inputTypeFor(fieldData);
+        return this.renderField(this.renderHtmlInput(inputType, fieldData.value, options), fieldData, compact);
     };
     Bootstrap3RenderOptions.prototype.renderHiddenField = function (fieldData, options, compact) {
         return this.renderHiddenFormGroup(this.renderHtmlInput('hidden', fieldData.value, options));
@@ -736,6 +764,16 @@ var Bootstrap3RenderOptions = (function () {
     Bootstrap3RenderOptions.prototype.additionalFieldOptions = function () {
         return { 'class': 'form-control' };
     };
+    Bootstrap3RenderOptions.prototype.inputTypeFor = function (fieldData) {
+        switch (fieldData.type) {
+            case FieldTypes.INTEGER: return 'number';
+            case FieldTypes.FLOAT: return 'number';
+        }
+        switch (fieldData.getRenderHintName()) {
+            case 'password': return 'password';
+        }
+        return 'text';
+    };
     return Bootstrap3RenderOptions;
 })();
 var SendController = (function () {
@@ -856,10 +894,11 @@ var SuplerForm = (function () {
         });
         this.customDataHandlerFn = customOptions.custom_data_handler || (function (data) {
         });
+        this.fieldsOptions = new FieldsOptions(customOptions.field_options);
     }
     SuplerForm.prototype.render = function (json) {
         if (this.isSuplerForm(json)) {
-            var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories).renderForm(json[FormSections.META], json.main_form);
+            var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories, this.fieldsOptions).renderForm(json[FormSections.META], json.main_form);
             this.container.innerHTML = result.html;
             this.initializeValidation(result.formElementDictionary, json);
             var sendController = new SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, this.validation);

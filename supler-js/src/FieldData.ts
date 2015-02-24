@@ -3,7 +3,8 @@ class FieldData {
     public id: string,
     public validationId: string,
     public json: any,
-    public label: string) {
+    public label: string,
+    private renderHintOverride:any = null) {
 
     this.name = json.name;
     this.value = json.value;
@@ -23,10 +24,16 @@ class FieldData {
   public validate: any;
 
   getRenderHintName(): string {
-    if (this.json.render_hint) {
+    if (this.renderHintOverride) {
+      return this.renderHintOverride.name;
+    } else if (this.json.render_hint) {
       return this.json.render_hint.name;
     } else {
       return null;
     }
+  }
+
+  withRenderHintOverride(renderHintOverride:any):FieldData {
+    return new FieldData(this.id, this.validationId, this.json, this.label, renderHintOverride);
   }
 }

@@ -3,7 +3,8 @@ class CreateFormFromJson {
 
   constructor(private renderOptionsGetter:RenderOptionsGetter,
               private i18n:I18n,
-              private validatorFnFactories:any) {
+              private validatorFnFactories:any,
+              private fieldsOptions:FieldsOptions) {
   }
 
   renderForm(meta, formJson, formElementDictionary:FormElementDictionary = new FormElementDictionary()):RenderFormResult {
@@ -45,6 +46,12 @@ class CreateFormFromJson {
     var validationId = this.nextId();
 
     var fieldData = new FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label));
+
+    var fieldOptions = this.fieldsOptions.forField(fieldData);
+    if (fieldOptions && fieldOptions.renderHint) {
+      fieldData = fieldData.withRenderHintOverride(fieldOptions.renderHint);
+    }
+
     var html = this.fieldHtmlFromJson(fieldData, formElementDictionary, compact);
 
     if (html) {

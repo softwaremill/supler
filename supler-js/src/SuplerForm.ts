@@ -8,6 +8,7 @@ class SuplerForm {
   private renderOptionsGetter:RenderOptionsGetter;
   private afterRenderFn:() => void;
   private customDataHandlerFn:(any) => void;
+  private fieldsOptions:FieldsOptions;
 
   constructor(private container:HTMLElement, customOptions:any) {
     customOptions = customOptions || {};
@@ -33,12 +34,14 @@ class SuplerForm {
     });
     this.customDataHandlerFn = customOptions.custom_data_handler || ((data:any) => {
     });
+
+    this.fieldsOptions = new FieldsOptions(customOptions.field_options);
   }
 
   render(json) {
     if (this.isSuplerForm(json)) { // might be custom-data-only result
-      var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories)
-                                        .renderForm(json[FormSections.META], json.main_form);
+      var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories,
+        this.fieldsOptions).renderForm(json[FormSections.META], json.main_form);
       this.container.innerHTML = result.html;
 
       this.initializeValidation(result.formElementDictionary, json);
