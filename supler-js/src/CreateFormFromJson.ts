@@ -96,13 +96,9 @@ class CreateFormFromJson {
 
     switch (fieldData.type) {
       case FieldTypes.STRING:
-        return this.stringFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
-
       case FieldTypes.INTEGER:
-        return renderOptions.renderIntegerField(fieldData, fieldOptions, compact);
-
       case FieldTypes.FLOAT:
-        return renderOptions.renderFloatField(fieldData, fieldOptions, compact);
+        return this.textFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
 
       case FieldTypes.BOOLEAN:
         return this.booleanFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
@@ -124,10 +120,8 @@ class CreateFormFromJson {
     }
   }
 
-  private stringFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions, compact) {
-    if (fieldData.getRenderHintName() === 'password') {
-      return renderOptions.renderPasswordField(fieldData, fieldOptions, compact);
-    } else if (fieldData.getRenderHintName() === 'textarea') {
+  private textFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions, compact) {
+    if (fieldData.getRenderHintName() === 'textarea') {
       var fieldOptionsWithDim = Util.copyProperties(
         {rows: fieldData.json.render_hint.rows, cols: fieldData.json.render_hint.cols},
         fieldOptions);
@@ -135,7 +129,7 @@ class CreateFormFromJson {
     } else if (fieldData.getRenderHintName() === 'hidden') {
       return renderOptions.renderHiddenField(fieldData, fieldOptions, compact);
     } else {
-      return renderOptions.renderStringField(fieldData, fieldOptions, compact);
+      return renderOptions.renderTextField(fieldData, fieldOptions, compact);
     }
   }
 

@@ -9,10 +9,7 @@ interface RenderPossibleValuesField {
 interface RenderOptions {
   // main field rendering entry points
   // basic types
-  renderStringField: RenderAnyValueField
-  renderIntegerField: RenderAnyValueField
-  renderFloatField: RenderAnyValueField
-  renderPasswordField: RenderAnyValueField
+  renderTextField: RenderAnyValueField
   renderHiddenField: RenderAnyValueField
   renderTextareaField: RenderAnyValueField
   renderMultiChoiceCheckboxField: RenderPossibleValuesField
@@ -44,26 +41,16 @@ interface RenderOptions {
 
   // misc
   additionalFieldOptions: () => any
+  inputTypeFor: (fieldData:FieldData) => string
 }
 
 class Bootstrap3RenderOptions implements RenderOptions {
   constructor() {
   }
 
-  renderStringField(fieldData, options, compact) {
-    return this.renderField(this.renderHtmlInput('text', fieldData.value, options), fieldData, compact);
-  }
-
-  renderIntegerField(fieldData, options, compact) {
-    return this.renderField(this.renderHtmlInput('number', fieldData.value, options), fieldData, compact);
-  }
-
-  renderFloatField(fieldData, options, compact) {
-    return this.renderField(this.renderHtmlInput('number', fieldData.value, options), fieldData, compact);
-  }
-
-  renderPasswordField(fieldData, options, compact) {
-    return this.renderField(this.renderHtmlInput('password', fieldData.value, options), fieldData, compact);
+  renderTextField(fieldData, options, compact) {
+    var inputType = this.inputTypeFor(fieldData);
+    return this.renderField(this.renderHtmlInput(inputType, fieldData.value, options), fieldData, compact);
   }
 
   renderHiddenField(fieldData, options, compact) {
@@ -253,5 +240,18 @@ class Bootstrap3RenderOptions implements RenderOptions {
 
   additionalFieldOptions() {
     return {'class': 'form-control'};
+  }
+
+  inputTypeFor(fieldData:FieldData):string {
+    switch(fieldData.type) {
+      case FieldTypes.INTEGER: return 'number';
+      case FieldTypes.FLOAT: return 'number';
+    }
+
+    switch(fieldData.getRenderHintName()) {
+      case 'password': return 'password';
+    }
+
+    return 'text';
   }
 }
