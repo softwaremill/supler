@@ -18,6 +18,6 @@ class SuplerAttributes {
   static PATH = 'supler:path';
 }
 
-class Sections {
+class FormSections {
   static META = 'supler_meta';
 }

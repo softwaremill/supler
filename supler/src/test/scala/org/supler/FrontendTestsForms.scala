@@ -21,11 +21,17 @@ import org.supler.field.ActionResult
  * 5. `runner.html` includes all the generated data via `script` tags and then the tests
  */
 object FrontendTestsForms {
+
   case class SimpleSingleField(f1: String)
+
   case class Simple1(field1: String, field2: Option[String], field3: Int, field4: Boolean)
+
   case class ComplexSubformsList(field10: String, simples: List[Simple1])
+
   case class ComplexSingleSubform(field10: String, simple: Simple1)
+
   case class ComplexOptionalSubform(field10: String, simple: Option[Simple1])
+
 }
 
 class FrontendTestsForms extends FlatSpec with ShouldMatchers {
@@ -52,9 +58,17 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("form3invalid", simple1Form, simpleObj3Invalid)
     writer.writeValidatedForm("form3invalidValidated", simple1Form, simpleObj3Invalid)
 
-    writer.writeObj("obj1", simpleObj1, Meta(Map()).addMeta("entityId", "987"))
-    writer.writeObj("obj2", simpleObj2, Meta(Map()).addMeta("entityId", "987"))
-    writer.writeObj("obj3invalid", simpleObj3Invalid, Meta(Map()).addMeta("entityId", "987"))
+    writer.writeObj("obj1", simpleObj1, FormMeta(Map()))
+    writer.writeObj("obj2", simpleObj2, FormMeta(Map()))
+    writer.writeObj("obj3invalid", simpleObj3Invalid, FormMeta(Map()))
+  }
+
+  writeTestData("simpleWithMeta") { writer =>
+    val simpleObj1 = Simple1("v1", Some("v2"), 12, field4 = true)
+
+    writer.writeFormWithMeta("form1", simple1Form, simpleObj1)
+
+    writer.writeObj("obj1", simpleObj1, FormMeta(Map()) + ("entityId", "987"))
   }
 
   writeTestData("actionSimple") { writer =>
@@ -63,23 +77,23 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
 
     val fOneActionValidateNone = form[SimpleSingleField](f => List(
       f.field(_.f1).label("Field 1"),
-      f.action("addx") { s => ActionResult(s.copy(f1 = s.f1 + "x")) }
+      f.action("addx") { s => ActionResult(s.copy(f1 = s.f1 + "x"))}
     ))
 
     val fTwoActionsOneValidateAll = form[SimpleSingleField](f => List(
       f.field(_.f1).label("Field 1"),
-      f.action("addx") { s => ActionResult(s.copy(f1 = s.f1 + "x")) },
-      f.action("addy") { s => ActionResult(s.copy(f1 = s.f1 + "y")) }.validateAll()
+      f.action("addx") { s => ActionResult(s.copy(f1 = s.f1 + "x"))},
+      f.action("addy") { s => ActionResult(s.copy(f1 = s.f1 + "y"))}.validateAll()
     ))
 
     val fActionFormAndDataResult = form[SimpleSingleField](f => List(
       f.field(_.f1).label("Field 1"),
-      f.action("act") { s => ActionResult(s.copy(f1 = s.f1 + "x"), customData = Some(JString("data and form"))) }
+      f.action("act") { s => ActionResult(s.copy(f1 = s.f1 + "x"), customData = Some(JString("data and form")))}
     ))
 
     val fActionDataResultOnly = form[SimpleSingleField](f => List(
       f.field(_.f1).label("Field 1"),
-      f.action("act") { s => ActionResult.custom(JString("data only")) }
+      f.action("act") { s => ActionResult.custom(JString("data only"))}
     ))
 
     writer.writeForm("formOneActionValidateNone", fOneActionValidateNone, obj1)
@@ -126,7 +140,7 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("form1optRadio", fOptRadio, obj1opt)
     writer.writeForm("form2optRadio", fOptRadio, obj2opt)
   }
-  
+
   writeTestData("complexSubformsList") { writer =>
     val complexFormTable = form[ComplexSubformsList](f => List(
       f.field(_.field10).label("Field 10"),
@@ -149,7 +163,7 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("formListNonEmpty", complexFormList, objNonEmpty)
     writer.writeForm("formListEmpty", complexFormList, objEmpty)
 
-    writer.writeObj("objNonEmpty", objNonEmpty, Meta(Map()).addMeta("entityId", "987"))
+    writer.writeObj("objNonEmpty", objNonEmpty, FormMeta(Map()))
   }
 
   writeTestData("complexSingleSubform") { writer =>
@@ -162,7 +176,7 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
 
     writer.writeForm("form1", complexForm1, obj1)
 
-    writer.writeObj("obj1", obj1, Meta(Map()).addMeta("entityId", "987"))
+    writer.writeObj("obj1", obj1, FormMeta(Map()))
   }
 
   writeTestData("complexOptionalSubform") { writer =>
@@ -177,8 +191,8 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("formSome", complexForm1, objSome)
     writer.writeForm("formNone", complexForm1, objNone)
 
-    writer.writeObj("objSome", objSome, Meta(Map()).addMeta("entityId", "987"))
-    writer.writeObj("objNone", objNone, Meta(Map()).addMeta("entityId", "987"))
+    writer.writeObj("objSome", objSome, FormMeta(Map()))
+    writer.writeObj("objNone", objNone, FormMeta(Map()))
   }
 
   writeTestData("conditional") { writer =>
@@ -264,8 +278,13 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
   class JsonWriter(pw: PrintWriter) {
     implicit val formats = Serialization.formats(NoTypeHints)
 
-    def writeForm[T](variableName: String, form: Form[T], obj: T): Unit = {
+    def writeFormWithMeta[T](variableName: String, form: Form[T], obj: T): Unit = {
       val toWrite = pretty(render(form(obj).withMeta("entityId", "987").generateJSON))
+      pw.println( s""""$variableName": $toWrite,""")
+    }
+
+    def writeForm[T](variableName: String, form: Form[T], obj: T): Unit = {
+      val toWrite = pretty(render(form(obj).generateJSON))
       pw.println( s""""$variableName": $toWrite,""")
     }
 
@@ -274,11 +293,17 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
       pw.println( s""""$variableName": $toWrite,""")
     }
 
-    def writeObj(variableName: String, obj: AnyRef, meta: Meta = Meta(Map())): Unit = {
-      val withMeta = Extraction.decompose(obj) match {
-        case JObject(fields) => JObject(meta.toJSON :: fields)
-        case _ => throw new RuntimeException(s"Got some weird unexpected object: $obj")
-      }
+    def writeObj(variableName: String, obj: AnyRef, meta: FormMeta = FormMeta(Map())): Unit = {
+      val withMeta =
+        if (meta.isEmpty) {
+          Extraction.decompose(obj)
+        }
+        else {
+          Extraction.decompose(obj) match {
+            case JObject(fields) => JObject(meta.toJSON :: fields)
+            case _ => throw new RuntimeException(s"Got some weird unexpected object: $obj")
+          }
+        }
       pw.println( s""""$variableName": ${pretty(render(withMeta))},""")
     }
 
@@ -289,4 +314,5 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
       pw.println( s""""$variableName": $toWrite,""")
     }
   }
+
 }

@@ -21,12 +21,15 @@ class CreateFormFromJson {
 
   private generateMeta(meta:any) {
     if (meta) {
-      var html = '<div class="supler_meta">\n';
+      var html = '<span class="supler_meta" style="display: none; visibility: hidden">\n';
       Util.foreach(meta, (metaKey, metaValue) => {
-        html += "<input type='hidden' " + SuplerAttributes.FIELD_NAME + "='" + metaKey + "' value='" + metaValue + "' " +
-        SuplerAttributes.FIELD_TYPE + "='" + FieldTypes.META + "' />\n";
+        var attributes = {'type': 'hidden', 'value': metaValue};
+        attributes[SuplerAttributes.FIELD_TYPE] = FieldTypes.META;
+        attributes[SuplerAttributes.FIELD_NAME] = metaKey;
+
+        html += HtmlUtil.renderTag('input', attributes) + '\n';
       });
-      return html + '</div>\n';
+      return html + '</span>\n';
     } else {
       return '';
     }

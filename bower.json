@@ -15,8 +15,7 @@
         "supler",
         "supler-js",
         "target",
-        "*.sh",
-        "README.md"
+        "*.sh"
     ],
     "dependencies": {
 

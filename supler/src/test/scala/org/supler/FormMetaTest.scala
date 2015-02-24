@@ -4,10 +4,10 @@ import org.json4s.JsonAST.JObject
 import org.json4s.native.JsonMethods._
 import org.scalatest._
 
-class MetaTest extends FlatSpec with ShouldMatchers {
+class FormMetaTest extends FlatSpec with ShouldMatchers {
   "meta" should "serialize to json" in {
     // given
-    val m = Meta(Map()).addMeta("tomek", "domek").addMeta("witek", "sprytek")
+    val m = FormMeta(Map()) + ("tomek", "domek") + ("witek", "sprytek")
 
     // when
     val json = compact(render(JObject(m.toJSON)))
@@ -32,7 +32,7 @@ class MetaTest extends FlatSpec with ShouldMatchers {
     val jsonParsed = parse(json)
 
     // when
-    val meta = Meta.fromJSON(jsonParsed)
+    val meta = FormMeta.fromJSON(jsonParsed)
 
     // then
     meta("entityId") should be ("123")

@@ -18,5 +18,5 @@ For example, to render a text field as a password::
 Supported render hints:
 
 * for subforms: ``asList()`` (default), ``asTable()``
-* for text fields: ``asPassword()``, ``asTextarea(rows = 10)``
+* for text fields: ``asPassword()``, ``asTextarea(rows = 10)``, ``asHidden()``
 * for single-select fields: ``asRadio()``

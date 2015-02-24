@@ -102,8 +102,8 @@ class ReadFormValues {
 
   private static appendMetaValue(result, fieldName, fieldValue) {
     var meta;
-    if (!(meta = result[Sections.META])) {
-      result[Sections.META] = (meta = {});
+    if (!(meta = result[FormSections.META])) {
+      result[FormSections.META] = (meta = {});
     }
 
     meta[fieldName] = fieldValue;

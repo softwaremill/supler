@@ -18,7 +18,7 @@ sealed trait SuplerData[+T] {
 trait FormWithObject[T] extends SuplerData[T] {
   def obj: T
   def form: Form[T]
-  def meta: Meta
+  def meta: FormMeta
   /**
    * Custom data which will be included in the generated JSON, passed to the frontend.
    * Not used or manipulated in any other way by Supler.
@@ -34,7 +34,7 @@ trait FormWithObject[T] extends SuplerData[T] {
   def applyJSONValues(jvalue: JValue): FormWithObjectAndErrors[T] = {
     val result = form.applyJSONValues(EmptyPath, obj, jvalue)
 
-    new FormWithObjectAndErrors(form, result.obj, customData, result.errors, Nil, Meta.fromJSON(jvalue))
+    new FormWithObjectAndErrors(form, result.obj, customData, result.errors, Nil, FormMeta.fromJSON(jvalue))
   }
 
   def doValidate(scope: ValidationScope = ValidateAll): FormWithObjectAndErrors[T] = {
@@ -81,7 +81,7 @@ trait FormWithObject[T] extends SuplerData[T] {
         validated
       } else {
         runnableAction.run() match {
-          case FullCompleteActionResult(t, customData) => InitialFormWithObject(form, t.asInstanceOf[T], customData, Meta(Map()))
+          case FullCompleteActionResult(t, customData) => InitialFormWithObject(form, t.asInstanceOf[T], customData, meta)
           case CustomDataCompleteActionResult(json) => CustomDataOnly(json)
         }
       }
@@ -89,12 +89,12 @@ trait FormWithObject[T] extends SuplerData[T] {
   }
 }
 
-case class InitialFormWithObject[T](form: Form[T], obj: T, customData: Option[JValue], meta: Meta)
+case class InitialFormWithObject[T](form: Form[T], obj: T, customData: Option[JValue], meta: FormMeta)
   extends FormWithObject[T] {
   override protected val applyErrors = Nil
   override protected val validationErrors = Nil
 
-  override def withMeta(key: String, value: String): InitialFormWithObject[T] = this.copy(meta = meta.addMeta(key, value))
+  override def withMeta(key: String, value: String): InitialFormWithObject[T] = this.copy(meta = meta + (key, value))
 }
 
 case class FormWithObjectAndErrors[T](
@@ -103,12 +103,12 @@ case class FormWithObjectAndErrors[T](
   customData: Option[JValue],
   applyErrors: FieldErrors,
   validationErrors: FieldErrors,
-  meta: Meta) extends FormWithObject[T] {
+  meta: FormMeta) extends FormWithObject[T] {
 
   def errors: FieldErrors = allErrors
   def hasErrors: Boolean = allErrors.size > 0
 
-  override def withMeta(key: String, value: String): FormWithObjectAndErrors[T] = this.copy(meta = meta.addMeta(key, value))
+  override def withMeta(key: String, value: String): FormWithObjectAndErrors[T] = this.copy(meta = meta + (key, value))
 }
 
 case class CustomDataOnly private[supler] (customData: JValue) extends SuplerData[Nothing] {

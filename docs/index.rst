@@ -50,6 +50,7 @@ Complete documentation
    backend/formdef/static
    backend/formdef/conditional
    backend/formwithobject
+   backend/meta
    frontend/rendering
    frontend/clientsideval
    frontend/serializing

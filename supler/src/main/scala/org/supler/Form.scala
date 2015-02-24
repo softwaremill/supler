@@ -6,11 +6,11 @@ import org.supler.field._
 import org.supler.validation._
 
 case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
-  def apply(obj: T): FormWithObject[T] = InitialFormWithObject(this, obj, None, Meta(Map()))
+  def apply(obj: T): FormWithObject[T] = InitialFormWithObject(this, obj, None, FormMeta(Map()))
 
-  def withNewEmpty: FormWithObject[T] = InitialFormWithObject(this, createEmpty(), None, Meta(Map()))
+  def withNewEmpty: FormWithObject[T] = InitialFormWithObject(this, createEmpty(), None, FormMeta(Map()))
 
-  def getMeta(jvalue: JValue): Meta = Meta.fromJSON(jvalue)
+  def getMeta(jvalue: JValue): FormMeta = FormMeta.fromJSON(jvalue)
 
   private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors =
     rows.flatMap(_.doValidate(parentPath, obj, scope))

@@ -11,6 +11,18 @@ describe('serialization', function() {
     serialized.should.deep.equal(data.simple1.obj1);
   });
 
+  it('should serialize a basic form with meta', function() {
+    // given
+    var sf = new SuplerForm(container);
+    sf.render(data.simpleWithMeta.form1);
+
+    // when
+    var serialized = sf.getValue();
+
+    // then
+    serialized.should.deep.equal(data.simpleWithMeta.obj1);
+  });
+
   it('should serialize after changes', function() {
     // given
     var sf = new SuplerForm(container);

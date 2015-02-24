@@ -22,11 +22,11 @@ var SuplerAttributes = (function () {
     SuplerAttributes.PATH = 'supler:path';
     return SuplerAttributes;
 })();
-var Sections = (function () {
-    function Sections() {
+var FormSections = (function () {
+    function FormSections() {
     }
-    Sections.META = 'supler_meta';
-    return Sections;
+    FormSections.META = 'supler_meta';
+    return FormSections;
 })();
 var CreateFormFromJson = (function () {
     function CreateFormFromJson(renderOptionsGetter, i18n, validatorFnFactories) {
@@ -50,11 +50,14 @@ var CreateFormFromJson = (function () {
     };
     CreateFormFromJson.prototype.generateMeta = function (meta) {
         if (meta) {
-            var html = '<div class="supler_meta">\n';
+            var html = '<span class="supler_meta" style="display: none; visibility: hidden">\n';
             Util.foreach(meta, function (metaKey, metaValue) {
-                html += "<input type='hidden' " + SuplerAttributes.FIELD_NAME + "='" + metaKey + "' value='" + metaValue + "' " + SuplerAttributes.FIELD_TYPE + "='" + FieldTypes.META + "' />\n";
+                var attributes = { 'type': 'hidden', 'value': metaValue };
+                attributes[SuplerAttributes.FIELD_TYPE] = FieldTypes.META;
+                attributes[SuplerAttributes.FIELD_NAME] = metaKey;
+                html += HtmlUtil.renderTag('input', attributes) + '\n';
             });
-            return html + '</div>\n';
+            return html + '</span>\n';
         }
         else {
             return '';
@@ -549,8 +552,8 @@ var ReadFormValues = (function () {
     };
     ReadFormValues.appendMetaValue = function (result, fieldName, fieldValue) {
         var meta;
-        if (!(meta = result[Sections.META])) {
-            result[Sections.META] = (meta = {});
+        if (!(meta = result[FormSections.META])) {
+            result[FormSections.META] = (meta = {});
         }
         meta[fieldName] = fieldValue;
     };
@@ -597,7 +600,7 @@ var Bootstrap3RenderOptions = (function () {
         return this.renderField(this.renderHtmlInput('password', fieldData.value, options), fieldData, compact);
     };
     Bootstrap3RenderOptions.prototype.renderHiddenField = function (fieldData, options, compact) {
-        return this.renderField(this.renderHtmlInput('hidden', fieldData.value, options), fieldData, compact);
+        return this.renderHiddenFormGroup(this.renderHtmlInput('hidden', fieldData.value, options));
     };
     Bootstrap3RenderOptions.prototype.renderTextareaField = function (fieldData, options, compact) {
         return this.renderField(this.renderHtmlTextarea(fieldData.value, options), fieldData, compact);
@@ -635,6 +638,9 @@ var Bootstrap3RenderOptions = (function () {
         }
         var divBody = labelPart + input + '\n' + this.renderValidation(fieldData.validationId) + '\n';
         return HtmlUtil.renderTag('div', { 'class': 'form-group' }, divBody, false);
+    };
+    Bootstrap3RenderOptions.prototype.renderHiddenFormGroup = function (input) {
+        return HtmlUtil.renderTag('span', { 'class': 'hidden-form-group', 'style': 'visibility: hidden; display: none' }, input, false);
     };
     Bootstrap3RenderOptions.prototype.renderLabel = function (forId, label) {
         return HtmlUtil.renderTag('label', { 'for': forId }, label);
@@ -852,7 +858,7 @@ var SuplerForm = (function () {
     }
     SuplerForm.prototype.render = function (json) {
         if (this.isSuplerForm(json)) {
-            var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories).renderForm(json[Sections.META], json.main_form);
+            var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories).renderForm(json[FormSections.META], json.main_form);
             this.container.innerHTML = result.html;
             this.initializeValidation(result.formElementDictionary, json);
             var sendController = new SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, this.validation);

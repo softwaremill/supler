@@ -67,7 +67,7 @@ class Bootstrap3RenderOptions implements RenderOptions {
   }
 
   renderHiddenField(fieldData, options, compact) {
-    return this.renderField(this.renderHtmlInput('hidden', fieldData.value, options), fieldData, compact);
+    return this.renderHiddenFormGroup(this.renderHtmlInput('hidden', fieldData.value, options));
   }
 
   renderTextareaField(fieldData, options, compact) {
@@ -121,6 +121,10 @@ class Bootstrap3RenderOptions implements RenderOptions {
       '\n';
 
     return HtmlUtil.renderTag('div', {'class': 'form-group'}, divBody, false);
+  }
+
+  renderHiddenFormGroup(input) {
+    return HtmlUtil.renderTag('span', {'class': 'hidden-form-group', 'style': 'visibility: hidden; display: none'}, input, false);
   }
 
   renderLabel(forId, label) {

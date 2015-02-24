@@ -38,7 +38,7 @@ class SuplerForm {
   render(json) {
     if (this.isSuplerForm(json)) { // might be custom-data-only result
       var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories)
-                                        .renderForm(json[Sections.META], json.main_form);
+                                        .renderForm(json[FormSections.META], json.main_form);
       this.container.innerHTML = result.html;
 
       this.initializeValidation(result.formElementDictionary, json);
