@@ -59,4 +59,5 @@ Complete documentation
    frontend/refreshes
    frontend/custombehavior
    frontend/customdata
+   frontend/options
    json

@@ -1,3 +1,5 @@
+.. _customdatahandler:
+
 Frontend: Handling custom data
 ==============================
 

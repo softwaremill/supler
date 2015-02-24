@@ -1,9 +1,13 @@
+.. _customizingrender:
+
 Frontend: Customizing the rendering process
 ===========================================
 
 The rendering process is fully customizable. By default, `Bootstrap <http://getbootstrap.com/>`_-based HTML is rendered,
 but this can be changed either by providing HTML templates, or by overriding any of the rendering functions using the
 options.
+
+.. _customizingrender_renderhints:
 
 Defining render hints on the frontend
 -------------------------------------
@@ -31,8 +35,7 @@ This can be done through the the ``field_options`` option passed when creating a
   });
 
 A render hint can be just a name (string), or an object with a ``name`` property and additional parameters (like
-the textarea example). When dealing with lists of subforms, options for nested fields can be defined using the
-``subformField[].fieldName`` syntax (``[]`` means every subform in subforms list).
+the textarea example).
 
 Customizing via HTML templates
 ------------------------------

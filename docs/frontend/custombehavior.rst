@@ -1,3 +1,5 @@
+.. _afterrender:
+
 Frontend: Adding custom behavior to the form
 ============================================
 
