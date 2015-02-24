@@ -131,7 +131,8 @@ var CreateFormFromJson = (function () {
     };
     CreateFormFromJson.prototype.textFieldFromJson = function (renderOptions, fieldData, fieldOptions, compact) {
         if (fieldData.getRenderHintName() === 'textarea') {
-            var fieldOptionsWithDim = Util.copyProperties({ rows: fieldData.json.render_hint.rows, cols: fieldData.json.render_hint.cols }, fieldOptions);
+            var renderHint = fieldData.getRenderHint();
+            var fieldOptionsWithDim = Util.copyProperties({ rows: renderHint.rows, cols: renderHint.cols }, fieldOptions);
             return renderOptions.renderTextareaField(fieldData, fieldOptionsWithDim, compact);
         }
         else if (fieldData.getRenderHintName() === 'hidden') {
@@ -337,6 +338,14 @@ var FieldData = (function () {
         this.enabled = json.enabled;
         this.validate = json.validate || {};
     }
+    FieldData.prototype.getRenderHint = function () {
+        if (this.renderHintOverride) {
+            return this.renderHintOverride;
+        }
+        else {
+            return this.json.render_hint;
+        }
+    };
     FieldData.prototype.getRenderHintName = function () {
         if (this.renderHintOverride) {
             return this.renderHintOverride.name;

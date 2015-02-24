@@ -23,6 +23,14 @@ class FieldData {
   public enabled: boolean;
   public validate: any;
 
+  getRenderHint():any {
+    if (this.renderHintOverride) {
+      return this.renderHintOverride;
+    } else {
+      return this.json.render_hint;
+    }
+  }
+
   getRenderHintName(): string {
     if (this.renderHintOverride) {
       return this.renderHintOverride.name;

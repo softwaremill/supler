@@ -129,8 +129,9 @@ class CreateFormFromJson {
 
   private textFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions, compact) {
     if (fieldData.getRenderHintName() === 'textarea') {
+      var renderHint = fieldData.getRenderHint();
       var fieldOptionsWithDim = Util.copyProperties(
-        {rows: fieldData.json.render_hint.rows, cols: fieldData.json.render_hint.cols},
+        {rows: renderHint.rows, cols: renderHint.cols},
         fieldOptions);
       return renderOptions.renderTextareaField(fieldData, fieldOptionsWithDim, compact);
     } else if (fieldData.getRenderHintName() === 'hidden') {
