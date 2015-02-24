@@ -16,4 +16,46 @@ describe('frontend render hints', function() {
     byName('field1').attr('type').should.equal('text');
     byName('field2').attr('type').should.equal('password');
   });
+
+  it('should allow specifying render hints for all fields nested in subforms list', function() {
+    // given
+    var sf = new SuplerForm(container, {
+      field_options: {
+        'simples[].field2': {
+          'render_hint': 'password'
+        }
+      }
+    });
+
+    // when
+    sf.render(data.complexSubformsList.formListNonEmpty);
+
+    // then
+    byName('simples[0].field1').attr('type').should.equal('text');
+    byName('simples[0].field2').attr('type').should.equal('password');
+
+    byName('simples[1].field1').attr('type').should.equal('text');
+    byName('simples[1].field2').attr('type').should.equal('password');
+  });
+
+  it('should allow specifying render hints for a single field nested in subforms list', function() {
+    // given
+    var sf = new SuplerForm(container, {
+      field_options: {
+        'simples[1].field2': {
+          'render_hint': 'password'
+        }
+      }
+    });
+
+    // when
+    sf.render(data.complexSubformsList.formListNonEmpty);
+
+    // then
+    byName('simples[0].field1').attr('type').should.equal('text');
+    byName('simples[0].field2').attr('type').should.equal('text');
+
+    byName('simples[1].field1').attr('type').should.equal('text');
+    byName('simples[1].field2').attr('type').should.equal('password');
+  });
 });

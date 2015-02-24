@@ -67,6 +67,11 @@ class Util {
     }
     return true;
   }
+
+  // http://stackoverflow.com/questions/2593637/how-to-escape-regular-expression-in-javascript
+  static escapeRegExp(s:string):string {
+    return s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+  }
 }
 
 class SelectValue {

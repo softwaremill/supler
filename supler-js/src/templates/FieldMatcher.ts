@@ -18,11 +18,19 @@ class CompositeFieldMatcher implements FieldMatcher {
 }
 
 class PathFieldMatcher implements FieldMatcher {
-  constructor(private path:string) {
+  private pathMatcher:RegExp;
+
+  constructor(path:string) {
+    var parts = path.split('[]');
+    if (parts.length === 1) {
+      this.pathMatcher = new RegExp(Util.escapeRegExp(path));
+    } else {
+      this.pathMatcher = new RegExp(parts.join('\\[\\d*\\]'));
+    }
   }
 
   matches(path:string, type:string, renderHintName:string):boolean {
-    return this.path === path;
+    return this.pathMatcher.test(path);
   }
 }
 

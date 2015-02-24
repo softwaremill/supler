@@ -1009,6 +1009,9 @@ var Util = (function () {
         }
         return true;
     };
+    Util.escapeRegExp = function (s) {
+        return s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    };
     return Util;
 })();
 var SelectValue = (function () {
@@ -1046,10 +1049,16 @@ var CompositeFieldMatcher = (function () {
 })();
 var PathFieldMatcher = (function () {
     function PathFieldMatcher(path) {
-        this.path = path;
+        var parts = path.split('[]');
+        if (parts.length === 1) {
+            this.pathMatcher = new RegExp(Util.escapeRegExp(path));
+        }
+        else {
+            this.pathMatcher = new RegExp(parts.join('\\[\\d*\\]'));
+        }
     }
     PathFieldMatcher.prototype.matches = function (path, type, renderHintName) {
-        return this.path === path;
+        return this.pathMatcher.test(path);
     };
     return PathFieldMatcher;
 })();
