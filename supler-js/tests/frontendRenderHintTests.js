@@ -80,4 +80,17 @@ describe('frontend render hints', function() {
     byName('simples[1].field1').attr('type').should.equal('text');
     byName('simples[1].field2').attr('type').should.equal('password');
   });
+
+  it('should render date field with bootstrap-datepicker decoration', function() {
+    // given
+    var sf = new Supler.Form(container, {});
+
+    // when
+    sf.render(data.simpleDate.dateform1);
+
+    // then
+    byName('field2').attr('class').should.contain('datepicker');
+    byName('field2').attr('data-date-format').should.equal('mm/dd/yyyy');
+    byName('field2').attr('data-provide').should.equal('date-picker');
+  });
 });

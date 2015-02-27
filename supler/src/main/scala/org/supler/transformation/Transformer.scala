@@ -1,8 +1,18 @@
 package org.supler.transformation
 
+import java.text.{ParseException, SimpleDateFormat}
+import java.util.{Date, UUID}
+
+import org.supler.Supler
+import org.supler.field.{BasicFieldCompatible, RenderHint}
+
 trait Transformer[U, S] {
   def serialize(u: U): S
   def deserialize(s: S): Either[String, U]
+}
+
+trait DefaultHint {
+  def hint: RenderHint with BasicFieldCompatible
 }
 
 // convenience traits for extension by custom transformers; one for each of the types which have a json transformer
@@ -26,6 +36,32 @@ object Transformer {
   implicit object FloatIdTransformer extends IdentityTransformer[Float]
   implicit object DoubleIdTransformer extends IdentityTransformer[Double]
   implicit object BooleanIdTransformer extends IdentityTransformer[Boolean]
+
+  implicit object UUIDTransformer extends StringTransformer[UUID] {
+    override def serialize(u: UUID) = u.toString
+
+    override def deserialize(s: String) = try {
+      Right(UUID.fromString(s))
+    }
+    catch {
+      case e: IllegalArgumentException => Left("error_illegalUUIDformat")
+    }
+  }
+
+  val ISO8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+
+  implicit object DateTransformer extends StringTransformer[Date] with DefaultHint {
+    override def serialize(d: Date) = ISO8601Format.format(d)
+
+    override def deserialize(d: String) = try {
+      Right(ISO8601Format.parse(d))
+    }
+    catch {
+      case e: ParseException => Left("error_illegalDateformat")
+    }
+
+    override def hint = Supler.asDate()
+  }
 
   implicit def optionTransformer[U, S](implicit base: Transformer[U, S]) = new Transformer[Option[U], Option[S]] {
     override def serialize(u: Option[U]) = u.map(base.serialize)

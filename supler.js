@@ -146,9 +146,29 @@ var Supler;
             else if (fieldData.getRenderHintName() === 'hidden') {
                 return renderOptions.renderHiddenField(fieldData, fieldOptions, compact);
             }
+            else if (fieldData.getRenderHintName() === 'date') {
+                var options = this.addDatePickerOptions(fieldOptions);
+                return renderOptions.renderTextField(fieldData, options, compact);
+            }
             else {
                 return renderOptions.renderTextField(fieldData, fieldOptions, compact);
             }
+        };
+        CreateFormFromJson.prototype.addDatePickerOptions = function (fieldOptions) {
+            var options = fieldOptions;
+            if (!options) {
+                options = {};
+            }
+            var classes = options['class'];
+            if (!options['class']) {
+                options['class'] = 'datepicker';
+            }
+            else {
+                options['class'] += ", datepicker";
+            }
+            options['data-date-format'] = 'mm/dd/yyyy';
+            options['data-provide'] = 'date-picker';
+            return options;
         };
         CreateFormFromJson.prototype.booleanFieldFromJson = function (renderOptions, fieldData, fieldOptions, compact) {
             var possibleSelectValues = [

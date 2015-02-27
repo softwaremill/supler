@@ -3,14 +3,14 @@ module Supler {
     private idCounter:number = 0;
 
     constructor(private renderOptionsGetter:RenderOptionsGetter,
-      private i18n:I18n,
-      private validatorFnFactories:any,
-      private fieldsOptions:FieldsOptions) {
+                private i18n:I18n,
+                private validatorFnFactories:any,
+                private fieldsOptions:FieldsOptions) {
     }
 
     renderForm(meta,
-      formJson,
-      formElementDictionary:FormElementDictionary = new FormElementDictionary()):RenderFormResult {
+               formJson,
+               formElementDictionary:FormElementDictionary = new FormElementDictionary()):RenderFormResult {
       var fields = formJson.fields;
       var fieldCount = fields.length;
 
@@ -85,8 +85,8 @@ module Supler {
     }
 
     private fieldHtmlFromJson(fieldData:FieldData,
-      formElementDictionary:FormElementDictionary,
-      compact:boolean):string {
+                              formElementDictionary:FormElementDictionary,
+                              compact:boolean):string {
 
       var renderOptions = this.renderOptionsGetter.forField(fieldData.path, fieldData.type, fieldData.getRenderHintName());
 
@@ -141,9 +141,28 @@ module Supler {
         return renderOptions.renderTextareaField(fieldData, fieldOptionsWithDim, compact);
       } else if (fieldData.getRenderHintName() === 'hidden') {
         return renderOptions.renderHiddenField(fieldData, fieldOptions, compact);
+      } else if (fieldData.getRenderHintName() === 'date') {
+        var options = this.addDatePickerOptions(fieldOptions);
+        return renderOptions.renderTextField(fieldData, options, compact);
       } else {
         return renderOptions.renderTextField(fieldData, fieldOptions, compact);
       }
+    }
+
+    private addDatePickerOptions(fieldOptions) {
+      var options = fieldOptions;
+      if (!options) {
+        options = {};
+      }
+      var classes = options['class'];
+      if (!options['class']) {
+        options['class'] = 'datepicker';
+      } else {
+        options['class'] += ", datepicker";
+      }
+      options['data-date-format'] = 'mm/dd/yyyy';
+      options['data-provide'] = 'date-picker';
+      return options;
     }
 
     private booleanFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions, compact) {
@@ -257,7 +276,7 @@ module Supler {
     }
 
     private actionFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions,
-      formElementDictionary:FormElementDictionary, compact) {
+                                formElementDictionary:FormElementDictionary, compact) {
 
       formElementDictionary.getElement(fieldData.id).validationScope =
         ValidationScopeParser.fromJson(fieldData.json.validation_scope);

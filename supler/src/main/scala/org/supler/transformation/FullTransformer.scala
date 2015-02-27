@@ -1,6 +1,7 @@
 package org.supler.transformation
 
 import org.json4s.JValue
+import org.supler.field.{BasicFieldCompatible, RenderHint}
 
 class FullTransformer[U, S](transformer: Transformer[U, S], jsonTransformer: JsonTransformer[S]) {
   def serialize(u: U): Option[JValue] = jsonTransformer.toJValue(transformer.serialize(u))
@@ -11,6 +12,13 @@ class FullTransformer[U, S](transformer: Transformer[U, S], jsonTransformer: Jso
   } yield u
 
   def jsonSchemaName = jsonTransformer.jsonSchemaName
+
+  def hasDefaultRenderHint = transformer.isInstanceOf[DefaultHint]
+
+  def renderHint: Option[RenderHint with BasicFieldCompatible] =
+    if (hasDefaultRenderHint)
+      Some(transformer.asInstanceOf[DefaultHint].hint)
+    else None
 }
 
 object FullTransformer {

@@ -13,6 +13,8 @@ case class BasicFieldTextareaRenderHint(rows: Option[Int], cols: Option[Int]) ex
 
 case object BasicFieldHiddenRenderHint extends RenderHint("hidden") with BasicFieldCompatible
 
+case object BasicFieldDateRenderHint extends RenderHint("date") with BasicFieldCompatible
+
 case object SelectOneFieldRadioRenderHint extends RenderHint("radio") with SelectOneFieldCompatible
 case object SelectOneFieldDropdownRenderHint extends RenderHint("dropdown") with SelectOneFieldCompatible
 
@@ -34,6 +36,7 @@ trait RenderHints {
   def asRadio() = SelectOneFieldRadioRenderHint
   def asDropdown() = SelectOneFieldDropdownRenderHint
   def asHidden() = BasicFieldHiddenRenderHint
+  def asDate() = BasicFieldDateRenderHint
 
   def customRenderHint(name: String, extraJSON: JField*) = CustomRenderHint(name, extraJSON.toList)
 }

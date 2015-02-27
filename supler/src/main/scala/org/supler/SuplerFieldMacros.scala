@@ -124,7 +124,7 @@ object SuplerFieldMacros {
     def newBasicField[T, U, S](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,
       transformer: FullTransformer[U, S], emptyValue: Option[U]): BasicField[T, U] = {
 
-      BasicField[T, U](fieldName, read, write, List(), None, required, transformer, None, emptyValue,
+      BasicField[T, U](fieldName, read, write, List(), None, required, transformer, transformer.renderHint, emptyValue,
         AlwaysCondition, AlwaysCondition)
     }
 

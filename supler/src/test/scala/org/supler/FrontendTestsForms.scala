@@ -1,6 +1,7 @@
 package org.supler
 
 import java.io.{File, PrintWriter}
+import java.util.Date
 
 import org.json4s.JsonAST._
 import org.json4s.native.JsonMethods._
@@ -32,6 +33,8 @@ object FrontendTestsForms {
 
   case class ComplexOptionalSubform(field10: String, simple: Option[Simple1])
 
+  case class SimpleWithDate(field1: String, field2: Date, field3: Option[Date])
+
 }
 
 class FrontendTestsForms extends FlatSpec with ShouldMatchers {
@@ -44,6 +47,12 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     f.field(_.field2).label("Field 2"),
     f.field(_.field3).label("Field 3").validate(gt(10)),
     f.field(_.field4).label("Field 4")
+  ))
+
+  val simpleDateForm = form[SimpleWithDate](f => List(
+    f.field(_.field1).label("DField 1"),
+    f.field(_.field2).label("DField 2"),
+    f.field(_.field3).label("DField 3")
   ))
 
   writeTestData("simple1") { writer =>
@@ -61,6 +70,17 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeObj("obj1", simpleObj1, FormMeta(Map()))
     writer.writeObj("obj2", simpleObj2, FormMeta(Map()))
     writer.writeObj("obj3invalid", simpleObj3Invalid, FormMeta(Map()))
+  }
+
+  writeTestData("simpleDate") { writer =>
+    val simpleDateObj1 = SimpleWithDate("dv1", new Date(), None)
+    val simpleDateObj2 = SimpleWithDate("dv2", new Date(), Some(new Date()))
+
+    writer.writeForm("dateform1", simpleDateForm, simpleDateObj1)
+    writer.writeForm("dateform2", simpleDateForm, simpleDateObj2)
+
+    writer.writeObj("dateobj1", simpleDateObj1, FormMeta(Map()))
+    writer.writeObj("ddateobj2", simpleDateObj2, FormMeta(Map()))
   }
 
   writeTestData("simpleWithMeta") { writer =>
