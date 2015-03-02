@@ -13,12 +13,7 @@ class FullTransformer[U, S](transformer: Transformer[U, S], jsonTransformer: Jso
 
   def jsonSchemaName = jsonTransformer.jsonSchemaName
 
-  def hasDefaultRenderHint = transformer.isInstanceOf[DefaultHint]
-
-  def renderHint: Option[RenderHint with BasicFieldCompatible] =
-    if (hasDefaultRenderHint)
-      Some(transformer.asInstanceOf[DefaultHint].hint)
-    else None
+  def renderHint: Option[RenderHint with BasicFieldCompatible] = transformer.renderHint
 }
 
 object FullTransformer {

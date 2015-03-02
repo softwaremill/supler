@@ -78,9 +78,6 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
 
     writer.writeForm("dateform1", simpleDateForm, simpleDateObj1)
     writer.writeForm("dateform2", simpleDateForm, simpleDateObj2)
-
-    writer.writeObj("dateobj1", simpleDateObj1, FormMeta(Map()))
-    writer.writeObj("ddateobj2", simpleDateObj2, FormMeta(Map()))
   }
 
   writeTestData("simpleWithMeta") { writer =>

@@ -142,27 +142,10 @@ module Supler {
       } else if (fieldData.getRenderHintName() === 'hidden') {
         return renderOptions.renderHiddenField(fieldData, fieldOptions, compact);
       } else if (fieldData.getRenderHintName() === 'date') {
-        var options = this.addDatePickerOptions(fieldOptions);
-        return renderOptions.renderTextField(fieldData, options, compact);
+        return renderOptions.renderDateField(fieldData, fieldOptions, compact);
       } else {
         return renderOptions.renderTextField(fieldData, fieldOptions, compact);
       }
-    }
-
-    private addDatePickerOptions(fieldOptions) {
-      var options = fieldOptions;
-      if (!options) {
-        options = {};
-      }
-      var classes = options['class'];
-      if (!options['class']) {
-        options['class'] = 'datepicker';
-      } else {
-        options['class'] += ", datepicker";
-      }
-      options['data-date-format'] = 'mm/dd/yyyy';
-      options['data-provide'] = 'date-picker';
-      return options;
     }
 
     private booleanFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions, compact) {

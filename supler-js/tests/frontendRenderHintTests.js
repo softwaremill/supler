@@ -93,4 +93,30 @@ describe('frontend render hints', function() {
     byName('field2').attr('data-date-format').should.equal('mm/dd/yyyy');
     byName('field2').attr('data-provide').should.equal('date-picker');
   });
+
+  it('should render date optional empty date field with bootstrap-datepicker decoration', function() {
+    // given
+    var sf = new Supler.Form(container, {});
+
+    // when
+    sf.render(data.simpleDate.dateform1);
+
+    // then
+    byName('field3').attr('class').should.contain('datepicker');
+    byName('field3').attr('data-date-format').should.equal('mm/dd/yyyy');
+    byName('field3').attr('data-provide').should.equal('date-picker');
+  });
+
+  it('should render date optional non-empty date field with bootstrap-datepicker decoration', function() {
+    // given
+    var sf = new Supler.Form(container, {});
+
+    // when
+    sf.render(data.simpleDate.dateform2);
+
+    // then
+    byName('field3').attr('class').should.contain('datepicker');
+    byName('field3').attr('data-date-format').should.equal('mm/dd/yyyy');
+    byName('field3').attr('data-provide').should.equal('date-picker');
+  });
 });

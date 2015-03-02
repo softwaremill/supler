@@ -9,10 +9,7 @@ import org.supler.field.{BasicFieldCompatible, RenderHint}
 trait Transformer[U, S] {
   def serialize(u: U): S
   def deserialize(s: S): Either[String, U]
-}
-
-trait DefaultHint {
-  def hint: RenderHint with BasicFieldCompatible
+  def renderHint: Option[RenderHint with BasicFieldCompatible] = None
 }
 
 // convenience traits for extension by custom transformers; one for each of the types which have a json transformer
@@ -50,7 +47,7 @@ object Transformer {
 
   val ISO8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
 
-  implicit object DateTransformer extends StringTransformer[Date] with DefaultHint {
+  implicit object DateTransformer extends StringTransformer[Date] {
     override def serialize(d: Date) = ISO8601Format.format(d)
 
     override def deserialize(d: String) = try {
@@ -60,7 +57,7 @@ object Transformer {
       case e: ParseException => Left("error_illegalDateformat")
     }
 
-    override def hint = Supler.asDate()
+    override def renderHint = Some(Supler.asDate())
   }
 
   implicit def optionTransformer[U, S](implicit base: Transformer[U, S]) = new Transformer[Option[U], Option[S]] {
@@ -69,5 +66,6 @@ object Transformer {
       case None => Right(None)
       case Some(d) => d.right.map(Some(_))
     }
+    override def renderHint = base.renderHint
   }
 }

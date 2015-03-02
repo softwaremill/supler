@@ -17,6 +17,7 @@ module Supler {
     renderTextField: RenderAnyValueField
     renderHiddenField: RenderAnyValueField
     renderTextareaField: RenderAnyValueField
+    renderDateField: RenderAnyValueField
     renderMultiChoiceCheckboxField: RenderPossibleValuesField
     renderMultiChoiceSelectField: RenderPossibleValuesField
     renderSingleChoiceRadioField: RenderPossibleValuesField
@@ -56,6 +57,27 @@ module Supler {
     renderTextField(fieldData, options, compact) {
       var inputType = this.inputTypeFor(fieldData);
       return this.renderField(this.renderHtmlInput(inputType, fieldData.value, options), fieldData, compact);
+    }
+
+    renderDateField(fieldData, options, compact) {
+      var optionsWithDatepicker = this.addDatePickerOptions(options);
+      return this.renderTextField(fieldData, optionsWithDatepicker, compact);
+    }
+
+    private addDatePickerOptions(fieldOptions) {
+      var options = fieldOptions;
+      if (!options) {
+        options = {};
+      }
+      var classes = options['class'];
+      if (!options['class']) {
+        options['class'] = 'datepicker';
+      } else {
+        options['class'] += " datepicker";
+      }
+      options['data-date-format'] = 'mm/dd/yyyy';
+      options['data-provide'] = 'date-picker';
+      return options;
     }
 
     renderHiddenField(fieldData, options, compact) {

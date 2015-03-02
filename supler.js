@@ -147,28 +147,11 @@ var Supler;
                 return renderOptions.renderHiddenField(fieldData, fieldOptions, compact);
             }
             else if (fieldData.getRenderHintName() === 'date') {
-                var options = this.addDatePickerOptions(fieldOptions);
-                return renderOptions.renderTextField(fieldData, options, compact);
+                return renderOptions.renderDateField(fieldData, fieldOptions, compact);
             }
             else {
                 return renderOptions.renderTextField(fieldData, fieldOptions, compact);
             }
-        };
-        CreateFormFromJson.prototype.addDatePickerOptions = function (fieldOptions) {
-            var options = fieldOptions;
-            if (!options) {
-                options = {};
-            }
-            var classes = options['class'];
-            if (!options['class']) {
-                options['class'] = 'datepicker';
-            }
-            else {
-                options['class'] += ", datepicker";
-            }
-            options['data-date-format'] = 'mm/dd/yyyy';
-            options['data-provide'] = 'date-picker';
-            return options;
         };
         CreateFormFromJson.prototype.booleanFieldFromJson = function (renderOptions, fieldData, fieldOptions, compact) {
             var possibleSelectValues = [
@@ -699,6 +682,26 @@ var Supler;
         Bootstrap3RenderOptions.prototype.renderTextField = function (fieldData, options, compact) {
             var inputType = this.inputTypeFor(fieldData);
             return this.renderField(this.renderHtmlInput(inputType, fieldData.value, options), fieldData, compact);
+        };
+        Bootstrap3RenderOptions.prototype.renderDateField = function (fieldData, options, compact) {
+            var optionsWithDatepicker = this.addDatePickerOptions(options);
+            return this.renderTextField(fieldData, optionsWithDatepicker, compact);
+        };
+        Bootstrap3RenderOptions.prototype.addDatePickerOptions = function (fieldOptions) {
+            var options = fieldOptions;
+            if (!options) {
+                options = {};
+            }
+            var classes = options['class'];
+            if (!options['class']) {
+                options['class'] = 'datepicker';
+            }
+            else {
+                options['class'] += " datepicker";
+            }
+            options['data-date-format'] = 'mm/dd/yyyy';
+            options['data-provide'] = 'date-picker';
+            return options;
         };
         Bootstrap3RenderOptions.prototype.renderHiddenField = function (fieldData, options, compact) {
             return this.renderHiddenFormGroup(this.renderHtmlInput('hidden', fieldData.value, options));
