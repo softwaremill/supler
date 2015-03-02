@@ -1,19 +1,28 @@
-import sbt.Keys._
-import sbt._
-import sbtassembly.Plugin._
-import AssemblyKeys._
 import bintray.Plugin.bintraySettings
 import bintray.Keys._
+import sbt.Keys._
+import sbt._
+import sbtassembly.Plugin.AssemblyKeys._
+import sbtassembly.Plugin._
 
 object BuildSettings {
-  val buildSettings = Defaults.coreDefaultSettings ++ bintraySettings ++ Seq(
+  val Version = "0.3.0-SNAPSHOT"
+
+  val buildSettings = Defaults.coreDefaultSettings ++ (
+    if (Version.endsWith("-SNAPSHOT"))
+      Seq(
+        publishTo := Some("Artifactory Realm" at "http://oss.jfrog.org/artifactory/oss-snapshot-local"),
+        credentials := Credentials(Path.userHome / ".bintray" / ".artifactory") :: Nil
+      )
+    else bintraySettings ++
+      Seq(
+        bintrayOrganization in bintray := Some("softwaremill"),
+        repository in bintray := "softwaremill")
+    ) ++ Seq(
     organization := "com.softwaremill.supler",
-    version := "0.3.0-SNAPSHOT",
+    version := Version,
     scalaVersion := "2.11.5",
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:existentials", "-language:higherKinds"),
-    // bintray
-    bintrayOrganization in bintray := Some("softwaremill"),
-    repository in bintray := "softwaremill",
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomExtra := <scm>
@@ -34,8 +43,6 @@ object BuildSettings {
       </developers>,
     parallelExecution := false,
     homepage := Some(new java.net.URL("https://github.com/softwaremill/supler")),
-    publishTo := (if (isSnapshot.value) Some("Artifactory Realm" at "http://oss.jfrog.org/artifactory/oss-snapshot-local") else publishTo.value),
-    credentials := (if (isSnapshot.value) Credentials(Path.userHome / ".bintray" / ".artifactory") :: Nil else credentials.value),
     licenses := ("Apache-2.0", new java.net.URL("http://www.apache.org/licenses/LICENSE-2.0.txt")) :: Nil
   )
 }
@@ -75,7 +82,7 @@ object SuplerBuild extends Build {
       makeVersionSh := {
         val pf = new java.io.File(".run.central.synchro.sh")
         val content = s"""|#!/bin/bash
-                          |PROJECT_VERSION=${version.value} /bin/bash .central.synchro.sh
+                         |PROJECT_VERSION=${version.value} /bin/bash .central.synchro.sh
                       """.stripMargin
         IO.write(pf, content)
         Seq(pf)
