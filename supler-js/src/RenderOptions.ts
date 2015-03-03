@@ -69,7 +69,6 @@ module Supler {
       if (!options) {
         options = {};
       }
-      var classes = options['class'];
       if (!options['class']) {
         options['class'] = 'datepicker';
       } else {
