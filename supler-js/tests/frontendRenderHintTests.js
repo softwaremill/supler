@@ -90,7 +90,7 @@ describe('frontend render hints', function() {
 
     // then
     byName('field2').attr('class').should.contain('datepicker');
-    byName('field2').attr('data-date-format').should.equal('yyyy-MM-dd');
+    byName('field2').attr('data-date-format').should.equal('yyyy-mm-dd');
     byName('field2').attr('data-provide').should.equal('datepicker');
   });
 
@@ -103,7 +103,7 @@ describe('frontend render hints', function() {
 
     // then
     byName('field3').attr('class').should.contain('datepicker');
-    byName('field3').attr('data-date-format').should.equal('yyyy-MM-dd');
+    byName('field3').attr('data-date-format').should.equal('yyyy-mm-dd');
     byName('field3').attr('data-provide').should.equal('datepicker');
   });
 
@@ -116,7 +116,7 @@ describe('frontend render hints', function() {
 
     // then
     byName('field3').attr('class').should.contain('datepicker');
-    byName('field3').attr('data-date-format').should.equal('yyyy-MM-dd');
+    byName('field3').attr('data-date-format').should.equal('yyyy-mm-dd');
     byName('field3').attr('data-provide').should.equal('datepicker');
   });
 });
