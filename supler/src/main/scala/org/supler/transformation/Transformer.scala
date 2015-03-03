@@ -45,13 +45,13 @@ object Transformer {
     }
   }
 
-  val ISO8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+  val ISODateFormat = new SimpleDateFormat("yyyy-MM-dd")
 
   implicit object DateTransformer extends StringTransformer[Date] {
-    override def serialize(d: Date) = ISO8601Format.format(d)
+    override def serialize(d: Date) = ISODateFormat.format(d)
 
     override def deserialize(d: String) = try {
-      Right(ISO8601Format.parse(d))
+      Right(ISODateFormat.parse(d))
     }
     catch {
       case e: ParseException => Left("error_illegalDateformat")
