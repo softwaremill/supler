@@ -91,7 +91,7 @@ describe('frontend render hints', function() {
     // then
     byName('field2').attr('class').should.contain('datepicker');
     byName('field2').attr('data-date-format').should.equal('mm/dd/yyyy');
-    byName('field2').attr('data-provide').should.equal('date-picker');
+    byName('field2').attr('data-provide').should.equal('datepicker');
   });
 
   it('should render date optional empty date field with bootstrap-datepicker decoration', function() {
@@ -104,7 +104,7 @@ describe('frontend render hints', function() {
     // then
     byName('field3').attr('class').should.contain('datepicker');
     byName('field3').attr('data-date-format').should.equal('mm/dd/yyyy');
-    byName('field3').attr('data-provide').should.equal('date-picker');
+    byName('field3').attr('data-provide').should.equal('datepicker');
   });
 
   it('should render date optional non-empty date field with bootstrap-datepicker decoration', function() {
@@ -117,6 +117,6 @@ describe('frontend render hints', function() {
     // then
     byName('field3').attr('class').should.contain('datepicker');
     byName('field3').attr('data-date-format').should.equal('mm/dd/yyyy');
-    byName('field3').attr('data-provide').should.equal('date-picker');
+    byName('field3').attr('data-provide').should.equal('datepicker');
   });
 });

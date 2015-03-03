@@ -76,7 +76,7 @@ module Supler {
         options['class'] += " datepicker";
       }
       options['data-date-format'] = 'mm/dd/yyyy';
-      options['data-provide'] = 'date-picker';
+      options['data-provide'] = 'datepicker';
       return options;
     }
 
