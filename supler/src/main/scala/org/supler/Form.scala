@@ -16,7 +16,8 @@ case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
     rows.flatMap(_.doValidate(parentPath, obj, scope))
 
   private[supler] def generateJSON(parentPath: FieldPath, obj: T): JValue = JObject(
-    JField("fields", JArray(rows.flatMap(_.generateJSON(parentPath, obj))))
+    JField("fields", JArray(rows.flatMap(_.generateJSON(parentPath, obj)._1))),
+    JField("order", JArray(rows.map(_.generateJSON(parentPath, obj)._2)))
   )
 
   private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jvalue: JValue): PartiallyAppliedObj[T] = {
