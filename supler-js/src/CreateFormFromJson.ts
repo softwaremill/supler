@@ -5,19 +5,26 @@ module Supler {
     constructor(private renderOptionsGetter:RenderOptionsGetter,
                 private i18n:I18n,
                 private validatorFnFactories:any,
-                private fieldsOptions:FieldsOptions) {
+                private fieldsOptions:FieldsOptions,
+                private customOrder: string[][]) {
     }
 
     renderForm(meta,
                formJson,
                formElementDictionary:FormElementDictionary = new FormElementDictionary()):RenderFormResult {
-      var fields = formJson.fields;
+      var fields = formJson.fields.slice();
 
       var html = this.generateMeta(meta) + '<div class="container-fluid">\n';
 
-      formJson.order.forEach(row => {
+      (this.customOrder || formJson.order).forEach(row => {
         html += this.row((<string[]>row).map(fieldName => this.findField(fieldName, fields)), formElementDictionary)
       });
+
+      if (fields.filter(f => f).length > 0) {
+        console.warn("There are fields sent from the server that were not shown on the form: [" +
+          fields.filter(f => f).map(f => f.name).join(',') +
+        "]");
+      }
 
       html += "</div>\n";
 
@@ -26,8 +33,10 @@ module Supler {
 
     private findField(fieldName: string, fields: any[]) {
       for (var i = 0; i < fields.length; i++) {
-        if (fields[i]['name'] == fieldName) {
-          return fields[i];
+        if (fields[i] && fields[i]['name'] == fieldName) {
+          var lookedForField = fields[i];
+          delete fields[i];
+          return lookedForField;
         }
       }
       console.warn('Trying to access field nto found in JSON: '+fieldName);

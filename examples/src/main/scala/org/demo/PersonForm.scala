@@ -4,10 +4,10 @@ import java.util.UUID
 
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import org.supler.Message
 import org.supler.Supler._
 import org.supler.field.ActionResult
 import org.supler.transformation.StringTransformer
-import org.supler.{Message, Supler}
 
 object PersonForm {
   val carMakesAndModels = Map(
@@ -59,7 +59,7 @@ object PersonForm {
     f.action("addlegoset")(p => ActionResult(p.copy(legoSets = p.legoSets :+ LegoSet("", "", 0, 0)))).label("Add lego set"),
     f.staticField(p => Message(p.registrationDate)).label("Registration date"),
     f.field(_.id).renderHint(asHidden()),
-    f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age)
+    f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age).label("4th age field") || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age) || f.field(_.age)
   ))
 
   def deleteCar(p: Person, c: Car): Person = p.copy(cars = p.cars diff List(c))

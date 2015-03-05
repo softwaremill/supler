@@ -37,28 +37,34 @@ var Supler;
 var Supler;
 (function (Supler) {
     var CreateFormFromJson = (function () {
-        function CreateFormFromJson(renderOptionsGetter, i18n, validatorFnFactories, fieldsOptions) {
+        function CreateFormFromJson(renderOptionsGetter, i18n, validatorFnFactories, fieldsOptions, customOrder) {
             this.renderOptionsGetter = renderOptionsGetter;
             this.i18n = i18n;
             this.validatorFnFactories = validatorFnFactories;
             this.fieldsOptions = fieldsOptions;
+            this.customOrder = customOrder;
             this.idCounter = 0;
         }
         CreateFormFromJson.prototype.renderForm = function (meta, formJson, formElementDictionary) {
             var _this = this;
             if (formElementDictionary === void 0) { formElementDictionary = new Supler.FormElementDictionary(); }
-            var fields = formJson.fields;
+            var fields = formJson.fields.slice();
             var html = this.generateMeta(meta) + '<div class="container-fluid">\n';
-            formJson.order.forEach(function (row) {
+            (this.customOrder || formJson.order).forEach(function (row) {
                 html += _this.row(row.map(function (fieldName) { return _this.findField(fieldName, fields); }), formElementDictionary);
             });
+            if (fields.filter(function (f) { return f; }).length > 0) {
+                console.warn("There are fields sent from the server that were not shown on the form: [" + fields.filter(function (f) { return f; }).map(function (f) { return f.name; }).join(',') + "]");
+            }
             html += "</div>\n";
             return new RenderFormResult(html, formElementDictionary);
         };
         CreateFormFromJson.prototype.findField = function (fieldName, fields) {
             for (var i = 0; i < fields.length; i++) {
-                if (fields[i]['name'] == fieldName) {
-                    return fields[i];
+                if (fields[i] && fields[i]['name'] == fieldName) {
+                    var lookedForField = fields[i];
+                    delete fields[i];
+                    return lookedForField;
                 }
             }
             console.warn('Trying to access field nto found in JSON: ' + fieldName);
@@ -1007,10 +1013,11 @@ var Supler;
             this.customDataHandlerFn = customOptions.custom_data_handler || (function (data) {
             });
             this.fieldsOptions = new Supler.FieldsOptions(customOptions.field_options);
+            this.customOrder = customOptions.order || null;
         }
         Form.prototype.render = function (json) {
             if (this.isSuplerForm(json)) {
-                var result = new Supler.CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories, this.fieldsOptions).renderForm(json[Supler.FormSections.META], json.main_form);
+                var result = new Supler.CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories, this.fieldsOptions, this.customOrder).renderForm(json[Supler.FormSections.META], json.main_form);
                 this.container.innerHTML = result.html;
                 this.initializeValidation(result.formElementDictionary, json);
                 var sendController = new Supler.SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, this.validation);

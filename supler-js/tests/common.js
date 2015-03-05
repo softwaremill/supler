@@ -7,6 +7,10 @@ function byName(name, extra) {
   return $('[name = "' + name + '"]' + (extra || '') + '');
 }
 
+function suplerFields() {
+  return $('[supler\\:fieldtype]');
+}
+
 function validationElementByName(name) {
   var validationId2 = byName(name).attr(Supler.SuplerAttributes.VALIDATION_ID);
   return document.getElementById(validationId2);
