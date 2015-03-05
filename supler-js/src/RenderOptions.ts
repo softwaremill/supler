@@ -133,7 +133,15 @@ module Supler {
         this.renderValidation(fieldData.validationId) +
         '\n';
 
-      return HtmlUtil.renderTag('div', {'class': 'form-group'}, divBody, false);
+      return HtmlUtil.renderTag('div', {'class': 'form-group'+this.addColumnWidthClass(fieldData)}, divBody, false);
+    }
+
+    private addColumnWidthClass(fieldData: FieldData) {
+      if (fieldData.fieldsPerRow > 0) {
+        return " col-md-" + (fieldData.fieldsPerRow >= 12 ? 1 : 12 / fieldData.fieldsPerRow);
+      } else {
+        return "";
+      }
     }
 
     renderHiddenFormGroup(input) {

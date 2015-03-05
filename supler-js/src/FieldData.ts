@@ -4,6 +4,7 @@ module Supler {
       public validationId:string,
       public json:any,
       public label:string,
+      public fieldsPerRow: number,
       private renderHintOverride:any = null) {
 
       this.name = json.name;
@@ -42,7 +43,7 @@ module Supler {
     }
 
     withRenderHintOverride(renderHintOverride:any):FieldData {
-      return new FieldData(this.id, this.validationId, this.json, this.label, renderHintOverride);
+      return new FieldData(this.id, this.validationId, this.json, this.label, this.fieldsPerRow, renderHintOverride);
     }
   }
 }

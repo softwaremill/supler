@@ -12,19 +12,26 @@ module Supler {
                formJson,
                formElementDictionary:FormElementDictionary = new FormElementDictionary()):RenderFormResult {
       var fields = formJson.fields;
-      var fieldCount = fields.length;
 
-      var html = this.generateMeta(meta);
+      var html = this.generateMeta(meta) + '<div class="container-fluid">\n';
 
-      for (var i = 0; i < fieldCount; i++) {
-        var fieldJson = fields[i];
-        var fieldResult = this.fieldFromJson(fieldJson, formElementDictionary, false);
-        if (fieldResult) {
-          html += fieldResult + '\n';
-        }
-      }
+      formJson.order.forEach(row => {
+        html += this.row((<string[]>row).map(fieldName => this.findField(fieldName, fields)), formElementDictionary)
+      });
+
+      html += "</div>\n";
 
       return new RenderFormResult(html, formElementDictionary);
+    }
+
+    private findField(fieldName: string, fields: any[]) {
+      for (var i = 0; i < fields.length; i++) {
+        if (fields[i]['name'] == fieldName) {
+          return fields[i];
+        }
+      }
+      console.warn('Trying to access field nto found in JSON: '+fieldName);
+      return null;
     }
 
     private generateMeta(meta:any) {
@@ -43,12 +50,20 @@ module Supler {
       }
     }
 
-    private fieldFromJson(fieldJson:any, formElementDictionary:FormElementDictionary, compact:boolean):string {
+    private row(fields: Object[], formElementDictionary:FormElementDictionary) {
+      var html = '<div class="row">\n';
+      fields.forEach(field => {
+        html += this.fieldFromJson(field, formElementDictionary, false, fields.length)
+      });
+      return html + "</div>\n";
+    }
+
+    private fieldFromJson(fieldJson:any, formElementDictionary:FormElementDictionary, compact:boolean, fieldsPerRow: number):string {
 
       var id = this.nextId();
       var validationId = this.nextId();
 
-      var fieldData = new FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label));
+      var fieldData = new FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label), fieldsPerRow);
 
       var fieldOptions = this.fieldsOptions.forField(fieldData);
       if (fieldOptions && fieldOptions.renderHint) {
@@ -231,7 +246,7 @@ module Supler {
 
           var subfieldsJson = values[i].fields;
           Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
-            cells[i][j] = this.fieldFromJson(subfieldJson, formElementDictionary, true);
+            cells[i][j] = this.fieldFromJson(subfieldJson, formElementDictionary, true, -1);
             j += 1;
           });
         }

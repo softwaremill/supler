@@ -45,18 +45,24 @@ var Supler;
             this.idCounter = 0;
         }
         CreateFormFromJson.prototype.renderForm = function (meta, formJson, formElementDictionary) {
+            var _this = this;
             if (formElementDictionary === void 0) { formElementDictionary = new Supler.FormElementDictionary(); }
             var fields = formJson.fields;
-            var fieldCount = fields.length;
-            var html = this.generateMeta(meta);
-            for (var i = 0; i < fieldCount; i++) {
-                var fieldJson = fields[i];
-                var fieldResult = this.fieldFromJson(fieldJson, formElementDictionary, false);
-                if (fieldResult) {
-                    html += fieldResult + '\n';
+            var html = this.generateMeta(meta) + '<div class="container-fluid">\n';
+            formJson.order.forEach(function (row) {
+                html += _this.row(row.map(function (fieldName) { return _this.findField(fieldName, fields); }), formElementDictionary);
+            });
+            html += "</div>\n";
+            return new RenderFormResult(html, formElementDictionary);
+        };
+        CreateFormFromJson.prototype.findField = function (fieldName, fields) {
+            for (var i = 0; i < fields.length; i++) {
+                if (fields[i]['name'] == fieldName) {
+                    return fields[i];
                 }
             }
-            return new RenderFormResult(html, formElementDictionary);
+            console.warn('Trying to access field nto found in JSON: ' + fieldName);
+            return null;
         };
         CreateFormFromJson.prototype.generateMeta = function (meta) {
             if (meta) {
@@ -73,10 +79,18 @@ var Supler;
                 return '';
             }
         };
-        CreateFormFromJson.prototype.fieldFromJson = function (fieldJson, formElementDictionary, compact) {
+        CreateFormFromJson.prototype.row = function (fields, formElementDictionary) {
+            var _this = this;
+            var html = '<div class="row">\n';
+            fields.forEach(function (field) {
+                html += _this.fieldFromJson(field, formElementDictionary, false, fields.length);
+            });
+            return html + "</div>\n";
+        };
+        CreateFormFromJson.prototype.fieldFromJson = function (fieldJson, formElementDictionary, compact, fieldsPerRow) {
             var id = this.nextId();
             var validationId = this.nextId();
-            var fieldData = new Supler.FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label));
+            var fieldData = new Supler.FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label), fieldsPerRow);
             var fieldOptions = this.fieldsOptions.forField(fieldData);
             if (fieldOptions && fieldOptions.renderHint) {
                 fieldData = fieldData.withRenderHintOverride(fieldOptions.renderHint);
@@ -219,7 +233,7 @@ var Supler;
                     cells[i] = [];
                     var subfieldsJson = values[i].fields;
                     Supler.Util.foreach(subfieldsJson, function (subfield, subfieldJson) {
-                        cells[i][j] = _this.fieldFromJson(subfieldJson, formElementDictionary, true);
+                        cells[i][j] = _this.fieldFromJson(subfieldJson, formElementDictionary, true, -1);
                         j += 1;
                     });
                 }
@@ -343,12 +357,13 @@ var Supler;
 var Supler;
 (function (Supler) {
     var FieldData = (function () {
-        function FieldData(id, validationId, json, label, renderHintOverride) {
+        function FieldData(id, validationId, json, label, fieldsPerRow, renderHintOverride) {
             if (renderHintOverride === void 0) { renderHintOverride = null; }
             this.id = id;
             this.validationId = validationId;
             this.json = json;
             this.label = label;
+            this.fieldsPerRow = fieldsPerRow;
             this.renderHintOverride = renderHintOverride;
             this.name = json.name;
             this.value = json.value;
@@ -378,7 +393,7 @@ var Supler;
             }
         };
         FieldData.prototype.withRenderHintOverride = function (renderHintOverride) {
-            return new FieldData(this.id, this.validationId, this.json, this.label, renderHintOverride);
+            return new FieldData(this.id, this.validationId, this.json, this.label, this.fieldsPerRow, renderHintOverride);
         };
         return FieldData;
     })();
@@ -740,7 +755,15 @@ var Supler;
                 labelPart = this.renderLabel(fieldData.id, fieldData.label) + '\n';
             }
             var divBody = labelPart + input + '\n' + this.renderValidation(fieldData.validationId) + '\n';
-            return Supler.HtmlUtil.renderTag('div', { 'class': 'form-group' }, divBody, false);
+            return Supler.HtmlUtil.renderTag('div', { 'class': 'form-group' + this.addColumnWidthClass(fieldData) }, divBody, false);
+        };
+        Bootstrap3RenderOptions.prototype.addColumnWidthClass = function (fieldData) {
+            if (fieldData.fieldsPerRow > 0) {
+                return " col-md-" + (fieldData.fieldsPerRow >= 12 ? 1 : 12 / fieldData.fieldsPerRow);
+            }
+            else {
+                return "";
+            }
         };
         Bootstrap3RenderOptions.prototype.renderHiddenFormGroup = function (input) {
             return Supler.HtmlUtil.renderTag('span', {
