@@ -5,26 +5,43 @@ module Supler {
     constructor(private renderOptionsGetter:RenderOptionsGetter,
                 private i18n:I18n,
                 private validatorFnFactories:any,
-                private fieldsOptions:FieldsOptions) {
+                private fieldsOptions:FieldsOptions,
+                private fieldOrder: string[][]) {
     }
 
     renderForm(meta,
                formJson,
                formElementDictionary:FormElementDictionary = new FormElementDictionary()):RenderFormResult {
-      var fields = formJson.fields;
-      var fieldCount = fields.length;
+      var fields = formJson.fields.slice();
 
-      var html = this.generateMeta(meta);
+      var rowsHtml = '';
 
-      for (var i = 0; i < fieldCount; i++) {
-        var fieldJson = fields[i];
-        var fieldResult = this.fieldFromJson(fieldJson, formElementDictionary, false);
-        if (fieldResult) {
-          html += fieldResult + '\n';
-        }
+      (this.fieldOrder || formJson.fieldOrder).forEach(row => {
+        rowsHtml += this.row((<string[]>row).map(fieldName => this.findField(fieldName, fields)),
+          formElementDictionary, this.renderOptionsGetter.defaultRenderOptions())
+      });
+
+      if (fields.filter(f => f).length > 0) {
+        Log.warn("There are fields sent from the server that were not shown on the form: [" +
+          fields.filter(f => f).map(f => f.name).join(',') +
+        "]");
       }
 
-      return new RenderFormResult(html, formElementDictionary);
+      return new RenderFormResult(
+        this.generateMeta(meta) + this.renderOptionsGetter.defaultRenderOptions().renderForm(rowsHtml),
+        formElementDictionary);
+    }
+
+    private findField(fieldName: string, fields: any[]) {
+      for (var i = 0; i < fields.length; i++) {
+        if (fields[i] && fields[i]['name'] == fieldName) {
+          var lookedForField = fields[i];
+          delete fields[i];
+          return lookedForField;
+        }
+      }
+      Log.warn('Trying to access field not found in JSON: '+fieldName);
+      return null;
     }
 
     private generateMeta(meta:any) {
@@ -43,12 +60,20 @@ module Supler {
       }
     }
 
-    private fieldFromJson(fieldJson:any, formElementDictionary:FormElementDictionary, compact:boolean):string {
+    private row(fields: Object[], formElementDictionary:FormElementDictionary, renderOptions: RenderOptions) {
+      var fieldsHtml = '';
+      fields.forEach(field => {
+        fieldsHtml += this.fieldFromJson(field, formElementDictionary, false, fields.length)
+      });
+      return renderOptions.renderRow(fieldsHtml);
+    }
+
+    private fieldFromJson(fieldJson:any, formElementDictionary:FormElementDictionary, compact:boolean, fieldsPerRow: number):string {
 
       var id = this.nextId();
       var validationId = this.nextId();
 
-      var fieldData = new FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label));
+      var fieldData = new FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label), fieldsPerRow);
 
       var fieldOptions = this.fieldsOptions.forField(fieldData);
       if (fieldOptions && fieldOptions.renderHint) {
@@ -231,7 +256,7 @@ module Supler {
 
           var subfieldsJson = values[i].fields;
           Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
-            cells[i][j] = this.fieldFromJson(subfieldJson, formElementDictionary, true);
+            cells[i][j] = this.fieldFromJson(subfieldJson, formElementDictionary, true, -1);
             j += 1;
           });
         }

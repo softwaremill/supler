@@ -37,26 +37,37 @@ var Supler;
 var Supler;
 (function (Supler) {
     var CreateFormFromJson = (function () {
-        function CreateFormFromJson(renderOptionsGetter, i18n, validatorFnFactories, fieldsOptions) {
+        function CreateFormFromJson(renderOptionsGetter, i18n, validatorFnFactories, fieldsOptions, fieldOrder) {
             this.renderOptionsGetter = renderOptionsGetter;
             this.i18n = i18n;
             this.validatorFnFactories = validatorFnFactories;
             this.fieldsOptions = fieldsOptions;
+            this.fieldOrder = fieldOrder;
             this.idCounter = 0;
         }
         CreateFormFromJson.prototype.renderForm = function (meta, formJson, formElementDictionary) {
+            var _this = this;
             if (formElementDictionary === void 0) { formElementDictionary = new Supler.FormElementDictionary(); }
-            var fields = formJson.fields;
-            var fieldCount = fields.length;
-            var html = this.generateMeta(meta);
-            for (var i = 0; i < fieldCount; i++) {
-                var fieldJson = fields[i];
-                var fieldResult = this.fieldFromJson(fieldJson, formElementDictionary, false);
-                if (fieldResult) {
-                    html += fieldResult + '\n';
+            var fields = formJson.fields.slice();
+            var rowsHtml = '';
+            (this.fieldOrder || formJson.fieldOrder).forEach(function (row) {
+                rowsHtml += _this.row(row.map(function (fieldName) { return _this.findField(fieldName, fields); }), formElementDictionary, _this.renderOptionsGetter.defaultRenderOptions());
+            });
+            if (fields.filter(function (f) { return f; }).length > 0) {
+                Supler.Log.warn("There are fields sent from the server that were not shown on the form: [" + fields.filter(function (f) { return f; }).map(function (f) { return f.name; }).join(',') + "]");
+            }
+            return new RenderFormResult(this.generateMeta(meta) + this.renderOptionsGetter.defaultRenderOptions().renderForm(rowsHtml), formElementDictionary);
+        };
+        CreateFormFromJson.prototype.findField = function (fieldName, fields) {
+            for (var i = 0; i < fields.length; i++) {
+                if (fields[i] && fields[i]['name'] == fieldName) {
+                    var lookedForField = fields[i];
+                    delete fields[i];
+                    return lookedForField;
                 }
             }
-            return new RenderFormResult(html, formElementDictionary);
+            Supler.Log.warn('Trying to access field not found in JSON: ' + fieldName);
+            return null;
         };
         CreateFormFromJson.prototype.generateMeta = function (meta) {
             if (meta) {
@@ -73,10 +84,18 @@ var Supler;
                 return '';
             }
         };
-        CreateFormFromJson.prototype.fieldFromJson = function (fieldJson, formElementDictionary, compact) {
+        CreateFormFromJson.prototype.row = function (fields, formElementDictionary, renderOptions) {
+            var _this = this;
+            var fieldsHtml = '';
+            fields.forEach(function (field) {
+                fieldsHtml += _this.fieldFromJson(field, formElementDictionary, false, fields.length);
+            });
+            return renderOptions.renderRow(fieldsHtml);
+        };
+        CreateFormFromJson.prototype.fieldFromJson = function (fieldJson, formElementDictionary, compact, fieldsPerRow) {
             var id = this.nextId();
             var validationId = this.nextId();
-            var fieldData = new Supler.FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label));
+            var fieldData = new Supler.FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label), fieldsPerRow);
             var fieldOptions = this.fieldsOptions.forField(fieldData);
             if (fieldOptions && fieldOptions.renderHint) {
                 fieldData = fieldData.withRenderHintOverride(fieldOptions.renderHint);
@@ -219,7 +238,7 @@ var Supler;
                     cells[i] = [];
                     var subfieldsJson = values[i].fields;
                     Supler.Util.foreach(subfieldsJson, function (subfield, subfieldJson) {
-                        cells[i][j] = _this.fieldFromJson(subfieldJson, formElementDictionary, true);
+                        cells[i][j] = _this.fieldFromJson(subfieldJson, formElementDictionary, true, -1);
                         j += 1;
                     });
                 }
@@ -343,12 +362,13 @@ var Supler;
 var Supler;
 (function (Supler) {
     var FieldData = (function () {
-        function FieldData(id, validationId, json, label, renderHintOverride) {
+        function FieldData(id, validationId, json, label, fieldsPerRow, renderHintOverride) {
             if (renderHintOverride === void 0) { renderHintOverride = null; }
             this.id = id;
             this.validationId = validationId;
             this.json = json;
             this.label = label;
+            this.fieldsPerRow = fieldsPerRow;
             this.renderHintOverride = renderHintOverride;
             this.name = json.name;
             this.value = json.value;
@@ -378,7 +398,7 @@ var Supler;
             }
         };
         FieldData.prototype.withRenderHintOverride = function (renderHintOverride) {
-            return new FieldData(this.id, this.validationId, this.json, this.label, renderHintOverride);
+            return new FieldData(this.id, this.validationId, this.json, this.label, this.fieldsPerRow, renderHintOverride);
         };
         return FieldData;
     })();
@@ -554,6 +574,30 @@ var Supler;
 })(Supler || (Supler = {}));
 var Supler;
 (function (Supler) {
+    var Log = (function () {
+        function Log() {
+        }
+        Log.warn = function (message) {
+            if (console) {
+                if (console.warn) {
+                    console.warn(message);
+                }
+                else {
+                    console.log("[WARN]" + message);
+                }
+            }
+        };
+        Log.log = function (message) {
+            if (console) {
+                console.log(message);
+            }
+        };
+        return Log;
+    })();
+    Supler.Log = Log;
+})(Supler || (Supler = {}));
+var Supler;
+(function (Supler) {
     var ReadFormValues = (function () {
         function ReadFormValues() {
         }
@@ -679,6 +723,12 @@ var Supler;
     var Bootstrap3RenderOptions = (function () {
         function Bootstrap3RenderOptions() {
         }
+        Bootstrap3RenderOptions.prototype.renderForm = function (rows) {
+            return Supler.HtmlUtil.renderTag('div', { 'class': 'container-fluid' }, rows, false);
+        };
+        Bootstrap3RenderOptions.prototype.renderRow = function (fields) {
+            return Supler.HtmlUtil.renderTag('div', { 'class': 'row' }, fields, false);
+        };
         Bootstrap3RenderOptions.prototype.renderTextField = function (fieldData, options, compact) {
             var inputType = this.inputTypeFor(fieldData);
             return this.renderField(this.renderHtmlInput(inputType, fieldData.value, options), fieldData, compact);
@@ -740,7 +790,15 @@ var Supler;
                 labelPart = this.renderLabel(fieldData.id, fieldData.label) + '\n';
             }
             var divBody = labelPart + input + '\n' + this.renderValidation(fieldData.validationId) + '\n';
-            return Supler.HtmlUtil.renderTag('div', { 'class': 'form-group' }, divBody, false);
+            return Supler.HtmlUtil.renderTag('div', { 'class': 'form-group' + this.addColumnWidthClass(fieldData) }, divBody, false);
+        };
+        Bootstrap3RenderOptions.prototype.addColumnWidthClass = function (fieldData) {
+            if (fieldData.fieldsPerRow > 0) {
+                return " col-md-" + (fieldData.fieldsPerRow >= 12 ? 1 : 12 / fieldData.fieldsPerRow);
+            }
+            else {
+                return "";
+            }
         };
         Bootstrap3RenderOptions.prototype.renderHiddenFormGroup = function (input) {
             return Supler.HtmlUtil.renderTag('span', {
@@ -984,10 +1042,11 @@ var Supler;
             this.customDataHandlerFn = customOptions.custom_data_handler || (function (data) {
             });
             this.fieldsOptions = new Supler.FieldsOptions(customOptions.field_options);
+            this.fieldOrder = customOptions.fieldOrder;
         }
         Form.prototype.render = function (json) {
             if (this.isSuplerForm(json)) {
-                var result = new Supler.CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories, this.fieldsOptions).renderForm(json[Supler.FormSections.META], json.main_form);
+                var result = new Supler.CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories, this.fieldsOptions, this.fieldOrder).renderForm(json[Supler.FormSections.META], json.main_form);
                 this.container.innerHTML = result.html;
                 this.initializeValidation(result.formElementDictionary, json);
                 var sendController = new Supler.SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, this.validation);
@@ -1262,6 +1321,9 @@ var Supler;
                 }
             }
             return current;
+        };
+        RenderOptionsGetter.prototype.defaultRenderOptions = function () {
+            return this.fallbackRenderOptions;
         };
         return RenderOptionsGetter;
     })();

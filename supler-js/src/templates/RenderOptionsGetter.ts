@@ -18,5 +18,9 @@ module Supler {
 
       return current;
     }
+
+    defaultRenderOptions(): RenderOptions {
+      return this.fallbackRenderOptions;
+    }
   }
 }

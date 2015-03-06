@@ -4,9 +4,9 @@ import java.util.UUID
 
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import org.supler.Message
+import org.supler.Supler._
 import org.supler.field.ActionResult
-import org.supler.{Message, Supler}
-import Supler._
 import org.supler.transformation.StringTransformer
 
 object PersonForm {
@@ -18,7 +18,7 @@ object PersonForm {
   )
 
   def carForm(deleteAction: Car => ActionResult[Car]) = form[Car](f => List(
-    f.selectOneField(_.make)(identity).possibleValues(_ => carMakesAndModels.keys.toList).label("Make"),
+    f.selectOneField(_.make)(identity).possibleValues(_ => carMakesAndModels.keys.toList).label("Make") ||
     f.selectOneField(_.model)(identity).possibleValues(car => carMakesAndModels.getOrElse(car.make, Nil)).label("Model"),
     f.field(_.year).validate(gt(1900)).label("Year"),
     f.action("delete")(c => { println(s"Running action: delete car $c"); deleteAction(c) }).label("Delete")
@@ -43,16 +43,14 @@ object PersonForm {
   }
 
   val personForm = form[Person](f => List(
-    f.field(_.firstName).label("label_person_firstname"),
-    f.field(_.lastName).label("label_person_lastname")
+    f.field(_.firstName).label("label_person_firstname") || f.field(_.lastName).label("label_person_lastname")
       .validate(custom((v, e) => v.length > e.firstName.length, (v, e) => Message("error_custom_lastNameLongerThanFirstName"))),
-    f.field(_.age).label("Age"),
-    f.field(_.birthday).label("Birthday"),
+    f.field(_.age).label("Age") || f.field(_.birthday).label("Birthday"),
     f.field(_.likesBroccoli).label("Likes broccoli"),
     f.field(_.address1).label("Address 1"),
     f.field(_.address2).label("Address 2"),
-    f.selectManyField(_.favoriteColors)(identity).possibleValues(_ => List("red", "green", "blue", "magenta")).label("Favorite colors"),
-    f.selectOneField(_.gender)(identity).possibleValues(_ => List("Male", "Female")).label("Gender").renderHint(asRadio()),
+    f.selectManyField(_.favoriteColors)(identity).possibleValues(_ => List("red", "green", "blue", "magenta")).label("Favorite colors") ||
+    f.selectOneField(_.gender)(identity).possibleValues(_ => List("Male", "Female")).label("Gender").renderHint(asRadio()) ||
     f.field(_.secret).label("Secret").renderHint(asPassword()),
     f.field(_.bio).label("Biography").renderHint(asTextarea(rows = 6)),
     f.subform(_.cars, carForm(f.parentAction((person, index, car) => ActionResult(deleteCar(person, car))))).label("Cars"),
@@ -60,7 +58,10 @@ object PersonForm {
     f.subform(_.legoSets, legoSetForm(f.parentAction((person, index, ls) => ActionResult(deleteLegoSet(person, ls))))).label("Lego sets").renderHint(asTable()),
     f.action("addlegoset")(p => ActionResult(p.copy(legoSets = p.legoSets :+ LegoSet("", "", 0, 0)))).label("Add lego set"),
     f.staticField(p => Message(p.registrationDate)).label("Registration date"),
-    f.field(_.id).renderHint(asHidden())
+    f.field(_.id).renderHint(asHidden()),
+    f.field(_.a1) || f.field(_.a2) || f.field(_.a3) || f.field(_.a4).label("4th field") || f.field(_.a5)
+      || f.field(_.a6) || f.field(_.a7) || f.field(_.a8) || f.field(_.a9) || f.field(_.a10) || f.field(_.a11)
+      || f.field(_.a12) || f.field(_.a13) || f.field(_.a14) || f.field(_.a15) || f.field(_.a16)
   ))
 
   def deleteCar(p: Person, c: Car): Person = p.copy(cars = p.cars diff List(c))
@@ -81,7 +82,9 @@ object PersonForm {
     cars: List[Car],
     legoSets: List[LegoSet],
     registrationDate: DateTime,
-    id : String)
+    id : String,
+    a1: String, a2: String, a3: String, a4: String, a5: String, a6: String, a7: String, a8: String, a9: String,
+    a10: String, a11: String, a12: String, a13: String, a14: String, a15: String, a16: String)
 
   case class Car(
     make: String,
@@ -105,5 +108,6 @@ object PersonForm {
       LegoSet("Motorcycle", "Technic", 1924, 31),
       LegoSet("Arctic Supply Plane", "City", 60064, 1),
       LegoSet("Princess and Horse", "Duplo", 4825, 7)),
-    new DateTime(2012, 2, 19, 0, 0), UUID.randomUUID().toString)
+    new DateTime(2012, 2, 19, 0, 0), UUID.randomUUID().toString,
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p")
 }

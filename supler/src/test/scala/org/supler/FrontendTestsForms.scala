@@ -49,6 +49,11 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     f.field(_.field4).label("Field 4")
   ))
 
+  val simple1FormWithRows = form[Simple1](f => List(
+    f.field(_.field1).label("Field 1") || f.field(_.field2).label("Field 2"),
+    f.field(_.field3).label("Field 3").validate(gt(10)) || f.field(_.field4).label("Field 4")
+  ))
+
   val simpleDateForm = form[SimpleWithDate](f => List(
     f.field(_.field1).label("DField 1"),
     f.field(_.field2).label("DField 2"),
@@ -70,6 +75,12 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeObj("obj1", simpleObj1, FormMeta(Map()))
     writer.writeObj("obj2", simpleObj2, FormMeta(Map()))
     writer.writeObj("obj3invalid", simpleObj3Invalid, FormMeta(Map()))
+  }
+
+  writeTestData("simple1rows") { writer =>
+    val simpleObj1 = Simple1("v1", Some("v2"), 12, field4 = true)
+
+    writer.writeForm("form1rows", simple1FormWithRows, simpleObj1)
   }
 
   writeTestData("simpleDate") { writer =>
@@ -183,6 +194,29 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeObj("objNonEmpty", objNonEmpty, FormMeta(Map()))
   }
 
+  writeTestData("complexSubformsWithRowsList") { writer =>
+    val complexFormTable = form[ComplexSubformsList](f => List(
+      f.field(_.field10).label("Field 10"),
+      f.subform(_.simples, simple1FormWithRows).renderHint(asTable())
+    ))
+    val complexFormList = form[ComplexSubformsList](f => List(
+      f.field(_.field10).label("Field 10"),
+      f.subform(_.simples, simple1FormWithRows).renderHint(asList())
+    ))
+
+    val objNonEmpty = ComplexSubformsList("c1", List(
+      Simple1("f11", Some("x"), 11, field4 = true),
+      Simple1("f12", Some("y"), 12, field4 = false),
+      Simple1("f13", Some("z"), 13, field4 = true)))
+    val objEmpty = ComplexSubformsList("c1", Nil)
+
+    writer.writeForm("formTableNonEmpty", complexFormTable, objNonEmpty)
+    writer.writeForm("formTableEmpty", complexFormTable, objEmpty)
+
+    writer.writeForm("formListNonEmpty", complexFormList, objNonEmpty)
+    writer.writeForm("formListEmpty", complexFormList, objEmpty)
+  }
+
   writeTestData("complexSingleSubform") { writer =>
     val complexForm1 = form[ComplexSingleSubform](f => List(
       f.field(_.field10).label("Field 10"),
@@ -194,6 +228,17 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("form1", complexForm1, obj1)
 
     writer.writeObj("obj1", obj1, FormMeta(Map()))
+  }
+
+  writeTestData("complexSingleSubformWithRows") { writer =>
+    val complexForm1 = form[ComplexSingleSubform](f => List(
+      f.field(_.field10).label("Field 10"),
+      f.subform(_.simple, simple1FormWithRows)
+    ))
+
+    val obj1 = ComplexSingleSubform("c1", Simple1("f11", Some("x"), 11, field4 = true))
+
+    writer.writeForm("form1", complexForm1, obj1)
   }
 
   writeTestData("complexOptionalSubform") { writer =>
