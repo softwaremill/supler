@@ -17,6 +17,9 @@ fields::
     f.field(_.age)
   ))
 
+.. note::
+  An (editable) field can be used on a form only once.
+
 The fields can be further customized. Almost always you'll want to specify the label of a field::
 
   f.field(_.firstName).label("First name")
@@ -41,3 +44,23 @@ of some common fields. For example::
   
   val personForm = form(_ => List(nameField, ageField))
 
+
+Multiple fields in rows
+-----------------------
+
+If you would like to have your fields rendered one text to the other as opposed to a horizontal list, you can use the ``||``
+operator::
+
+  case class Person(firstName: String, lastName: String, age: Int)
+
+  val personForm = form[Person](f => List(
+    f.field(_.firstName) || f.field(_.lastName),
+    f.field(_.age)
+  ))
+
+the above example will render first name and last name in the first row and the age in second.
+
+.. note::
+
+  The default twitter-bootstrap based frontend implementation is constrained for a maximum of 12 fields in a row. You can
+  specify more, but the extra fields will be always wrapped in a new row.

@@ -1042,7 +1042,7 @@ var Supler;
             this.customDataHandlerFn = customOptions.custom_data_handler || (function (data) {
             });
             this.fieldsOptions = new Supler.FieldsOptions(customOptions.field_options);
-            this.fieldOrder = customOptions.fieldOrder;
+            this.fieldOrder = customOptions.field_order;
         }
         Form.prototype.render = function (json) {
             if (this.isSuplerForm(json)) {
