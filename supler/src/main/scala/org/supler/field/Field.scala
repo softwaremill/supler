@@ -3,7 +3,7 @@ package org.supler.field
 import org.json4s
 import org.json4s.JsonAST._
 import org.supler.validation.PartiallyAppliedObj
-import org.supler.{FieldPath, MultiFieldRow, Row}
+import org.supler.{FieldPath, FormJSON, MultiFieldRow, Row}
 
 trait Field[T] extends Row[T] {
   def name: String
@@ -13,7 +13,7 @@ trait Field[T] extends Row[T] {
 
   override def ||(field: Field[T]): Row[T] = MultiFieldRow(this :: field :: Nil)
 
-  private[supler] override def generateJSON(parentPath: FieldPath, obj: T): (List[JObject], JArray) = {
+  private[supler] override def generateJSON(parentPath: FieldPath, obj: T): FormJSON = {
     val isIncluded = includeIf(obj)
     if (isIncluded) {
       val isEnabled = enabledIf(obj)
@@ -24,8 +24,8 @@ trait Field[T] extends Row[T] {
           JField(JSONFieldNames.Enabled, JBool(isEnabled)) ::
           fieldJsonPartial.obj)
 
-      (List(fieldJson), JArray(List(JString(name))))
-    } else (Nil, JArray(Nil))
+      FormJSON(List(fieldJson), List(List(name)))
+    } else FormJSON(Nil, Nil)
   }
 
   override private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, json4s.JValue]) = {

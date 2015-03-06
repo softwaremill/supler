@@ -10,7 +10,7 @@ module Supler {
     private afterRenderFn:() => void;
     private customDataHandlerFn:(any) => void;
     private fieldsOptions:FieldsOptions;
-    private customOrder:string[][];
+    private fieldOrder:string[][];
 
     constructor(private container:HTMLElement, customOptions:any) {
       customOptions = customOptions || {};
@@ -39,13 +39,13 @@ module Supler {
 
       this.fieldsOptions = new FieldsOptions(customOptions.field_options);
 
-      this.customOrder = customOptions.order || null;
+      this.fieldOrder = customOptions.order || null;
     }
 
     render(json) {
       if (this.isSuplerForm(json)) { // might be custom-data-only result
         var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories,
-          this.fieldsOptions, this.customOrder).renderForm(json[FormSections.META], json.main_form);
+          this.fieldsOptions, this.fieldOrder).renderForm(json[FormSections.META], json.main_form);
         this.container.innerHTML = result.html;
 
         this.initializeValidation(result.formElementDictionary, json);

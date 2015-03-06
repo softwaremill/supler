@@ -6,7 +6,7 @@ module Supler {
                 private i18n:I18n,
                 private validatorFnFactories:any,
                 private fieldsOptions:FieldsOptions,
-                private customOrder: string[][]) {
+                private fieldOrder: string[][]) {
     }
 
     renderForm(meta,
@@ -16,7 +16,7 @@ module Supler {
 
       var html = this.generateMeta(meta) + '<div class="container-fluid">\n';
 
-      (this.customOrder || formJson.order).forEach(row => {
+      (this.fieldOrder || formJson.fieldOrder).forEach(row => {
         html += this.row((<string[]>row).map(fieldName => this.findField(fieldName, fields)), formElementDictionary)
       });
 

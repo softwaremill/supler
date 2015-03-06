@@ -1,8 +1,8 @@
-describe('customOrder', function(){
+describe('fieldOrder', function(){
   it('should render only the fields specified in custom order', function() {
     // given
     var sf = new Supler.Form(container, {
-      order: [["field1", "field2"]]
+      fieldOrder: [["field1", "field2"]]
     });
 
     // when

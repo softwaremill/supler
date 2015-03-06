@@ -4,7 +4,7 @@ import org.json4s.JsonAST.{JArray, JString}
 import org.scalatest._
 import org.supler.Supler._
 
-class OrderTest extends FlatSpec with ShouldMatchers {
+class FieldOrderTest extends FlatSpec with ShouldMatchers {
   case class OrderTestObj(field1: String, field2: String, field3: String)
 
   case class OrderTestParentClass(field1: String, obj: OrderTestObj, objList: List[OrderTestObj])
@@ -26,7 +26,7 @@ class OrderTest extends FlatSpec with ShouldMatchers {
     // when
     val json = form.generateJSON
     // then
-    val orderFields = json.filterField(f => f._1 == "order")
+    val orderFields = json.filterField(f => f._1 == "fieldOrder")
 
     orderFields should have size 1
     orderFields(0)._2 should be( JArray(List(
@@ -41,7 +41,7 @@ class OrderTest extends FlatSpec with ShouldMatchers {
     // when
     val json = form.generateJSON
     // then
-    val orderFields = json.filterField(f => f._1 == "order")
+    val orderFields = json.filterField(f => f._1 == "fieldOrder")
 
     orderFields should have size 1
     orderFields(0)._2 should be( JArray(List(
@@ -59,7 +59,7 @@ class OrderTest extends FlatSpec with ShouldMatchers {
     // when
     val json = formInst.generateJSON
     // then
-    val orderFields = json.filterField(f => f._1 == "order")
+    val orderFields = json.filterField(f => f._1 == "fieldOrder")
 
     orderFields should have size 2
 
@@ -85,7 +85,7 @@ class OrderTest extends FlatSpec with ShouldMatchers {
     // when
     val json = formInst.generateJSON
     // then
-    val orderFields = json.filterField(f => f._1 == "order")
+    val orderFields = json.filterField(f => f._1 == "fieldOrder")
 
     orderFields should have size 3
 

@@ -15,10 +15,13 @@ case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
   private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors =
     rows.flatMap(_.doValidate(parentPath, obj, scope))
 
-  private[supler] def generateJSON(parentPath: FieldPath, obj: T): JValue = JObject(
-    JField("fields", JArray(rows.flatMap(_.generateJSON(parentPath, obj)._1))),
-    JField("order", JArray(rows.map(_.generateJSON(parentPath, obj)._2)))
-  )
+  private[supler] def generateJSON(parentPath: FieldPath, obj: T): JValue = {
+    val json = rows.map(_.generateJSON(parentPath, obj))
+    JObject(
+      JField("fields", JArray(json.flatMap(_.fields))),
+      JField("fieldOrder", JArray(json.map(row => JArray(row.fieldOrder.flatMap(f => f.map(JString(_)))))))
+    )
+  }
 
   private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jvalue: JValue): PartiallyAppliedObj[T] = {
     jvalue match {
