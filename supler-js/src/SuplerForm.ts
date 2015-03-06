@@ -39,7 +39,7 @@ module Supler {
 
       this.fieldsOptions = new FieldsOptions(customOptions.field_options);
 
-      this.fieldOrder = customOptions.order || null;
+      this.fieldOrder = customOptions.fieldOrder;
     }
 
     render(json) {

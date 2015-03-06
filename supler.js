@@ -54,7 +54,7 @@ var Supler;
                 rowsHtml += _this.row(row.map(function (fieldName) { return _this.findField(fieldName, fields); }), formElementDictionary, _this.renderOptionsGetter.defaultRenderOptions());
             });
             if (fields.filter(function (f) { return f; }).length > 0) {
-                console.warn("There are fields sent from the server that were not shown on the form: [" + fields.filter(function (f) { return f; }).map(function (f) { return f.name; }).join(',') + "]");
+                Supler.Log.warn("There are fields sent from the server that were not shown on the form: [" + fields.filter(function (f) { return f; }).map(function (f) { return f.name; }).join(',') + "]");
             }
             return new RenderFormResult(this.generateMeta(meta) + this.renderOptionsGetter.defaultRenderOptions().renderForm(rowsHtml), formElementDictionary);
         };
@@ -66,7 +66,7 @@ var Supler;
                     return lookedForField;
                 }
             }
-            console.warn('Trying to access field nto found in JSON: ' + fieldName);
+            Supler.Log.warn('Trying to access field not found in JSON: ' + fieldName);
             return null;
         };
         CreateFormFromJson.prototype.generateMeta = function (meta) {
@@ -574,6 +574,30 @@ var Supler;
 })(Supler || (Supler = {}));
 var Supler;
 (function (Supler) {
+    var Log = (function () {
+        function Log() {
+        }
+        Log.warn = function (message) {
+            if (console) {
+                if (console.warn) {
+                    console.warn(message);
+                }
+                else {
+                    console.log("[WARN]" + message);
+                }
+            }
+        };
+        Log.log = function (message) {
+            if (console) {
+                console.log(message);
+            }
+        };
+        return Log;
+    })();
+    Supler.Log = Log;
+})(Supler || (Supler = {}));
+var Supler;
+(function (Supler) {
     var ReadFormValues = (function () {
         function ReadFormValues() {
         }
@@ -1018,7 +1042,7 @@ var Supler;
             this.customDataHandlerFn = customOptions.custom_data_handler || (function (data) {
             });
             this.fieldsOptions = new Supler.FieldsOptions(customOptions.field_options);
-            this.fieldOrder = customOptions.order || null;
+            this.fieldOrder = customOptions.fieldOrder;
         }
         Form.prototype.render = function (json) {
             if (this.isSuplerForm(json)) {

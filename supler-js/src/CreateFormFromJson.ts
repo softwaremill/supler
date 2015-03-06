@@ -22,7 +22,7 @@ module Supler {
       });
 
       if (fields.filter(f => f).length > 0) {
-        console.warn("There are fields sent from the server that were not shown on the form: [" +
+        Log.warn("There are fields sent from the server that were not shown on the form: [" +
           fields.filter(f => f).map(f => f.name).join(',') +
         "]");
       }
@@ -40,7 +40,7 @@ module Supler {
           return lookedForField;
         }
       }
-      console.warn('Trying to access field nto found in JSON: '+fieldName);
+      Log.warn('Trying to access field not found in JSON: '+fieldName);
       return null;
     }
 
