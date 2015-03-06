@@ -16,10 +16,10 @@ case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
     rows.flatMap(_.doValidate(parentPath, obj, scope))
 
   private[supler] def generateJSON(parentPath: FieldPath, obj: T): JValue = {
-    val json = rows.map(_.generateJSON(parentPath, obj))
+    val rowsJSONs = rows.map(_.generateJSON(parentPath, obj))
     JObject(
-      JField("fields", JArray(json.flatMap(_.fields))),
-      JField("fieldOrder", JArray(json.map(row => JArray(row.fieldOrder.flatMap(f => f.map(JString(_)))))))
+      JField("fields", JArray(rowsJSONs.flatMap(_.fields))),
+      JField("fieldOrder", JArray(rowsJSONs.map(_.fieldOrderAsJSON)))
     )
   }
 
