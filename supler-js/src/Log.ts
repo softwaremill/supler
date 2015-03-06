@@ -11,7 +11,7 @@ module Supler {
       }
     }
 
-    static log(message: string) {
+    static info(message: string) {
       if (console) {
         console.log(message);
       }
