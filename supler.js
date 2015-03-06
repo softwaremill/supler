@@ -587,7 +587,7 @@ var Supler;
                 }
             }
         };
-        Log.log = function (message) {
+        Log.info = function (message) {
             if (console) {
                 console.log(message);
             }
