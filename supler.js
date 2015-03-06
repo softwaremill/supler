@@ -49,15 +49,14 @@ var Supler;
             var _this = this;
             if (formElementDictionary === void 0) { formElementDictionary = new Supler.FormElementDictionary(); }
             var fields = formJson.fields.slice();
-            var html = this.generateMeta(meta) + '<div class="container-fluid">\n';
+            var rowsHtml = '';
             (this.fieldOrder || formJson.fieldOrder).forEach(function (row) {
-                html += _this.row(row.map(function (fieldName) { return _this.findField(fieldName, fields); }), formElementDictionary);
+                rowsHtml += _this.row(row.map(function (fieldName) { return _this.findField(fieldName, fields); }), formElementDictionary, _this.renderOptionsGetter.defaultRenderOptions());
             });
             if (fields.filter(function (f) { return f; }).length > 0) {
                 console.warn("There are fields sent from the server that were not shown on the form: [" + fields.filter(function (f) { return f; }).map(function (f) { return f.name; }).join(',') + "]");
             }
-            html += "</div>\n";
-            return new RenderFormResult(html, formElementDictionary);
+            return new RenderFormResult(this.generateMeta(meta) + this.renderOptionsGetter.defaultRenderOptions().renderForm(rowsHtml), formElementDictionary);
         };
         CreateFormFromJson.prototype.findField = function (fieldName, fields) {
             for (var i = 0; i < fields.length; i++) {
@@ -85,13 +84,13 @@ var Supler;
                 return '';
             }
         };
-        CreateFormFromJson.prototype.row = function (fields, formElementDictionary) {
+        CreateFormFromJson.prototype.row = function (fields, formElementDictionary, renderOptions) {
             var _this = this;
-            var html = '<div class="row">\n';
+            var fieldsHtml = '';
             fields.forEach(function (field) {
-                html += _this.fieldFromJson(field, formElementDictionary, false, fields.length);
+                fieldsHtml += _this.fieldFromJson(field, formElementDictionary, false, fields.length);
             });
-            return html + "</div>\n";
+            return renderOptions.renderRow(fieldsHtml);
         };
         CreateFormFromJson.prototype.fieldFromJson = function (fieldJson, formElementDictionary, compact, fieldsPerRow) {
             var id = this.nextId();
@@ -700,6 +699,12 @@ var Supler;
     var Bootstrap3RenderOptions = (function () {
         function Bootstrap3RenderOptions() {
         }
+        Bootstrap3RenderOptions.prototype.renderForm = function (rows) {
+            return Supler.HtmlUtil.renderTag('div', { 'class': 'container-fluid' }, rows, false);
+        };
+        Bootstrap3RenderOptions.prototype.renderRow = function (fields) {
+            return Supler.HtmlUtil.renderTag('div', { 'class': 'row' }, fields, false);
+        };
         Bootstrap3RenderOptions.prototype.renderTextField = function (fieldData, options, compact) {
             var inputType = this.inputTypeFor(fieldData);
             return this.renderField(this.renderHtmlInput(inputType, fieldData.value, options), fieldData, compact);
@@ -1292,6 +1297,9 @@ var Supler;
                 }
             }
             return current;
+        };
+        RenderOptionsGetter.prototype.defaultRenderOptions = function () {
+            return this.fallbackRenderOptions;
         };
         return RenderOptionsGetter;
     })();

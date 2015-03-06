@@ -30,6 +30,10 @@ module Supler {
     renderLabel: (forId:string, label:string) => string
     renderValidation: (validationId:string) => string
 
+    renderRow: (fields: string) => string
+
+    renderForm: (rows: string) => string
+
     renderStaticField: (label:string, id:string, validationId:string, value:any, compact:boolean) => string
     renderStaticText: (text:string) => string
 
@@ -51,7 +55,16 @@ module Supler {
   }
 
   export class Bootstrap3RenderOptions implements RenderOptions {
+
     constructor() {
+    }
+
+    renderForm(rows:string):string {
+      return HtmlUtil.renderTag('div', {'class': 'container-fluid'}, rows, false);
+    }
+
+    renderRow(fields:string):string {
+      return HtmlUtil.renderTag('div', {'class': 'row'}, fields, false);
     }
 
     renderTextField(fieldData, options, compact) {

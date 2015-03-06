@@ -14,10 +14,11 @@ module Supler {
                formElementDictionary:FormElementDictionary = new FormElementDictionary()):RenderFormResult {
       var fields = formJson.fields.slice();
 
-      var html = this.generateMeta(meta) + '<div class="container-fluid">\n';
+      var rowsHtml = '';
 
       (this.fieldOrder || formJson.fieldOrder).forEach(row => {
-        html += this.row((<string[]>row).map(fieldName => this.findField(fieldName, fields)), formElementDictionary)
+        rowsHtml += this.row((<string[]>row).map(fieldName => this.findField(fieldName, fields)),
+          formElementDictionary, this.renderOptionsGetter.defaultRenderOptions())
       });
 
       if (fields.filter(f => f).length > 0) {
@@ -26,9 +27,9 @@ module Supler {
         "]");
       }
 
-      html += "</div>\n";
-
-      return new RenderFormResult(html, formElementDictionary);
+      return new RenderFormResult(
+        this.generateMeta(meta) + this.renderOptionsGetter.defaultRenderOptions().renderForm(rowsHtml),
+        formElementDictionary);
     }
 
     private findField(fieldName: string, fields: any[]) {
@@ -59,12 +60,12 @@ module Supler {
       }
     }
 
-    private row(fields: Object[], formElementDictionary:FormElementDictionary) {
-      var html = '<div class="row">\n';
+    private row(fields: Object[], formElementDictionary:FormElementDictionary, renderOptions: RenderOptions) {
+      var fieldsHtml = '';
       fields.forEach(field => {
-        html += this.fieldFromJson(field, formElementDictionary, false, fields.length)
+        fieldsHtml += this.fieldFromJson(field, formElementDictionary, false, fields.length)
       });
-      return html + "</div>\n";
+      return renderOptions.renderRow(fieldsHtml);
     }
 
     private fieldFromJson(fieldJson:any, formElementDictionary:FormElementDictionary, compact:boolean, fieldsPerRow: number):string {
