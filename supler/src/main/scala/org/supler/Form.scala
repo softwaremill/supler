@@ -6,7 +6,7 @@ import org.supler.field._
 import org.supler.validation._
 
 case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
-  checkIFFieldsAreUnique()
+  requireFieldsUnique()
 
   def apply(obj: T): FormWithObject[T] = InitialFormWithObject(this, obj, None, FormMeta(Map()))
 
@@ -44,16 +44,15 @@ case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
     }
   }
 
-  private def checkIFFieldsAreUnique() {
+  private def requireFieldsUnique() {
     val fieldsUsedMultipletimes = rows.flatMap {
       case MultiFieldRow(fields) => fields
       case f: Field[_] => List(f)
       case _ => Nil
     }.groupBy(f => f.name).filter(_._2.size > 1).map(_._1)
 
-    if (fieldsUsedMultipletimes.size > 0) {
-      throw new IllegalArgumentException("Supler does not support same field multiple times on a form, but those were used: "+fieldsUsedMultipletimes.mkString(", "))
-    }
+    require(fieldsUsedMultipletimes.isEmpty,
+      "Supler does not support same field multiple times on a form, but those were used: "+fieldsUsedMultipletimes.mkString(", "))
   }
 
   def useCreateEmpty(newCreateEmpty: => T) = this.copy(createEmpty = () => newCreateEmpty)

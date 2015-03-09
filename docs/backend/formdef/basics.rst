@@ -48,7 +48,7 @@ of some common fields. For example::
 Multiple fields in rows
 -----------------------
 
-If you would like to have your fields rendered one text to the other as opposed to a horizontal list, you can use the ``||``
+If you would like to have your fields rendered one next to the other as opposed to a horizontal list, you can use the ``||``
 operator::
 
   case class Person(firstName: String, lastName: String, age: Int)

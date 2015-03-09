@@ -9,24 +9,24 @@ class FieldUniquenessTest extends FlatSpec with ShouldMatchers {
 
   "supler" should "throw error when same field used multiple times" in {
     // expect
-    val error = the[IllegalArgumentException] thrownBy form[Person](f => List(
+    val error = the[Exception] thrownBy form[Person](f => List(
       f.field(_.name),
       f.field(_.name),
       f.field(_.lastname)
     ))
 
-    error.getMessage should equal("Supler does not support same field multiple times on a form, but those were used: name")
+    error.getMessage should endWith("Supler does not support same field multiple times on a form, but those were used: name")
   }
 
   "supler" should "throw error specifying many fields used multiple times" in {
     // expect
-    val error = the[IllegalArgumentException] thrownBy form[Person](f => List(
+    val error = the[Exception] thrownBy form[Person](f => List(
       f.field(_.name),
       f.field(_.name),
       f.field(_.lastname),
       f.field(_.lastname)
     ))
 
-    error.getMessage should equal("Supler does not support same field multiple times on a form, but those were used: name, lastname")
+    error.getMessage should endWith("Supler does not support same field multiple times on a form, but those were used: name, lastname")
   }
 }

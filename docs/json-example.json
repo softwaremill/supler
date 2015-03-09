@@ -1,0 +1,1053 @@
+.. code-block:: javascript
+
+  {
+    "supler_meta": {
+    },
+    "is_supler_form": true,
+    "main_form": {
+      "fields": [
+        {
+          "name": "firstName",
+          "enabled": true,
+          "label": "label_person_firstname",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "firstName",
+          "value": "Adam",
+          "empty_value": ""
+        },
+        {
+          "name": "lastName",
+          "enabled": true,
+          "label": "label_person_lastname",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "lastName",
+          "value": "",
+          "empty_value": ""
+        },
+        {
+          "name": "age",
+          "enabled": true,
+          "label": "Age",
+          "type": "integer",
+          "validate": {
+            "required": true
+          },
+          "path": "age",
+          "value": 10,
+          "empty_value": 0
+        },
+        {
+          "name": "birthday",
+          "enabled": true,
+          "label": "Birthday",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "birthday",
+          "value": "2015-03-09"
+        },
+        {
+          "name": "likesBroccoli",
+          "enabled": true,
+          "label": "Likes broccoli",
+          "type": "boolean",
+          "validate": {
+            "required": true
+          },
+          "path": "likesBroccoli",
+          "value": false
+        },
+        {
+          "name": "address1",
+          "enabled": true,
+          "label": "Address 1",
+          "type": "string",
+          "validate": {
+            "required": false
+          },
+          "path": "address1"
+        },
+        {
+          "name": "address2",
+          "enabled": true,
+          "label": "Address 2",
+          "type": "string",
+          "validate": {
+            "required": false
+          },
+          "path": "address2"
+        },
+        {
+          "name": "favoriteColors",
+          "enabled": true,
+          "label": "Favorite colors",
+          "type": "select",
+          "validate": {
+            "required": false
+          },
+          "path": "favoriteColors",
+          "value": [
+            "0",
+            "2"
+          ],
+          "possible_values": [
+            {
+              "id": "0",
+              "label": "red"
+            },
+            {
+              "id": "1",
+              "label": "green"
+            },
+            {
+              "id": "2",
+              "label": "blue"
+            },
+            {
+              "id": "3",
+              "label": "magenta"
+            }
+          ],
+          "multiple": true
+        },
+        {
+          "name": "gender",
+          "enabled": true,
+          "label": "Gender",
+          "type": "select",
+          "validate": {
+            "required": true
+          },
+          "path": "gender",
+          "value": null,
+          "empty_value": null,
+          "render_hint": {
+            "name": "radio"
+          },
+          "possible_values": [
+            {
+              "id": "0",
+              "label": "Male"
+            },
+            {
+              "id": "1",
+              "label": "Female"
+            }
+          ]
+        },
+        {
+          "name": "secret",
+          "enabled": true,
+          "label": "Secret",
+          "type": "string",
+          "validate": {
+            "required": false
+          },
+          "path": "secret",
+          "render_hint": {
+            "name": "password"
+          }
+        },
+        {
+          "name": "bio",
+          "enabled": true,
+          "label": "Biography",
+          "type": "string",
+          "validate": {
+            "required": false
+          },
+          "path": "bio",
+          "render_hint": {
+            "name": "textarea",
+            "rows": 6
+          }
+        },
+        {
+          "name": "cars",
+          "enabled": true,
+          "type": "subform",
+          "render_hint": {
+            "name": "list"
+          },
+          "multiple": true,
+          "label": "Cars",
+          "path": "cars",
+          "value": [
+            {
+              "fields": [
+                {
+                  "name": "make",
+                  "enabled": true,
+                  "label": "Make",
+                  "type": "select",
+                  "validate": {
+                    "required": true
+                  },
+                  "path": "cars[0].make",
+                  "value": "0",
+                  "empty_value": null,
+                  "possible_values": [
+                    {
+                      "id": "0",
+                      "label": "Ford"
+                    },
+                    {
+                      "id": "1",
+                      "label": "Toyota"
+                    },
+                    {
+                      "id": "2",
+                      "label": "KIA"
+                    },
+                    {
+                      "id": "3",
+                      "label": "Lada"
+                    }
+                  ]
+                },
+                {
+                  "name": "model",
+                  "enabled": true,
+                  "label": "Model",
+                  "type": "select",
+                  "validate": {
+                    "required": true
+                  },
+                  "path": "cars[0].model",
+                  "value": "1",
+                  "empty_value": null,
+                  "possible_values": [
+                    {
+                      "id": "0",
+                      "label": "Ka"
+                    },
+                    {
+                      "id": "1",
+                      "label": "Focus"
+                    },
+                    {
+                      "id": "2",
+                      "label": "Mondeo"
+                    },
+                    {
+                      "id": "3",
+                      "label": "Transit"
+                    }
+                  ]
+                },
+                {
+                  "name": "year",
+                  "enabled": true,
+                  "label": "Year",
+                  "type": "integer",
+                  "validate": {
+                    "required": true,
+                    "gt": 1900.0
+                  },
+                  "path": "cars[0].year",
+                  "value": 1990,
+                  "empty_value": 0
+                },
+                {
+                  "name": "delete",
+                  "enabled": true,
+                  "label": "Delete",
+                  "type": "action",
+                  "path": "cars[0].delete",
+                  "validation_scope": {
+                    "name": "none"
+                  }
+                }
+              ],
+              "fieldOrder": [
+                [
+                  "make",
+                  "model"
+                ],
+                [
+                  "year"
+                ],
+                [
+                  "delete"
+                ]
+              ]
+            },
+            {
+              "fields": [
+                {
+                  "name": "make",
+                  "enabled": true,
+                  "label": "Make",
+                  "type": "select",
+                  "validate": {
+                    "required": true
+                  },
+                  "path": "cars[1].make",
+                  "value": "1",
+                  "empty_value": null,
+                  "possible_values": [
+                    {
+                      "id": "0",
+                      "label": "Ford"
+                    },
+                    {
+                      "id": "1",
+                      "label": "Toyota"
+                    },
+                    {
+                      "id": "2",
+                      "label": "KIA"
+                    },
+                    {
+                      "id": "3",
+                      "label": "Lada"
+                    }
+                  ]
+                },
+                {
+                  "name": "model",
+                  "enabled": true,
+                  "label": "Model",
+                  "type": "select",
+                  "validate": {
+                    "required": true
+                  },
+                  "path": "cars[1].model",
+                  "value": "5",
+                  "empty_value": null,
+                  "possible_values": [
+                    {
+                      "id": "0",
+                      "label": "Aygo"
+                    },
+                    {
+                      "id": "1",
+                      "label": "Yaris"
+                    },
+                    {
+                      "id": "2",
+                      "label": "Corolla"
+                    },
+                    {
+                      "id": "3",
+                      "label": "Auris"
+                    },
+                    {
+                      "id": "4",
+                      "label": "Verso"
+                    },
+                    {
+                      "id": "5",
+                      "label": "Avensis"
+                    },
+                    {
+                      "id": "6",
+                      "label": "Rav4"
+                    }
+                  ]
+                },
+                {
+                  "name": "year",
+                  "enabled": true,
+                  "label": "Year",
+                  "type": "integer",
+                  "validate": {
+                    "required": true,
+                    "gt": 1900.0
+                  },
+                  "path": "cars[1].year",
+                  "value": 2004,
+                  "empty_value": 0
+                },
+                {
+                  "name": "delete",
+                  "enabled": true,
+                  "label": "Delete",
+                  "type": "action",
+                  "path": "cars[1].delete",
+                  "validation_scope": {
+                    "name": "none"
+                  }
+                }
+              ],
+              "fieldOrder": [
+                [
+                  "make",
+                  "model"
+                ],
+                [
+                  "year"
+                ],
+                [
+                  "delete"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "name": "addcar",
+          "enabled": true,
+          "label": "Add car",
+          "type": "action",
+          "path": "addcar",
+          "validation_scope": {
+            "name": "none"
+          }
+        },
+        {
+          "name": "legoSets",
+          "enabled": true,
+          "type": "subform",
+          "render_hint": {
+            "name": "table"
+          },
+          "multiple": true,
+          "label": "Lego sets",
+          "path": "legoSets",
+          "value": [
+            {
+              "fields": [
+                {
+                  "name": "name",
+                  "enabled": true,
+                  "label": "label_lego_name",
+                  "type": "string",
+                  "validate": {
+                    "required": true
+                  },
+                  "path": "legoSets[0].name",
+                  "value": "Motorcycle",
+                  "empty_value": ""
+                },
+                {
+                  "name": "theme",
+                  "enabled": true,
+                  "label": "label_lego_theme",
+                  "type": "select",
+                  "validate": {
+                    "required": true
+                  },
+                  "path": "legoSets[0].theme",
+                  "value": "1",
+                  "empty_value": null,
+                  "possible_values": [
+                    {
+                      "id": "0",
+                      "label": "City"
+                    },
+                    {
+                      "id": "1",
+                      "label": "Technic"
+                    },
+                    {
+                      "id": "2",
+                      "label": "Duplo"
+                    },
+                    {
+                      "id": "3",
+                      "label": "Space"
+                    },
+                    {
+                      "id": "4",
+                      "label": "Friends"
+                    },
+                    {
+                      "id": "5",
+                      "label": "Universal"
+                    }
+                  ]
+                },
+                {
+                  "name": "number",
+                  "enabled": true,
+                  "label": "label_lego_setnumber",
+                  "type": "integer",
+                  "validate": {
+                    "required": true,
+                    "lt": 100000.0
+                  },
+                  "path": "legoSets[0].number",
+                  "value": 1924,
+                  "empty_value": 0
+                },
+                {
+                  "name": "age",
+                  "enabled": true,
+                  "label": "label_lego_age",
+                  "type": "integer",
+                  "validate": {
+                    "required": true,
+                    "ge": 0.0,
+                    "le": 50.0
+                  },
+                  "path": "legoSets[0].age",
+                  "value": 31,
+                  "empty_value": 0
+                },
+                {
+                  "name": "delete",
+                  "enabled": true,
+                  "label": "Delete",
+                  "type": "action",
+                  "path": "legoSets[0].delete",
+                  "validation_scope": {
+                    "name": "none"
+                  }
+                }
+              ],
+              "fieldOrder": [
+                [
+                  "name"
+                ],
+                [
+                  "theme"
+                ],
+                [
+                  "number"
+                ],
+                [
+                  "age"
+                ],
+                [
+                  "delete"
+                ]
+              ]
+            },
+            {
+              "fields": [
+                {
+                  "name": "name",
+                  "enabled": true,
+                  "label": "label_lego_name",
+                  "type": "string",
+                  "validate": {
+                    "required": true
+                  },
+                  "path": "legoSets[1].name",
+                  "value": "Arctic Supply Plane",
+                  "empty_value": ""
+                },
+                {
+                  "name": "theme",
+                  "enabled": true,
+                  "label": "label_lego_theme",
+                  "type": "select",
+                  "validate": {
+                    "required": true
+                  },
+                  "path": "legoSets[1].theme",
+                  "value": "0",
+                  "empty_value": null,
+                  "possible_values": [
+                    {
+                      "id": "0",
+                      "label": "City"
+                    },
+                    {
+                      "id": "1",
+                      "label": "Technic"
+                    },
+                    {
+                      "id": "2",
+                      "label": "Duplo"
+                    },
+                    {
+                      "id": "3",
+                      "label": "Space"
+                    },
+                    {
+                      "id": "4",
+                      "label": "Friends"
+                    },
+                    {
+                      "id": "5",
+                      "label": "Universal"
+                    }
+                  ]
+                },
+                {
+                  "name": "number",
+                  "enabled": true,
+                  "label": "label_lego_setnumber",
+                  "type": "integer",
+                  "validate": {
+                    "required": true,
+                    "lt": 100000.0
+                  },
+                  "path": "legoSets[1].number",
+                  "value": 60064,
+                  "empty_value": 0
+                },
+                {
+                  "name": "age",
+                  "enabled": true,
+                  "label": "label_lego_age",
+                  "type": "integer",
+                  "validate": {
+                    "required": true,
+                    "ge": 0.0,
+                    "le": 50.0
+                  },
+                  "path": "legoSets[1].age",
+                  "value": 1,
+                  "empty_value": 0
+                },
+                {
+                  "name": "delete",
+                  "enabled": true,
+                  "label": "Delete",
+                  "type": "action",
+                  "path": "legoSets[1].delete",
+                  "validation_scope": {
+                    "name": "none"
+                  }
+                }
+              ],
+              "fieldOrder": [
+                [
+                  "name"
+                ],
+                [
+                  "theme"
+                ],
+                [
+                  "number"
+                ],
+                [
+                  "age"
+                ],
+                [
+                  "delete"
+                ]
+              ]
+            },
+            {
+              "fields": [
+                {
+                  "name": "name",
+                  "enabled": true,
+                  "label": "label_lego_name",
+                  "type": "string",
+                  "validate": {
+                    "required": true
+                  },
+                  "path": "legoSets[2].name",
+                  "value": "Princess and Horse",
+                  "empty_value": ""
+                },
+                {
+                  "name": "theme",
+                  "enabled": true,
+                  "label": "label_lego_theme",
+                  "type": "select",
+                  "validate": {
+                    "required": true
+                  },
+                  "path": "legoSets[2].theme",
+                  "value": "2",
+                  "empty_value": null,
+                  "possible_values": [
+                    {
+                      "id": "0",
+                      "label": "City"
+                    },
+                    {
+                      "id": "1",
+                      "label": "Technic"
+                    },
+                    {
+                      "id": "2",
+                      "label": "Duplo"
+                    },
+                    {
+                      "id": "3",
+                      "label": "Space"
+                    },
+                    {
+                      "id": "4",
+                      "label": "Friends"
+                    },
+                    {
+                      "id": "5",
+                      "label": "Universal"
+                    }
+                  ]
+                },
+                {
+                  "name": "number",
+                  "enabled": true,
+                  "label": "label_lego_setnumber",
+                  "type": "integer",
+                  "validate": {
+                    "required": true,
+                    "lt": 100000.0
+                  },
+                  "path": "legoSets[2].number",
+                  "value": 4825,
+                  "empty_value": 0
+                },
+                {
+                  "name": "age",
+                  "enabled": true,
+                  "label": "label_lego_age",
+                  "type": "integer",
+                  "validate": {
+                    "required": true,
+                    "ge": 0.0,
+                    "le": 50.0
+                  },
+                  "path": "legoSets[2].age",
+                  "value": 7,
+                  "empty_value": 0
+                },
+                {
+                  "name": "delete",
+                  "enabled": true,
+                  "label": "Delete",
+                  "type": "action",
+                  "path": "legoSets[2].delete",
+                  "validation_scope": {
+                    "name": "none"
+                  }
+                }
+              ],
+              "fieldOrder": [
+                [
+                  "name"
+                ],
+                [
+                  "theme"
+                ],
+                [
+                  "number"
+                ],
+                [
+                  "age"
+                ],
+                [
+                  "delete"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "name": "addlegoset",
+          "enabled": true,
+          "label": "Add lego set",
+          "type": "action",
+          "path": "addlegoset",
+          "validation_scope": {
+            "name": "none"
+          }
+        },
+        {
+          "name": "_supler_static_-1345397749",
+          "enabled": true,
+          "label": "Registration date",
+          "type": "static",
+          "validate": {
+          },
+          "path": "_supler_static_-1345397749",
+          "value": {
+            "params": [
+            ],
+            "key": "2012-02-19"
+          }
+        },
+        {
+          "name": "id",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "id",
+          "value": "d606796a-9f91-42ad-8d51-1e3dd203027c",
+          "empty_value": "",
+          "render_hint": {
+            "name": "hidden"
+          }
+        },
+        {
+          "name": "a1",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a1",
+          "value": "a",
+          "empty_value": ""
+        },
+        {
+          "name": "a2",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a2",
+          "value": "b",
+          "empty_value": ""
+        },
+        {
+          "name": "a3",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a3",
+          "value": "c",
+          "empty_value": ""
+        },
+        {
+          "name": "a4",
+          "enabled": true,
+          "label": "4th field",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a4",
+          "value": "d",
+          "empty_value": ""
+        },
+        {
+          "name": "a5",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a5",
+          "value": "e",
+          "empty_value": ""
+        },
+        {
+          "name": "a6",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a6",
+          "value": "f",
+          "empty_value": ""
+        },
+        {
+          "name": "a7",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a7",
+          "value": "g",
+          "empty_value": ""
+        },
+        {
+          "name": "a8",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a8",
+          "value": "h",
+          "empty_value": ""
+        },
+        {
+          "name": "a9",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a9",
+          "value": "i",
+          "empty_value": ""
+        },
+        {
+          "name": "a10",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a10",
+          "value": "j",
+          "empty_value": ""
+        },
+        {
+          "name": "a11",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a11",
+          "value": "k",
+          "empty_value": ""
+        },
+        {
+          "name": "a12",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a12",
+          "value": "l",
+          "empty_value": ""
+        },
+        {
+          "name": "a13",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a13",
+          "value": "m",
+          "empty_value": ""
+        },
+        {
+          "name": "a14",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a14",
+          "value": "n",
+          "empty_value": ""
+        },
+        {
+          "name": "a15",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a15",
+          "value": "o",
+          "empty_value": ""
+        },
+        {
+          "name": "a16",
+          "enabled": true,
+          "label": "",
+          "type": "string",
+          "validate": {
+            "required": true
+          },
+          "path": "a16",
+          "value": "p",
+          "empty_value": ""
+        },
+        {
+          "name": "save",
+          "enabled": true,
+          "label": "Save",
+          "type": "action",
+          "path": "save",
+          "validation_scope": {
+            "name": "all"
+          }
+        }
+      ],
+      "fieldOrder": [
+        [
+          "firstName",
+          "lastName"
+        ],
+        [
+          "age",
+          "birthday"
+        ],
+        [
+          "likesBroccoli"
+        ],
+        [
+          "address1"
+        ],
+        [
+          "address2"
+        ],
+        [
+          "favoriteColors",
+          "gender",
+          "secret"
+        ],
+        [
+          "bio"
+        ],
+        [
+          "cars"
+        ],
+        [
+          "addcar"
+        ],
+        [
+          "legoSets"
+        ],
+        [
+          "addlegoset"
+        ],
+        [
+          "_supler_static_-1345397749"
+        ],
+        [
+          "id"
+        ],
+        [
+          "a1",
+          "a2",
+          "a3",
+          "a4",
+          "a5",
+          "a6",
+          "a7",
+          "a8",
+          "a9",
+          "a10",
+          "a11",
+          "a12",
+          "a13",
+          "a14",
+          "a15",
+          "a16"
+        ],
+        [
+          "save"
+        ]
+      ]
+    },
+    "errors": [
+    ]
+  }
