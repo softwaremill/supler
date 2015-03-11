@@ -2,9 +2,18 @@ module Supler {
   export class FieldsOptions {
     private fieldOptions:FieldOptions[] = [];
 
+    private RENDER_HINT_MATCHER_PREFIX = 'render_hint:';
+
     constructor(options:any) {
-      Util.foreach(options || {}, (path, fieldOpts) => {
-        this.fieldOptions.push(new FieldOptions(new PathFieldMatcher(path), fieldOpts));
+      Util.foreach(options || {}, (matcherStr, fieldOpts) => {
+        var matcher;
+        if (matcherStr.indexOf(this.RENDER_HINT_MATCHER_PREFIX) === 0) {
+          matcher = new RenderHintFieldMatcher(matcherStr.substring(this.RENDER_HINT_MATCHER_PREFIX.length));
+        } else {
+          matcher = new PathFieldMatcher(matcherStr);
+        }
+
+        this.fieldOptions.push(new FieldOptions(matcher, fieldOpts));
       })
     }
 

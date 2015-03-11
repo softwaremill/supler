@@ -491,8 +491,16 @@ var Supler;
         function FieldsOptions(options) {
             var _this = this;
             this.fieldOptions = [];
-            Supler.Util.foreach(options || {}, function (path, fieldOpts) {
-                _this.fieldOptions.push(new FieldOptions(new Supler.PathFieldMatcher(path), fieldOpts));
+            this.RENDER_HINT_MATCHER_PREFIX = 'render_hint:';
+            Supler.Util.foreach(options || {}, function (matcherStr, fieldOpts) {
+                var matcher;
+                if (matcherStr.indexOf(_this.RENDER_HINT_MATCHER_PREFIX) === 0) {
+                    matcher = new Supler.RenderHintFieldMatcher(matcherStr.substring(_this.RENDER_HINT_MATCHER_PREFIX.length));
+                }
+                else {
+                    matcher = new Supler.PathFieldMatcher(matcherStr);
+                }
+                _this.fieldOptions.push(new FieldOptions(matcher, fieldOpts));
             });
         }
         FieldsOptions.prototype.forField = function (fieldData) {

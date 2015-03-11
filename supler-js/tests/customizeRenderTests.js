@@ -88,6 +88,28 @@ describe('customize render', function() {
       // then
       $('#id193812').text().should.equal('some label');
       byName('field1').val().should.equal('v1'); // the field should still be rendered normally
+    });
+
+    it('should use a javascript override for rendering fields with the given render hint', function() {
+      // when
+      var sf = new Supler.Form(container, {
+        field_options: {
+          'render_hint:date': {
+            'render_options': {
+              'renderLabel': function (forId, label) {
+                return '<div id="id193813">date label</div>';
+              }
+            }
+          }
+        }
+      });
+      sf.render(data.simpleDate.dateform1);
+
+      // then
+
+
+      $('#id193813').text().should.equal('date label');
+      byName('field1').val().should.equal('dv1'); // the field should still be rendered normally
     })
   });
 });
