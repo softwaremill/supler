@@ -13,10 +13,15 @@ module Supler {
         return fo.matcher.matches(fieldData.path, fieldData.type, fieldData.getRenderHintName());
       });
     }
+
+    forEach(cb: (fo: FieldOptions) => void) {
+      this.fieldOptions.forEach(cb);
+    }
   }
 
   export class FieldOptions {
     renderHint:any;
+    renderOptions:any;
 
     constructor(public matcher:PathFieldMatcher, options:any) {
       if (options.render_hint) {
@@ -26,6 +31,8 @@ module Supler {
           this.renderHint = {'name': options.render_hint};
         } else this.renderHint = options.render_hint;
       }
+
+      this.renderOptions = options.render_options;
     }
   }
 }

@@ -26,8 +26,8 @@ module Supler {
 
     private static parseFieldTemplate(element:HTMLElement):RenderOptionsModifier {
       var template = element.innerHTML;
-      return this.createModifierWithOverride(function () {
-        this.renderField = function (input:string, fieldData:FieldData, compact:boolean) {
+      return CreateRenderOptionsModifier.withOverride({
+        renderField: function (input:string, fieldData:FieldData, compact:boolean) {
           var renderedLabel = compact ? '' : this.renderLabel(fieldData.id, fieldData.label);
           var renderedValidation = this.renderValidation(fieldData.validationId);
 
@@ -35,27 +35,27 @@ module Supler {
             .replace('{{suplerLabel}}', renderedLabel)
             .replace('{{suplerInput}}', input)
             .replace('{{suplerValidation}}', renderedValidation);
-        };
+        }
       })
     }
 
     private static parseFieldLabelTemplate(element:HTMLElement):RenderOptionsModifier {
       var template = element.innerHTML;
-      return this.createModifierWithOverride(function () {
-        this.renderLabel = function (forId:string, label:string) {
+      return CreateRenderOptionsModifier.withOverride({
+        renderLabel: function (forId:string, label:string) {
           return template
             .replace('{{suplerLabelForId}}', forId)
             .replace('{{suplerLabelText}}', label);
-        };
+        }
       })
     }
 
     private static parseFieldValidationTemplate(element:HTMLElement):RenderOptionsModifier {
       var template = element.innerHTML;
-      return this.createModifierWithOverride(function () {
-        this.renderValidation = function (validationId:string) {
+      return CreateRenderOptionsModifier.withOverride({
+        renderValidation: function (validationId:string) {
           return template.replace('{{suplerValidationId}}', validationId);
-        };
+        }
       })
     }
 
@@ -117,64 +117,47 @@ module Supler {
           .replace(possibleValueTemplate, renderedPossibleValues);
       }
 
-      return this.createModifierWithOverride(function () {
-        this.additionalFieldOptions = function () {
+      return CreateRenderOptionsModifier.withOverride({
+        additionalFieldOptions: function () {
           return {};
-        };
-
+        },
         // no possible values
-        this.renderHtmlInput = function (inputType:string, value:any, options:any):string {
+        renderHtmlInput: function (inputType:string, value:any, options:any):string {
           var attrs = Util.copyProperties({'type': inputType}, options);
           return renderTemplateForAttrs(mainTemplate, attrs, value);
-        };
-
-        this.renderHtmlTextarea = function (value:string, options:any):string {
+        },
+        renderHtmlTextarea: function (value:string, options:any):string {
           return renderTemplateForAttrs(mainTemplate, options, value);
-        };
-
-        this.renderHtmlButton = function (label:string, options:any):string {
+        },
+        renderHtmlButton: function (label:string, options:any):string {
           return renderTemplateForAttrs(mainTemplate, options, null);
-        };
-
+        },
         // possible values
-        this.renderHtmlSelect = function (value:number,
+        renderHtmlSelect: function (value:number,
           possibleValues:SelectValue[],
           containerOptions:any,
           elementOptions:any):string {
           return renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, (v) => {
             return v.id === value;
           });
-        };
-
-        this.renderHtmlRadios = function (value:any,
+        },
+        renderHtmlRadios: function (value:any,
           possibleValues:SelectValue[],
           containerOptions:any,
           elementOptions:any):string {
           return renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, (v) => {
             return v.id === value;
           });
-        };
-
-        this.renderHtmlCheckboxes = function (value:any,
+        },
+        renderHtmlCheckboxes: function (value:any,
           possibleValues:SelectValue[],
           containerOptions:any,
           elementOptions:any):string {
           return renderTemplateWithPossibleValues(possibleValues, containerOptions, elementOptions, (v) => {
             return value.indexOf(v.id) >= 0;
           });
-        };
+        }
       })
-    }
-
-    /**
-     * Creates a function to create a `RenderOptions` instance using the methods defined in the `Override`
-     * class, falling back to the given `RenderOptions`.
-     */
-    private static createModifierWithOverride(Override):RenderOptionsModifier {
-      return (renderOptions:RenderOptions) => {
-        Override.prototype = renderOptions;
-        return <RenderOptions>(new Override());
-      }
     }
   }
 }

@@ -22,9 +22,7 @@ module Supler {
     defaultRenderOptions(): RenderOptions {
       return this.fallbackRenderOptions;
     }
-  }
 
-  export class RenderOptionsGetterParser {
     static parse(defaultRenderOptions:RenderOptions, container:HTMLElement, fieldsOptions:FieldsOptions) {
       var fromTemplates = new HTMLRenderTemplateParser(container).parse();
       var fromFieldOptions = new RenderModifiersFromFieldOptions(fieldsOptions).parse();

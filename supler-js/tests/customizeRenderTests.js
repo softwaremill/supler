@@ -87,7 +87,7 @@ describe('customize render', function() {
 
       // then
       $('#id193812').text().should.equal('some label');
-      byName('field1').value().should.equal('v1'); // the field should still be rendered normally
+      byName('field1').val().should.equal('v1'); // the field should still be rendered normally
     })
   });
 });

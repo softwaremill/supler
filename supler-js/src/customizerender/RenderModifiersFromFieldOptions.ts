@@ -4,7 +4,16 @@ module Supler {
     }
 
     parse():RenderModifierWithMatcher[] {
-      return [];
+      var modifiers = [];
+      this.fieldsOptions.forEach((fo: FieldOptions) => {
+        if (fo.renderOptions) {
+          modifiers.push(new RenderModifierWithMatcher(
+            fo.matcher,
+            CreateRenderOptionsModifier.withOverride(fo.renderOptions)));
+        }
+      });
+
+      return modifiers;
     }
   }
 }
