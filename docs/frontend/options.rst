@@ -16,11 +16,16 @@ Here's a summary of all options that can be used when defining a Supler form.
         'render_hint': 'password' // [3]
       },
       'friends[].bio': {
+        'render_options': {
+          renderLabel: function(forId, label) { return '<div>some html</div>'; }
+        }
+      },
+      'render_hint:radio': {
 
       }
     },
-    after_render_function: enrichForm, // [4]
-    custom_data_handler: displayCustomData, // [5]
+    after_render_function: enrichForm, // [5]
+    custom_data_handler: displayCustomData, // [6]
     validators: {
       good_value: function(json) { return (fieldValue) => { return "error"; } }
     },
@@ -36,5 +41,6 @@ Options details:
 * [1] :ref:`refreshes`
 * [2] :ref:`i18n`
 * [3] :ref:`customizingrender_renderhints`
-* [4] :ref:`afterrender`
-* [5] :ref:`customdatahandler`
+* [4] :ref:`customizingrender_fieldoptions_javascript`
+* [5] :ref:`afterrender`
+* [6] :ref:`customdatahandler`

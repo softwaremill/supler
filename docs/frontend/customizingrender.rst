@@ -211,16 +211,53 @@ The table cells are a series of ``<tr><td></td><td></td>..></tr>...`` tags.
   <div id="form-container" supler:fieldOrder="x, y, z">
   </div>
 
-Customizing via options
------------------------
+.. _customizingrender_fieldoptions_javascript:
 
-To override how a particular type of form elements are rendered, simply provide a method in the ``render_options``
-option passed to ``Supler.Form``:
+Customizing via local javascript options
+----------------------------------------
+
+Rendering can also be customized by providing customizations using javascript instead of HTML templates. You can
+override any of the methods available on ``RenderOptions`` (see below for a complete list) using field options:
+
+.. code-block:: javascript
+
+  new Supler.Form(container, {
+    field_options: {
+      'bio': {
+        'render_options': {
+          renderLabel: function(forId, label) { return '<div>some html</div>'; }
+        }
+      }
+    }
+  });
+
+It is also possible to match using render hints, instead of field names/paths. You need to prefix the field option name
+with ``render_hint:``. For example, to provide custom javascript rendering options for all fields with render hint
+``date``:
+
+.. code-block:: javascript
+
+  new Supler.Form(container, {
+    field_options: {
+      'render_hint:date': {
+        'render_options': {
+          renderLabel: function(forId, label) { return '<div>this is a date</div>'; }
+        }
+      }
+    }
+  });
+
+Customizing via global javascript options
+-----------------------------------------
+
+To override how particular types of form elements are rendered globally, simply provide a method in the ``render_options``
+option passed to ``Supler.Form``; you can even provide a whole alternative implementation of the ``RenderOptions``
+interface:
  
 .. code-block:: javascript 
 
   var formContainer = document.getElementById('form-container');
-  var form =  = new Supler.Form(formContainer, {
+  var form = new Supler.Form(formContainer, {
     render_options: {
       renderStringField: function(label, id, validationId, name, value, options, compact) {
         return someHtml;
@@ -248,7 +285,11 @@ Methods available for overriding:
   renderField: (input: string, fieldData: FieldData, compact: boolean) => string
   renderLabel: (forId: string, label: string) => string
   renderValidation: (validationId: string) => string
-  
+
+  renderRow: (fields: string) => string
+
+  renderForm: (rows: string) => string
+
   renderStaticField: (label: string, id: string, validationId: string, value: any, compact: boolean) => string
   renderStaticText: (text: string) => string
   
