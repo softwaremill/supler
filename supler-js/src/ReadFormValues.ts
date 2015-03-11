@@ -6,7 +6,7 @@ module Supler {
      * @param result The object to which found mappings will be added.
      * @returns An object containing mappings from found form field names to form field values.
      */
-    static getValueFrom(element, selectedActionId = null, result = {}) {
+    static getValueFrom(element, selectedButtonId = null, result = {}) {
       var fieldType = element.getAttribute(SuplerAttributes.FIELD_TYPE);
       var multiple = element.getAttribute(SuplerAttributes.MULTIPLE) === 'true';
 
@@ -39,14 +39,20 @@ module Supler {
             break;
 
           case FieldTypes.ACTION:
-            if (element.id === selectedActionId) {
+            if (element.id === selectedButtonId) {
+              ReadFormValues.appendFieldValue(result, fieldName, true, false);
+            }
+            break;
+
+          case FieldTypes.MODAL:
+            if (element.id === selectedButtonId) {
               ReadFormValues.appendFieldValue(result, fieldName, true, false);
             }
             break;
 
           case FieldTypes.SUBFORM:
             fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
-            var subResult = this.getValueFromChildren(element, selectedActionId, {});
+            var subResult = this.getValueFromChildren(element, selectedButtonId, {});
             ReadFormValues.appendFieldValue(result, fieldName, subResult, multiple);
             break;
 
@@ -57,7 +63,7 @@ module Supler {
         }
       } else if (element.children.length > 0) {
         // flattening
-        this.getValueFromChildren(element, selectedActionId, result);
+        this.getValueFromChildren(element, selectedButtonId, result);
       }
 
       return result;

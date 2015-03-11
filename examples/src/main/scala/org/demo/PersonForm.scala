@@ -17,11 +17,18 @@ object PersonForm {
     "Lada" -> List("Niva")
   )
 
+  val carModalForm = form[Car](f => List(
+    f.field(_.make),
+    f.field(_.model),
+    f.field(_.year)
+  ))
+
   def carForm(deleteAction: Car => ActionResult[Car]) = form[Car](f => List(
     f.selectOneField(_.make)(identity).possibleValues(_ => carMakesAndModels.keys.toList).label("Make") ||
     f.selectOneField(_.model)(identity).possibleValues(car => carMakesAndModels.getOrElse(car.make, Nil)).label("Model"),
     f.field(_.year).validate(gt(1900)).label("Year"),
-    f.action("delete")(c => { println(s"Running action: delete car $c"); deleteAction(c) }).label("Delete")
+    f.action("delete")(c => { println(s"Running action: delete car $c"); deleteAction(c) }).label("Delete") ||
+    f.modal("editCar"){carModalForm(_)}.label("Edit")
   ))
 
   def legoSetForm(deleteAction: LegoSet => ActionResult[LegoSet]) = form[LegoSet](f => List(

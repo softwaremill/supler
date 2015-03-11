@@ -24,7 +24,15 @@ module Supler {
     attachActionListeners() {
       this.ifEnabledForEachFormElement(htmlFormElement => {
         if (htmlFormElement.getAttribute(SuplerAttributes.FIELD_TYPE) === FieldTypes.ACTION) {
-          htmlFormElement.onclick = () => this.actionListenerFor(htmlFormElement)
+          htmlFormElement.onclick = () => this.buttonListenerFor(htmlFormElement)
+        }
+      });
+    }
+
+    attachModalListeners() {
+      this.ifEnabledForEachFormElement(htmlFormElement => {
+        if (htmlFormElement.getAttribute(SuplerAttributes.FIELD_TYPE) === FieldTypes.MODAL) {
+          htmlFormElement.onclick = () => this.buttonListenerFor(htmlFormElement)
         }
       });
     }
@@ -52,8 +60,8 @@ module Supler {
       }
     }
 
-    private actionListenerFor(htmlFormElement:HTMLElement) {
-      // allowing at most one action at a time.
+    private buttonListenerFor(htmlFormElement:HTMLElement) {
+      // allowing at most one button pressed at a time.
       if (!this.actionInProgress) {
         this.actionInProgress = true;
 

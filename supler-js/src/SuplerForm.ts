@@ -54,6 +54,14 @@ module Supler {
           this.validation);
         sendController.attachRefreshListeners();
         sendController.attachActionListeners();
+        sendController.attachModalListeners();
+      }
+      else if (this.isModalForm(json)) {
+        var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories,
+          this.fieldsOptions, this.fieldOrder).renderForm(json.form[FormSections.META], json.form.main_form);
+        document.getElementById('modal-form-container').innerHTML = result.html;
+
+        (<any>document.getElementById('supler-modal')).modal('show');
       }
 
       var customData = this.getCustomData(json);
@@ -73,8 +81,8 @@ module Supler {
       }
     }
 
-    getValue(selectedActionId:string = null) {
-      return ReadFormValues.getValueFrom(this.container, selectedActionId);
+    getValue(selectedButtonId:string = null) {
+      return ReadFormValues.getValueFrom(this.container, selectedButtonId);
     }
 
     /**
@@ -98,6 +106,10 @@ module Supler {
 
     private isSuplerForm(json):boolean {
       return json.is_supler_form === true;
+    }
+
+    private isModalForm(json):boolean {
+      return json.type === "modal";
     }
   }
 }

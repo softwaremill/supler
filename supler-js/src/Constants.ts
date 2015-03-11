@@ -9,6 +9,7 @@ module Supler {
     static STATIC = 'static';
     static ACTION = 'action';
     static META = 'meta';
+    static MODAL = 'modal';
   }
 
   export class SuplerAttributes {

@@ -5,6 +5,7 @@ module Supler {
     constructor(private renderOptionsGetter:RenderOptionsGetter,
                 private i18n:I18n,
                 private validatorFnFactories:any,
+
                 private fieldsOptions:FieldsOptions,
                 private fieldOrder: string[][]) {
     }
@@ -152,6 +153,9 @@ module Supler {
         case FieldTypes.ACTION:
           return this.actionFieldFromJson(renderOptions, fieldData, fieldOptions, formElementDictionary, compact);
 
+        case FieldTypes.MODAL:
+          return this.modalFieldFromJson(renderOptions, fieldData, fieldOptions, formElementDictionary, compact);
+
         default:
           return null;
       }
@@ -290,6 +294,14 @@ module Supler {
         ValidationScopeParser.fromJson(fieldData.json.validation_scope);
 
       return renderOptions.renderActionField(fieldData, fieldOptions, compact);
+    }
+
+    private modalFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions,
+                               formElementDictionary:FormElementDictionary, compact) {
+
+      formElementDictionary.getElement(fieldData.id).validationScope = ValidateNone;
+
+      return renderOptions.renderModalField(fieldData, fieldOptions, compact);
     }
 
     private getTableHeaderLabels(fieldJson:any):string[] {

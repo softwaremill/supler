@@ -12,6 +12,7 @@ var Supler;
         FieldTypes.STATIC = 'static';
         FieldTypes.ACTION = 'action';
         FieldTypes.META = 'meta';
+        FieldTypes.MODAL = 'modal';
         return FieldTypes;
     })();
     Supler.FieldTypes = FieldTypes;
@@ -152,6 +153,8 @@ var Supler;
                     return this.staticFieldFromJson(renderOptions, fieldData, compact);
                 case Supler.FieldTypes.ACTION:
                     return this.actionFieldFromJson(renderOptions, fieldData, fieldOptions, formElementDictionary, compact);
+                case Supler.FieldTypes.MODAL:
+                    return this.modalFieldFromJson(renderOptions, fieldData, fieldOptions, formElementDictionary, compact);
                 default:
                     return null;
             }
@@ -263,6 +266,10 @@ var Supler;
         CreateFormFromJson.prototype.actionFieldFromJson = function (renderOptions, fieldData, fieldOptions, formElementDictionary, compact) {
             formElementDictionary.getElement(fieldData.id).validationScope = Supler.ValidationScopeParser.fromJson(fieldData.json.validation_scope);
             return renderOptions.renderActionField(fieldData, fieldOptions, compact);
+        };
+        CreateFormFromJson.prototype.modalFieldFromJson = function (renderOptions, fieldData, fieldOptions, formElementDictionary, compact) {
+            formElementDictionary.getElement(fieldData.id).validationScope = Supler.ValidateNone;
+            return renderOptions.renderModalField(fieldData, fieldOptions, compact);
         };
         CreateFormFromJson.prototype.getTableHeaderLabels = function (fieldJson) {
             var _this = this;
@@ -601,8 +608,8 @@ var Supler;
     var ReadFormValues = (function () {
         function ReadFormValues() {
         }
-        ReadFormValues.getValueFrom = function (element, selectedActionId, result) {
-            if (selectedActionId === void 0) { selectedActionId = null; }
+        ReadFormValues.getValueFrom = function (element, selectedButtonId, result) {
+            if (selectedButtonId === void 0) { selectedButtonId = null; }
             if (result === void 0) { result = {}; }
             var fieldType = element.getAttribute(Supler.SuplerAttributes.FIELD_TYPE);
             var multiple = element.getAttribute(Supler.SuplerAttributes.MULTIPLE) === 'true';
@@ -628,13 +635,18 @@ var Supler;
                         ReadFormValues.appendFieldValue(result, fieldName, this.parseBooleanOrNull(this.getElementValue(element)), multiple);
                         break;
                     case Supler.FieldTypes.ACTION:
-                        if (element.id === selectedActionId) {
+                        if (element.id === selectedButtonId) {
+                            ReadFormValues.appendFieldValue(result, fieldName, true, false);
+                        }
+                        break;
+                    case Supler.FieldTypes.MODAL:
+                        if (element.id === selectedButtonId) {
                             ReadFormValues.appendFieldValue(result, fieldName, true, false);
                         }
                         break;
                     case Supler.FieldTypes.SUBFORM:
                         fieldName = element.getAttribute(Supler.SuplerAttributes.FIELD_NAME);
-                        var subResult = this.getValueFromChildren(element, selectedActionId, {});
+                        var subResult = this.getValueFromChildren(element, selectedButtonId, {});
                         ReadFormValues.appendFieldValue(result, fieldName, subResult, multiple);
                         break;
                     case Supler.FieldTypes.META:
@@ -643,7 +655,7 @@ var Supler;
                 }
             }
             else if (element.children.length > 0) {
-                this.getValueFromChildren(element, selectedActionId, result);
+                this.getValueFromChildren(element, selectedButtonId, result);
             }
             return result;
         };
@@ -777,6 +789,11 @@ var Supler;
             return this.renderField(this.renderHtmlSelect(fieldData.value, possibleValues, elementOptions), fieldData, compact);
         };
         Bootstrap3RenderOptions.prototype.renderActionField = function (fieldData, options, compact) {
+            var fieldDataNoLabel = Supler.Util.copyObject(fieldData);
+            fieldDataNoLabel.label = '';
+            return this.renderField(this.renderHtmlButton(fieldData.label, options), fieldDataNoLabel, compact);
+        };
+        Bootstrap3RenderOptions.prototype.renderModalField = function (fieldData, options, compact) {
             var fieldDataNoLabel = Supler.Util.copyObject(fieldData);
             fieldDataNoLabel.label = '';
             return this.renderField(this.renderHtmlButton(fieldData.label, options), fieldDataNoLabel, compact);
@@ -940,7 +957,15 @@ var Supler;
             var _this = this;
             this.ifEnabledForEachFormElement(function (htmlFormElement) {
                 if (htmlFormElement.getAttribute(Supler.SuplerAttributes.FIELD_TYPE) === Supler.FieldTypes.ACTION) {
-                    htmlFormElement.onclick = function () { return _this.actionListenerFor(htmlFormElement); };
+                    htmlFormElement.onclick = function () { return _this.buttonListenerFor(htmlFormElement); };
+                }
+            });
+        };
+        SendController.prototype.attachModalListeners = function () {
+            var _this = this;
+            this.ifEnabledForEachFormElement(function (htmlFormElement) {
+                if (htmlFormElement.getAttribute(Supler.SuplerAttributes.FIELD_TYPE) === Supler.FieldTypes.MODAL) {
+                    htmlFormElement.onclick = function () { return _this.buttonListenerFor(htmlFormElement); };
                 }
             });
         };
@@ -957,7 +982,7 @@ var Supler;
                 }, false, htmlFormElement);
             }
         };
-        SendController.prototype.actionListenerFor = function (htmlFormElement) {
+        SendController.prototype.buttonListenerFor = function (htmlFormElement) {
             var _this = this;
             if (!this.actionInProgress) {
                 this.actionInProgress = true;
@@ -1052,6 +1077,12 @@ var Supler;
                 var sendController = new Supler.SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, this.validation);
                 sendController.attachRefreshListeners();
                 sendController.attachActionListeners();
+                sendController.attachModalListeners();
+            }
+            else if (this.isModalForm(json)) {
+                var result = new Supler.CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories, this.fieldsOptions, this.fieldOrder).renderForm(json.form[Supler.FormSections.META], json.form.main_form);
+                document.getElementById('modal-form-container').innerHTML = result.html;
+                document.getElementById('supler-modal').modal('show');
             }
             var customData = this.getCustomData(json);
             if (customData)
@@ -1066,9 +1097,9 @@ var Supler;
                 this.validation.copyFrom(oldValidation);
             }
         };
-        Form.prototype.getValue = function (selectedActionId) {
-            if (selectedActionId === void 0) { selectedActionId = null; }
-            return Supler.ReadFormValues.getValueFrom(this.container, selectedActionId);
+        Form.prototype.getValue = function (selectedButtonId) {
+            if (selectedButtonId === void 0) { selectedButtonId = null; }
+            return Supler.ReadFormValues.getValueFrom(this.container, selectedButtonId);
         };
         Form.prototype.validate = function (validationScope) {
             if (validationScope === void 0) { validationScope = Supler.ValidateAll; }
@@ -1084,6 +1115,9 @@ var Supler;
         };
         Form.prototype.isSuplerForm = function (json) {
             return json.is_supler_form === true;
+        };
+        Form.prototype.isModalForm = function (json) {
+            return json.type === "modal";
         };
         return Form;
     })();

@@ -23,6 +23,7 @@ module Supler {
     renderSingleChoiceRadioField: RenderPossibleValuesField
     renderSingleChoiceSelectField: RenderPossibleValuesField
     renderActionField: (fieldData:FieldData, options:any, compact:boolean) => string
+    renderModalField: (fieldData:FieldData, options:any, compact:boolean) => string
 
     // templates
     // [label] [input] [validation]
@@ -125,6 +126,12 @@ module Supler {
     }
 
     renderActionField(fieldData, options, compact) {
+      var fieldDataNoLabel = Util.copyObject(fieldData);
+      fieldDataNoLabel.label = '';
+      return this.renderField(this.renderHtmlButton(fieldData.label, options), fieldDataNoLabel, compact);
+    }
+
+    renderModalField(fieldData, options, compact) {
       var fieldDataNoLabel = Util.copyObject(fieldData);
       fieldDataNoLabel.label = '';
       return this.renderField(this.renderHtmlButton(fieldData.label, options), fieldDataNoLabel, compact);
