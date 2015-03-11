@@ -17,7 +17,7 @@ Here's a summary of all options that can be used when defining a Supler form.
       },
       'friends[].bio': {
         'render_options': {
-          renderLabel: function(forId, label) { return '<div>some html</div>'; }
+          renderLabel: function(forId, label) { return '<div>some html</div>'; } // [4]
         }
       },
       'render_hint:radio': {
