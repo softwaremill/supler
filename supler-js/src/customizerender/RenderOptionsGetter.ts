@@ -23,13 +23,22 @@ module Supler {
       return this.fallbackRenderOptions;
     }
 
-    static parse(defaultRenderOptions:RenderOptions, container:HTMLElement, fieldsOptions:FieldsOptions) {
-      var fromTemplates = new HTMLRenderTemplateParser(container).parse();
-      var fromFieldOptions = new RenderModifiersFromFieldOptions(fieldsOptions).parse();
+    static parse(defaultRenderOptions:RenderOptions, container:HTMLElement, fieldsOptions:FieldsOptions,
+      fieldTemplatesOption: string[]) {
+
+      var allModifiers = [];
 
       // currently any modifiers in field options have precedence. But maybe we should sort somehow, so that e.g.
       // templates for specific fields should have precedence over templates for render hints?
-      var allModifiers = fromFieldOptions.concat(fromTemplates);
+      allModifiers = allModifiers.concat(new RenderModifiersFromFieldOptions(fieldsOptions).parse());
+      allModifiers = allModifiers.concat(new HTMLRenderTemplateParser(container).parse());
+
+      (fieldTemplatesOption || []).forEach(templateId => {
+        var element = document.getElementById(templateId);
+        if (element) {
+          allModifiers = allModifiers.concat(new HTMLRenderTemplateParser(element).parse());
+        }
+      });
 
       return new RenderOptionsGetter(defaultRenderOptions, allModifiers);
     }

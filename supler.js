@@ -1124,7 +1124,7 @@ var Supler;
             Supler.Util.copyProperties(this.i18n, customOptions.i18n);
             var renderOptions = new Supler.Bootstrap3RenderOptions();
             Supler.Util.copyProperties(renderOptions, customOptions.render_options);
-            this.renderOptionsGetter = Supler.RenderOptionsGetter.parse(renderOptions, container, this.fieldsOptions);
+            this.renderOptionsGetter = Supler.RenderOptionsGetter.parse(renderOptions, container, this.fieldsOptions, customOptions.field_templates);
             this.validatorFnFactories = new Supler.ValidatorFnFactories(this.i18n);
             Supler.Util.copyProperties(this.validatorFnFactories, customOptions.validators);
             this.validatorRenderOptions = new Supler.ValidatorRenderOptions;
@@ -1348,10 +1348,16 @@ var Supler;
         RenderOptionsGetter.prototype.defaultRenderOptions = function () {
             return this.fallbackRenderOptions;
         };
-        RenderOptionsGetter.parse = function (defaultRenderOptions, container, fieldsOptions) {
-            var fromTemplates = new Supler.HTMLRenderTemplateParser(container).parse();
-            var fromFieldOptions = new Supler.RenderModifiersFromFieldOptions(fieldsOptions).parse();
-            var allModifiers = fromFieldOptions.concat(fromTemplates);
+        RenderOptionsGetter.parse = function (defaultRenderOptions, container, fieldsOptions, fieldTemplatesOption) {
+            var allModifiers = [];
+            allModifiers = allModifiers.concat(new Supler.RenderModifiersFromFieldOptions(fieldsOptions).parse());
+            allModifiers = allModifiers.concat(new Supler.HTMLRenderTemplateParser(container).parse());
+            (fieldTemplatesOption || []).forEach(function (templateId) {
+                var element = document.getElementById(templateId);
+                if (element) {
+                    allModifiers = allModifiers.concat(new Supler.HTMLRenderTemplateParser(element).parse());
+                }
+            });
             return new RenderOptionsGetter(defaultRenderOptions, allModifiers);
         };
         return RenderOptionsGetter;

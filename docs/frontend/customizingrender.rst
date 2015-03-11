@@ -37,11 +37,13 @@ This can be done through the the ``field_options`` option passed when creating a
 A render hint can be just a name (string), or an object with a ``name`` property and additional parameters (like
 the textarea example).
 
+.. _customizingrender_templates:
+
 Customizing via HTML templates
 ------------------------------
 
-The generated HTML can be customized by providing templates, which will be used during the rendering process. All
-templates should be nested inside the element that will contain the form. For example:
+The generated HTML can be customized by providing templates, which will be used during the rendering process. By default
+Supler looks for templates nested inside the element that will contain the form. For example:
 
 .. code-block:: html
  
@@ -55,7 +57,16 @@ templates should be nested inside the element that will contain the form. For ex
     </div>
   </div>
 
-The templates are stacked top-to-bottom, that is the tempaltes that are defined higher will take precedence, if
+If the templates are defined somewhere else, you can provide additional ids of the elements from which templates
+should be read by defining the ``field_templates`` option:
+
+.. code-block:: javascript
+
+  new Supler.Form(container, {
+    field_templates: [ 'idOfElementWithTemplates1', 'idOfElementWithTemplates2' ]
+  });
+
+The templates are stacked top-to-bottom, that is the templates that are defined higher will take precedence, if
 multiple templates match a given field.
 
 Matching templates to fields

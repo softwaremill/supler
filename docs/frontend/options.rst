@@ -29,7 +29,8 @@ Here's a summary of all options that can be used when defining a Supler form.
     validators: {
       good_value: function(json) { return (fieldValue) => { return "error"; } }
     },
-    render_options: new Bootstrap3RenderOptions()
+    render_options: new Bootstrap3RenderOptions(), // or any subset of methods from RenderOptions
+    field_templates: [ 'idOfElementWithTemplates1', 'idOfElementWithTemplates2' ] // [7]
   });
 
 When specifying field options and dealing with lists of subforms, options for nested fields can be defined using the
@@ -44,3 +45,4 @@ Options details:
 * [4] :ref:`customizingrender_fieldoptions_javascript`
 * [5] :ref:`afterrender`
 * [6] :ref:`customdatahandler`
+* [7] :ref:`customizingrender_templates`

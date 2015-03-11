@@ -22,7 +22,8 @@ module Supler {
 
       var renderOptions = new Bootstrap3RenderOptions();
       Util.copyProperties(renderOptions, customOptions.render_options);
-      this.renderOptionsGetter = RenderOptionsGetter.parse(renderOptions, container, this.fieldsOptions);
+      this.renderOptionsGetter = RenderOptionsGetter.parse(renderOptions, container, this.fieldsOptions,
+        customOptions.field_templates);
 
       this.validatorFnFactories = new ValidatorFnFactories(this.i18n);
       Util.copyProperties(this.validatorFnFactories, customOptions.validators);

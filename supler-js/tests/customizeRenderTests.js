@@ -67,6 +67,18 @@ describe('customize render', function() {
       serialized2.field4.should.equal(false);
       validate2.should.equal(false);
     });
+
+    it('should use external templates', function () {
+      // when
+      var sf = new Supler.Form(container, {
+        field_templates: [ 'templates_oneinput_text' ]
+      });
+      sf.render(data.simple1.form1);
+
+      // then
+      byName('field1').attr('customattr').should.equal('z');
+      assert.equal(byName('field2').attr('customattr'), null);
+    });
   });
 
   describe('using javascript', function() {
