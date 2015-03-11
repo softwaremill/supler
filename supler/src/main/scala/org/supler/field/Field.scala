@@ -51,6 +51,7 @@ trait Field[T] extends Row[T] {
     val Enabled = "enabled"
 
     val ValidateRequired = "required"
+    val ValidationScope = "validation_scope"
   }
 
   protected object SpecialFieldTypes {
@@ -58,6 +59,7 @@ trait Field[T] extends Row[T] {
     val Subform = "subform"
     val Static = "static"
     val Action = "action"
+    val Modal = "modal"
   }
 
   private[supler] override def findAction(
@@ -65,4 +67,8 @@ trait Field[T] extends Row[T] {
     obj: T,
     jsonFields: Map[String, json4s.JValue],
     ctx: RunActionContext): Option[RunnableAction] = None
+
+  private[supler] override def findModal(
+    parentPath: FieldPath, obj: T,
+    jsonFields: Map[String, json4s.JValue]): Option[ShowableModal] = None
 }

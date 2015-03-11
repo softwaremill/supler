@@ -85,6 +85,26 @@ case class SubformField[T, ContU, U, Cont[_]](
       _.isDefined).flatten
   }
 
+  override private[supler] def findModal(
+    parentPath: FieldPath,
+    obj: T,
+    jsonFields: Map[String, JValue]): Option[ShowableModal] = {
+
+    val values = read(obj)
+    val valuesList = read(obj).toList
+    val jvaluesWithIndex = c.valuesWithIndexFromJSON(jsonFields.get(name)).toList
+
+    val valuesJValuesIndex = valuesList.zip(jvaluesWithIndex)
+
+    Util
+      .findFirstMapped[(U, (JValue, Option[Int])), Option[ShowableModal]](valuesJValuesIndex, { case (v, (jvalue, indexOpt)) =>
+      val i = indexOpt.getOrElse(0)
+      // assuming that the values matches the json (that is, that the json values were previously applied)
+      embeddedForm.findModal(pathWithOptionalIndex(parentPath, indexOpt), valuesList(i), jvalue)
+    },
+    _.isDefined).flatten
+  }
+
   private def pathWithOptionalIndex(parentPath: FieldPath, indexOpt: Option[Int]) = indexOpt match {
     case None => parentPath.append(name)
     case Some(i) => parentPath.appendWithIndex(name, i)

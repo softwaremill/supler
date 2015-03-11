@@ -1,9 +1,9 @@
 package org.supler.field
 
+import org.json4s.JsonAST.{JField, JObject}
 import org.json4s._
-import org.json4s.JsonAST.{JObject, JField}
-import org.supler.FieldPath
 import org.supler.validation._
+import org.supler.{FieldPath, FormWithObject}
 
 case class ActionField[T](
   name: String,
@@ -34,7 +34,7 @@ case class ActionField[T](
       JField(Label, JString(label.getOrElse(""))),
       JField(Type, JString(SpecialFieldTypes.Action)),
       JField(Path, JString(parentPath.append(name).toString)),
-      JField("validation_scope", validationScopeJSON)
+      JField(ValidationScope, validationScopeJSON)
     ))
   }
 
@@ -107,6 +107,9 @@ private[supler] case class RunnableAction(
   path: FieldPath,
   validationScope: ValidationScope,
   run: () => CompleteActionResult)
+
+private[supler] case class ShowableModal(
+  path: FieldPath, form: FormWithObject[_])
 
 trait ActionValidationScope {
   /**

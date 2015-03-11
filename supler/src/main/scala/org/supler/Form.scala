@@ -44,6 +44,13 @@ case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
     }
   }
 
+  private[supler] def findModal(parentPath: FieldPath, obj: T, jvalue: JValue) = {
+    jvalue match {
+      case JObject(jsonFields) => Row.findFirstModal(parentPath, rows, obj, jsonFields.toMap)
+      case _ => None
+    }
+  }
+
   private def requireFieldsUnique() {
     val fieldsUsedMultipletimes = rows.flatMap {
       case MultiFieldRow(fields) => fields

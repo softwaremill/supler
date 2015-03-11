@@ -1,7 +1,8 @@
 package org.supler
 
+import org.json4s
 import org.json4s.JsonAST.{JArray, JObject, JString, JValue}
-import org.supler.field.{Field, RunActionContext, RunnableAction}
+import org.supler.field.{Field, RunActionContext, RunnableAction, ShowableModal}
 import org.supler.validation._
 
 trait Row[T] {
@@ -14,6 +15,8 @@ trait Row[T] {
   private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors
 
   private[supler] def findAction(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext): Option[RunnableAction]
+
+  private[supler] def findModal(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): Option[ShowableModal]
 }
 
 object Row {
@@ -33,6 +36,15 @@ object Row {
       (_: Row[T]).findAction(parentPath, obj, jsonFields, ctx),
       (_: Option[RunnableAction]).isDefined).flatten
   }
+
+  def findFirstModal[T](parentPath: FieldPath, rows: Iterable[Row[T]], obj: T, jsonFields: Map[String, JValue]):
+    Option[ShowableModal] = {
+
+    Util.findFirstMapped(
+      rows,
+      (_: Row[T]).findModal(parentPath, obj, jsonFields),
+      (_: Option[ShowableModal]).isDefined).flatten
+  }
 }
 
 case class MultiFieldRow[T](fields: List[Field[T]]) extends Row[T] {
@@ -50,6 +62,9 @@ case class MultiFieldRow[T](fields: List[Field[T]]) extends Row[T] {
 
   override def findAction(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext) =
     Row.findFirstAction(parentPath, fields, obj, jsonFields, ctx)
+
+  private[supler] override def findModal(parentPath: FieldPath, obj: T, jsonFields: Map[String, json4s.JValue]): Option[ShowableModal] =
+    Row.findFirstModal(parentPath, fields, obj, jsonFields)
 }
 
 case class RowsJSON(fields: List[JObject], fieldOrder: List[String]) {

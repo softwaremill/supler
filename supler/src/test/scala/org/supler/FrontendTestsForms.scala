@@ -169,6 +169,16 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("form2optRadio", fOptRadio, obj2opt)
   }
 
+  writeTestData("complexFormWithModal") { writer =>
+    val formWithModal = form[ComplexSingleSubform](f => List(
+      f.field(_.field10),
+      f.modal("showSimple"){ e => simple1Form(e.simple) }
+    ))
+
+    writer.writeForm("complexFormWithModal", formWithModal,
+      ComplexSingleSubform("Helo", Simple1("A", Some("B"), 1, false)))
+  }
+
   writeTestData("complexSubformsList") { writer =>
     val complexFormTable = form[ComplexSubformsList](f => List(
       f.field(_.field10).label("Field 10"),
