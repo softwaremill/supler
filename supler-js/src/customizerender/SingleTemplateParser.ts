@@ -177,8 +177,4 @@ module Supler {
       }
     }
   }
-
-  export interface RenderOptionsModifier {
-    (renderOptions:RenderOptions): RenderOptions
-  }
 }

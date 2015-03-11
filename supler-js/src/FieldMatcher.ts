@@ -53,7 +53,7 @@ module Supler {
     }
   }
 
-  export class FieldMatcherParser {
+  export class FieldMatcherHtmlParser {
     private static FIELD_PATH_MATCHER = 'supler:fieldPath';
     private static FIELD_TYPE_MATCHER = 'supler:fieldType';
     private static FIELD_RENDERHINT_MATCHER = 'supler:fieldRenderHint';
@@ -63,17 +63,17 @@ module Supler {
      */
     static parseMatcher(element:HTMLElement):FieldMatcher {
       var current = new AllFieldMatcher();
-      if (element.hasAttribute(FieldMatcherParser.FIELD_PATH_MATCHER)) {
+      if (element.hasAttribute(FieldMatcherHtmlParser.FIELD_PATH_MATCHER)) {
         current = new CompositeFieldMatcher(current,
-          new PathFieldMatcher(element.getAttribute(FieldMatcherParser.FIELD_PATH_MATCHER)))
+          new PathFieldMatcher(element.getAttribute(FieldMatcherHtmlParser.FIELD_PATH_MATCHER)))
       }
-      if (element.hasAttribute(FieldMatcherParser.FIELD_TYPE_MATCHER)) {
+      if (element.hasAttribute(FieldMatcherHtmlParser.FIELD_TYPE_MATCHER)) {
         current = new CompositeFieldMatcher(current,
-          new TypeFieldMatcher(element.getAttribute(FieldMatcherParser.FIELD_TYPE_MATCHER)))
+          new TypeFieldMatcher(element.getAttribute(FieldMatcherHtmlParser.FIELD_TYPE_MATCHER)))
       }
-      if (element.hasAttribute(FieldMatcherParser.FIELD_RENDERHINT_MATCHER)) {
+      if (element.hasAttribute(FieldMatcherHtmlParser.FIELD_RENDERHINT_MATCHER)) {
         current = new CompositeFieldMatcher(current,
-          new RenderHintFieldMatcher(element.getAttribute(FieldMatcherParser.FIELD_RENDERHINT_MATCHER)))
+          new RenderHintFieldMatcher(element.getAttribute(FieldMatcherHtmlParser.FIELD_RENDERHINT_MATCHER)))
       }
       return current;
     }

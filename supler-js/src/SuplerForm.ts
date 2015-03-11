@@ -15,12 +15,14 @@ module Supler {
     constructor(private container:HTMLElement, customOptions:any) {
       customOptions = customOptions || {};
 
+      this.fieldsOptions = new FieldsOptions(customOptions.field_options);
+
       this.i18n = new I18n();
       Util.copyProperties(this.i18n, customOptions.i18n);
 
       var renderOptions = new Bootstrap3RenderOptions();
       Util.copyProperties(renderOptions, customOptions.render_options);
-      this.renderOptionsGetter = new HTMLRenderTemplateParser(this.container).parse(renderOptions);
+      this.renderOptionsGetter = RenderOptionsGetterParser.parse(renderOptions, container, this.fieldsOptions);
 
       this.validatorFnFactories = new ValidatorFnFactories(this.i18n);
       Util.copyProperties(this.validatorFnFactories, customOptions.validators);
@@ -36,8 +38,6 @@ module Supler {
       });
       this.customDataHandlerFn = customOptions.custom_data_handler || ((data:any) => {
       });
-
-      this.fieldsOptions = new FieldsOptions(customOptions.field_options);
 
       this.fieldOrder = customOptions.field_order;
     }
