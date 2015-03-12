@@ -1,7 +1,7 @@
 package org.supler
 
 import org.supler.field._
-import org.supler.transformation.FullTransformer
+import org.supler.transformation.Transformer
 import org.supler.validation._
 
 import scala.language.experimental.macros
@@ -15,7 +15,7 @@ object Supler extends Validators with RenderHints {
   def form[T](rows: Supler[T] => List[Row[T]]): Form[T] = macro SuplerFormMacros.form_impl[T]
 
   def field[T, U](param: T => U)
-    (implicit transformer: FullTransformer[U, _]): BasicField[T, U] =
+    (implicit transformer: Transformer[U, _]): BasicField[T, U] =
     macro SuplerFieldMacros.field_impl[T, U]
 
   /**
@@ -79,7 +79,7 @@ object Supler extends Validators with RenderHints {
 
 trait Supler[T] extends Validators {
   def field[U](param: T => U)
-    (implicit transformer: FullTransformer[U, _]): BasicField[T, U] =
+    (implicit transformer: Transformer[U, _]): BasicField[T, U] =
     macro SuplerFieldMacros.field_impl[T, U]
 
   /**

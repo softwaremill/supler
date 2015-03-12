@@ -2,7 +2,7 @@ package org.supler.field
 
 import org.json4s.JValue
 import org.json4s.JsonAST._
-import org.supler.transformation.FullTransformer
+import org.supler.transformation.Transformer
 import org.supler.validation.{PartiallyAppliedObj, ValidationScope}
 import org.supler.{FieldPath, Message}
 
@@ -21,7 +21,7 @@ case class StaticField[T](
   val enabledIf: T => Boolean = AlwaysCondition
   def includeIf(condition: T => Boolean): StaticField[T] = this.copy(includeIf = condition)
 
-  private val transformer = implicitly[FullTransformer[String, String]]
+  private val transformer = implicitly[Transformer[String, String]]
 
   override protected def generateJSONData(obj: T) = {
     val msg = createMessage(obj)

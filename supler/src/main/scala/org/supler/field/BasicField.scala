@@ -3,7 +3,7 @@ package org.supler.field
 import org.json4s.JsonAST._
 import org.supler._
 import org.supler.validation._
-import org.supler.transformation.FullTransformer
+import org.supler.transformation.Transformer
 
 case class BasicField[T, U](
   name: String,
@@ -12,7 +12,7 @@ case class BasicField[T, U](
   validators: List[Validator[T, U]],
   label: Option[String],
   required: Boolean,
-  transformer: FullTransformer[U, _],
+  transformer: Transformer[U, _],
   renderHint: Option[RenderHint with BasicFieldCompatible],
   emptyValue: Option[U],
   enabledIf: T => Boolean,
