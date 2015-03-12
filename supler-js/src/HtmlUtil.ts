@@ -1,6 +1,14 @@
 module Supler {
   export class HtmlUtil {
-    static renderTag(tagName, tagAttrs, tagBody = null, escapeTagBody = true) {
+    static renderTagEscaped(tagName, tagAttrs, tagBody = null):string {
+      return HtmlUtil._renderTag(tagName, tagAttrs, tagBody, true)
+    }
+
+    static renderTag(tagName, tagAttrs, tagBody = null):string {
+      return HtmlUtil._renderTag(tagName, tagAttrs, tagBody, false)
+    }
+
+    private static _renderTag(tagName, tagAttrs, tagBody, escapeTagBody = true) {
       var r = '<' + tagName + ' ';
       r += HtmlUtil.renderAttrs(tagAttrs);
       r += '>';
