@@ -96,7 +96,7 @@ var Supler;
             var id = this.nextId();
             var validationId = this.nextId();
             var fieldData = new Supler.FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label), fieldsPerRow);
-            var fieldOptions = this.fieldsOptions.forField(fieldData);
+            var fieldOptions = this.fieldsOptions.forFieldData(fieldData);
             if (fieldOptions && fieldOptions.renderHint) {
                 fieldData = fieldData.withRenderHintOverride(fieldOptions.renderHint);
             }
@@ -138,10 +138,6 @@ var Supler;
                 fieldOptions['disabled'] = true;
             }
             switch (fieldData.type) {
-                case Supler.FieldTypes.STRING:
-                case Supler.FieldTypes.INTEGER:
-                case Supler.FieldTypes.FLOAT:
-                    return this.textFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
                 case Supler.FieldTypes.BOOLEAN:
                     return this.booleanFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
                 case Supler.FieldTypes.SELECT:
@@ -153,7 +149,7 @@ var Supler;
                 case Supler.FieldTypes.ACTION:
                     return this.actionFieldFromJson(renderOptions, fieldData, fieldOptions, formElementDictionary, compact);
                 default:
-                    return null;
+                    return this.textFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
             }
         };
         CreateFormFromJson.prototype.textFieldFromJson = function (renderOptions, fieldData, fieldOptions, compact) {
@@ -503,9 +499,12 @@ var Supler;
                 _this.fieldOptions.push(new FieldOptions(matcher, fieldOpts));
             });
         }
-        FieldsOptions.prototype.forField = function (fieldData) {
+        FieldsOptions.prototype.forFieldData = function (fieldData) {
+            return this.forField(fieldData.path, fieldData.type, fieldData.getRenderHintName());
+        };
+        FieldsOptions.prototype.forField = function (path, type, renderHint) {
             return Supler.Util.find(this.fieldOptions, function (fo) {
-                return fo.matcher.matches(fieldData.path, fieldData.type, fieldData.getRenderHintName());
+                return fo.matcher.matches(path, type, renderHint);
             });
         };
         FieldsOptions.prototype.forEach = function (cb) {
@@ -525,6 +524,7 @@ var Supler;
                     this.renderHint = options.render_hint;
             }
             this.renderOptions = options.render_options;
+            this.readValue = options.read_value;
         }
         return FieldOptions;
     })();
@@ -562,8 +562,15 @@ var Supler;
     var HtmlUtil = (function () {
         function HtmlUtil() {
         }
-        HtmlUtil.renderTag = function (tagName, tagAttrs, tagBody, escapeTagBody) {
+        HtmlUtil.renderTagEscaped = function (tagName, tagAttrs, tagBody) {
             if (tagBody === void 0) { tagBody = null; }
+            return HtmlUtil._renderTag(tagName, tagAttrs, tagBody, true);
+        };
+        HtmlUtil.renderTag = function (tagName, tagAttrs, tagBody) {
+            if (tagBody === void 0) { tagBody = null; }
+            return HtmlUtil._renderTag(tagName, tagAttrs, tagBody, false);
+        };
+        HtmlUtil._renderTag = function (tagName, tagAttrs, tagBody, escapeTagBody) {
             if (escapeTagBody === void 0) { escapeTagBody = true; }
             var r = '<' + tagName + ' ';
             r += HtmlUtil.renderAttrs(tagAttrs);
@@ -692,47 +699,26 @@ var Supler;
 var Supler;
 (function (Supler) {
     var ReadFormValues = (function () {
-        function ReadFormValues() {
+        function ReadFormValues(fieldsOptions) {
+            this.fieldsOptions = fieldsOptions;
         }
-        ReadFormValues.getValueFrom = function (element, selectedActionId, result) {
+        ReadFormValues.prototype.getValueFrom = function (element, selectedActionId, result) {
             if (selectedActionId === void 0) { selectedActionId = null; }
             if (result === void 0) { result = {}; }
             var fieldType = element.getAttribute(Supler.SuplerAttributes.FIELD_TYPE);
-            var multiple = element.getAttribute(Supler.SuplerAttributes.MULTIPLE) === 'true';
             if (element.disabled) {
                 return result;
             }
             if (fieldType) {
+                var fieldOptions = this.fieldsOptions.forField(element.getAttribute('name'), fieldType, null);
                 var fieldName = element.getAttribute(Supler.SuplerAttributes.FIELD_NAME);
-                switch (fieldType) {
-                    case Supler.FieldTypes.STRING:
-                        ReadFormValues.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
-                        break;
-                    case Supler.FieldTypes.INTEGER:
-                        ReadFormValues.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
-                        break;
-                    case Supler.FieldTypes.FLOAT:
-                        ReadFormValues.appendFieldValue(result, fieldName, this.parseFloatOrNull(this.getElementValue(element)), multiple);
-                        break;
-                    case Supler.FieldTypes.SELECT:
-                        ReadFormValues.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
-                        break;
-                    case Supler.FieldTypes.BOOLEAN:
-                        ReadFormValues.appendFieldValue(result, fieldName, this.parseBooleanOrNull(this.getElementValue(element)), multiple);
-                        break;
-                    case Supler.FieldTypes.ACTION:
-                        if (element.id === selectedActionId) {
-                            ReadFormValues.appendFieldValue(result, fieldName, true, false);
-                        }
-                        break;
-                    case Supler.FieldTypes.SUBFORM:
-                        fieldName = element.getAttribute(Supler.SuplerAttributes.FIELD_NAME);
-                        var subResult = this.getValueFromChildren(element, selectedActionId, {});
-                        ReadFormValues.appendFieldValue(result, fieldName, subResult, multiple);
-                        break;
-                    case Supler.FieldTypes.META:
-                        ReadFormValues.appendMetaValue(result, fieldName, this.getElementValue(element));
-                        break;
+                var multiple = element.getAttribute(Supler.SuplerAttributes.MULTIPLE) === 'true';
+                if (fieldOptions && fieldOptions.readValue) {
+                    var v = fieldOptions.readValue(element);
+                    this.appendFieldValue(result, fieldName, v, multiple);
+                }
+                else {
+                    this.getValueDefault(element, fieldType, fieldName, multiple, selectedActionId, result);
                 }
             }
             else if (element.children.length > 0) {
@@ -740,14 +726,48 @@ var Supler;
             }
             return result;
         };
-        ReadFormValues.getValueFromChildren = function (element, selectedActionId, result) {
+        ReadFormValues.prototype.getValueDefault = function (element, fieldType, fieldName, multiple, selectedActionId, result) {
+            switch (fieldType) {
+                case Supler.FieldTypes.STRING:
+                    this.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
+                    break;
+                case Supler.FieldTypes.INTEGER:
+                    this.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
+                    break;
+                case Supler.FieldTypes.FLOAT:
+                    this.appendFieldValue(result, fieldName, this.parseFloatOrNull(this.getElementValue(element)), multiple);
+                    break;
+                case Supler.FieldTypes.SELECT:
+                    this.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
+                    break;
+                case Supler.FieldTypes.BOOLEAN:
+                    this.appendFieldValue(result, fieldName, this.parseBooleanOrNull(this.getElementValue(element)), multiple);
+                    break;
+                case Supler.FieldTypes.ACTION:
+                    if (element.id === selectedActionId) {
+                        this.appendFieldValue(result, fieldName, true, false);
+                    }
+                    break;
+                case Supler.FieldTypes.SUBFORM:
+                    fieldName = element.getAttribute(Supler.SuplerAttributes.FIELD_NAME);
+                    var subResult = this.getValueFromChildren(element, selectedActionId, {});
+                    this.appendFieldValue(result, fieldName, subResult, multiple);
+                    break;
+                case Supler.FieldTypes.META:
+                    this.appendMetaValue(result, fieldName, this.getElementValue(element));
+                    break;
+                default:
+                    throw new Error("Unknown type: " + fieldType + ", cannot read value!");
+            }
+        };
+        ReadFormValues.prototype.getValueFromChildren = function (element, selectedActionId, result) {
             var children = element.children;
             for (var i = 0; i < children.length; i++) {
                 this.getValueFrom(children[i], selectedActionId, result);
             }
             return result;
         };
-        ReadFormValues.getElementValue = function (element) {
+        ReadFormValues.prototype.getElementValue = function (element) {
             if ((element.type === 'radio' || element.type === 'checkbox') && !element.checked) {
                 return null;
             }
@@ -762,7 +782,7 @@ var Supler;
                 return element.value;
             }
         };
-        ReadFormValues.appendFieldValue = function (result, fieldName, fieldValue, multiple) {
+        ReadFormValues.prototype.appendFieldValue = function (result, fieldName, fieldValue, multiple) {
             if (multiple) {
                 result[fieldName] = result[fieldName] || [];
                 if (fieldValue !== null) {
@@ -775,14 +795,14 @@ var Supler;
                 }
             }
         };
-        ReadFormValues.appendMetaValue = function (result, fieldName, fieldValue) {
+        ReadFormValues.prototype.appendMetaValue = function (result, fieldName, fieldValue) {
             var meta;
             if (!(meta = result[Supler.FormSections.META])) {
                 result[Supler.FormSections.META] = (meta = {});
             }
             meta[fieldName] = fieldValue;
         };
-        ReadFormValues.parseIntOrNull = function (v) {
+        ReadFormValues.prototype.parseIntOrNull = function (v) {
             var p = parseInt(v);
             if (isNaN(p)) {
                 return null;
@@ -791,7 +811,7 @@ var Supler;
                 return p;
             }
         };
-        ReadFormValues.parseFloatOrNull = function (v) {
+        ReadFormValues.prototype.parseFloatOrNull = function (v) {
             var p = parseFloat(v);
             if (isNaN(p)) {
                 return null;
@@ -800,7 +820,7 @@ var Supler;
                 return p;
             }
         };
-        ReadFormValues.parseBooleanOrNull = function (v) {
+        ReadFormValues.prototype.parseBooleanOrNull = function (v) {
             if (v === null) {
                 return null;
             }
@@ -817,10 +837,10 @@ var Supler;
         function Bootstrap3RenderOptions() {
         }
         Bootstrap3RenderOptions.prototype.renderForm = function (rows) {
-            return Supler.HtmlUtil.renderTag('div', { 'class': 'container-fluid' }, rows, false);
+            return Supler.HtmlUtil.renderTag('div', { 'class': 'container-fluid' }, rows);
         };
         Bootstrap3RenderOptions.prototype.renderRow = function (fields) {
-            return Supler.HtmlUtil.renderTag('div', { 'class': 'row' }, fields, false);
+            return Supler.HtmlUtil.renderTag('div', { 'class': 'row' }, fields);
         };
         Bootstrap3RenderOptions.prototype.renderTextField = function (fieldData, options, compact) {
             var inputType = this.inputTypeFor(fieldData);
@@ -855,7 +875,7 @@ var Supler;
             return this.renderField(this.renderStaticText(fieldData.value), fieldData, compact);
         };
         Bootstrap3RenderOptions.prototype.renderStaticText = function (text) {
-            return Supler.HtmlUtil.renderTag('div', { 'class': 'form-control-static' }, text);
+            return Supler.HtmlUtil.renderTagEscaped('div', { 'class': 'form-control-static' }, text);
         };
         Bootstrap3RenderOptions.prototype.renderMultiChoiceCheckboxField = function (fieldData, possibleValues, containerOptions, elementOptions, compact) {
             return this.renderField(this.renderHtmlCheckboxes(fieldData.value, possibleValues, containerOptions, elementOptions), fieldData, compact);
@@ -883,7 +903,7 @@ var Supler;
                 labelPart = this.renderLabel(fieldData.id, fieldData.label) + '\n';
             }
             var divBody = labelPart + input + '\n' + this.renderValidation(fieldData.validationId) + '\n';
-            return Supler.HtmlUtil.renderTag('div', { 'class': 'form-group' + this.addColumnWidthClass(fieldData) }, divBody, false);
+            return Supler.HtmlUtil.renderTag('div', { 'class': 'form-group' + this.addColumnWidthClass(fieldData) }, divBody);
         };
         Bootstrap3RenderOptions.prototype.addColumnWidthClass = function (fieldData) {
             if (fieldData.fieldsPerRow > 0) {
@@ -897,33 +917,33 @@ var Supler;
             return Supler.HtmlUtil.renderTag('span', {
                 'class': 'hidden-form-group',
                 'style': 'visibility: hidden; display: none'
-            }, input, false);
+            }, input);
         };
         Bootstrap3RenderOptions.prototype.renderLabel = function (forId, label) {
-            return Supler.HtmlUtil.renderTag('label', { 'for': forId }, label);
+            return Supler.HtmlUtil.renderTagEscaped('label', { 'for': forId }, label);
         };
         Bootstrap3RenderOptions.prototype.renderValidation = function (validationId) {
-            return Supler.HtmlUtil.renderTag('div', { 'class': 'text-danger', 'id': validationId });
+            return Supler.HtmlUtil.renderTagEscaped('div', { 'class': 'text-danger', 'id': validationId });
         };
         Bootstrap3RenderOptions.prototype.renderSubformDecoration = function (subform, label, id, name) {
             var fieldsetBody = '\n';
-            fieldsetBody += Supler.HtmlUtil.renderTag('legend', {}, label);
+            fieldsetBody += Supler.HtmlUtil.renderTagEscaped('legend', {}, label);
             fieldsetBody += subform;
-            return Supler.HtmlUtil.renderTag('fieldset', { 'id': id }, fieldsetBody, false);
+            return Supler.HtmlUtil.renderTag('fieldset', { 'id': id }, fieldsetBody);
         };
         Bootstrap3RenderOptions.prototype.renderSubformListElement = function (subformElement, options) {
             var optionsWithClass = Supler.Util.copyProperties({ 'class': 'well' }, options);
-            return Supler.HtmlUtil.renderTag('div', optionsWithClass, subformElement, false);
+            return Supler.HtmlUtil.renderTag('div', optionsWithClass, subformElement);
         };
         Bootstrap3RenderOptions.prototype.renderSubformTable = function (tableHeaders, cells, elementOptions) {
             var tableBody = this.renderSubformTableHeader(tableHeaders);
             tableBody += this.renderSubformTableBody(cells, elementOptions);
-            return Supler.HtmlUtil.renderTag('table', { 'class': 'table' }, tableBody, false);
+            return Supler.HtmlUtil.renderTag('table', { 'class': 'table' }, tableBody);
         };
         Bootstrap3RenderOptions.prototype.renderSubformTableHeader = function (tableHeaders) {
             var trBody = '';
-            tableHeaders.forEach(function (header) { return trBody += Supler.HtmlUtil.renderTag('th', {}, header); });
-            return Supler.HtmlUtil.renderTag('tr', {}, trBody, false);
+            tableHeaders.forEach(function (header) { return trBody += Supler.HtmlUtil.renderTagEscaped('th', {}, header); });
+            return Supler.HtmlUtil.renderTag('tr', {}, trBody);
         };
         Bootstrap3RenderOptions.prototype.renderSubformTableBody = function (cells, elementOptions) {
             var html = '';
@@ -931,9 +951,9 @@ var Supler;
                 var row = cells[i];
                 var trBody = '';
                 for (var j = 0; j < row.length; j++) {
-                    trBody += Supler.HtmlUtil.renderTag('td', {}, row[j], false);
+                    trBody += Supler.HtmlUtil.renderTag('td', {}, row[j]);
                 }
-                html += Supler.HtmlUtil.renderTag('tr', elementOptions, trBody, false) + '\n';
+                html += Supler.HtmlUtil.renderTag('tr', elementOptions, trBody) + '\n';
             }
             return html;
         };
@@ -948,9 +968,9 @@ var Supler;
                 if (v.id === value) {
                     optionOptions['selected'] = 'selected';
                 }
-                selectBody += Supler.HtmlUtil.renderTag('option', optionOptions, v.label);
+                selectBody += Supler.HtmlUtil.renderTagEscaped('option', optionOptions, v.label);
             });
-            var html = Supler.HtmlUtil.renderTag('select', options, selectBody, false);
+            var html = Supler.HtmlUtil.renderTag('select', options, selectBody);
             html += '\n';
             return html;
         };
@@ -965,12 +985,12 @@ var Supler;
             });
         };
         Bootstrap3RenderOptions.prototype.renderHtmlTextarea = function (value, options) {
-            return Supler.HtmlUtil.renderTag('textarea', options, value);
+            return Supler.HtmlUtil.renderTagEscaped('textarea', options, value);
         };
         Bootstrap3RenderOptions.prototype.renderHtmlButton = function (label, options) {
             var allOptions = Supler.Util.copyProperties({ 'type': 'button' }, options);
             allOptions['class'] = allOptions['class'].replace('form-control', 'btn btn-default');
-            return Supler.HtmlUtil.renderTag('button', allOptions, label);
+            return Supler.HtmlUtil.renderTagEscaped('button', allOptions, label);
         };
         Bootstrap3RenderOptions.prototype.renderCheckable = function (inputType, possibleValues, containerOptions, elementOptions, isChecked) {
             var _this = this;
@@ -983,11 +1003,11 @@ var Supler;
                 }
                 checkableOptions['id'] = containerOptions['id'] + '.' + v.id;
                 var labelBody = _this.renderHtmlInput(inputType, v.id, checkableOptions);
-                labelBody += Supler.HtmlUtil.renderTag('span', {}, v.label);
-                var divBody = Supler.HtmlUtil.renderTag('label', {}, labelBody, false);
-                html += Supler.HtmlUtil.renderTag('div', { 'class': inputType }, divBody, false);
+                labelBody += Supler.HtmlUtil.renderTagEscaped('span', {}, v.label);
+                var divBody = Supler.HtmlUtil.renderTag('label', {}, labelBody);
+                html += Supler.HtmlUtil.renderTag('div', { 'class': inputType }, divBody);
             });
-            return Supler.HtmlUtil.renderTag('span', containerOptions, html, false);
+            return Supler.HtmlUtil.renderTag('span', containerOptions, html);
         };
         Bootstrap3RenderOptions.prototype.additionalFieldOptions = function () {
             return { 'class': 'form-control' };
@@ -1136,6 +1156,7 @@ var Supler;
             this.customDataHandlerFn = customOptions.custom_data_handler || (function (data) {
             });
             this.fieldOrder = customOptions.field_order;
+            this.readFormValues = new Supler.ReadFormValues(this.fieldsOptions);
         }
         Form.prototype.render = function (json) {
             if (this.isSuplerForm(json)) {
@@ -1153,7 +1174,7 @@ var Supler;
         };
         Form.prototype.initializeValidation = function (formElementDictionary, json) {
             var oldValidation = this.validation;
-            this.validation = new Supler.Validation(this.elementSearch, formElementDictionary, this.validatorRenderOptions, this.i18n);
+            this.validation = new Supler.Validation(this.elementSearch, formElementDictionary, this.validatorRenderOptions, this.i18n, this.readFormValues);
             this.validation.processServer(json.errors);
             if (oldValidation) {
                 this.validation.copyFrom(oldValidation);
@@ -1161,7 +1182,7 @@ var Supler;
         };
         Form.prototype.getValue = function (selectedActionId) {
             if (selectedActionId === void 0) { selectedActionId = null; }
-            return Supler.ReadFormValues.getValueFrom(this.container, selectedActionId);
+            return this.readFormValues.getValueFrom(this.container, selectedActionId);
         };
         Form.prototype.validate = function (validationScope) {
             if (validationScope === void 0) { validationScope = Supler.ValidateAll; }
@@ -1519,8 +1540,8 @@ var Supler;
             this.required = required;
             this.emptyValue = emptyValue;
         }
-        ElementValidator.prototype.validate = function (element) {
-            var value = Supler.Util.getSingleProperty(Supler.ReadFormValues.getValueFrom(element));
+        ElementValidator.prototype.validate = function (readFormValues, element) {
+            var value = Supler.Util.getSingleProperty(readFormValues.getValueFrom(element));
             if (this.required !== true && Supler.FieldUtil.fieldIsEmpty(value, this.emptyValue)) {
                 return [];
             }
@@ -1539,11 +1560,12 @@ var Supler;
 var Supler;
 (function (Supler) {
     var Validation = (function () {
-        function Validation(elementSearch, formElementDictionary, validatorRenderOptions, i18n) {
+        function Validation(elementSearch, formElementDictionary, validatorRenderOptions, i18n, readFormValues) {
             this.elementSearch = elementSearch;
             this.formElementDictionary = formElementDictionary;
             this.validatorRenderOptions = validatorRenderOptions;
             this.i18n = i18n;
+            this.readFormValues = readFormValues;
             this.addedValidations = {};
         }
         Validation.prototype.processServer = function (validationJson) {
@@ -1583,7 +1605,7 @@ var Supler;
         Validation.prototype.doProcessClientSingle = function (htmlFormElement, validator) {
             var hasErrors = false;
             var validationElement = this.lookupValidationElement(htmlFormElement);
-            var errors = validator.validate(htmlFormElement);
+            var errors = validator.validate(this.readFormValues, htmlFormElement);
             for (var i = 0; i < errors.length; i++) {
                 this.appendValidation(errors[i], validationElement, htmlFormElement);
                 hasErrors = true;
@@ -1609,7 +1631,7 @@ var Supler;
         };
         Validation.prototype.appendValidation = function (text, validationElement, formElement) {
             if (!this.addedValidations.hasOwnProperty(formElement.id)) {
-                this.addedValidations[formElement.id] = new AddedValidation(this.validatorRenderOptions, formElement, validationElement);
+                this.addedValidations[formElement.id] = new AddedValidation(this.validatorRenderOptions, this.readFormValues, formElement, validationElement);
             }
             var addedValidation = this.addedValidations[formElement.id];
             if (addedValidation.addText(text)) {
@@ -1621,7 +1643,7 @@ var Supler;
             Supler.Util.foreach(other.addedValidations, function (otherElementId, otherAddedValidation) {
                 var newFormElement = _this.elementSearch.byPath(otherAddedValidation.formElementPath());
                 if (newFormElement) {
-                    if (Supler.Util.deepEqual(otherAddedValidation.invalidValue, Supler.ReadFormValues.getValueFrom(newFormElement))) {
+                    if (Supler.Util.deepEqual(otherAddedValidation.invalidValue, _this.readFormValues.getValueFrom(newFormElement))) {
                         var newValidationElement = _this.lookupValidationElement(newFormElement);
                         otherAddedValidation.texts.forEach(function (text) {
                             _this.appendValidation(text, newValidationElement, newFormElement);
@@ -1634,12 +1656,13 @@ var Supler;
     })();
     Supler.Validation = Validation;
     var AddedValidation = (function () {
-        function AddedValidation(validatorRenderOptions, formElement, validationElement) {
+        function AddedValidation(validatorRenderOptions, readFormValues, formElement, validationElement) {
             this.validatorRenderOptions = validatorRenderOptions;
+            this.readFormValues = readFormValues;
             this.formElement = formElement;
             this.validationElement = validationElement;
             this.texts = [];
-            this.invalidValue = Supler.ReadFormValues.getValueFrom(formElement);
+            this.invalidValue = this.readFormValues.getValueFrom(formElement);
         }
         AddedValidation.prototype.addText = function (text) {
             if (this.texts.indexOf(text) === -1) {

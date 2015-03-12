@@ -75,7 +75,7 @@ module Supler {
 
       var fieldData = new FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label), fieldsPerRow);
 
-      var fieldOptions = this.fieldsOptions.forField(fieldData);
+      var fieldOptions = this.fieldsOptions.forFieldData(fieldData);
       if (fieldOptions && fieldOptions.renderHint) {
         fieldData = fieldData.withRenderHintOverride(fieldOptions.renderHint);
       }
@@ -132,11 +132,6 @@ module Supler {
       }
 
       switch (fieldData.type) {
-        case FieldTypes.STRING:
-        case FieldTypes.INTEGER:
-        case FieldTypes.FLOAT:
-          return this.textFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
-
         case FieldTypes.BOOLEAN:
           return this.booleanFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
 
@@ -152,8 +147,8 @@ module Supler {
         case FieldTypes.ACTION:
           return this.actionFieldFromJson(renderOptions, fieldData, fieldOptions, formElementDictionary, compact);
 
-        default:
-          return null;
+        default: // STRING, INTEGER, FLOAT, custom
+          return this.textFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
       }
     }
 

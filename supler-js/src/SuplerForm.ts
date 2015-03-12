@@ -43,7 +43,7 @@ module Supler {
 
       this.fieldOrder = customOptions.field_order;
 
-      this.readFormValues = new ReadFormValues();
+      this.readFormValues = new ReadFormValues(this.fieldsOptions);
     }
 
     render(json) {

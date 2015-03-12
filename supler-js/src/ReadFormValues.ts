@@ -1,5 +1,7 @@
 module Supler {
   export class ReadFormValues {
+    constructor(private fieldsOptions:FieldsOptions) {
+    }
     /**
      * @param element Element from which to read field values
      * @param selectedActionId The id of the element corresponding to the selected action. `null` if no action selected.
@@ -8,7 +10,6 @@ module Supler {
      */
     getValueFrom(element, selectedActionId = null, result = {}) {
       var fieldType = element.getAttribute(SuplerAttributes.FIELD_TYPE);
-      var multiple = element.getAttribute(SuplerAttributes.MULTIPLE) === 'true';
 
       // disabled element values are not included in the form's value
       if (element.disabled) {
@@ -16,47 +17,15 @@ module Supler {
       }
 
       if (fieldType) {
+        var fieldOptions = this.fieldsOptions.forField(element.getAttribute('name'), fieldType, null);
         var fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
-        switch (fieldType) {
-          case FieldTypes.STRING:
-            this.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
-            break;
+        var multiple = element.getAttribute(SuplerAttributes.MULTIPLE) === 'true';
 
-          case FieldTypes.INTEGER:
-            this.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
-            break;
-
-          case FieldTypes.FLOAT:
-            this.appendFieldValue(result, fieldName, this.parseFloatOrNull(this.getElementValue(element)), multiple);
-            break;
-
-          case FieldTypes.SELECT:
-            this.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
-            break;
-
-          case FieldTypes.BOOLEAN:
-            this.appendFieldValue(result, fieldName, this.parseBooleanOrNull(this.getElementValue(element)), multiple);
-            break;
-
-          case FieldTypes.ACTION:
-            if (element.id === selectedActionId) {
-              this.appendFieldValue(result, fieldName, true, false);
-            }
-            break;
-
-          case FieldTypes.SUBFORM:
-            fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
-            var subResult = this.getValueFromChildren(element, selectedActionId, {});
-            this.appendFieldValue(result, fieldName, subResult, multiple);
-            break;
-
-          case FieldTypes.META:
-            this.appendMetaValue(result, fieldName, this.getElementValue(element));
-            break;
-
-          default:
-            throw new Error("Unknown type: " + fieldType + ", cannot read value!");
-
+        if (fieldOptions && fieldOptions.readValue) {
+          var v = fieldOptions.readValue(element);
+          this.appendFieldValue(result, fieldName, v, multiple);
+        } else {
+          this.getValueDefault(element, fieldType, fieldName, multiple, selectedActionId, result);
         }
       } else if (element.children.length > 0) {
         // flattening
@@ -64,6 +33,52 @@ module Supler {
       }
 
       return result;
+    }
+
+    private getValueDefault(element:HTMLElement, fieldType:string, fieldName:string, multiple: boolean,
+      selectedActionId:string, result:any) {
+
+      switch (fieldType) {
+        case FieldTypes.STRING:
+          this.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
+          break;
+
+        case FieldTypes.INTEGER:
+          this.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
+          break;
+
+        case FieldTypes.FLOAT:
+          this.appendFieldValue(result, fieldName, this.parseFloatOrNull(this.getElementValue(element)), multiple);
+          break;
+
+        case FieldTypes.SELECT:
+          this.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
+          break;
+
+        case FieldTypes.BOOLEAN:
+          this.appendFieldValue(result, fieldName, this.parseBooleanOrNull(this.getElementValue(element)), multiple);
+          break;
+
+        case FieldTypes.ACTION:
+          if (element.id === selectedActionId) {
+            this.appendFieldValue(result, fieldName, true, false);
+          }
+          break;
+
+        case FieldTypes.SUBFORM:
+          fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
+          var subResult = this.getValueFromChildren(element, selectedActionId, {});
+          this.appendFieldValue(result, fieldName, subResult, multiple);
+          break;
+
+        case FieldTypes.META:
+          this.appendMetaValue(result, fieldName, this.getElementValue(element));
+          break;
+
+        default:
+          throw new Error("Unknown type: " + fieldType + ", cannot read value!");
+
+      }
     }
 
     private getValueFromChildren(element, selectedActionId, result) {

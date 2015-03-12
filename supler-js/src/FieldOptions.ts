@@ -17,9 +17,13 @@ module Supler {
       })
     }
 
-    forField(fieldData:FieldData):FieldOptions {
+    forFieldData(fieldData:FieldData):FieldOptions {
+      return this.forField(fieldData.path, fieldData.type, fieldData.getRenderHintName());
+    }
+
+    forField(path:string, type:string, renderHint:string):FieldOptions {
       return Util.find(this.fieldOptions, (fo) => {
-        return fo.matcher.matches(fieldData.path, fieldData.type, fieldData.getRenderHintName());
+        return fo.matcher.matches(path, type, renderHint);
       });
     }
 
@@ -31,6 +35,7 @@ module Supler {
   export class FieldOptions {
     renderHint:any;
     renderOptions:any;
+    readValue:(el:HTMLElement) => any;
 
     constructor(public matcher:PathFieldMatcher, options:any) {
       if (options.render_hint) {
@@ -42,6 +47,7 @@ module Supler {
       }
 
       this.renderOptions = options.render_options;
+      this.readValue = options.read_value;
     }
   }
 }
