@@ -6,7 +6,7 @@ module Supler {
      * @param result The object to which found mappings will be added.
      * @returns An object containing mappings from found form field names to form field values.
      */
-    static getValueFrom(element, selectedActionId = null, result = {}) {
+    getValueFrom(element, selectedActionId = null, result = {}) {
       var fieldType = element.getAttribute(SuplerAttributes.FIELD_TYPE);
       var multiple = element.getAttribute(SuplerAttributes.MULTIPLE) === 'true';
 
@@ -19,40 +19,43 @@ module Supler {
         var fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
         switch (fieldType) {
           case FieldTypes.STRING:
-            ReadFormValues.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
+            this.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
             break;
 
           case FieldTypes.INTEGER:
-            ReadFormValues.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
+            this.appendFieldValue(result, fieldName, this.parseIntOrNull(this.getElementValue(element)), multiple);
             break;
 
           case FieldTypes.FLOAT:
-            ReadFormValues.appendFieldValue(result, fieldName, this.parseFloatOrNull(this.getElementValue(element)), multiple);
+            this.appendFieldValue(result, fieldName, this.parseFloatOrNull(this.getElementValue(element)), multiple);
             break;
 
           case FieldTypes.SELECT:
-            ReadFormValues.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
+            this.appendFieldValue(result, fieldName, this.getElementValue(element), multiple);
             break;
 
           case FieldTypes.BOOLEAN:
-            ReadFormValues.appendFieldValue(result, fieldName, this.parseBooleanOrNull(this.getElementValue(element)), multiple);
+            this.appendFieldValue(result, fieldName, this.parseBooleanOrNull(this.getElementValue(element)), multiple);
             break;
 
           case FieldTypes.ACTION:
             if (element.id === selectedActionId) {
-              ReadFormValues.appendFieldValue(result, fieldName, true, false);
+              this.appendFieldValue(result, fieldName, true, false);
             }
             break;
 
           case FieldTypes.SUBFORM:
             fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
             var subResult = this.getValueFromChildren(element, selectedActionId, {});
-            ReadFormValues.appendFieldValue(result, fieldName, subResult, multiple);
+            this.appendFieldValue(result, fieldName, subResult, multiple);
             break;
 
           case FieldTypes.META:
-            ReadFormValues.appendMetaValue(result, fieldName, this.getElementValue(element));
+            this.appendMetaValue(result, fieldName, this.getElementValue(element));
             break;
+
+          default:
+            throw new Error("Unknown type: " + fieldType + ", cannot read value!");
 
         }
       } else if (element.children.length > 0) {
@@ -63,7 +66,7 @@ module Supler {
       return result;
     }
 
-    private static getValueFromChildren(element, selectedActionId, result) {
+    private getValueFromChildren(element, selectedActionId, result) {
       var children = element.children;
 
       for (var i = 0; i < children.length; i++) {
@@ -73,7 +76,7 @@ module Supler {
       return result;
     }
 
-    private static getElementValue(element) {
+    private getElementValue(element) {
       if ((element.type === 'radio' || element.type === 'checkbox') && !element.checked) {
         return null;
       } else if (element.nodeName === 'SELECT') {
@@ -84,7 +87,7 @@ module Supler {
       }
     }
 
-    private static appendFieldValue(result, fieldName, fieldValue, multiple) {
+    private appendFieldValue(result, fieldName, fieldValue, multiple) {
       if (multiple) {
         // Always initializing to an empty array, if not yet set
         result[fieldName] = result[fieldName] || [];
@@ -101,7 +104,7 @@ module Supler {
       }
     }
 
-    private static appendMetaValue(result, fieldName, fieldValue) {
+    private appendMetaValue(result, fieldName, fieldValue) {
       var meta;
       if (!(meta = result[FormSections.META])) {
         result[FormSections.META] = (meta = {});
@@ -110,7 +113,7 @@ module Supler {
       meta[fieldName] = fieldValue;
     }
 
-    private static parseIntOrNull(v):number {
+    private parseIntOrNull(v):number {
       var p = parseInt(v);
       if (isNaN(p)) {
         return null;
@@ -119,7 +122,7 @@ module Supler {
       }
     }
 
-    private static parseFloatOrNull(v):number {
+    private parseFloatOrNull(v):number {
       var p = parseFloat(v);
       if (isNaN(p)) {
         return null;
@@ -128,7 +131,7 @@ module Supler {
       }
     }
 
-    private static parseBooleanOrNull(v):boolean {
+    private parseBooleanOrNull(v):boolean {
       if (v === null) {
         return null;
       } else return v === "1";

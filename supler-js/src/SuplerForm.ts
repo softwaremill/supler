@@ -11,6 +11,7 @@ module Supler {
     private customDataHandlerFn:(any) => void;
     private fieldsOptions:FieldsOptions;
     private fieldOrder:string[][];
+    private readFormValues:ReadFormValues;
 
     constructor(private container:HTMLElement, customOptions:any) {
       customOptions = customOptions || {};
@@ -41,6 +42,8 @@ module Supler {
       });
 
       this.fieldOrder = customOptions.field_order;
+
+      this.readFormValues = new ReadFormValues();
     }
 
     render(json) {
@@ -66,7 +69,7 @@ module Supler {
     private initializeValidation(formElementDictionary:FormElementDictionary, json) {
       var oldValidation = this.validation;
       this.validation = new Validation(this.elementSearch, formElementDictionary,
-        this.validatorRenderOptions, this.i18n);
+        this.validatorRenderOptions, this.i18n, this.readFormValues);
 
       this.validation.processServer(json.errors);
       if (oldValidation) {
@@ -75,7 +78,7 @@ module Supler {
     }
 
     getValue(selectedActionId:string = null) {
-      return ReadFormValues.getValueFrom(this.container, selectedActionId);
+      return this.readFormValues.getValueFrom(this.container, selectedActionId);
     }
 
     /**

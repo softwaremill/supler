@@ -5,7 +5,8 @@ module Supler {
     constructor(private elementSearch:ElementSearch,
       private formElementDictionary:FormElementDictionary,
       private validatorRenderOptions:ValidatorRenderOptions,
-      private i18n:I18n) {
+      private i18n:I18n,
+      private readFormValues:ReadFormValues) {
     }
 
     /**
@@ -63,7 +64,7 @@ module Supler {
       var hasErrors = false;
       var validationElement = this.lookupValidationElement(htmlFormElement);
 
-      var errors = validator.validate(htmlFormElement);
+      var errors = validator.validate(this.readFormValues, htmlFormElement);
 
       for (var i = 0; i < errors.length; i++) {
         this.appendValidation(errors[i], validationElement, htmlFormElement);
@@ -97,7 +98,7 @@ module Supler {
     private appendValidation(text:string, validationElement:HTMLElement, formElement:HTMLElement) {
       if (!this.addedValidations.hasOwnProperty(formElement.id)) {
         this.addedValidations[formElement.id] =
-          new AddedValidation(this.validatorRenderOptions, formElement, validationElement);
+          new AddedValidation(this.validatorRenderOptions, this.readFormValues, formElement, validationElement);
       }
 
       var addedValidation = this.addedValidations[formElement.id];
@@ -113,7 +114,7 @@ module Supler {
         // has the same value.
         var newFormElement = this.elementSearch.byPath(otherAddedValidation.formElementPath());
         if (newFormElement) {
-          if (Util.deepEqual(otherAddedValidation.invalidValue, ReadFormValues.getValueFrom(newFormElement))) {
+          if (Util.deepEqual(otherAddedValidation.invalidValue, this.readFormValues.getValueFrom(newFormElement))) {
             var newValidationElement = this.lookupValidationElement(newFormElement);
 
             otherAddedValidation.texts.forEach((text:string) => {
@@ -134,10 +135,11 @@ module Supler {
     texts:string[] = [];
 
     constructor(private validatorRenderOptions:ValidatorRenderOptions,
+      private readFormValues:ReadFormValues,
       private formElement:HTMLElement,
       private validationElement:HTMLElement) {
 
-      this.invalidValue = ReadFormValues.getValueFrom(formElement);
+      this.invalidValue = this.readFormValues.getValueFrom(formElement);
     }
 
     addText(text:string):boolean {
