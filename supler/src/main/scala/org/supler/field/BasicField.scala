@@ -33,7 +33,7 @@ case class BasicField[T, U](
     BasicJSONData(
       valueJSONValue = transformer.serialize(read(obj)),
       validationJSON = JField(JSONFieldNames.ValidateRequired, JBool(required)) :: validators.flatMap(_.generateJSON),
-      fieldTypeName = transformer.jsonSchemaName,
+      fieldTypeName = transformer.typeName,
       emptyValue = emptyValue.flatMap(transformer.serialize)
     )
   }
