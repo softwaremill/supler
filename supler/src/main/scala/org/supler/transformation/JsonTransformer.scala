@@ -65,9 +65,9 @@ object JsonTransformer {
       def toJValue(value: Option[U]) = value.flatMap(inner.toJValueOrJNull)
 
       def fromJValue(jvalue: JValue) = jvalue match {
-        case JNothing => None
-        case JNull => None
-        case JString("") => None
+        case JNothing => Some(None)
+        case JNull => Some(None)
+        case JString("") => Some(None)
         case jv => inner.fromJValue(jv).map(Some(_))
       }
     }
