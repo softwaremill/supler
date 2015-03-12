@@ -67,5 +67,6 @@ object Transformer {
         case None => Right(None)
         case Some(d) => d.right.map(Some(_))
       }
+      override def renderHint = base.renderHint
     }
 }

@@ -49,7 +49,7 @@ object JsonTransformer {
     def fromJValue = { case JBool(v) => v }
   }
 
-  implicit def optionJsonTransformer[U](implicit inner: JsonTransformer[U]) = new JsonTransformer[Option[U]] {
+  implicit def optionJsonTransformer[U](implicit inner: JsonTransformer[U]): JsonTransformer[Option[U]] = new JsonTransformer[Option[U]] {
     val jsonSchemaName = inner.jsonSchemaName
     def toNonNullJValue(value: Option[U]) = value.flatMap(inner.toJValue)
     def fromJValue = {
