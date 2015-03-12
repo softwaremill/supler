@@ -60,12 +60,12 @@ object Transformer {
     override def renderHint = Some(Supler.asDate())
   }
 
-  implicit def optionTransformer[U, S](implicit base: Transformer[U, S]) = new Transformer[Option[U], Option[S]] {
-    override def serialize(u: Option[U]) = u.map(base.serialize)
-    override def deserialize(s: Option[S]) = s.map(base.deserialize) match {
-      case None => Right(None)
-      case Some(d) => d.right.map(Some(_))
+  implicit def optionTransformer[U, S](implicit base: Transformer[U, S]): Transformer[Option[U], Option[S]] =
+    new Transformer[Option[U], Option[S]] {
+      override def serialize(u: Option[U]) = u.map(base.serialize)
+      override def deserialize(s: Option[S]) = s.map(base.deserialize) match {
+        case None => Right(None)
+        case Some(d) => d.right.map(Some(_))
+      }
     }
-    override def renderHint = base.renderHint
-  }
 }

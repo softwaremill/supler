@@ -17,6 +17,6 @@ class FullTransformer[U, S](transformer: Transformer[U, S], jsonTransformer: Jso
 }
 
 object FullTransformer {
-  implicit def create[U, S](implicit transformer: Transformer[U, S], jsonTransformer: JsonTransformer[S]) =
+  implicit def create[U, S](implicit transformer: Transformer[U, S], jsonTransformer: JsonTransformer[S]): FullTransformer[U, S] =
     new FullTransformer[U, S](transformer, jsonTransformer)
 }
