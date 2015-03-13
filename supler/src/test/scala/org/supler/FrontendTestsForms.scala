@@ -10,6 +10,7 @@ import org.json4s.{Extraction, NoTypeHints}
 import org.scalatest._
 import org.supler.Supler._
 import org.supler.field.ActionResult
+import org.supler.transformation.JsonTransformer
 
 /**
  * The frontend tests are run by grunt-mocha in a headless phantomjs browser.
@@ -35,6 +36,8 @@ object FrontendTestsForms {
 
   case class SimpleWithDate(field1: String, field2: Date, field3: Option[Date])
 
+  case class Point(x: Int, y: Int)
+  case class WithPoint(f: String, p: Point)
 }
 
 class FrontendTestsForms extends FlatSpec with ShouldMatchers {
@@ -346,6 +349,29 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
 
     writer.writeForm("simple", simpleCustomRenderHint, TwoFields("a", "b"))
     writer.writeForm("complex", complexCustomRenderHint, TwoFields("a", "b"))
+  }
+
+  writeTestData("complexObject") { writer =>
+    implicit val pointJsonTransformer: JsonTransformer[Point] = new JsonTransformer[Point] {
+      override def typeName = "point"
+
+      override def fromJValue(jvalue: JValue) = (for {
+        JObject(fields) <- jvalue
+        JField("x", JInt(x)) <- fields
+        JField("y", JInt(y)) <- fields
+      } yield Point(x.toInt, y.toInt)).headOption
+
+      override def toJValue(value: Point) = Some(
+        JObject(JField("x", JInt(value.x)), JField("y", JInt(value.y))))
+    }
+
+    val dataForm = form[WithPoint](f => List(
+      f.field(_.f).label("Field"),
+      f.field(_.p).label("Point")
+    ))
+
+    writer.writeForm("form1", dataForm, WithPoint("x", Point(1, 2)))
+    writer.writeObj("obj_y_5_6", WithPoint("y", Point(5, 6)))
   }
 
   def writeTestData(name: String)(thunk: JsonWriter => Unit): Unit = {

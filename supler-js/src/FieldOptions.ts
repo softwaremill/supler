@@ -2,21 +2,40 @@ module Supler {
   export class FieldsOptions {
     private fieldOptions:FieldOptions[] = [];
 
+    private RENDER_HINT_MATCHER_PREFIX = 'render_hint:';
+
     constructor(options:any) {
-      Util.foreach(options || {}, (path, fieldOpts) => {
-        this.fieldOptions.push(new FieldOptions(new PathFieldMatcher(path), fieldOpts));
+      Util.foreach(options || {}, (matcherStr, fieldOpts) => {
+        var matcher;
+        if (matcherStr.indexOf(this.RENDER_HINT_MATCHER_PREFIX) === 0) {
+          matcher = new RenderHintFieldMatcher(matcherStr.substring(this.RENDER_HINT_MATCHER_PREFIX.length));
+        } else {
+          matcher = new PathFieldMatcher(matcherStr);
+        }
+
+        this.fieldOptions.push(new FieldOptions(matcher, fieldOpts));
       })
     }
 
-    forField(fieldData:FieldData):FieldOptions {
+    forFieldData(fieldData:FieldData):FieldOptions {
+      return this.forField(fieldData.path, fieldData.type, fieldData.getRenderHintName());
+    }
+
+    forField(path:string, type:string, renderHint:string):FieldOptions {
       return Util.find(this.fieldOptions, (fo) => {
-        return fo.matcher.matches(fieldData.path, fieldData.type, fieldData.getRenderHintName());
+        return fo.matcher.matches(path, type, renderHint);
       });
+    }
+
+    forEach(cb: (fo: FieldOptions) => void) {
+      this.fieldOptions.forEach(cb);
     }
   }
 
   export class FieldOptions {
     renderHint:any;
+    renderOptions:any;
+    readValue:(el:HTMLElement) => any;
 
     constructor(public matcher:PathFieldMatcher, options:any) {
       if (options.render_hint) {
@@ -26,6 +45,9 @@ module Supler {
           this.renderHint = {'name': options.render_hint};
         } else this.renderHint = options.render_hint;
       }
+
+      this.renderOptions = options.render_options;
+      this.readValue = options.read_value;
     }
   }
 }

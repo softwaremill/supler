@@ -11,16 +11,20 @@ module Supler {
     private customDataHandlerFn:(any) => void;
     private fieldsOptions:FieldsOptions;
     private fieldOrder:string[][];
+    private readFormValues:ReadFormValues;
 
     constructor(private container:HTMLElement, customOptions:any) {
       customOptions = customOptions || {};
+
+      this.fieldsOptions = new FieldsOptions(customOptions.field_options);
 
       this.i18n = new I18n();
       Util.copyProperties(this.i18n, customOptions.i18n);
 
       var renderOptions = new Bootstrap3RenderOptions();
       Util.copyProperties(renderOptions, customOptions.render_options);
-      this.renderOptionsGetter = new HTMLRenderTemplateParser(this.container).parse(renderOptions);
+      this.renderOptionsGetter = RenderOptionsGetter.parse(renderOptions, container, this.fieldsOptions,
+        customOptions.field_templates);
 
       this.validatorFnFactories = new ValidatorFnFactories(this.i18n);
       Util.copyProperties(this.validatorFnFactories, customOptions.validators);
@@ -37,9 +41,9 @@ module Supler {
       this.customDataHandlerFn = customOptions.custom_data_handler || ((data:any) => {
       });
 
-      this.fieldsOptions = new FieldsOptions(customOptions.field_options);
-
       this.fieldOrder = customOptions.field_order;
+
+      this.readFormValues = new ReadFormValues(this.fieldsOptions);
     }
 
     render(json) {
@@ -82,7 +86,7 @@ module Supler {
     private initializeValidation(formElementDictionary:FormElementDictionary, json) {
       var oldValidation = this.validation;
       this.validation = new Validation(this.elementSearch, formElementDictionary,
-        this.validatorRenderOptions, this.i18n);
+        this.validatorRenderOptions, this.i18n, this.readFormValues);
 
       this.validation.processServer(json.errors);
       if (oldValidation) {
@@ -91,7 +95,7 @@ module Supler {
     }
 
     getValue(modalFieldPath:string = null, selectedButtonId:string = null) {
-      var values = ReadFormValues.getValueFrom(this.container, selectedButtonId);
+      var values = this.getValueFrom(this.container, selectedButtonId);
       if (modalFieldPath != null) {
         values[FormSections.MODAL_PATH] = modalFieldPath;
       }

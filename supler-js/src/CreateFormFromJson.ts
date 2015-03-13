@@ -5,7 +5,6 @@ module Supler {
     constructor(private renderOptionsGetter:RenderOptionsGetter,
                 private i18n:I18n,
                 private validatorFnFactories:any,
-
                 private fieldsOptions:FieldsOptions,
                 private fieldOrder: string[][],
                 private prefixer: FieldPrefixer = new EmptyPrefixer()) {
@@ -77,7 +76,7 @@ module Supler {
 
       var fieldData = new FieldData(id, validationId, fieldJson, this.labelFor(fieldJson.label), fieldsPerRow);
 
-      var fieldOptions = this.fieldsOptions.forField(fieldData);
+      var fieldOptions = this.fieldsOptions.forFieldData(fieldData);
       if (fieldOptions && fieldOptions.renderHint) {
         fieldData = fieldData.withRenderHintOverride(fieldOptions.renderHint);
       }
@@ -134,11 +133,6 @@ module Supler {
       }
 
       switch (fieldData.type) {
-        case FieldTypes.STRING:
-        case FieldTypes.INTEGER:
-        case FieldTypes.FLOAT:
-          return this.textFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
-
         case FieldTypes.BOOLEAN:
           return this.booleanFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
 
@@ -157,8 +151,8 @@ module Supler {
         case FieldTypes.MODAL:
           return this.modalFieldFromJson(renderOptions, fieldData, fieldOptions, formElementDictionary, compact);
 
-        default:
-          return null;
+        default: // STRING, INTEGER, FLOAT, custom
+          return this.textFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
       }
     }
 

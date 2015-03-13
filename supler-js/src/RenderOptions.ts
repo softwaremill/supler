@@ -61,11 +61,11 @@ module Supler {
     }
 
     renderForm(rows:string):string {
-      return HtmlUtil.renderTag('div', {'class': 'container-fluid'}, rows, false);
+      return HtmlUtil.renderTag('div', {'class': 'container-fluid'}, rows);
     }
 
     renderRow(fields:string):string {
-      return HtmlUtil.renderTag('div', {'class': 'row'}, fields, false);
+      return HtmlUtil.renderTag('div', {'class': 'row'}, fields);
     }
 
     renderTextField(fieldData, options, compact) {
@@ -106,7 +106,7 @@ module Supler {
     }
 
     renderStaticText(text) {
-      return HtmlUtil.renderTag('div', {'class': 'form-control-static'}, text);
+      return HtmlUtil.renderTagEscaped('div', {'class': 'form-control-static'}, text);
     }
 
     renderMultiChoiceCheckboxField(fieldData, possibleValues, containerOptions, elementOptions, compact) {
@@ -153,7 +153,7 @@ module Supler {
         this.renderValidation(fieldData.validationId) +
         '\n';
 
-      return HtmlUtil.renderTag('div', {'class': 'form-group'+this.addColumnWidthClass(fieldData)}, divBody, false);
+      return HtmlUtil.renderTag('div', {'class': 'form-group'+this.addColumnWidthClass(fieldData)}, divBody);
     }
 
     private addColumnWidthClass(fieldData: FieldData) {
@@ -168,42 +168,42 @@ module Supler {
       return HtmlUtil.renderTag('span', {
         'class': 'hidden-form-group',
         'style': 'visibility: hidden; display: none'
-      }, input, false);
+      }, input);
     }
 
     renderLabel(forId, label) {
-      return HtmlUtil.renderTag('label', {'for': forId}, label);
+      return HtmlUtil.renderTagEscaped('label', {'for': forId}, label);
     }
 
     renderValidation(validationId) {
-      return HtmlUtil.renderTag('div', {'class': 'text-danger', 'id': validationId});
+      return HtmlUtil.renderTagEscaped('div', {'class': 'text-danger', 'id': validationId});
     }
 
     renderSubformDecoration(subform, label, id, name) {
       var fieldsetBody = '\n';
-      fieldsetBody += HtmlUtil.renderTag('legend', {}, label);
+      fieldsetBody += HtmlUtil.renderTagEscaped('legend', {}, label);
       fieldsetBody += subform;
 
-      return HtmlUtil.renderTag('fieldset', {'id': id}, fieldsetBody, false);
+      return HtmlUtil.renderTag('fieldset', {'id': id}, fieldsetBody);
     }
 
     renderSubformListElement(subformElement, options) {
       var optionsWithClass = Util.copyProperties({'class': 'well'}, options);
-      return HtmlUtil.renderTag('div', optionsWithClass, subformElement, false);
+      return HtmlUtil.renderTag('div', optionsWithClass, subformElement);
     }
 
     renderSubformTable(tableHeaders, cells, elementOptions) {
       var tableBody = this.renderSubformTableHeader(tableHeaders);
       tableBody += this.renderSubformTableBody(cells, elementOptions);
 
-      return HtmlUtil.renderTag('table', {'class': 'table'}, tableBody, false);
+      return HtmlUtil.renderTag('table', {'class': 'table'}, tableBody);
     }
 
     private renderSubformTableHeader(tableHeaders) {
       var trBody = '';
-      tableHeaders.forEach((header) => trBody += HtmlUtil.renderTag('th', {}, header));
+      tableHeaders.forEach((header) => trBody += HtmlUtil.renderTagEscaped('th', {}, header));
 
-      return HtmlUtil.renderTag('tr', {}, trBody, false);
+      return HtmlUtil.renderTag('tr', {}, trBody);
     }
 
     private renderSubformTableBody(cells, elementOptions) {
@@ -213,10 +213,10 @@ module Supler {
 
         var trBody = '';
         for (var j = 0; j < row.length; j++) {
-          trBody += HtmlUtil.renderTag('td', {}, row[j], false);
+          trBody += HtmlUtil.renderTag('td', {}, row[j]);
         }
 
-        html += HtmlUtil.renderTag('tr', elementOptions, trBody, false) + '\n';
+        html += HtmlUtil.renderTag('tr', elementOptions, trBody) + '\n';
       }
       return html;
     }
@@ -236,10 +236,10 @@ module Supler {
           optionOptions['selected'] = 'selected';
         }
 
-        selectBody += HtmlUtil.renderTag('option', optionOptions, v.label);
+        selectBody += HtmlUtil.renderTagEscaped('option', optionOptions, v.label);
       });
 
-      var html = HtmlUtil.renderTag('select', options, selectBody, false);
+      var html = HtmlUtil.renderTag('select', options, selectBody);
       html += '\n';
       return html;
     }
@@ -259,13 +259,13 @@ module Supler {
     }
 
     renderHtmlTextarea(value, options) {
-      return HtmlUtil.renderTag('textarea', options, value);
+      return HtmlUtil.renderTagEscaped('textarea', options, value);
     }
 
     renderHtmlButton(label, options) {
       var allOptions = Util.copyProperties({'type': 'button'}, options);
       allOptions['class'] = allOptions['class'].replace('form-control', 'btn btn-default');
-      return HtmlUtil.renderTag('button', allOptions, label);
+      return HtmlUtil.renderTagEscaped('button', allOptions, label);
     }
 
     private renderCheckable(inputType:string, possibleValues:SelectValue[],
@@ -284,13 +284,13 @@ module Supler {
 
         checkableOptions['id'] = containerOptions['id'] + '.' + v.id;
         var labelBody = this.renderHtmlInput(inputType, v.id, checkableOptions);
-        labelBody += HtmlUtil.renderTag('span', {}, v.label);
+        labelBody += HtmlUtil.renderTagEscaped('span', {}, v.label);
 
-        var divBody = HtmlUtil.renderTag('label', {}, labelBody, false);
-        html += HtmlUtil.renderTag('div', {'class': inputType}, divBody, false);
+        var divBody = HtmlUtil.renderTag('label', {}, labelBody);
+        html += HtmlUtil.renderTag('div', {'class': inputType}, divBody);
       });
 
-      return HtmlUtil.renderTag('span', containerOptions, html, false);
+      return HtmlUtil.renderTag('span', containerOptions, html);
     }
 
     //

@@ -8,8 +8,8 @@ module Supler {
       private emptyValue:any) {
     }
 
-    public validate(element:HTMLElement):string[] {
-      var value = Util.getSingleProperty(ReadFormValues.getValueFrom(element));
+    public validate(readFormValues:ReadFormValues, element:HTMLElement):string[] {
+      var value = Util.getSingleProperty(readFormValues.getValueFrom(element));
 
       // not running validations for optional fields without a value
       if (this.required !== true && FieldUtil.fieldIsEmpty(value, this.emptyValue)) {

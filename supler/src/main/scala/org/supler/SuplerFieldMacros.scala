@@ -1,7 +1,7 @@
 package org.supler
 
 import org.supler.field._
-import org.supler.transformation.FullTransformer
+import org.supler.transformation.Transformer
 
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -9,7 +9,7 @@ import scala.reflect.macros.blackbox
 object SuplerFieldMacros {
   def field_impl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: blackbox.Context)
     (param: c.Expr[T => U])
-    (transformer: c.Expr[FullTransformer[U, _]]): c.Expr[BasicField[T, U]] = {
+    (transformer: c.Expr[Transformer[U, _]]): c.Expr[BasicField[T, U]] = {
 
     import c.universe._
 
@@ -122,7 +122,7 @@ object SuplerFieldMacros {
 
   object FactoryMethods {
     def newBasicField[T, U, S](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,
-      transformer: FullTransformer[U, S], emptyValue: Option[U]): BasicField[T, U] = {
+      transformer: Transformer[U, S], emptyValue: Option[U]): BasicField[T, U] = {
 
       BasicField[T, U](fieldName, read, write, List(), None, required, transformer, transformer.renderHint, emptyValue,
         AlwaysCondition, AlwaysCondition)

@@ -3,60 +3,72 @@ package org.supler.transformation
 import org.json4s.JsonAST._
 
 trait JsonTransformer[U] {
-  def jsonSchemaName: String
-  def toJValue(value: U): Option[JValue] = {
+  /**
+   * The name of the type that will be used in the generated json. Used by frontend to determine how to render the
+   * field and serialize the value back to json.
+   */
+  def typeName: String
+  def toJValueOrJNull(value: U): Option[JValue] = {
     if (value == null) Some(JNull)
-    else toNonNullJValue(value)
+    else toJValue(value)
   }
-  protected def toNonNullJValue(value: U): Option[JValue]
-  def fromJValue: PartialFunction[JValue, U]
+  def toJValue(value: U): Option[JValue]
+  def fromJValue(jvalue: JValue): Option[U]
 }
 
 object JsonTransformer {
-  implicit object StringJsonTransformer extends JsonTransformer[String] {
-    val jsonSchemaName = "string"
-    def toNonNullJValue(value: String) = Some(JString(value))
-    def fromJValue = { case JString(v) => v }
+  trait JsonTransformerPF[U] extends JsonTransformer[U] {
+    def fromJValue(jvalue: JValue): Option[U] = fromJValuePF.lift(jvalue)
+
+    def fromJValuePF: PartialFunction[JValue, U]
   }
 
-  implicit object IntJsonTransformer extends JsonTransformer[Int] {
-    val jsonSchemaName = "integer"
-    def toNonNullJValue(value: Int) = Some(JInt(value))
-    def fromJValue = { case JInt(v) => v.intValue() }
+  implicit object StringJsonTransformer extends JsonTransformerPF[String] {
+    val typeName = "string"
+    def toJValue(value: String) = Some(JString(value))
+    def fromJValuePF = { case JString(v) => v }
   }
 
-  implicit object LongJsonTransformer extends JsonTransformer[Long] {
-    val jsonSchemaName = "integer"
-    def toNonNullJValue(value: Long) = Some(JInt(value))
-    def fromJValue = { case JInt(v) => v.longValue() }
+  implicit object IntJsonTransformer extends JsonTransformerPF[Int] {
+    val typeName = "integer"
+    def toJValue(value: Int) = Some(JInt(value))
+    def fromJValuePF = { case JInt(v) => v.intValue() }
   }
 
-  implicit object FloatJsonTransformer extends JsonTransformer[Float] {
-    val jsonSchemaName = "float"
-    def toNonNullJValue(value: Float) = Some(JDouble(value))
-    def fromJValue = { case JDouble(v) => v.toFloat }
+  implicit object LongJsonTransformer extends JsonTransformerPF[Long] {
+    val typeName = "integer"
+    def toJValue(value: Long) = Some(JInt(value))
+    def fromJValuePF = { case JInt(v) => v.longValue() }
   }
 
-  implicit object DoubleJsonTransformer extends JsonTransformer[Double] {
-    val jsonSchemaName = "float"
-    def toNonNullJValue(value: Double) = Some(JDouble(value))
-    def fromJValue = { case JDouble(v) => v }
+  implicit object FloatJsonTransformer extends JsonTransformerPF[Float] {
+    val typeName = "float"
+    def toJValue(value: Float) = Some(JDouble(value))
+    def fromJValuePF = { case JDouble(v) => v.toFloat }
   }
 
-  implicit object BooleanJsonTransformer extends JsonTransformer[Boolean] {
-    val jsonSchemaName = "boolean"
-    def toNonNullJValue(value: Boolean) = Some(JBool(value))
-    def fromJValue = { case JBool(v) => v }
+  implicit object DoubleJsonTransformer extends JsonTransformerPF[Double] {
+    val typeName = "float"
+    def toJValue(value: Double) = Some(JDouble(value))
+    def fromJValuePF = { case JDouble(v) => v }
   }
 
-  implicit def optionJsonTransformer[U](implicit inner: JsonTransformer[U]) = new JsonTransformer[Option[U]] {
-    val jsonSchemaName = inner.jsonSchemaName
-    def toNonNullJValue(value: Option[U]) = value.flatMap(inner.toJValue)
-    def fromJValue = {
-      case JNothing => None
-      case JNull => None
-      case JString("") => None
-      case jvalue if inner.fromJValue.isDefinedAt(jvalue) => inner.fromJValue.lift(jvalue)
+  implicit object BooleanJsonTransformer extends JsonTransformerPF[Boolean] {
+    val typeName = "boolean"
+    def toJValue(value: Boolean) = Some(JBool(value))
+    def fromJValuePF = { case JBool(v) => v }
+  }
+
+  implicit def optionJsonTransformer[U](implicit inner: JsonTransformer[U]): JsonTransformer[Option[U]] =
+    new JsonTransformer[Option[U]] {
+      val typeName = inner.typeName
+      def toJValue(value: Option[U]) = value.flatMap(inner.toJValueOrJNull)
+
+      def fromJValue(jvalue: JValue) = jvalue match {
+        case JNothing => Some(None)
+        case JNull => Some(None)
+        case JString("") => Some(None)
+        case jv => inner.fromJValue(jv).map(Some(_))
+      }
     }
-  }
 }

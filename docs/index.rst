@@ -60,4 +60,5 @@ Complete documentation
    frontend/custombehavior
    frontend/customdata
    frontend/options
+   frontend/complexjson
    json
