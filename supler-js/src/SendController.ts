@@ -7,7 +7,9 @@ module Supler {
       private formElementDictionary:FormElementDictionary,
       private options:SendControllerOptions,
       private elementSearch:ElementSearch,
-      private validation:Validation) {
+      private validation:Validation,
+      private modalFormPath: string = null,
+      private prefixer: FieldPrefixer = new EmptyPrefixer()) {
 
       this.refreshCounter = 0;
       this.actionInProgress = false;
@@ -50,7 +52,7 @@ module Supler {
         };
 
         this.options.sendFormFunction(
-          this.form.getValue(),
+          this.form.getValue(this.modalFormPath),
           this.sendSuccessFn(applyRefreshResultsCondition, () => {
           }),
           () => {
@@ -71,7 +73,7 @@ module Supler {
 
         if (validationPassed) {
           this.options.sendFormFunction(
-            this.form.getValue(id),
+            this.form.getValue(this.modalFormPath, id),
             this.sendSuccessFn(() => {
               return true;
             }, () => this.actionCompleted()),
@@ -91,7 +93,7 @@ module Supler {
     private ifEnabledForEachFormElement(body:(htmlFormElement:HTMLElement) => void) {
       if (this.options.sendEnabled()) {
         this.formElementDictionary.foreach((elementId:string, formElement:FormElement) => {
-          var htmlFormElement = document.getElementById(elementId);
+          var htmlFormElement = document.getElementById(this.prefixer.prefix(elementId));
           if (htmlFormElement) {
             body(htmlFormElement);
           }

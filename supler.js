@@ -31,6 +31,7 @@ var Supler;
         function FormSections() {
         }
         FormSections.META = 'supler_meta';
+        FormSections.MODAL_PATH = 'supler_modal_path';
         return FormSections;
     })();
     Supler.FormSections = FormSections;
@@ -38,12 +39,14 @@ var Supler;
 var Supler;
 (function (Supler) {
     var CreateFormFromJson = (function () {
-        function CreateFormFromJson(renderOptionsGetter, i18n, validatorFnFactories, fieldsOptions, fieldOrder) {
+        function CreateFormFromJson(renderOptionsGetter, i18n, validatorFnFactories, fieldsOptions, fieldOrder, prefixer) {
+            if (prefixer === void 0) { prefixer = new Supler.EmptyPrefixer(); }
             this.renderOptionsGetter = renderOptionsGetter;
             this.i18n = i18n;
             this.validatorFnFactories = validatorFnFactories;
             this.fieldsOptions = fieldsOptions;
             this.fieldOrder = fieldOrder;
+            this.prefixer = prefixer;
             this.idCounter = 0;
         }
         CreateFormFromJson.prototype.renderForm = function (meta, formJson, formElementDictionary) {
@@ -127,7 +130,7 @@ var Supler;
         CreateFormFromJson.prototype.fieldHtmlFromJson = function (fieldData, formElementDictionary, compact) {
             var renderOptions = this.renderOptionsGetter.forField(fieldData.path, fieldData.type, fieldData.getRenderHintName());
             var fieldOptions = Supler.Util.copyProperties({
-                'id': fieldData.id,
+                'id': this.prefixer.prefix(fieldData.id),
                 'name': fieldData.path,
                 'supler:fieldName': fieldData.name,
                 'supler:fieldType': fieldData.type,
@@ -443,6 +446,37 @@ var Supler;
         return FieldOptions;
     })();
     Supler.FieldOptions = FieldOptions;
+})(Supler || (Supler = {}));
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var Supler;
+(function (Supler) {
+    var FieldPrefixer = (function () {
+        function FieldPrefixer(prefixStr) {
+            this.prefixStr = prefixStr;
+        }
+        FieldPrefixer.prototype.prefix = function (fieldId) {
+            return this.prefixStr + FieldPrefixer.SEPARATOR + fieldId;
+        };
+        FieldPrefixer.SEPARATOR = "-";
+        return FieldPrefixer;
+    })();
+    Supler.FieldPrefixer = FieldPrefixer;
+    var EmptyPrefixer = (function (_super) {
+        __extends(EmptyPrefixer, _super);
+        function EmptyPrefixer() {
+            _super.call(this, "");
+        }
+        EmptyPrefixer.prototype.prefix = function (fieldId) {
+            return fieldId;
+        };
+        return EmptyPrefixer;
+    })(FieldPrefixer);
+    Supler.EmptyPrefixer = EmptyPrefixer;
 })(Supler || (Supler = {}));
 var Supler;
 (function (Supler) {
@@ -936,12 +970,16 @@ var Supler;
 var Supler;
 (function (Supler) {
     var SendController = (function () {
-        function SendController(form, formElementDictionary, options, elementSearch, validation) {
+        function SendController(form, formElementDictionary, options, elementSearch, validation, modalFormPath, prefixer) {
+            if (modalFormPath === void 0) { modalFormPath = null; }
+            if (prefixer === void 0) { prefixer = new Supler.EmptyPrefixer(); }
             this.form = form;
             this.formElementDictionary = formElementDictionary;
             this.options = options;
             this.elementSearch = elementSearch;
             this.validation = validation;
+            this.modalFormPath = modalFormPath;
+            this.prefixer = prefixer;
             this.refreshCounter = 0;
             this.actionInProgress = false;
         }
@@ -977,7 +1015,7 @@ var Supler;
                 var applyRefreshResultsCondition = function () {
                     return !_this.actionInProgress && thisRefreshNumber === _this.refreshCounter;
                 };
-                this.options.sendFormFunction(this.form.getValue(), this.sendSuccessFn(applyRefreshResultsCondition, function () {
+                this.options.sendFormFunction(this.form.getValue(this.modalFormPath), this.sendSuccessFn(applyRefreshResultsCondition, function () {
                 }), function () {
                 }, false, htmlFormElement);
             }
@@ -989,7 +1027,7 @@ var Supler;
                 var id = htmlFormElement.id;
                 var validationPassed = !this.validation.processClientSingle(id) && !this.validation.processClient(this.formElementDictionary.getElement(id).validationScope);
                 if (validationPassed) {
-                    this.options.sendFormFunction(this.form.getValue(id), this.sendSuccessFn(function () {
+                    this.options.sendFormFunction(this.form.getValue(this.modalFormPath, id), this.sendSuccessFn(function () {
                         return true;
                     }, function () { return _this.actionCompleted(); }), function () { return _this.actionCompleted(); }, true, htmlFormElement);
                 }
@@ -1002,9 +1040,10 @@ var Supler;
             this.actionInProgress = false;
         };
         SendController.prototype.ifEnabledForEachFormElement = function (body) {
+            var _this = this;
             if (this.options.sendEnabled()) {
                 this.formElementDictionary.foreach(function (elementId, formElement) {
-                    var htmlFormElement = document.getElementById(elementId);
+                    var htmlFormElement = document.getElementById(_this.prefixer.prefix(elementId));
                     if (htmlFormElement) {
                         body(htmlFormElement);
                     }
@@ -1080,9 +1119,14 @@ var Supler;
                 sendController.attachModalListeners();
             }
             else if (this.isModalForm(json)) {
-                var result = new Supler.CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories, this.fieldsOptions, this.fieldOrder).renderForm(json.form[Supler.FormSections.META], json.form.main_form);
+                var prefixer = new Supler.FieldPrefixer(json.path);
+                var result = new Supler.CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories, this.fieldsOptions, this.fieldOrder, prefixer).renderForm(json.form[Supler.FormSections.META], json.form.main_form);
+                var sendController = new Supler.SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, this.validation, json.path, prefixer);
+                sendController.attachRefreshListeners();
+                sendController.attachActionListeners();
+                sendController.attachModalListeners();
                 document.getElementById('modal-form-container').innerHTML = result.html;
-                document.getElementById('supler-modal').modal('show');
+                $('#supler-modal').modal('show');
             }
             var customData = this.getCustomData(json);
             if (customData)
@@ -1097,9 +1141,14 @@ var Supler;
                 this.validation.copyFrom(oldValidation);
             }
         };
-        Form.prototype.getValue = function (selectedButtonId) {
+        Form.prototype.getValue = function (modalFieldPath, selectedButtonId) {
+            if (modalFieldPath === void 0) { modalFieldPath = null; }
             if (selectedButtonId === void 0) { selectedButtonId = null; }
-            return Supler.ReadFormValues.getValueFrom(this.container, selectedButtonId);
+            var values = Supler.ReadFormValues.getValueFrom(this.container, selectedButtonId);
+            if (modalFieldPath != null) {
+                values[Supler.FormSections.MODAL_PATH] = modalFieldPath;
+            }
+            return values;
         };
         Form.prototype.validate = function (validationScope) {
             if (validationScope === void 0) { validationScope = Supler.ValidateAll; }

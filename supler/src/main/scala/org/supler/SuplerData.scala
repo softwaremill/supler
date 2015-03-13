@@ -67,7 +67,7 @@ trait FormWithObject[T] extends SuplerData[T] {
     applied.findAndRunAction(jvalue) match {
       case Some(actionResult) => actionResult
       case None => applied.findAndShowModal(jvalue) match {
-        case Some(modalForm) => ModalFormWithObject[T](modalForm)
+        case Some(showableModal) => ModalFormWithObject[T](showableModal.path, showableModal.form)
         case None => applied.doValidate(ValidateFilled)
       }
     }
@@ -91,8 +91,8 @@ trait FormWithObject[T] extends SuplerData[T] {
     }
   }
 
-  def findAndShowModal(jvalue: JValue): Option[SuplerData[_]] = {
-    form.findModal(EmptyPath, obj, jvalue).map { _.form }
+  def findAndShowModal(jvalue: JValue): Option[ShowableModal] = {
+    form.findModal(EmptyPath, obj, jvalue)
   }
 }
 
@@ -122,6 +122,10 @@ case class CustomDataOnly private[supler] (customData: JValue) extends SuplerDat
   override def generateJSON = customData
 }
 
-case class ModalFormWithObject[T](modalForm: SuplerData[_]) extends SuplerData[T] {
-  override def generateJSON = JObject(JField("type", JString("modal")), JField("form", modalForm.generateJSON))
+case class ModalFormWithObject[T](modalPath: FieldPath, modalForm: SuplerData[_]) extends SuplerData[T] {
+  override def generateJSON = JObject(
+    JField("type", JString("modal")),
+    JField("path", JString(modalPath.toString)),
+    JField("form", modalForm.generateJSON)
+  )
 }

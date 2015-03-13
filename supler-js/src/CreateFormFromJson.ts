@@ -7,7 +7,8 @@ module Supler {
                 private validatorFnFactories:any,
 
                 private fieldsOptions:FieldsOptions,
-                private fieldOrder: string[][]) {
+                private fieldOrder: string[][],
+                private prefixer: FieldPrefixer = new EmptyPrefixer()) {
     }
 
     renderForm(meta,
@@ -117,7 +118,7 @@ module Supler {
       var renderOptions = this.renderOptionsGetter.forField(fieldData.path, fieldData.type, fieldData.getRenderHintName());
 
       var fieldOptions = Util.copyProperties({
-        'id': fieldData.id,
+        'id': this.prefixer.prefix(fieldData.id),
         // the field name must be unique for a value, so that e.g. radio button groups in multiple subforms work
         // correctly, hence we cannot use the field's name.
         'name': fieldData.path,

@@ -57,11 +57,20 @@ module Supler {
         sendController.attachModalListeners();
       }
       else if (this.isModalForm(json)) {
+        var prefixer = new FieldPrefixer(json.path);
         var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories,
-          this.fieldsOptions, this.fieldOrder).renderForm(json.form[FormSections.META], json.form.main_form);
+          this.fieldsOptions, this.fieldOrder, prefixer).renderForm(json.form[FormSections.META], json.form.main_form);
+
+        var sendController = new SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch,
+          this.validation, json.path, prefixer);
+        sendController.attachRefreshListeners();
+        sendController.attachActionListeners();
+        sendController.attachModalListeners();
+
+        //todo move this to render options!
         document.getElementById('modal-form-container').innerHTML = result.html;
 
-        (<any>document.getElementById('supler-modal')).modal('show');
+        $('#supler-modal').modal('show');
       }
 
       var customData = this.getCustomData(json);
@@ -81,8 +90,12 @@ module Supler {
       }
     }
 
-    getValue(selectedButtonId:string = null) {
-      return ReadFormValues.getValueFrom(this.container, selectedButtonId);
+    getValue(modalFieldPath:string = null, selectedButtonId:string = null) {
+      var values = ReadFormValues.getValueFrom(this.container, selectedButtonId);
+      if (modalFieldPath != null) {
+        values[FormSections.MODAL_PATH] = modalFieldPath;
+      }
+      return values;
     }
 
     /**
