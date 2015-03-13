@@ -95,7 +95,7 @@ module Supler {
     }
 
     getValue(modalFieldPath:string = null, selectedButtonId:string = null) {
-      var values = this.getValueFrom(this.container, selectedButtonId);
+      var values = this.readFormValues.getValueFrom(this.container, selectedButtonId);
       if (modalFieldPath != null) {
         values[FormSections.MODAL_PATH] = modalFieldPath;
       }

@@ -25,18 +25,18 @@ module Supler {
           var v = fieldOptions.readValue(element);
           this.appendFieldValue(result, fieldName, v, multiple);
         } else {
-          this.getValueDefault(element, fieldType, fieldName, multiple, selectedActionId, result);
+          this.getValueDefault(element, fieldType, fieldName, multiple, selectedButtonId, result);
         }
       } else if (element.children.length > 0) {
         // flattening
-        this.getValueFromChildren(element, selectedActionId, result);
+        this.getValueFromChildren(element, selectedButtonId, result);
       }
 
       return result;
     }
 
     private getValueDefault(element:HTMLElement, fieldType:string, fieldName:string, multiple: boolean,
-      selectedActionId:string, result:any) {
+                            selectedButtonId:string, result:any) {
 
       switch (fieldType) {
         case FieldTypes.STRING:
@@ -67,7 +67,7 @@ module Supler {
 
         case FieldTypes.SUBFORM:
           fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
-          var subResult = this.getValueFromChildren(element, selectedActionId, {});
+          var subResult = this.getValueFromChildren(element, selectedButtonId, {});
           this.appendFieldValue(result, fieldName, subResult, multiple);
           break;
 
