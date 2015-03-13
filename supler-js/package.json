@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "dependencies": {},
   "devDependencies": {
+    "bootstrap": "^3.3.2",
     "chai": "^1.10.0",
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.13",

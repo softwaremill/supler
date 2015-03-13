@@ -65,16 +65,22 @@ module Supler {
         var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories,
           this.fieldsOptions, this.fieldOrder, prefixer).renderForm(json.form[FormSections.META], json.form.main_form);
 
-        var sendController = new SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch,
-          this.validation, json.path, prefixer);
-        sendController.attachRefreshListeners();
-        sendController.attachActionListeners();
-        sendController.attachModalListeners();
+        this.initializeValidation(result.formElementDictionary, json);
+
+        var modalValidation = new Validation(this.elementSearch, result.formElementDictionary, this.validatorRenderOptions,
+          this.i18n, this.readFormValues);
+
+        var sendController = new SendController(this, result.formElementDictionary, this.sendControllerOptions,
+          this.elementSearch, modalValidation, json.path, prefixer);
 
         //todo move this to render options!
         document.getElementById('modal-form-container').innerHTML = result.html;
-
         $('#supler-modal').modal('show');
+
+        // only attach actions when fields are visible
+        sendController.attachRefreshListeners();
+        sendController.attachActionListeners();
+        sendController.attachModalListeners();
       }
 
       var customData = this.getCustomData(json);

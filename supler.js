@@ -581,7 +581,7 @@ var Supler;
     Supler.FormElement = FormElement;
     var FormElementDictionary = (function () {
         function FormElementDictionary() {
-            this.formElements = [];
+            this.formElements = {};
         }
         FormElementDictionary.prototype.getElement = function (id) {
             var element = this.formElements[id];
@@ -1235,12 +1235,14 @@ var Supler;
             else if (this.isModalForm(json)) {
                 var prefixer = new Supler.FieldPrefixer(json.path);
                 var result = new Supler.CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories, this.fieldsOptions, this.fieldOrder, prefixer).renderForm(json.form[Supler.FormSections.META], json.form.main_form);
-                var sendController = new Supler.SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, this.validation, json.path, prefixer);
+                this.initializeValidation(result.formElementDictionary, json);
+                var modalValidation = new Supler.Validation(this.elementSearch, result.formElementDictionary, this.validatorRenderOptions, this.i18n, this.readFormValues);
+                var sendController = new Supler.SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, modalValidation, json.path, prefixer);
+                document.getElementById('modal-form-container').innerHTML = result.html;
+                $('#supler-modal').modal('show');
                 sendController.attachRefreshListeners();
                 sendController.attachActionListeners();
                 sendController.attachModalListeners();
-                document.getElementById('modal-form-container').innerHTML = result.html;
-                $('#supler-modal').modal('show');
             }
             var customData = this.getCustomData(json);
             if (customData)

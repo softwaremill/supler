@@ -132,8 +132,8 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
 
     writer.writeForm("formTwoActionsOneValidateAll", fTwoActionsOneValidateAll, obj1)
 
-    writer.writeFormAfterAction("formAfterActionFormAndData", fActionFormAndDataResult, obj1, "act")
-    writer.writeFormAfterAction("formAfterActionDataOnly", fActionDataResultOnly, obj1, "act")
+    writer.writeFormAfterButtonPressed("formAfterActionFormAndData", fActionFormAndDataResult, obj1, "act")
+    writer.writeFormAfterButtonPressed("formAfterActionDataOnly", fActionDataResultOnly, obj1, "act")
   }
 
   writeTestData("selectSingle") { writer =>
@@ -173,13 +173,23 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
   }
 
   writeTestData("complexFormWithModal") { writer =>
+    val modalSimplePopup = form[Simple1](f => List(
+      f.field(_.field1).label("Field1"),
+      f.field(_.field2).label("Field2"),
+      f.field(_.field3).label("Field3"),
+      f.field(_.field4).label("Field4"),
+      f.staticField(s => Message(s"${s.field1} ${s.field2} ${s.field3} ${s.field4}")).label("All Fields")
+    ))
     val formWithModal = form[ComplexSingleSubform](f => List(
       f.field(_.field10),
-      f.modal("showSimple"){ e => simple1Form(e.simple) }
+      f.subform(_.simple, simple1Form).renderHint(asTable()),
+      f.modal("showSimple"){ e => modalSimplePopup(e.simple) }
     ))
 
-    writer.writeForm("complexFormWithModal", formWithModal,
-      ComplexSingleSubform("Helo", Simple1("A", Some("B"), 1, false)))
+    val obj: ComplexSingleSubform = ComplexSingleSubform("Helo", Simple1("A", Some("B"), 1, false))
+
+    writer.writeForm("complexFormWithModal", formWithModal,obj)
+    writer.writeFormAfterButtonPressed("complexFormWithModalAfterButton", formWithModal, obj, "showSimple")
   }
 
   writeTestData("complexSubformsList") { writer =>
@@ -422,12 +432,12 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
       pw.println( s""""$variableName": ${pretty(render(withMeta))},""")
     }
 
-    def writeFormAfterAction[T](variableName: String, form: Form[T], obj: T, actionFieldName: String): Unit = {
+    def writeFormAfterButtonPressed[T](variableName: String, form: Form[T], obj: T, actionFieldName: String): Unit = {
       val JObject(fields) = Extraction.decompose(obj)
       val actionField = JField(actionFieldName, JBool(value = true))
       val toWrite = pretty(render(form(obj).process(JObject(fields :+ actionField)).generateJSON))
       pw.println( s""""$variableName": $toWrite,""")
     }
-  }
 
+  }
 }

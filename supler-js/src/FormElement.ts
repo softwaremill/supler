@@ -9,7 +9,7 @@ module Supler {
   }
 
   export class FormElementDictionary {
-    private formElements:FormElement[] = [];
+    private formElements: { [index: string]: FormElement; } = {};
 
     getElement(id:string):FormElement {
       var element = this.formElements[id];
