@@ -92,6 +92,7 @@ Types of templates
     <div supler:fieldTemplate>
       // html with placeholders:
       // {{suplerLabel}}
+      // {{suplerDescription}}
       // {{suplerInput}}
       // {{suplerValidation}}
     </div>
@@ -106,6 +107,17 @@ Types of templates
       // html with placeholders:
       // {{suplerLabelForId}}
       // {{suplerLabelText}}
+    </div>
+  </div>
+
+* re-define how descriptions are rendered
+
+.. code-block:: html
+
+  <div id="form-container">
+    <div supler:fieldDescriptionTemplate>
+      // html with placeholders:
+      // {{suplerDescriptionText}}
     </div>
   </div>
 
@@ -171,6 +183,7 @@ Not yet implemented
       // {{suplerFieldInputAttrs}}
       // {{suplerFieldLabelForId}}
       // {{suplerFieldLabelText}}
+      // {{suplerFieldDescriptionText}}
       // {{suplerFieldValidationId}}
     </div>
   </div>
@@ -295,6 +308,7 @@ Methods available for overriding:
   // [label] [input] [validation]
   renderField: (input: string, fieldData: FieldData, compact: boolean) => string
   renderLabel: (forId: string, label: string) => string
+  renderDescription: (description:string) => string
   renderValidation: (validationId: string) => string
 
   renderRow: (fields: string) => string

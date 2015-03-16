@@ -373,6 +373,7 @@ var Supler;
             this.type = json.type;
             this.enabled = json.enabled;
             this.validate = json.validate || {};
+            this.description = json.description;
         }
         FieldData.prototype.getRenderHint = function () {
             if (this.renderHintOverride) {
@@ -896,21 +897,24 @@ var Supler;
         };
         Bootstrap3RenderOptions.prototype.renderField = function (input, fieldData, compact) {
             var labelPart;
+            var descriptionPart;
             if (compact) {
                 labelPart = '';
+                descriptionPart = '';
             }
             else {
-                labelPart = this.renderLabel(fieldData.id, fieldData.label) + '\n';
+                labelPart = this.renderLabel(fieldData.id, fieldData.label);
+                descriptionPart = this.renderDescription(fieldData.description);
             }
-            var divBody = labelPart + input + '\n' + this.renderValidation(fieldData.validationId) + '\n';
+            var divBody = labelPart + '\n' + input + '\n' + descriptionPart + '\n' + this.renderValidation(fieldData.validationId) + '\n';
             return Supler.HtmlUtil.renderTag('div', { 'class': 'form-group' + this.addColumnWidthClass(fieldData) }, divBody);
         };
         Bootstrap3RenderOptions.prototype.addColumnWidthClass = function (fieldData) {
             if (fieldData.fieldsPerRow > 0) {
-                return " col-md-" + (fieldData.fieldsPerRow >= 12 ? 1 : 12 / fieldData.fieldsPerRow);
+                return ' col-md-' + (fieldData.fieldsPerRow >= 12 ? 1 : 12 / fieldData.fieldsPerRow);
             }
             else {
-                return "";
+                return '';
             }
         };
         Bootstrap3RenderOptions.prototype.renderHiddenFormGroup = function (input) {
@@ -921,6 +925,13 @@ var Supler;
         };
         Bootstrap3RenderOptions.prototype.renderLabel = function (forId, label) {
             return Supler.HtmlUtil.renderTagEscaped('label', { 'for': forId }, label);
+        };
+        Bootstrap3RenderOptions.prototype.renderDescription = function (description) {
+            if (description) {
+                return Supler.HtmlUtil.renderTagEscaped('p', { 'class': 'help-block' }, description);
+            }
+            else
+                return '';
         };
         Bootstrap3RenderOptions.prototype.renderValidation = function (validationId) {
             return Supler.HtmlUtil.renderTagEscaped('div', { 'class': 'text-danger', 'id': validationId });
@@ -1423,6 +1434,9 @@ var Supler;
             if (element.hasAttribute(this.FIELD_LABEL_TEMPLATE)) {
                 return this.parseFieldLabelTemplate(element);
             }
+            if (element.hasAttribute(this.FIELD_DESCRIPTION_TEMPLATE)) {
+                return this.parseFieldDescriptionTemplate(element);
+            }
             if (element.hasAttribute(this.FIELD_VALIDATION_TEMPLATE)) {
                 return this.parseFieldValidationTemplate(element);
             }
@@ -1437,8 +1451,9 @@ var Supler;
             return Supler.CreateRenderOptionsModifier.withOverride({
                 renderField: function (input, fieldData, compact) {
                     var renderedLabel = compact ? '' : this.renderLabel(fieldData.id, fieldData.label);
+                    var renderedDescription = compact ? '' : this.renderDescription(fieldData.description);
                     var renderedValidation = this.renderValidation(fieldData.validationId);
-                    return template.replace('{{suplerLabel}}', renderedLabel).replace('{{suplerInput}}', input).replace('{{suplerValidation}}', renderedValidation);
+                    return template.replace('{{suplerLabel}}', renderedLabel).replace('{{suplerDescription}}', renderedDescription).replace('{{suplerInput}}', input).replace('{{suplerValidation}}', renderedValidation);
                 }
             });
         };
@@ -1447,6 +1462,18 @@ var Supler;
             return Supler.CreateRenderOptionsModifier.withOverride({
                 renderLabel: function (forId, label) {
                     return template.replace('{{suplerLabelForId}}', forId).replace('{{suplerLabelText}}', label);
+                }
+            });
+        };
+        SingleTemplateParser.parseFieldDescriptionTemplate = function (element) {
+            var template = element.innerHTML;
+            return Supler.CreateRenderOptionsModifier.withOverride({
+                renderDescription: function (description) {
+                    if (description) {
+                        return template.replace('{{suplerDescriptionText}}', description);
+                    }
+                    else
+                        return '';
                 }
             });
         };
@@ -1526,6 +1553,7 @@ var Supler;
         };
         SingleTemplateParser.FIELD_TEMPLATE = 'supler:fieldTemplate';
         SingleTemplateParser.FIELD_LABEL_TEMPLATE = 'supler:fieldLabelTemplate';
+        SingleTemplateParser.FIELD_DESCRIPTION_TEMPLATE = 'supler:fieldDescriptionTemplate';
         SingleTemplateParser.FIELD_VALIDATION_TEMPLATE = 'supler:fieldValidationTemplate';
         SingleTemplateParser.FIELD_INPUT_TEMPLATE = 'supler:fieldInputTemplate';
         return SingleTemplateParser;

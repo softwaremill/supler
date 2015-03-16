@@ -12,12 +12,14 @@ case class SelectManyField[T, U](
   valuesProvider: ValuesProvider[T, U],
   label: Option[String],
   labelForValue: U => String,
+  description: Option[String],
   idForValue: Option[U => String],
   renderHint: Option[RenderHint with SelectManyFieldCompatible],
   enabledIf: T => Boolean,
   includeIf: T => Boolean) extends Field[T] with SelectField[T, U] with ValidateWithValidators[T, Set[U]] {
 
   def label(newLabel: String): SelectManyField[T, U] = this.copy(label = Some(newLabel))
+  def description(newDescription: String): SelectManyField[T, U] = this.copy(description = Some(newDescription))
   def validate(validators: Validator[T, Set[U]]*): SelectManyField[T, U] = this.copy(validators = this.validators ++ validators)
   def renderHint(newRenderHint: RenderHint with SelectManyFieldCompatible): SelectManyField[T, U] = this.copy(renderHint = Some(newRenderHint))
 
@@ -63,6 +65,6 @@ class AlmostSelectManyField[T, U](
   renderHint: Option[RenderHint with SelectManyFieldCompatible]) {
 
   def possibleValues(valuesProvider: ValuesProvider[T, U]): SelectManyField[T, U] =
-    SelectManyField(name, read, write, Nil, valuesProvider, None, labelForValue, None, renderHint,
+    SelectManyField(name, read, write, Nil, valuesProvider, None, labelForValue, None, None, renderHint,
       AlwaysCondition, AlwaysCondition)
 }

@@ -2,6 +2,7 @@ module Supler {
   export class SingleTemplateParser {
     private static FIELD_TEMPLATE = 'supler:fieldTemplate';
     private static FIELD_LABEL_TEMPLATE = 'supler:fieldLabelTemplate';
+    private static FIELD_DESCRIPTION_TEMPLATE = 'supler:fieldDescriptionTemplate';
     private static FIELD_VALIDATION_TEMPLATE = 'supler:fieldValidationTemplate';
     private static FIELD_INPUT_TEMPLATE = 'supler:fieldInputTemplate';
 
@@ -16,6 +17,9 @@ module Supler {
       if (element.hasAttribute(this.FIELD_LABEL_TEMPLATE)) {
         return this.parseFieldLabelTemplate(element);
       }
+      if (element.hasAttribute(this.FIELD_DESCRIPTION_TEMPLATE)) {
+        return this.parseFieldDescriptionTemplate(element);
+      }
       if (element.hasAttribute(this.FIELD_VALIDATION_TEMPLATE)) {
         return this.parseFieldValidationTemplate(element);
       }
@@ -29,10 +33,12 @@ module Supler {
       return CreateRenderOptionsModifier.withOverride({
         renderField: function (input:string, fieldData:FieldData, compact:boolean) {
           var renderedLabel = compact ? '' : this.renderLabel(fieldData.id, fieldData.label);
+          var renderedDescription = compact ? '' : this.renderDescription(fieldData.description);
           var renderedValidation = this.renderValidation(fieldData.validationId);
 
           return template
             .replace('{{suplerLabel}}', renderedLabel)
+            .replace('{{suplerDescription}}', renderedDescription)
             .replace('{{suplerInput}}', input)
             .replace('{{suplerValidation}}', renderedValidation);
         }
@@ -46,6 +52,17 @@ module Supler {
           return template
             .replace('{{suplerLabelForId}}', forId)
             .replace('{{suplerLabelText}}', label);
+        }
+      })
+    }
+
+    private static parseFieldDescriptionTemplate(element:HTMLElement):RenderOptionsModifier {
+      var template = element.innerHTML;
+      return CreateRenderOptionsModifier.withOverride({
+        renderDescription: function (description:string) {
+          if (description) {
+            return template.replace('{{suplerDescriptionText}}', description);
+          } else return '';
         }
       })
     }

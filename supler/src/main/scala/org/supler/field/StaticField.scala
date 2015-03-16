@@ -11,12 +11,14 @@ import scala.concurrent.forkjoin.ThreadLocalRandom
 case class StaticField[T](
   createMessage: T => Message,
   label: Option[String],
+  description: Option[String],
   includeIf: T => Boolean) extends Field[T] with GenerateBasicJSON[T] {
 
   val name = "_supler_static_" + ThreadLocalRandom.current().nextInt()
   val renderHint = None
 
   def label(newLabel: String): StaticField[T] = this.copy(label = Some(newLabel))
+  def description(newDescription: String): StaticField[T] = this.copy(description = Some(newDescription))
 
   val enabledIf: T => Boolean = AlwaysCondition
   def includeIf(condition: T => Boolean): StaticField[T] = this.copy(includeIf = condition)

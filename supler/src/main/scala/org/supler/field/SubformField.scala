@@ -11,6 +11,7 @@ case class SubformField[T, ContU, U, Cont[_]](
   read: T => Cont[U],
   write: (T, Cont[U]) => T,
   label: Option[String],
+  description: Option[String],
   embeddedForm: Form[U],
   // if not specified, `embeddedForm.createEmpty` will be used
   createEmpty: Option[() => U],
@@ -21,6 +22,7 @@ case class SubformField[T, ContU, U, Cont[_]](
   import c._
   
   def label(newLabel: String): SubformField[T, ContU, U, Cont] = this.copy(label = Some(newLabel))
+  def description(newDescription: String): SubformField[T, ContU, U, Cont] = this.copy(description = Some(newDescription))
 
   def renderHint(newRenderHint: RenderHint with SubformFieldCompatible): SubformField[T, ContU, U, Cont] = this.copy(renderHint = newRenderHint)
 
