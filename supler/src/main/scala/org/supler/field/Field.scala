@@ -7,6 +7,7 @@ import org.supler.{FieldPath, MultiFieldRow, Row, RowsJSON}
 
 trait Field[T] extends Row[T] {
   def name: String
+  def label: Option[String]
 
   private[supler] def enabledIf: T => Boolean
   private[supler] def includeIf: T => Boolean
@@ -22,6 +23,7 @@ trait Field[T] extends Row[T] {
       val fieldJson = JObject(
         JField(JSONFieldNames.Name, JString(name)) ::
           JField(JSONFieldNames.Enabled, JBool(isEnabled)) ::
+          JField(JSONFieldNames.Label, JString(label.getOrElse(""))) ::
           fieldJsonPartial.obj)
 
       RowsJSON.singleField(fieldJson, name)

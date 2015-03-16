@@ -31,7 +31,6 @@ case class ActionField[T](
     val validationScopeJSON = JObject(JField("name", JString(validationScopeJSONData.name)) :: validationScopeJSONData.extra)
 
     JObject(List(
-      JField(Label, JString(label.getOrElse(""))),
       JField(Type, JString(SpecialFieldTypes.Action)),
       JField(Path, JString(parentPath.append(name).toString)),
       JField("validation_scope", validationScopeJSON)
