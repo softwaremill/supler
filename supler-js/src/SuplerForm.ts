@@ -73,7 +73,11 @@ module Supler {
 
       this.validation.processServer(json.errors);
       if (oldValidation) {
-        this.validation.copyFrom(oldValidation);
+        /* After a form is processed on the server-side, in some cases only validation of filled in fields is done,
+         * as the server doesn't know which fields have been "touched". However, this could cause e.g. value-required
+         * errors on "touched" fields to disappear, hence we need to re-run the client-side validation on "touched"
+         * fields which aren't validated yet validated. */
+        this.validation.reprocessClientFrom(oldValidation);
       }
     }
 

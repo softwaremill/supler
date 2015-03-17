@@ -1,6 +1,6 @@
 module Supler {
   export class Validation {
-    private addedValidations:AddedValidationsDictionary = {};
+    private addedValidations:AddedValidations = new AddedValidations();
 
     constructor(private elementSearch:ElementSearch,
       private formElementDictionary:FormElementDictionary,
@@ -80,46 +80,49 @@ module Supler {
     }
 
     private removeAllValidationErrors() {
-      Util.foreach(this.addedValidations, (elementId:string, addedValidation:AddedValidation) => {
+      Util.foreach(this.addedValidations.byId, (elementId:string, addedValidation:AddedValidation) => {
         addedValidation.remove();
       });
 
-      this.addedValidations = {};
+      this.addedValidations = new AddedValidations();
     }
 
     private removeSingleValidationErrors(elementId:string) {
-      var addedValidation = this.addedValidations[elementId];
+      var addedValidation = this.addedValidations.byId[elementId];
       if (addedValidation) {
         addedValidation.remove();
-        delete this.addedValidations[elementId];
+        delete this.addedValidations.byId[elementId];
+        delete this.addedValidations.byPath[addedValidation.formElementPath()];
       }
     }
 
     private appendValidation(text:string, validationElement:HTMLElement, formElement:HTMLElement) {
-      if (!this.addedValidations.hasOwnProperty(formElement.id)) {
-        this.addedValidations[formElement.id] =
-          new AddedValidation(this.validatorRenderOptions, this.readFormValues, formElement, validationElement);
-      }
+      var addedValidation;
 
-      var addedValidation = this.addedValidations[formElement.id];
+      if (!this.addedValidations.byId.hasOwnProperty(formElement.id)) {
+        addedValidation = new AddedValidation(this.validatorRenderOptions, this.readFormValues, formElement, validationElement);
+        this.addedValidations.byId[formElement.id] = addedValidation;
+        this.addedValidations.byPath[addedValidation.formElementPath()] = addedValidation;
+      } else {
+        addedValidation = this.addedValidations.byId[formElement.id];
+      }
 
       if (addedValidation.addText(text)) {
         this.validatorRenderOptions.appendValidation(text, validationElement, formElement)
       }
     }
 
-    copyFrom(other:Validation) {
-      Util.foreach(other.addedValidations, (otherElementId:string, otherAddedValidation:AddedValidation) => {
-        // checking if the form element with the same path as the one with existing validation exists and
-        // has the same value.
-        var newFormElement = this.elementSearch.byPath(otherAddedValidation.formElementPath());
-        if (newFormElement) {
-          if (Util.deepEqual(otherAddedValidation.invalidValue, this.readFormValues.getValueFrom(newFormElement))) {
-            var newValidationElement = this.lookupValidationElement(newFormElement);
-
-            otherAddedValidation.texts.forEach((text:string) => {
-              this.appendValidation(text, newValidationElement, newFormElement)
-            });
+    reprocessClientFrom(other:Validation) {
+      Util.foreach(other.addedValidations.byPath, (path:string, otherAddedValidation:AddedValidation) => {
+        // Only copying if that path is not already validated
+        if (!this.addedValidations.byPath.hasOwnProperty(path)) {
+          // Checking if the form element still has the same value
+          var newFormElement = this.elementSearch.byPath(path);
+          if (newFormElement) {
+            if (Util.deepEqual(otherAddedValidation.invalidValue, this.readFormValues.getValueFrom(newFormElement))) {
+              // Re-running the client-side validation
+              this.processClientSingle(newFormElement.id);
+            }
           }
         }
       });
@@ -127,7 +130,12 @@ module Supler {
   }
 
   interface AddedValidationsDictionary {
-    [ elementId: string ]: AddedValidation
+    [ key: string ]: AddedValidation
+  }
+
+  class AddedValidations {
+    byId:AddedValidationsDictionary = {};
+    byPath:AddedValidationsDictionary = {};
   }
 
   class AddedValidation {

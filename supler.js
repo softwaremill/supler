@@ -1193,7 +1193,7 @@ var Supler;
             this.validation = new Supler.Validation(this.elementSearch, formElementDictionary, this.validatorRenderOptions, this.i18n, this.readFormValues);
             this.validation.processServer(json.errors);
             if (oldValidation) {
-                this.validation.copyFrom(oldValidation);
+                this.validation.reprocessClientFrom(oldValidation);
             }
         };
         Form.prototype.getValue = function (selectedActionId) {
@@ -1612,7 +1612,7 @@ var Supler;
             this.validatorRenderOptions = validatorRenderOptions;
             this.i18n = i18n;
             this.readFormValues = readFormValues;
-            this.addedValidations = {};
+            this.addedValidations = new AddedValidations();
         }
         Validation.prototype.processServer = function (validationJson) {
             this.removeAllValidationErrors();
@@ -1663,37 +1663,42 @@ var Supler;
             return document.getElementById(validationId);
         };
         Validation.prototype.removeAllValidationErrors = function () {
-            Supler.Util.foreach(this.addedValidations, function (elementId, addedValidation) {
+            Supler.Util.foreach(this.addedValidations.byId, function (elementId, addedValidation) {
                 addedValidation.remove();
             });
-            this.addedValidations = {};
+            this.addedValidations = new AddedValidations();
         };
         Validation.prototype.removeSingleValidationErrors = function (elementId) {
-            var addedValidation = this.addedValidations[elementId];
+            var addedValidation = this.addedValidations.byId[elementId];
             if (addedValidation) {
                 addedValidation.remove();
-                delete this.addedValidations[elementId];
+                delete this.addedValidations.byId[elementId];
+                delete this.addedValidations.byPath[addedValidation.formElementPath()];
             }
         };
         Validation.prototype.appendValidation = function (text, validationElement, formElement) {
-            if (!this.addedValidations.hasOwnProperty(formElement.id)) {
-                this.addedValidations[formElement.id] = new AddedValidation(this.validatorRenderOptions, this.readFormValues, formElement, validationElement);
+            var addedValidation;
+            if (!this.addedValidations.byId.hasOwnProperty(formElement.id)) {
+                addedValidation = new AddedValidation(this.validatorRenderOptions, this.readFormValues, formElement, validationElement);
+                this.addedValidations.byId[formElement.id] = addedValidation;
+                this.addedValidations.byPath[addedValidation.formElementPath()] = addedValidation;
             }
-            var addedValidation = this.addedValidations[formElement.id];
+            else {
+                addedValidation = this.addedValidations.byId[formElement.id];
+            }
             if (addedValidation.addText(text)) {
                 this.validatorRenderOptions.appendValidation(text, validationElement, formElement);
             }
         };
-        Validation.prototype.copyFrom = function (other) {
+        Validation.prototype.reprocessClientFrom = function (other) {
             var _this = this;
-            Supler.Util.foreach(other.addedValidations, function (otherElementId, otherAddedValidation) {
-                var newFormElement = _this.elementSearch.byPath(otherAddedValidation.formElementPath());
-                if (newFormElement) {
-                    if (Supler.Util.deepEqual(otherAddedValidation.invalidValue, _this.readFormValues.getValueFrom(newFormElement))) {
-                        var newValidationElement = _this.lookupValidationElement(newFormElement);
-                        otherAddedValidation.texts.forEach(function (text) {
-                            _this.appendValidation(text, newValidationElement, newFormElement);
-                        });
+            Supler.Util.foreach(other.addedValidations.byPath, function (path, otherAddedValidation) {
+                if (!_this.addedValidations.byPath.hasOwnProperty(path)) {
+                    var newFormElement = _this.elementSearch.byPath(path);
+                    if (newFormElement) {
+                        if (Supler.Util.deepEqual(otherAddedValidation.invalidValue, _this.readFormValues.getValueFrom(newFormElement))) {
+                            _this.processClientSingle(newFormElement.id);
+                        }
                     }
                 }
             });
@@ -1701,6 +1706,13 @@ var Supler;
         return Validation;
     })();
     Supler.Validation = Validation;
+    var AddedValidations = (function () {
+        function AddedValidations() {
+            this.byId = {};
+            this.byPath = {};
+        }
+        return AddedValidations;
+    })();
     var AddedValidation = (function () {
         function AddedValidation(validatorRenderOptions, readFormValues, formElement, validationElement) {
             this.validatorRenderOptions = validatorRenderOptions;
