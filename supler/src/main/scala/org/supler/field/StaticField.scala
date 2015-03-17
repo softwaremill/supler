@@ -9,12 +9,16 @@ import org.supler.{FieldPath, Message}
 import scala.concurrent.forkjoin.ThreadLocalRandom
 
 case class StaticField[T](
+  customName: Option[String],
   createMessage: T => Message,
   label: Option[String],
   description: Option[String],
   includeIf: T => Boolean) extends Field[T] with GenerateBasicJSON[T] {
 
-  val name = "_supler_static_" + ThreadLocalRandom.current().nextInt()
+  val generatedName = "_supler_static_" + ThreadLocalRandom.current().nextInt()
+  def name = customName.getOrElse(generatedName)
+  def name(name: String): StaticField[T] = this.copy(customName = Some(name))
+
   val renderHint = None
 
   def label(newLabel: String): StaticField[T] = this.copy(label = Some(newLabel))

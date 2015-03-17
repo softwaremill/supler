@@ -73,7 +73,7 @@ object Supler extends Validators with RenderHints {
    */
   def parentAction[T, U](action: (T, Int, U) => ActionResult[T]): U => ActionResult[U] = ActionResult.parentAction(action)
 
-  def staticField[T](createMessage: T => Message) = new StaticField[T](createMessage, None, None,
+  def staticField[T](createMessage: T => Message) = new StaticField[T](None, createMessage, None, None,
     AlwaysCondition)
 }
 
@@ -137,7 +137,7 @@ trait Supler[T] extends Validators {
    */
   def parentAction[U](action: (T, Int, U) => ActionResult[T]): U => ActionResult[U] = ActionResult.parentAction(action)
 
-  def staticField(createMessage: T => Message) = new StaticField[T](createMessage, None, None,
+  def staticField(createMessage: T => Message) = new StaticField[T](None, createMessage, None, None,
     AlwaysCondition)
 }
 
