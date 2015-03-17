@@ -48,26 +48,31 @@ var Supler;
         CreateFormFromJson.prototype.renderForm = function (meta, formJson, formElementDictionary) {
             var _this = this;
             if (formElementDictionary === void 0) { formElementDictionary = new Supler.FormElementDictionary(); }
-            var fields = formJson.fields.slice();
-            var rowsHtml = '';
-            (this.fieldOrder || formJson.fieldOrder).forEach(function (row) {
-                rowsHtml += _this.row(row.map(function (fieldName) { return _this.findField(fieldName, fields); }), formElementDictionary, _this.renderOptionsGetter.defaultRenderOptions());
+            var fieldsByName = {};
+            formJson.fields.forEach(function (f) {
+                fieldsByName[f.name] = f;
             });
-            if (fields.filter(function (f) { return f; }).length > 0) {
-                Supler.Log.warn("There are fields sent from the server that were not shown on the form: [" + fields.filter(function (f) { return f; }).map(function (f) { return f.name; }).join(',') + "]");
+            function getField(fieldName) {
+                var result = fieldsByName[fieldName];
+                if (!result)
+                    Supler.Log.warn('Trying to access field not found in JSON: ' + fieldName);
+                return result;
             }
+            var fieldOrder = this.fieldOrder || formJson.fieldOrder;
+            var rowsHtml = '';
+            fieldOrder.forEach(function (row) {
+                rowsHtml += _this.row(row.map(getField), formElementDictionary, _this.renderOptionsGetter.defaultRenderOptions());
+            });
+            this.verifyAllFieldsDisplayed(fieldOrder, formJson.fields.map(function (f) { return f.name; }));
             return new RenderFormResult(this.generateMeta(meta) + this.renderOptionsGetter.defaultRenderOptions().renderForm(rowsHtml), formElementDictionary);
         };
-        CreateFormFromJson.prototype.findField = function (fieldName, fields) {
-            for (var i = 0; i < fields.length; i++) {
-                if (fields[i] && fields[i]['name'] == fieldName) {
-                    var lookedForField = fields[i];
-                    delete fields[i];
-                    return lookedForField;
-                }
+        CreateFormFromJson.prototype.verifyAllFieldsDisplayed = function (fieldOrder, fieldNames) {
+            var fieldsInFieldOrder = [];
+            fieldOrder.forEach(function (row) { return row.forEach(function (fieldName) { return fieldsInFieldOrder.push(fieldName); }); });
+            var missingFields = Supler.Util.arrayDifference(fieldNames, fieldsInFieldOrder);
+            if (missingFields.length > 0) {
+                Supler.Log.warn("There are fields sent from the server that were not shown on the form: [" + missingFields + "]");
             }
-            Supler.Log.warn('Trying to access field not found in JSON: ' + fieldName);
-            return null;
         };
         CreateFormFromJson.prototype.generateMeta = function (meta) {
             if (meta) {
@@ -1288,6 +1293,19 @@ var Supler;
         };
         Util.escapeRegExp = function (s) {
             return s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+        };
+        Util.arrayDifference = function (a1, a2) {
+            var a = [], diff = [];
+            for (var i = 0; i < a1.length; i++)
+                a[a1[i]] = true;
+            for (var i = 0; i < a2.length; i++)
+                if (a[a2[i]])
+                    delete a[a2[i]];
+                else
+                    a[a2[i]] = true;
+            for (var k in a)
+                diff.push(k);
+            return diff;
         };
         return Util;
     })();

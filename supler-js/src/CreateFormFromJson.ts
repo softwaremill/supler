@@ -12,36 +12,37 @@ module Supler {
     renderForm(meta,
                formJson,
                formElementDictionary:FormElementDictionary = new FormElementDictionary()):RenderFormResult {
-      var fields = formJson.fields.slice();
+      var fieldsByName = {};
+      formJson.fields.forEach((f: any) => { fieldsByName[f.name] = f; });
+      function getField(fieldName: string) {
+        var result = fieldsByName[fieldName];
+        if (!result) Log.warn('Trying to access field not found in JSON: '+fieldName);
+        return result;
+      }
+
+      var fieldOrder = this.fieldOrder || formJson.fieldOrder;
 
       var rowsHtml = '';
 
-      (this.fieldOrder || formJson.fieldOrder).forEach(row => {
-        rowsHtml += this.row((<string[]>row).map(fieldName => this.findField(fieldName, fields)),
+      fieldOrder.forEach(row => {
+        rowsHtml += this.row((<string[]>row).map(getField),
           formElementDictionary, this.renderOptionsGetter.defaultRenderOptions())
       });
 
-      if (fields.filter(f => f).length > 0) {
-        Log.warn("There are fields sent from the server that were not shown on the form: [" +
-          fields.filter(f => f).map(f => f.name).join(',') +
-        "]");
-      }
+      this.verifyAllFieldsDisplayed(fieldOrder, formJson.fields.map(f => f.name));
 
       return new RenderFormResult(
         this.generateMeta(meta) + this.renderOptionsGetter.defaultRenderOptions().renderForm(rowsHtml),
         formElementDictionary);
     }
 
-    private findField(fieldName: string, fields: any[]) {
-      for (var i = 0; i < fields.length; i++) {
-        if (fields[i] && fields[i]['name'] == fieldName) {
-          var lookedForField = fields[i];
-          delete fields[i];
-          return lookedForField;
-        }
+    private verifyAllFieldsDisplayed(fieldOrder: string[][], fieldNames: string[]) {
+      var fieldsInFieldOrder = [];
+      fieldOrder.forEach(row => row.forEach(fieldName => fieldsInFieldOrder.push(fieldName)));
+      var missingFields = Util.arrayDifference(fieldNames, fieldsInFieldOrder);
+      if (missingFields.length > 0) {
+        Log.warn("There are fields sent from the server that were not shown on the form: ["+missingFields+"]");
       }
-      Log.warn('Trying to access field not found in JSON: '+fieldName);
-      return null;
     }
 
     private generateMeta(meta:any) {
