@@ -53,6 +53,17 @@ running tests and a live-reload server:
 
 ## Version history
 
+0.3.0 - 18/03/2015
+
+* field options on the frontend:
+  - field order
+  - javascript rendering overrides
+  - render hints overrides
+* custom render hints
+* multiple fields in one row rendering
+* complex fields support
+* bug fixes and various improvements
+
 0.2.0 - 29/01/2015
 
 * subforms extensions
