@@ -23,6 +23,8 @@ the form JSON is available, create a new ``Supler.Form``:
 
 If the JSON received from the server contains validation errors, they will be displayed as well.
 
+.. _rendering_fieldorder:
+
 Field order
 -----------
 
