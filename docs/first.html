@@ -54,7 +54,7 @@
 
     window.onload = function() {
         $.get(docsFormEndpoint, function(data) {
-            new SuplerForm(document.getElementById('firstform'), {
+            new Supler.Form(document.getElementById('firstform'), {
                 send_form_function: sendForm,
                 custom_data_handler: function(data) {
                     $('#feedback').html(data);
