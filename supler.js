@@ -52,26 +52,31 @@ var Supler;
         CreateFormFromJson.prototype.renderForm = function (meta, formJson, formElementDictionary) {
             var _this = this;
             if (formElementDictionary === void 0) { formElementDictionary = new Supler.FormElementDictionary(); }
-            var fields = formJson.fields.slice();
-            var rowsHtml = '';
-            (this.fieldOrder || formJson.fieldOrder).forEach(function (row) {
-                rowsHtml += _this.row(row.map(function (fieldName) { return _this.findField(fieldName, fields); }), formElementDictionary, _this.renderOptionsGetter.defaultRenderOptions());
+            var fieldsByName = {};
+            formJson.fields.forEach(function (f) {
+                fieldsByName[f.name] = f;
             });
-            if (fields.filter(function (f) { return f; }).length > 0) {
-                Supler.Log.warn("There are fields sent from the server that were not shown on the form: [" + fields.filter(function (f) { return f; }).map(function (f) { return f.name; }).join(',') + "]");
+            function getField(fieldName) {
+                var result = fieldsByName[fieldName];
+                if (!result)
+                    Supler.Log.warn('Trying to access field not found in JSON: ' + fieldName);
+                return result;
             }
+            var fieldOrder = this.fieldOrder || formJson.fieldOrder;
+            var rowsHtml = '';
+            fieldOrder.forEach(function (row) {
+                rowsHtml += _this.row(row.map(getField), formElementDictionary, _this.renderOptionsGetter.defaultRenderOptions());
+            });
+            this.verifyAllFieldsDisplayed(fieldOrder, formJson.fields.map(function (f) { return f.name; }));
             return new RenderFormResult(this.generateMeta(meta) + this.renderOptionsGetter.defaultRenderOptions().renderForm(rowsHtml), formElementDictionary);
         };
-        CreateFormFromJson.prototype.findField = function (fieldName, fields) {
-            for (var i = 0; i < fields.length; i++) {
-                if (fields[i] && fields[i]['name'] == fieldName) {
-                    var lookedForField = fields[i];
-                    delete fields[i];
-                    return lookedForField;
-                }
+        CreateFormFromJson.prototype.verifyAllFieldsDisplayed = function (fieldOrder, fieldNames) {
+            var fieldsInFieldOrder = [];
+            fieldOrder.forEach(function (row) { return row.forEach(function (fieldName) { return fieldsInFieldOrder.push(fieldName); }); });
+            var missingFields = Supler.Util.arrayDifference(fieldNames, fieldsInFieldOrder);
+            if (missingFields.length > 0) {
+                Supler.Log.warn("There are fields sent from the server that were not shown on the form: [" + missingFields + "]");
             }
-            Supler.Log.warn('Trying to access field not found in JSON: ' + fieldName);
-            return null;
         };
         CreateFormFromJson.prototype.generateMeta = function (meta) {
             if (meta) {
@@ -383,6 +388,7 @@ var Supler;
             this.type = json.type;
             this.enabled = json.enabled;
             this.validate = json.validate || {};
+            this.description = json.description;
         }
         FieldData.prototype.getRenderHint = function () {
             if (this.renderHintOverride) {
@@ -947,21 +953,24 @@ var Supler;
         };
         Bootstrap3RenderOptions.prototype.renderField = function (input, fieldData, compact) {
             var labelPart;
+            var descriptionPart;
             if (compact) {
                 labelPart = '';
+                descriptionPart = '';
             }
             else {
-                labelPart = this.renderLabel(fieldData.id, fieldData.label) + '\n';
+                labelPart = this.renderLabel(fieldData.id, fieldData.label);
+                descriptionPart = this.renderDescription(fieldData.description);
             }
-            var divBody = labelPart + input + '\n' + this.renderValidation(fieldData.validationId) + '\n';
+            var divBody = labelPart + '\n' + input + '\n' + descriptionPart + '\n' + this.renderValidation(fieldData.validationId) + '\n';
             return Supler.HtmlUtil.renderTag('div', { 'class': 'form-group' + this.addColumnWidthClass(fieldData) }, divBody);
         };
         Bootstrap3RenderOptions.prototype.addColumnWidthClass = function (fieldData) {
             if (fieldData.fieldsPerRow > 0) {
-                return " col-md-" + (fieldData.fieldsPerRow >= 12 ? 1 : 12 / fieldData.fieldsPerRow);
+                return ' col-md-' + (fieldData.fieldsPerRow >= 12 ? 1 : 12 / fieldData.fieldsPerRow);
             }
             else {
-                return "";
+                return '';
             }
         };
         Bootstrap3RenderOptions.prototype.renderHiddenFormGroup = function (input) {
@@ -972,6 +981,13 @@ var Supler;
         };
         Bootstrap3RenderOptions.prototype.renderLabel = function (forId, label) {
             return Supler.HtmlUtil.renderTagEscaped('label', { 'for': forId }, label);
+        };
+        Bootstrap3RenderOptions.prototype.renderDescription = function (description) {
+            if (description) {
+                return Supler.HtmlUtil.renderTagEscaped('p', { 'class': 'help-block' }, description);
+            }
+            else
+                return '';
         };
         Bootstrap3RenderOptions.prototype.renderValidation = function (validationId) {
             return Supler.HtmlUtil.renderTagEscaped('div', { 'class': 'text-danger', 'id': validationId });
@@ -1254,7 +1270,7 @@ var Supler;
             this.validation = new Supler.Validation(this.elementSearch, formElementDictionary, this.validatorRenderOptions, this.i18n, this.readFormValues);
             this.validation.processServer(json.errors);
             if (oldValidation) {
-                this.validation.copyFrom(oldValidation);
+                this.validation.reprocessClientFrom(oldValidation);
             }
         };
         Form.prototype.getValue = function (modalFieldPath, selectedButtonId) {
@@ -1362,6 +1378,19 @@ var Supler;
         };
         Util.escapeRegExp = function (s) {
             return s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+        };
+        Util.arrayDifference = function (a1, a2) {
+            var a = [], diff = [];
+            for (var i = 0; i < a1.length; i++)
+                a[a1[i]] = true;
+            for (var i = 0; i < a2.length; i++)
+                if (a[a2[i]])
+                    delete a[a2[i]];
+                else
+                    a[a2[i]] = true;
+            for (var k in a)
+                diff.push(k);
+            return diff;
         };
         return Util;
     })();
@@ -1508,6 +1537,9 @@ var Supler;
             if (element.hasAttribute(this.FIELD_LABEL_TEMPLATE)) {
                 return this.parseFieldLabelTemplate(element);
             }
+            if (element.hasAttribute(this.FIELD_DESCRIPTION_TEMPLATE)) {
+                return this.parseFieldDescriptionTemplate(element);
+            }
             if (element.hasAttribute(this.FIELD_VALIDATION_TEMPLATE)) {
                 return this.parseFieldValidationTemplate(element);
             }
@@ -1522,8 +1554,9 @@ var Supler;
             return Supler.CreateRenderOptionsModifier.withOverride({
                 renderField: function (input, fieldData, compact) {
                     var renderedLabel = compact ? '' : this.renderLabel(fieldData.id, fieldData.label);
+                    var renderedDescription = compact ? '' : this.renderDescription(fieldData.description);
                     var renderedValidation = this.renderValidation(fieldData.validationId);
-                    return template.replace('{{suplerLabel}}', renderedLabel).replace('{{suplerInput}}', input).replace('{{suplerValidation}}', renderedValidation);
+                    return template.replace('{{suplerLabel}}', renderedLabel).replace('{{suplerDescription}}', renderedDescription).replace('{{suplerInput}}', input).replace('{{suplerValidation}}', renderedValidation);
                 }
             });
         };
@@ -1532,6 +1565,18 @@ var Supler;
             return Supler.CreateRenderOptionsModifier.withOverride({
                 renderLabel: function (forId, label) {
                     return template.replace('{{suplerLabelForId}}', forId).replace('{{suplerLabelText}}', label);
+                }
+            });
+        };
+        SingleTemplateParser.parseFieldDescriptionTemplate = function (element) {
+            var template = element.innerHTML;
+            return Supler.CreateRenderOptionsModifier.withOverride({
+                renderDescription: function (description) {
+                    if (description) {
+                        return template.replace('{{suplerDescriptionText}}', description);
+                    }
+                    else
+                        return '';
                 }
             });
         };
@@ -1611,6 +1656,7 @@ var Supler;
         };
         SingleTemplateParser.FIELD_TEMPLATE = 'supler:fieldTemplate';
         SingleTemplateParser.FIELD_LABEL_TEMPLATE = 'supler:fieldLabelTemplate';
+        SingleTemplateParser.FIELD_DESCRIPTION_TEMPLATE = 'supler:fieldDescriptionTemplate';
         SingleTemplateParser.FIELD_VALIDATION_TEMPLATE = 'supler:fieldValidationTemplate';
         SingleTemplateParser.FIELD_INPUT_TEMPLATE = 'supler:fieldInputTemplate';
         return SingleTemplateParser;
@@ -1651,7 +1697,7 @@ var Supler;
             this.validatorRenderOptions = validatorRenderOptions;
             this.i18n = i18n;
             this.readFormValues = readFormValues;
-            this.addedValidations = {};
+            this.addedValidations = new AddedValidations();
         }
         Validation.prototype.processServer = function (validationJson) {
             this.removeAllValidationErrors();
@@ -1702,37 +1748,42 @@ var Supler;
             return document.getElementById(validationId);
         };
         Validation.prototype.removeAllValidationErrors = function () {
-            Supler.Util.foreach(this.addedValidations, function (elementId, addedValidation) {
+            Supler.Util.foreach(this.addedValidations.byId, function (elementId, addedValidation) {
                 addedValidation.remove();
             });
-            this.addedValidations = {};
+            this.addedValidations = new AddedValidations();
         };
         Validation.prototype.removeSingleValidationErrors = function (elementId) {
-            var addedValidation = this.addedValidations[elementId];
+            var addedValidation = this.addedValidations.byId[elementId];
             if (addedValidation) {
                 addedValidation.remove();
-                delete this.addedValidations[elementId];
+                delete this.addedValidations.byId[elementId];
+                delete this.addedValidations.byPath[addedValidation.formElementPath()];
             }
         };
         Validation.prototype.appendValidation = function (text, validationElement, formElement) {
-            if (!this.addedValidations.hasOwnProperty(formElement.id)) {
-                this.addedValidations[formElement.id] = new AddedValidation(this.validatorRenderOptions, this.readFormValues, formElement, validationElement);
+            var addedValidation;
+            if (!this.addedValidations.byId.hasOwnProperty(formElement.id)) {
+                addedValidation = new AddedValidation(this.validatorRenderOptions, this.readFormValues, formElement, validationElement);
+                this.addedValidations.byId[formElement.id] = addedValidation;
+                this.addedValidations.byPath[addedValidation.formElementPath()] = addedValidation;
             }
-            var addedValidation = this.addedValidations[formElement.id];
+            else {
+                addedValidation = this.addedValidations.byId[formElement.id];
+            }
             if (addedValidation.addText(text)) {
                 this.validatorRenderOptions.appendValidation(text, validationElement, formElement);
             }
         };
-        Validation.prototype.copyFrom = function (other) {
+        Validation.prototype.reprocessClientFrom = function (other) {
             var _this = this;
-            Supler.Util.foreach(other.addedValidations, function (otherElementId, otherAddedValidation) {
-                var newFormElement = _this.elementSearch.byPath(otherAddedValidation.formElementPath());
-                if (newFormElement) {
-                    if (Supler.Util.deepEqual(otherAddedValidation.invalidValue, _this.readFormValues.getValueFrom(newFormElement))) {
-                        var newValidationElement = _this.lookupValidationElement(newFormElement);
-                        otherAddedValidation.texts.forEach(function (text) {
-                            _this.appendValidation(text, newValidationElement, newFormElement);
-                        });
+            Supler.Util.foreach(other.addedValidations.byPath, function (path, otherAddedValidation) {
+                if (!_this.addedValidations.byPath.hasOwnProperty(path)) {
+                    var newFormElement = _this.elementSearch.byPath(path);
+                    if (newFormElement) {
+                        if (Supler.Util.deepEqual(otherAddedValidation.invalidValue, _this.readFormValues.getValueFrom(newFormElement))) {
+                            _this.processClientSingle(newFormElement.id);
+                        }
                     }
                 }
             });
@@ -1740,6 +1791,13 @@ var Supler;
         return Validation;
     })();
     Supler.Validation = Validation;
+    var AddedValidations = (function () {
+        function AddedValidations() {
+            this.byId = {};
+            this.byPath = {};
+        }
+        return AddedValidations;
+    })();
     var AddedValidation = (function () {
         function AddedValidation(validatorRenderOptions, readFormValues, formElement, validationElement) {
             this.validatorRenderOptions = validatorRenderOptions;

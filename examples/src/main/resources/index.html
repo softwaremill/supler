@@ -45,15 +45,17 @@
 </div>
 
 <div class="container theme-showcase" role="main">
-    <div class="jumbotron">
-        <h1>Form 1</h1>
-        <div id="form-container">
-            <div supler:fieldInputTemplate supler:fieldPath="save">
-                <button class="btn btn-primary btn-lg" role="button" {{suplerFieldInputAttrs}}>Save</button>
+    <div class="panel panel-default">
+        <div class="panel-heading">Form 1</div>
+        <div class="panel-body">
+            <div id="form-container">
+                <div supler:fieldInputTemplate supler:fieldPath="save">
+                    <button class="btn btn-primary btn-lg" role="button" {{suplerFieldInputAttrs}}>Save</button>
+                </div>
             </div>
+            <p id="feedback"></p>
         </div>
-        <p id="feedback"></p>
-
+        
         <!-- Modal -->
         <div class="modal fade" id="supler-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">

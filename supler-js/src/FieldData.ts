@@ -14,6 +14,7 @@ module Supler {
       this.type = json.type;
       this.enabled = json.enabled;
       this.validate = json.validate || {};
+      this.description = json.description;
     }
 
     public name:string;
@@ -23,6 +24,7 @@ module Supler {
     public type:string;
     public enabled:boolean;
     public validate:any;
+    public description:string;
 
     getRenderHint():any {
       if (this.renderHintOverride) {

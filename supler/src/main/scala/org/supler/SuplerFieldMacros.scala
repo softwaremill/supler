@@ -124,16 +124,16 @@ object SuplerFieldMacros {
     def newBasicField[T, U, S](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,
       transformer: Transformer[U, S], emptyValue: Option[U]): BasicField[T, U] = {
 
-      BasicField[T, U](fieldName, read, write, List(), None, required, transformer, transformer.renderHint, emptyValue,
-        AlwaysCondition, AlwaysCondition)
+      BasicField[T, U](fieldName, read, write, List(), None, None, required, transformer, transformer.renderHint,
+        emptyValue, AlwaysCondition, AlwaysCondition)
     }
 
     def newSubformField[T, ContU, U, Cont[_]](c: SubformContainer[ContU, U, Cont])
       (fieldName: String, read: T => Cont[U], write: (T, Cont[U]) => T,
         embeddedForm: Form[U], createEmpty: Option[() => U]): SubformField[T, ContU, U, Cont] = {
 
-      SubformField[T, ContU, U, Cont](c, fieldName, read, write, None, embeddedForm, createEmpty, SubformListRenderHint,
-        AlwaysCondition, AlwaysCondition)
+      SubformField[T, ContU, U, Cont](c, fieldName, read, write, None, None, embeddedForm, createEmpty,
+        SubformListRenderHint, AlwaysCondition, AlwaysCondition)
     }
 
     def newAlmostSelectOneField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,

@@ -11,6 +11,7 @@ case class BasicField[T, U](
   write: (T, U) => T,
   validators: List[Validator[T, U]],
   label: Option[String],
+  description: Option[String],
   required: Boolean,
   transformer: Transformer[U, _],
   renderHint: Option[RenderHint with BasicFieldCompatible],
@@ -19,6 +20,7 @@ case class BasicField[T, U](
   includeIf: T => Boolean) extends Field[T] with GenerateBasicJSON[T] with ValidateWithValidators[T, U] {
 
   def label(newLabel: String): BasicField[T, U] = this.copy(label = Some(newLabel))
+  def description(newDescription: String): BasicField[T, U] = this.copy(description = Some(newDescription))
 
   def validate(validators: Validator[T, U]*): BasicField[T, U] = this.copy(validators = this.validators ++ validators)
 

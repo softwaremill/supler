@@ -21,10 +21,10 @@ describe('customize render', function() {
       // given
       container.innerHTML = document.getElementById('templates_oneinput_button').innerHTML;
 
-      var state = 1;
+      var formSent = false;
 
       function sendForm() {
-        state = 2;
+        formSent = true;
       }
 
       var sf = new Supler.Form(container, {
@@ -37,7 +37,7 @@ describe('customize render', function() {
       // then
       byName('addx').attr('customattr').should.equal('custombutton');
       byName('addx').click();
-      state.should.equal(2);
+      formSent.should.be.true();
     });
 
     it('should use an input template for the specified boolean field', function () {

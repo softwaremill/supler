@@ -26,6 +26,11 @@ The fields can be further customized. Almost always you'll want to specify the l
 
 The label can also be a key which will be looked up in the :ref:`i18n <i18n>` component on the frontend.
 
+You can also provide a field description, which can be an explanation why you need this field to be filled, or
+a tip to the user on how to properly fill in a value::
+
+  f.field(_.firstName).label("First name").description("Your first name goes here. For example: John")
+
 .. note::
 
   All Supler objects (fields, forms, ...) are immutable and can be freely re-used (or shared between threads). Adding a
@@ -48,8 +53,8 @@ of some common fields. For example::
 Multiple fields in rows
 -----------------------
 
-If you would like to have your fields rendered one next to the other as opposed to a horizontal list, you can use the ``||``
-operator::
+If you would like to render a couple of fields in a single row, as opposed to the default horizontal rendering,
+you can use the ``||`` operator::
 
   case class Person(firstName: String, lastName: String, age: Int)
 

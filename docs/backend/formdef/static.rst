@@ -10,3 +10,6 @@ be included when the form is serialized on the frontend, and sent back to the se
     f.field(_.name).label("Name"),
     f.staticField(_.registrationId).label("Registration id")
   ))
+
+Static fields have random names by default. If you'd like to customize the field order, assign a name to the
+static field using the ``name`` method.

@@ -12,6 +12,7 @@ case class SelectOneField[T, U](
   valuesProvider: ValuesProvider[T, U],
   label: Option[String],
   labelForValue: U => String,
+  description: Option[String],
   idForValue: Option[U => String],
   required: Boolean,
   renderHint: Option[RenderHint with SelectOneFieldCompatible],
@@ -20,6 +21,7 @@ case class SelectOneField[T, U](
   includeIf: T => Boolean) extends Field[T] with SelectField[T, U] with ValidateWithValidators[T, U] {
 
   def label(newLabel: String): SelectOneField[T, U] = this.copy(label = Some(newLabel))
+  def description(newDescription: String): SelectOneField[T, U] = this.copy(description = Some(newDescription))
   def validate(validators: Validator[T, U]*): SelectOneField[T, U] = this.copy(validators = this.validators ++ validators)
   def renderHint(newRenderHint: RenderHint with SelectOneFieldCompatible): SelectOneField[T, U] = this.copy(renderHint = Some(newRenderHint))
 
@@ -62,6 +64,6 @@ class AlmostSelectOneField[T, U](
   emptyValue: Option[U]) {
 
   def possibleValues(valuesProvider: ValuesProvider[T, U]): SelectOneField[T, U] =
-    SelectOneField(name, read, write, Nil, valuesProvider, None, labelForValue, None, required, renderHint, emptyValue,
-      AlwaysCondition, AlwaysCondition)
+    SelectOneField(name, read, write, Nil, valuesProvider, None, labelForValue, None, None, required, renderHint,
+      emptyValue, AlwaysCondition, AlwaysCondition)
 }

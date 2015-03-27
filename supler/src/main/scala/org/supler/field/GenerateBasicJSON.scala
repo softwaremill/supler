@@ -7,7 +7,6 @@ import org.supler._
 trait GenerateBasicJSON[T] {
   this: Field[T] =>
 
-  def label: Option[String]
   def renderHint: Option[RenderHint]
 
   private[supler] override def generateFieldJSON(parentPath: FieldPath, obj: T) = {
@@ -16,7 +15,6 @@ trait GenerateBasicJSON[T] {
     import JSONFieldNames._
 
     JObject(List(
-      JField(Label, JString(label.getOrElse(""))),
       JField(Type, JString(data.fieldTypeName)),
       JField(Validate, JObject(data.validationJSON.toList)),
       JField(Path, JString(parentPath.append(name).toString))

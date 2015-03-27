@@ -23,6 +23,8 @@ the form JSON is available, create a new ``Supler.Form``:
 
 If the JSON received from the server contains validation errors, they will be displayed as well.
 
+.. _rendering_fieldorder:
+
 Field order
 -----------
 
@@ -40,3 +42,6 @@ You may choose to change the order of fields that comes from the backend. To do 
   });
 
 The ``field_order`` field should be a two-dimensional string array with field names that represents form rows.
+
+Note that if you have fields which have random names (static fields), you will have to name them to be able to reference
+them in the field order.

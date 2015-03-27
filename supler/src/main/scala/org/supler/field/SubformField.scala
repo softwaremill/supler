@@ -10,7 +10,8 @@ case class SubformField[T, ContU, U, Cont[_]](
   name: String,
   read: T => Cont[U],
   write: (T, Cont[U]) => T,
-  _label: Option[String],
+  label: Option[String],
+  description: Option[String],
   embeddedForm: Form[U],
   // if not specified, `embeddedForm.createEmpty` will be used
   createEmpty: Option[() => U],
@@ -20,7 +21,8 @@ case class SubformField[T, ContU, U, Cont[_]](
   
   import c._
   
-  def label(newLabel: String): SubformField[T, ContU, U, Cont] = this.copy(_label = Some(newLabel))
+  def label(newLabel: String): SubformField[T, ContU, U, Cont] = this.copy(label = Some(newLabel))
+  def description(newDescription: String): SubformField[T, ContU, U, Cont] = this.copy(description = Some(newDescription))
 
   def renderHint(newRenderHint: RenderHint with SubformFieldCompatible): SubformField[T, ContU, U, Cont] = this.copy(renderHint = newRenderHint)
 
@@ -37,7 +39,7 @@ case class SubformField[T, ContU, U, Cont[_]](
       JField(Type, JString(SpecialFieldTypes.Subform)),
       JField(RenderHint, JObject(JField("name", JString(renderHint.name)) :: renderHint.extraJSON)),
       JField(Multiple, JBool(c.isMultiple)),
-      JField(Label, JString(_label.getOrElse(""))),
+      JField(Label, JString(label.getOrElse(""))),
       JField(Path, JString(parentPath.append(name).toString)),
       JField(Value, c.combineJValues(valuesAsJValue))
     )

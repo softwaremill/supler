@@ -29,6 +29,7 @@ module Supler {
     // [label] [input] [validation]
     renderField: (input:string, fieldData:FieldData, compact:boolean) => string
     renderLabel: (forId:string, label:string) => string
+    renderDescription: (description:string) => string
     renderValidation: (validationId:string) => string
 
     renderRow: (fields: string) => string
@@ -141,14 +142,20 @@ module Supler {
 
     renderField(input, fieldData, compact) {
       var labelPart;
+      var descriptionPart;
       if (compact) {
         labelPart = '';
+        descriptionPart = '';
       } else {
-        labelPart = this.renderLabel(fieldData.id, fieldData.label) + '\n';
+        labelPart = this.renderLabel(fieldData.id, fieldData.label);
+        descriptionPart = this.renderDescription(fieldData.description);
       }
 
       var divBody = labelPart +
+        '\n' +
         input +
+        '\n' +
+        descriptionPart +
         '\n' +
         this.renderValidation(fieldData.validationId) +
         '\n';
@@ -158,9 +165,9 @@ module Supler {
 
     private addColumnWidthClass(fieldData: FieldData) {
       if (fieldData.fieldsPerRow > 0) {
-        return " col-md-" + (fieldData.fieldsPerRow >= 12 ? 1 : 12 / fieldData.fieldsPerRow);
+        return ' col-md-' + (fieldData.fieldsPerRow >= 12 ? 1 : 12 / fieldData.fieldsPerRow);
       } else {
-        return "";
+        return '';
       }
     }
 
@@ -173,6 +180,12 @@ module Supler {
 
     renderLabel(forId, label) {
       return HtmlUtil.renderTagEscaped('label', {'for': forId}, label);
+    }
+
+    renderDescription(description) {
+      if (description) {
+        return HtmlUtil.renderTagEscaped('p', {'class': 'help-block'}, description);
+      } else return '';
     }
 
     renderValidation(validationId) {

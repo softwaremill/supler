@@ -65,7 +65,7 @@ object Supler extends Validators with RenderHints {
    * that behavior.
    */
   def action[T](name: String)(action: T => ActionResult[T]): ActionField[T] =
-    ActionField(name, action, None, BeforeActionValidateNone, AlwaysCondition, AlwaysCondition)
+    ActionField(name, action, None, None, BeforeActionValidateNone, AlwaysCondition, AlwaysCondition)
 
   /**
    * Creates an action which can be passed to a subform and used in a subform's action field. Such an action has access
@@ -73,7 +73,7 @@ object Supler extends Validators with RenderHints {
    */
   def parentAction[T, U](action: (T, Int, U) => ActionResult[T]): U => ActionResult[U] = ActionResult.parentAction(action)
 
-  def staticField[T](createMessage: T => Message) = new StaticField[T](createMessage, None,
+  def staticField[T](createMessage: T => Message) = new StaticField[T](None, createMessage, None, None,
     AlwaysCondition)
 }
 
@@ -128,7 +128,7 @@ trait Supler[T] extends Validators {
    * By default, no fields will be validated when the action is invoked. Use the `.validateXxx` methods to customize
    * that behavior.
    */
-  def action(name: String)(action: T => ActionResult[T]): ActionField[T] = ActionField(name, action, None,
+  def action(name: String)(action: T => ActionResult[T]): ActionField[T] = ActionField(name, action, None, None,
     BeforeActionValidateNone, AlwaysCondition, AlwaysCondition)
 
   /**
@@ -140,8 +140,9 @@ trait Supler[T] extends Validators {
   /**
    * A new static field that will be rendered as a label.
    */
-  def staticField(createMessage: T => Message) = new StaticField[T](createMessage, None, AlwaysCondition)
-
+  def staticField(createMessage: T => Message) = new StaticField[T](None, createMessage, None, None,
+    AlwaysCondition)
+  
   /**
    * Modal field will render a button on the form that when pressed will show a form returned by a `form` closure.
    */
