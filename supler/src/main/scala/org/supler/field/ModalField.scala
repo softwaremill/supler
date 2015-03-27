@@ -9,6 +9,7 @@ case class ModalField[T](
                           name: String,
                           form: T => FormWithObject[_],
                           label: Option[String],
+                          description: Option[String],
                           enabledIf: T => Boolean,
                           includeIf: T => Boolean) extends Field[T] {
   override private[supler] def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
