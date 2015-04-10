@@ -20,7 +20,8 @@ object PersonForm {
   val carModalForm = form[Car](f => List(
     f.field(_.make),
     f.field(_.model),
-    f.field(_.year)
+    f.field(_.year),
+    f.staticField(c => if (c.year < 2010) Message("Your car is old") else Message("#jb"))
   ))
 
   def carForm(deleteAction: Car => ActionResult[Car]) = form[Car](f => List(

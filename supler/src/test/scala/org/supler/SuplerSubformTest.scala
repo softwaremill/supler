@@ -110,7 +110,7 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
       """.stripMargin)
 
     // when
-    val result = personForm(PersonManyCars("", Nil)).applyJSONValues(jsonInOrder)
+    val result = personForm(PersonManyCars("", Nil)).applyJSONValues(jsonInOrder).formObjectAndErrors
 
     // then
     result.errors should be ('empty)
@@ -134,7 +134,7 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
         |}""".stripMargin)
 
     // when
-    val result = personForm(PersonOneCar("", Car("m2", 20))).applyJSONValues(json)
+    val result = personForm(PersonOneCar("", Car("m2", 20))).applyJSONValues(json).formObjectAndErrors
 
     // then
     result.errors should be ('empty)
@@ -160,8 +160,8 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
     val json2 = parseJson("{}")
 
     // when
-    val result1 = personForm(PersonOptionalCal("", None)).applyJSONValues(json1)
-    val result2 = personForm(PersonOptionalCal("", None)).applyJSONValues(json2)
+    val result1 = personForm(PersonOptionalCal("", None)).applyJSONValues(json1).formObjectAndErrors
+    val result2 = personForm(PersonOptionalCal("", None)).applyJSONValues(json2).formObjectAndErrors
 
     // then
     result1.errors should be ('empty)

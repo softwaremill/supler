@@ -3,7 +3,7 @@ package org.supler
 import java.util.Date
 
 import org.json4s.JValue
-import org.json4s.JsonAST.{JInt, JObject, JField}
+import org.json4s.JsonAST.{JField, JInt, JObject}
 import org.json4s.native.JsonMethods._
 import org.scalatest._
 import org.supler.Supler._
@@ -66,7 +66,10 @@ class TransformerTest extends FlatSpec with ShouldMatchers {
     val json = parse("""{"p": {"x":10,"y":20}}""")
 
     // when
-    val result = pointForm(PointObj(Point(1, 2))).applyJSONValues(json)
+    val result = pointForm(PointObj(Point(1, 2))).applyJSONValues(json) match {
+      case ParentFormApplyResult(formObjectAndErrors) => formObjectAndErrors
+      case _ => fail("Expected parent apply result")
+    }
 
     // then
     result.obj.p should be (Point(10, 20))

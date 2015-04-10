@@ -5,9 +5,9 @@ import org.json4s._
 import org.supler.validation.{PartiallyAppliedObj, ValidationScope}
 import org.supler.{FieldPath, FormWithObject}
 
-case class ModalField[T](
+case class ModalField[T, U](
                           name: String,
-                          form: T => FormWithObject[_],
+                          form: T => FormWithObject[U],
                           label: Option[String],
                           description: Option[String],
                           enabledIf: T => Boolean,
@@ -27,11 +27,11 @@ case class ModalField[T](
 
   override private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) = Nil
 
-  def label(newLabel: String): ModalField[T] = this.copy(label = Some(newLabel))
+  def label(newLabel: String): ModalField[T, U] = this.copy(label = Some(newLabel))
 
-  def enabledIf(condition: T => Boolean): ModalField[T] = this.copy(enabledIf = condition)
+  def enabledIf(condition: T => Boolean): ModalField[T, U] = this.copy(enabledIf = condition)
 
-  def includeIf(condition: T => Boolean): ModalField[T] = this.copy(includeIf = condition)
+  def includeIf(condition: T => Boolean): ModalField[T, U] = this.copy(includeIf = condition)
 
   override private[supler] def findModal(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue])
     : Option[ShowableModal] = {

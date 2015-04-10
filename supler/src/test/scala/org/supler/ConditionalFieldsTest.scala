@@ -1,8 +1,8 @@
 package org.supler
 
-import org.scalatest.{ShouldMatchers, FlatSpec}
 import org.json4s.native.JsonMethods._
-import Supler._
+import org.scalatest.{FlatSpec, ShouldMatchers}
+import org.supler.Supler._
 
 class ConditionalFieldsTest extends FlatSpec with ShouldMatchers {
   case class Person(f1: String, f2: String, flag: Boolean)
@@ -35,8 +35,8 @@ class ConditionalFieldsTest extends FlatSpec with ShouldMatchers {
 
   it should "apply values to a conditional field only if it is included" in {
     // when
-    val rTrue = personFormIncl(Person("v1", "v2", flag = true)).applyJSONValues(personValuesJson)
-    val rFalse = personFormIncl(Person("v1", "v2", flag = false)).applyJSONValues(personValuesJson)
+    val rTrue = personFormIncl(Person("v1", "v2", flag = true)).applyJSONValues(personValuesJson).formObjectAndErrors
+    val rFalse = personFormIncl(Person("v1", "v2", flag = false)).applyJSONValues(personValuesJson).formObjectAndErrors
 
     // then
     rTrue.obj should be (Person("v11", "v22", flag = true))
@@ -45,8 +45,8 @@ class ConditionalFieldsTest extends FlatSpec with ShouldMatchers {
 
   it should "apply values to a conditional field only if it is enabled" in {
     // when
-    val rTrue = personFormEn(Person("v1", "v2", flag = true)).applyJSONValues(personValuesJson)
-    val rFalse = personFormEn(Person("v1", "v2", flag = false)).applyJSONValues(personValuesJson)
+    val rTrue = personFormEn(Person("v1", "v2", flag = true)).applyJSONValues(personValuesJson).formObjectAndErrors
+    val rFalse = personFormEn(Person("v1", "v2", flag = false)).applyJSONValues(personValuesJson).formObjectAndErrors
 
     // then
     rTrue.obj should be (Person("v11", "v22", flag = true))

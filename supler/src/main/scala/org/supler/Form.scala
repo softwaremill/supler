@@ -51,6 +51,11 @@ case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
     }
   }
 
+  private[supler] def findFieldByPath(fieldPath: String): Option[Field[_]] = {
+    val parsedPath = FieldPath.parse(fieldPath)
+    parsedPath.findField(this)
+  }
+
   private def requireFieldsUnique() {
     val fieldsUsedMultipletimes = rows.flatMap {
       case MultiFieldRow(fields) => fields

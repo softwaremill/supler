@@ -11,14 +11,17 @@ import org.supler.validation._
  * - form with an object, and optional errors and custom data
  * - custom data only, represented as json. This can be a result of running an action.
  */
-sealed trait SuplerData[+T] {
+sealed trait SuplerData {
   def generateJSON: JValue
 }
 
-trait FormWithObject[T] extends SuplerData[T] {
+trait FormWithObject[T] extends SuplerData {
   def obj: T
+
   def form: Form[T]
+
   def meta: FormMeta
+
   /**
    * Custom data which will be included in the generated JSON, passed to the frontend.
    * Not used or manipulated in any other way by Supler.
@@ -26,15 +29,48 @@ trait FormWithObject[T] extends SuplerData[T] {
   def customData: Option[JValue]
 
   protected def applyErrors: FieldErrors
+
   protected def validationErrors: FieldErrors
+
   protected def allErrors: FieldErrors = applyErrors ++ validationErrors
 
   def withMeta(key: String, value: String): FormWithObject[T]
 
-  def applyJSONValues(jvalue: JValue): FormWithObjectAndErrors[T] = {
-    val result = form.applyJSONValues(EmptyPath, obj, jvalue)
+  def applyJSONValues(jvalue: JValue): JSONApplyResult[T] = {
+    modalFormPath(jvalue) match {
+      case Some(path) => form.findFieldByPath(path) match {
+        case Some(modal: ModalField[T, _]) => {
+          applyJSONValuesOnModal(modal, jvalue)
+        }
+        case other =>
+          throw new IllegalStateException(s"Expected field of type ModalField under path ${path} but got ${other}")
+      }
+      case None => {
+        val result = form.applyJSONValues(EmptyPath, obj, jvalue)
+        ParentFormApplyResult(
+          new FormWithObjectAndErrors(form, result.obj, customData, result.errors, Nil, FormMeta.fromJSON(jvalue)))
+      }
+    }
+  }
 
-    new FormWithObjectAndErrors(form, result.obj, customData, result.errors, Nil, FormMeta.fromJSON(jvalue))
+  private def applyJSONValuesOnModal[U](modal: ModalField[T, U], jvalue: JValue) : ModalFormApplyResult[T] = {
+    val blah = modal.form(obj)
+    val modalForm: FormWithObject[U] = modal.form(obj)
+    val modalObj = modalForm.obj
+    val result = modalForm.form.applyJSONValues(EmptyPath, modalObj, jvalue)
+    ModalFormApplyResult(new FormWithObjectAndErrors[U](modalForm.form, result.obj, modalForm.customData, 
+      result.errors, Nil, FormMeta.fromJSON(jvalue)))
+  }
+
+  private def modalFormPath(jvalue: JValue): Option[String] = {
+    jvalue match {
+      case JObject (jsonFields) =>
+        jsonFields.toMap.get ("supler_modal_path") match {
+          case Some(JString(path)) => Some(path)
+          case _ => None
+        }
+      case _ => None
+    }
   }
 
   def doValidate(scope: ValidationScope = ValidateAll): FormWithObjectAndErrors[T] = {
@@ -61,8 +97,8 @@ trait FormWithObject[T] extends SuplerData[T] {
    * If there's no action, validation of filled fields is run and the result is returned.
    * If there's an action, the action result (optional) together with the new form (optional) is returned.
    */
-  def process(jvalue: JValue): SuplerData[T] = {
-    val applied = this.applyJSONValues(jvalue)
+  def process(jvalue: JValue): SuplerData = {
+    val applied = this.applyJSONValues(jvalue).formObjectAndErrors
 
     applied.findAndRunAction(jvalue) match {
       case Some(actionResult) => actionResult
@@ -77,7 +113,7 @@ trait FormWithObject[T] extends SuplerData[T] {
    * Finds an action, and if there's one, runs the required validation and if there are no errors, the action itself.
    * @return `Some` if an action was found. Contains the validated form with errors or the action result.
    */
-  def findAndRunAction(jvalue: JValue): Option[SuplerData[T]] = {
+  def findAndRunAction(jvalue: JValue): Option[SuplerData] = {
     form.findAction(EmptyPath, obj, jvalue, RunActionContext(Nil)).map { runnableAction =>
       val validated = this.doValidate(runnableAction.validationScope)
       if (validated.hasErrors) {
@@ -101,31 +137,40 @@ case class InitialFormWithObject[T](form: Form[T], obj: T, customData: Option[JV
   override protected val applyErrors = Nil
   override protected val validationErrors = Nil
 
-  override def withMeta(key: String, value: String): InitialFormWithObject[T] = this.copy(meta = meta + (key, value))
+  override def withMeta(key: String, value: String): InitialFormWithObject[T] = this.copy(meta = meta +(key, value))
 }
 
 case class FormWithObjectAndErrors[T](
-  form: Form[T],
-  obj: T,
-  customData: Option[JValue],
-  applyErrors: FieldErrors,
-  validationErrors: FieldErrors,
-  meta: FormMeta) extends FormWithObject[T] {
+                                       form: Form[T],
+                                       obj: T,
+                                       customData: Option[JValue],
+                                       applyErrors: FieldErrors,
+                                       validationErrors: FieldErrors,
+                                       meta: FormMeta) extends FormWithObject[T] {
 
   def errors: FieldErrors = allErrors
+
   def hasErrors: Boolean = allErrors.size > 0
 
-  override def withMeta(key: String, value: String): FormWithObjectAndErrors[T] = this.copy(meta = meta + (key, value))
+  override def withMeta(key: String, value: String): FormWithObjectAndErrors[T] = this.copy(meta = meta +(key, value))
 }
 
-case class CustomDataOnly private[supler] (customData: JValue) extends SuplerData[Nothing] {
+case class CustomDataOnly private[supler](customData: JValue) extends SuplerData {
   override def generateJSON = customData
 }
 
-case class ModalFormWithObject[T](modalPath: FieldPath, modalForm: SuplerData[_]) extends SuplerData[T] {
+case class ModalFormWithObject[T](modalPath: FieldPath, modalForm: SuplerData) extends SuplerData {
   override def generateJSON = JObject(
     JField("type", JString("modal")),
     JField("path", JString(modalPath.toString)),
     JField("form", modalForm.generateJSON)
   )
 }
+
+sealed trait JSONApplyResult[T] {
+  def formObjectAndErrors: FormWithObjectAndErrors[_]
+}
+
+case class ParentFormApplyResult[T](formObjectAndErrors: FormWithObjectAndErrors[T]) extends JSONApplyResult[T]
+
+case class ModalFormApplyResult[T](formObjectAndErrors: FormWithObjectAndErrors[_]) extends JSONApplyResult[T]

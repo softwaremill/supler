@@ -1,8 +1,8 @@
 package org.supler
 
+import org.json4s.native.JsonMethods._
 import org.scalatest._
 import org.supler.Supler._
-import org.json4s.native.JsonMethods._
 
 class SelectFieldTest extends FlatSpec with ShouldMatchers {
   case class Select1Required(field1: String)
@@ -19,7 +19,7 @@ class SelectFieldTest extends FlatSpec with ShouldMatchers {
 
   it should "apply from possible values basing on list index when no custom id function is provided" in {
     // when
-    val result = fReq(Select1Required("a")).applyJSONValues(parse("""{"field1": "1"}"""))
+    val result = fReq(Select1Required("a")).applyJSONValues(parse("""{"field1": "1"}""")).formObjectAndErrors
 
     // then
     result.obj should be (Select1Required("b"))
@@ -27,7 +27,7 @@ class SelectFieldTest extends FlatSpec with ShouldMatchers {
 
   it should "not apply and leave value intact, fail validation if no value is selected and a value is required" in {
     // when
-    val result = fReq(Select1Required("")).applyJSONValues(parse("""{"field1": null}"""))
+    val result = fReq(Select1Required("")).applyJSONValues(parse("""{"field1": null}""")).formObjectAndErrors
 
     // then
     result.obj should be (Select1Required(""))
@@ -36,7 +36,7 @@ class SelectFieldTest extends FlatSpec with ShouldMatchers {
 
   it should "apply an empty value if no value is selected and a value is optional, pass validation" in {
     // when
-    val result = fOpt(Select1Optional(Some("a"))).applyJSONValues(parse("""{"field1": null}"""))
+    val result = fOpt(Select1Optional(Some("a"))).applyJSONValues(parse("""{"field1": null}""")).formObjectAndErrors
 
     // then
     result.obj should be (Select1Optional(None))
@@ -48,7 +48,7 @@ class SelectFieldTest extends FlatSpec with ShouldMatchers {
     val fReqCustomId = form[Select1Required](f => List(fReqField1.idForValue(s => s+s)))
 
     // when
-    val result = fReqCustomId(Select1Required("a")).applyJSONValues(parse("""{"field1": "bb"}"""))
+    val result = fReqCustomId(Select1Required("a")).applyJSONValues(parse("""{"field1": "bb"}""")).formObjectAndErrors
 
     // then
     result.obj should be (Select1Required("b"))

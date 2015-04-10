@@ -1,9 +1,9 @@
 package org.supler
 
 import org.json4s.JsonAST._
-import org.scalatest.{FlatSpec, ShouldMatchers}
-import Supler._
 import org.json4s.native._
+import org.scalatest.{FlatSpec, ShouldMatchers}
+import org.supler.Supler._
 
 class ApplyTest extends FlatSpec with ShouldMatchers {
   "form" should "apply json values to the entity given" in {
@@ -39,9 +39,9 @@ class ApplyTest extends FlatSpec with ShouldMatchers {
     val p = Person("Mary", None, f3 = false, Some("Nothing"))
 
     // when
-    val p1 = personForm(p).applyJSONValues(jsonInOrder).obj
-    val p2 = personForm(p).applyJSONValues(jsonOutOfOrder).obj
-    val p3 = personForm(p).applyJSONValues(jsonPartial).obj
+    val p1 = personForm(p).applyJSONValues(jsonInOrder).formObjectAndErrors.obj
+    val p2 = personForm(p).applyJSONValues(jsonOutOfOrder).formObjectAndErrors.obj
+    val p3 = personForm(p).applyJSONValues(jsonPartial).formObjectAndErrors.obj
 
     // then
     p1 should be (Person("John", Some(10), f3 = true, Some("Something")))
@@ -64,10 +64,10 @@ class ApplyTest extends FlatSpec with ShouldMatchers {
     val jsonBothSet = parseJson("""{"f1": 40, "f2": 41}""")
 
     // when
-    val d1 = dataForm(Data(10, Some(11))).applyJSONValues(jsonBothNull).obj
-    val d2 = dataForm(Data(10, Some(11))).applyJSONValues(jsonOneNull).obj
-    val d3 = dataForm(Data(10, Some(11))).applyJSONValues(jsonOneMissing).obj
-    val d4 = dataForm(Data(10, Some(11))).applyJSONValues(jsonBothSet).obj
+    val d1 = dataForm(Data(10, Some(11))).applyJSONValues(jsonBothNull).formObjectAndErrors.obj
+    val d2 = dataForm(Data(10, Some(11))).applyJSONValues(jsonOneNull).formObjectAndErrors.obj
+    val d3 = dataForm(Data(10, Some(11))).applyJSONValues(jsonOneMissing).formObjectAndErrors.obj
+    val d4 = dataForm(Data(10, Some(11))).applyJSONValues(jsonBothSet).formObjectAndErrors.obj
 
     // then
     d1 should be (Data(10, None))

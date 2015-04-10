@@ -141,11 +141,11 @@ trait Supler[T] extends Validators {
    * A new static field that will be rendered as a label.
    */
   def staticField(createMessage: T => Message) = new StaticField[T](None, createMessage, None, None, AlwaysCondition)
-  
+
   /**
    * Modal field will render a button on the form that when pressed will show a form returned by a `form` closure.
    */
-  def modal(name: String)(form: T => FormWithObject[_]) = new ModalField[T](name, form, None, None, AlwaysCondition,
+  def modal[U](name: String)(form: T => FormWithObject[U]) = new ModalField[T, U](name, form, None, None, AlwaysCondition,
     AlwaysCondition)
 }
 
