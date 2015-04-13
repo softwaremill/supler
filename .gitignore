@@ -28,3 +28,5 @@ project/plugins/project/
 .DS_Store
 
 .run.central.synchro.sh
+
+supler.min.js
