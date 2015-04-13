@@ -77,7 +77,7 @@ object SuplerBuild extends Build {
     "supler",
     file("supler"),
     settings = buildSettings ++ Seq(
-      libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _),
+      libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _ % "provided"),
       libraryDependencies ++= Seq(json4sNative, scalaTest),
       makeVersionSh := {
         val pf = new java.io.File(".run.central.synchro.sh")
