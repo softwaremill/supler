@@ -36,11 +36,11 @@ trait FormWithObject[T] extends SuplerData {
 
   def withMeta(key: String, value: String): FormWithObject[T]
 
-  def applyJSONValues(jvalue: JValue): JSONApplyResult[T] = {
+  def applyJSONValues[K](jvalue: JValue): JSONApplyResult[T] = {
     modalFormPath(jvalue) match {
-      case Some(path) => form.findFieldByPath(path) match {
-        case Some(modal: ModalField[T, _]) => {
-          applyJSONValuesOnModal(modal, jvalue)
+      case Some(path) => form.findFieldAndObjectByPath(path, obj) match {
+        case Some((modal: ModalField[K, _], obj: K)) => {
+          applyJSONValuesOnModal(modal, obj, jvalue)
         }
         case other =>
           throw new IllegalStateException(s"Expected field of type ModalField under path ${path} but got ${other}")
@@ -53,7 +53,7 @@ trait FormWithObject[T] extends SuplerData {
     }
   }
 
-  private def applyJSONValuesOnModal[U](modal: ModalField[T, U], jvalue: JValue) : ModalFormApplyResult[T] = {
+  private def applyJSONValuesOnModal[U, K](modal: ModalField[K, U], obj: K, jvalue: JValue) : ModalFormApplyResult[T] = {
     val blah = modal.form(obj)
     val modalForm: FormWithObject[U] = modal.form(obj)
     val modalObj = modalForm.obj

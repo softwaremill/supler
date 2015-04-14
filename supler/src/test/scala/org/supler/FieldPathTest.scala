@@ -55,30 +55,35 @@ class FieldPathTest extends FlatSpec with ShouldMatchers {
 
   import org.supler.ModalFormTest._
 
+  val person = Person("Witold", Car("Lada", Address("Stritskaya") :: Address("Otherskaya") :: Nil) :: Car("Bentley", List(Address("Warsaw 1"))) :: Nil)
+
   "supler" should "find string field by path" in {
     // given
-    val field = personForm.findFieldByPath("name")
+    val fieldAndObject = personForm.findFieldAndObjectByPath("name", person)
 
     // expect
-    field.map(_.isInstanceOf[BasicField[_, _]]) shouldBe Some(true)
-    field.map(_.name) shouldBe Some("name")
+    fieldAndObject.map(_._1.isInstanceOf[BasicField[_, _]]) shouldBe Some(true)
+    fieldAndObject.map(_._1.name) shouldBe Some("name")
+    fieldAndObject.map(_._2) shouldBe Some(person)
   }
 
   "supler" should "find modal field by path" in {
     // given
-    val field = personForm.findFieldByPath("cars[0].editCar")
+    val fieldAndObject = personForm.findFieldAndObjectByPath("cars[0].editCar", person)
 
     // expect
-    field.map(_.isInstanceOf[ModalField[_, _]]) shouldBe Some(true)
-    field.map(_.name) shouldBe Some("editCar")
+    fieldAndObject.map(_._1.isInstanceOf[ModalField[_, _]]) shouldBe Some(true)
+    fieldAndObject.map(_._1.name) shouldBe Some("editCar")
+    fieldAndObject.map(_._2) shouldBe Some(person.cars(0))
   }
 
   "supler" should "find field in double embedded subform" in  {
     // given
-    val field = personForm.findFieldByPath("cars[0].garages[1].street")
+    val fieldAndObject = personForm.findFieldAndObjectByPath("cars[0].garages[1].street", person)
 
     // expect
-    field.map(_.isInstanceOf[BasicField[_, _]]) shouldBe Some(true)
-    field.map(_.name) shouldBe Some("street")
+    fieldAndObject.map(_._1.isInstanceOf[BasicField[_, _]]) shouldBe Some(true)
+    fieldAndObject.map(_._1.name) shouldBe Some("street")
+    fieldAndObject.map(_._2) shouldBe Some(person.cars(0).garages(1))
   }
 }

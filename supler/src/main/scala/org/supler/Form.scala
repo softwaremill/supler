@@ -51,9 +51,9 @@ case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
     }
   }
 
-  private[supler] def findFieldByPath(fieldPath: String): Option[Field[_]] = {
+  private[supler] def findFieldAndObjectByPath(fieldPath: String, parentObj: T): Option[(Field[_], Any)] = {
     val parsedPath = FieldPath.parse(fieldPath)
-    parsedPath.findField(this)
+    parsedPath.findFieldAndObject(this, parentObj.asInstanceOf[AnyRef])
   }
 
   private def requireFieldsUnique() {

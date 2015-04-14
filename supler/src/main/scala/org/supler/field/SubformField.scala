@@ -111,6 +111,8 @@ case class SubformField[T, ContU, U, Cont[_]](
     case None => parentPath.append(name)
     case Some(i) => parentPath.appendWithIndex(name, i)
   }
+
+  def getObjectByIndex(idx: Int, obj: T): AnyRef = read(obj).toList(idx).asInstanceOf[AnyRef]
 }
 
 /**

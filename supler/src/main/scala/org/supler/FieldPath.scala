@@ -5,9 +5,9 @@ import org.supler.field.{Field, SubformField}
 import scala.annotation.tailrec
 
 sealed trait FieldPath {
-  def findField(form: Form[_]): Option[Field[_]]
+  def findFieldAndObject(form: Form[_], parentObj: AnyRef): Option[(Field[_], AnyRef)]
 
-  def getCurrentForm(form: Form[_]): Form[_]
+  def getCurrentFormAndObj(form: Form[_], parentObj: AnyRef): (Form[_], AnyRef)
 
   def append(fieldName: String) = SingleFieldPath(this, fieldName)
 
@@ -26,40 +26,50 @@ sealed trait FieldPath {
 
   def childOf(otherPath: FieldPath): Boolean
 
-  private[supler] def findFieldByName(name: String, rows: List[Row[_]]): Option[Field[_]] = {
+  private[supler] def findFieldByName(name: String, rows: List[Row[_]], obj: AnyRef): Option[(Field[_], AnyRef)] = {
     val allFields: List[Field[_]] = rows.map {
       case MultiFieldRow(fields) => fields
       case field => List(field.asInstanceOf[Field[_]])
     }.flatten
-    allFields.find(_.name.equals(name))
+    allFields.find(_.name.equals(name)).map((_, obj))
   }
 }
 
 object EmptyPath extends FieldPath {
   override def childOf(otherPath: FieldPath) = this == otherPath
 
-  override def findField(form: Form[_]) = None
+  override def findFieldAndObject(form: Form[_], parentObj: AnyRef) = None
 
-  override def getCurrentForm(form: Form[_]) = form
+  override def getCurrentFormAndObj(form: Form[_], parentObj: AnyRef) = (form, parentObj)
 }
 
 case class SingleFieldPath(parent: FieldPath, fieldName: String) extends FieldPath {
   override def childOf(otherPath: FieldPath) = this == otherPath || parent.childOf(otherPath)
 
-  override def findField(form: Form[_]) = findFieldByName(fieldName, parent.getCurrentForm(form).rows)
+  override def findFieldAndObject(form: Form[_], parentObj: AnyRef) = {
+    val currentFormAndObj = parent.getCurrentFormAndObj(form, parentObj)
+    findFieldByName(fieldName, currentFormAndObj._1.rows, currentFormAndObj._2)
+  }
 
-  override def getCurrentForm(form: Form[_]) = form
+  override def getCurrentFormAndObj(form: Form[_], parentObj: AnyRef) = (form, parentObj)
 }
 
 case class SingleIndexedFieldPath(parent: FieldPath, fieldName: String, index: Int) extends FieldPath {
   override def childOf(otherPath: FieldPath) = this == otherPath || parent.childOf(otherPath) ||
     SingleFieldPath(parent, fieldName).childOf(otherPath)
 
-  override def findField(form: Form[_]) = findFieldByName(fieldName, parent.getCurrentForm(form).rows)
+  override def findFieldAndObject(form: Form[_], parentObj: AnyRef) = {
+    val currentFormAndObj = parent.getCurrentFormAndObj(form, parentObj)
+    findFieldByName(fieldName, currentFormAndObj._1.rows, currentFormAndObj._2)
+  }
 
-  override def getCurrentForm(form: Form[_]) = {
-    findFieldByName(fieldName, parent.getCurrentForm(form).rows)
-      .map(_.asInstanceOf[SubformField[Any, Any, Any, Any]].embeddedForm)
+  override def getCurrentFormAndObj(form: Form[_], parentObj: AnyRef): (Form[_], AnyRef) = {
+    val currentFormAndObj = parent.getCurrentFormAndObj(form, parentObj)
+    findFieldByName(fieldName, currentFormAndObj._1.rows, currentFormAndObj._2)
+      .map { f =>
+        val subform = f._1.asInstanceOf[SubformField[Any, Any, Any, Any]]
+        (subform.embeddedForm, subform.getObjectByIndex(index, f._2))
+      }
       .getOrElse(throw new IllegalStateException("Expected embedded form"))
   }
 }
