@@ -14,7 +14,7 @@ module Supler {
     }
 
     attachRefreshListeners() {
-      this.ifEnabledForEachFormElement(htmlFormElement => {
+      this.forEachFormElement(htmlFormElement => {
         if (htmlFormElement.nodeName != "FIELDSET") {
           htmlFormElement.onchange = () => this.refreshListenerFor(htmlFormElement)
         }
@@ -22,7 +22,7 @@ module Supler {
     }
 
     attachActionListeners() {
-      this.ifEnabledForEachFormElement(htmlFormElement => {
+      this.forEachFormElement(htmlFormElement => {
         if (htmlFormElement.getAttribute(SuplerAttributes.FIELD_TYPE) === FieldTypes.ACTION) {
           htmlFormElement.onclick = () => this.actionListenerFor(htmlFormElement)
         }
@@ -30,8 +30,11 @@ module Supler {
     }
 
     private refreshListenerFor(htmlFormElement:HTMLElement) {
+      // always running validations
+      var validationResult = this.validation.processClientSingle(htmlFormElement.id);
+
       // if an action is in progress, dropping the send
-      if (!this.actionInProgress && !this.validation.processClientSingle(htmlFormElement.id)) {
+      if (!this.actionInProgress && this.options.sendEnabled() && !validationResult) {
         this.refreshCounter += 1;
         var thisRefreshNumber = this.refreshCounter;
 
@@ -54,7 +57,7 @@ module Supler {
 
     private actionListenerFor(htmlFormElement:HTMLElement) {
       // allowing at most one action at a time.
-      if (!this.actionInProgress) {
+      if (!this.actionInProgress && this.options.sendEnabled()) {
         this.actionInProgress = true;
 
         var id = htmlFormElement.id;
@@ -80,15 +83,13 @@ module Supler {
       this.actionInProgress = false;
     }
 
-    private ifEnabledForEachFormElement(body:(htmlFormElement:HTMLElement) => void) {
-      if (this.options.sendEnabled()) {
-        this.formElementDictionary.foreach((elementId:string, formElement:FormElement) => {
-          var htmlFormElement = document.getElementById(elementId);
-          if (htmlFormElement) {
-            body(htmlFormElement);
-          }
-        });
-      }
+    private forEachFormElement(body:(htmlFormElement:HTMLElement) => void) {
+      this.formElementDictionary.foreach((elementId:string, formElement:FormElement) => {
+        var htmlFormElement = document.getElementById(elementId);
+        if (htmlFormElement) {
+          body(htmlFormElement);
+        }
+      });
     }
 
     private sendSuccessFn(applyResultsCondition:() => boolean, onComplete:() => void) {

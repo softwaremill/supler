@@ -226,5 +226,19 @@ describe('form validation', function() {
     validationElementByName('f2').innerText.should.not.have.length(0);
     validationElementByName('f3').innerText.should.not.have.length(0);
     validationElementByName('f4').innerText.should.not.have.length(0);
-  })
+  });
+
+  it('should run client-side validations after a field is changed, even if send_form_function is not defined', function() {
+    // given
+    var sf = new Supler.Form(container);
+    sf.render(data.simple1.form1);
+
+    // when
+    byName('field1').val('');
+    byName('field1').change();
+
+    // then
+    var validationElement1 = validationElementByName('field1');
+    validationElement1.innerText.should.have.length.above(0);
+  });
 });
