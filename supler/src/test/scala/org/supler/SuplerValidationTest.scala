@@ -1,8 +1,8 @@
 package org.supler
 
 import org.scalatest._
+import org.supler.Supler._
 import org.supler.validation._
-import Supler._
 
 class SuplerValidationTest extends FlatSpec with ShouldMatchers {
   "field" should "validate required" in {
@@ -82,7 +82,7 @@ class SuplerValidationTest extends FlatSpec with ShouldMatchers {
     val personForm = form[Person](f => List(f.field(_.size).validate(gt(0))))
     val cityForm = form[City](f => List(
       f.field(_.name),
-      f.subform(_.people, personForm)
+      f.subform(_.people, t => personForm, false)
     ))
 
     val c1 = City("city1", List(Person(10), Person(20)))

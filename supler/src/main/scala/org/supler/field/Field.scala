@@ -53,6 +53,7 @@ trait Field[T] extends Row[T] {
     val Path = "path"
     val EmptyValue = "empty_value"
     val Enabled = "enabled"
+    val Evaluated = "evaluated"
 
     val ValidateRequired = "required"
   }

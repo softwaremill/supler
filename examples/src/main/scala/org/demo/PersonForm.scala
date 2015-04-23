@@ -53,9 +53,9 @@ object PersonForm {
     f.selectOneField(_.gender)(identity).possibleValues(_ => List("Male", "Female")).label("Gender").renderHint(asRadio()) ||
     f.field(_.secret).label("Secret").renderHint(asPassword()),
     f.field(_.bio).label("Biography").renderHint(asTextarea(rows = 6)),
-    f.subform(_.cars, carForm(f.parentAction((person, index, car) => ActionResult(deleteCar(person, car))))).label("Cars"),
+    f.subform(_.cars, t => carForm(f.parentAction((person, index, car) => ActionResult(deleteCar(person, car)))), false).label("Cars"),
     f.action("addcar")(p => ActionResult(p.copy(cars = p.cars :+ Car("", "", 0)))).label("Add car"),
-    f.subform(_.legoSets, legoSetForm(f.parentAction((person, index, ls) => ActionResult(deleteLegoSet(person, ls))))).label("Lego sets").renderHint(asTable()),
+    f.subform(_.legoSets, t => legoSetForm(f.parentAction((person, index, ls) => ActionResult(deleteLegoSet(person, ls)))), false).label("Lego sets").renderHint(asTable()),
     f.action("addlegoset")(p => ActionResult(p.copy(legoSets = p.legoSets :+ LegoSet("", "", 0, 0)))).label("Add lego set"),
     f.staticField(p => Message(p.registrationDate)).label("Registration date"),
     f.field(_.id).renderHint(asHidden()),
