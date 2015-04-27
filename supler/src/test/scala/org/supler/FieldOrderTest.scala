@@ -53,7 +53,7 @@ class FieldOrderTest extends FlatSpec with ShouldMatchers {
     // given
     val formWithSubform = form[OrderTestParentClass](f => List(
       f.field(_.field1),
-      f.subform(_.obj, t => flatForm, false)
+      f.subform(_.obj, flatForm, None)
     ))
     val formInst = formWithSubform(OrderTestParentClass("hej", o, Nil))
     // when
@@ -79,7 +79,7 @@ class FieldOrderTest extends FlatSpec with ShouldMatchers {
     // given
     val formWithSubform = form[OrderTestParentClass](f => List(
       f.field(_.field1),
-      f.subform(_.objList, t => nonFlatForm, false)
+      f.subform(_.objList, nonFlatForm, None)
     ))
     val formInst = formWithSubform(OrderTestParentClass("hej", o, List(o, o)))
     // when

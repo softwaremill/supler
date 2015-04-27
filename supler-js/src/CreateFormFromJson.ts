@@ -140,7 +140,7 @@ module Supler {
           return this.selectFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
 
         case FieldTypes.SUBFORM:
-          return this.subformFieldFromJson(renderOptions, fieldData, formElementDictionary);
+          return this.subformFieldFromJson(renderOptions, fieldData, fieldOptions, formElementDictionary);
 
         case FieldTypes.STATIC:
           return this.staticFieldFromJson(renderOptions, fieldData, compact);
@@ -221,46 +221,52 @@ module Supler {
       };
     }
 
-    private subformFieldFromJson(renderOptions, fieldData:FieldData, formElementDictionary:FormElementDictionary) {
-      var subformHtml = '';
-      var options = {
-        'supler:fieldType': FieldTypes.SUBFORM,
-        'supler:fieldName': fieldData.name,
-        'supler:multiple': fieldData.multiple
-      };
+    private subformFieldFromJson(renderOptions, fieldData:FieldData, fieldOptions, formElementDictionary:FormElementDictionary) {
+      if (fieldData.evaluated) {
+        var subformHtml = '';
+        var options = {
+          'supler:fieldType': FieldTypes.SUBFORM,
+          'supler:fieldName': fieldData.name,
+          'supler:multiple': fieldData.multiple
+        };
 
-      var values;
-      // value can be undefined for an optional subform
-      if (typeof fieldData.value !== 'undefined') {
-        values = fieldData.multiple ? fieldData.value : [fieldData.value];
-      } else values = [];
+        var values;
+        // value can be undefined for an optional subform
+        if (typeof fieldData.value !== 'undefined') {
+          values = fieldData.multiple ? fieldData.value : [fieldData.value];
+        } else values = [];
 
-      this.propagateDisabled(fieldData, values);
+        this.propagateDisabled(fieldData, values);
 
-      if (fieldData.getRenderHintName() === 'list') {
-        for (var k in values) {
-          var subformResult = this.renderForm(null, values[k], formElementDictionary);
-          subformHtml += renderOptions.renderSubformListElement(subformResult.html, options);
+        if (fieldData.getRenderHintName() === 'list') {
+          for (var k in values) {
+            var subformResult = this.renderForm(null, values[k], formElementDictionary);
+            subformHtml += renderOptions.renderSubformListElement(subformResult.html, options);
+          }
+        } else { // table
+          var headers = this.getTableHeaderLabels(fieldData.json);
+          var cells:string[][] = [];
+
+          for (var i = 0; i < values.length; i++) {
+            var j = 0;
+            cells[i] = [];
+
+            var subfieldsJson = values[i].fields;
+            Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
+              cells[i][j] = this.fieldFromJson(subfieldJson, formElementDictionary, true, -1);
+              j += 1;
+            });
+          }
+
+          subformHtml += renderOptions.renderSubformTable(headers, cells, options);
         }
-      } else { // table
-        var headers = this.getTableHeaderLabels(fieldData.json);
-        var cells:string[][] = [];
 
-        for (var i = 0; i < values.length; i++) {
-          var j = 0;
-          cells[i] = [];
-
-          var subfieldsJson = values[i].fields;
-          Util.foreach(subfieldsJson, (subfield, subfieldJson) => {
-            cells[i][j] = this.fieldFromJson(subfieldJson, formElementDictionary, true, -1);
-            j += 1;
-          });
-        }
-
-        subformHtml += renderOptions.renderSubformTable(headers, cells, options);
+        return renderOptions.renderSubformDecoration(subformHtml, fieldData.label, fieldData.id, fieldData.name);
+      } else if(fieldData.modal) {
+        return renderOptions.renderModalButton(fieldData, fieldOptions, false);
+      } else {
+        return "";
       }
-
-      return renderOptions.renderSubformDecoration(subformHtml, fieldData.label, fieldData.id, fieldData.name);
     }
 
     private propagateDisabled(fromFieldData:FieldData, toSubforms:any) {

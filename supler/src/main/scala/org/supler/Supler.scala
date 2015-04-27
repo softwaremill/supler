@@ -44,7 +44,7 @@ object Supler extends Validators with RenderHints {
    *
    * By default subforms are rendered as a list. Use the `.renderHint()` method to customize.
    */
-  def subform[T, ContU, U, Cont[_]](param: T => ContU, form: T => Form[U], lazyForm: Boolean)
+  def subform[T, ContU, U, Cont[_]](param: T => ContU, form: Form[U], shouldShowModal: Option[Boolean])
     (implicit container: SubformContainer[ContU, U, Cont]): SubformField[T, ContU, U, Cont] =
     macro SuplerFieldMacros.subform_impl[T, ContU, U, Cont]
 
@@ -54,7 +54,7 @@ object Supler extends Validators with RenderHints {
    *
    * By default subforms are rendered as a list. Use the `.renderHint()` method to customize.
    */
-  def subform[T, ContU, U, Cont[_]](param: T => ContU, form: T => Form[U], lazyForm: Boolean, createEmpty: () => U)
+  def subform[T, ContU, U, Cont[_]](param: T => ContU, form: Form[U], shouldShowModal: Option[Boolean], createEmpty: () => U)
     (implicit container: SubformContainer[ContU, U, Cont]): SubformField[T, ContU, U, Cont] =
     macro SuplerFieldMacros.subform_createempty_impl[T, ContU, U, Cont]
 
@@ -110,7 +110,7 @@ trait Supler[T] extends Validators {
    *
    * By default subforms are rendered as a list. Use the `.renderHint()` method to customize.
    */
-  def subform[ContU, U, Cont[_]](param: T => ContU, form: T => Form[U], lazyForm: Boolean)
+  def subform[ContU, U, Cont[_]](param: T => ContU, form: Form[U], shouldShowModal: Option[Boolean])
     (implicit container: SubformContainer[ContU, U, Cont]): SubformField[T, ContU, U, Cont] =
     macro SuplerFieldMacros.subform_impl[T, ContU, U, Cont]
 
@@ -120,7 +120,7 @@ trait Supler[T] extends Validators {
    *
    * By default subforms are rendered as a list. Use the `.renderHint()` method to customize.
    */
-  def subform[U, ContU, Cont[_]](param: T => ContU, form: T => Form[U], lazyForm: Boolean, createEmpty: () => U)
+  def subform[U, ContU, Cont[_]](param: T => ContU, form: Form[U], shouldShowModal: Option[Boolean], createEmpty: () => U)
     (implicit container: SubformContainer[ContU, U, Cont]): SubformField[T, ContU, U, Cont] =
     macro SuplerFieldMacros.subform_createempty_impl[T, ContU, U, Cont]
 

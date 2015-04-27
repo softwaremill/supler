@@ -29,7 +29,7 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
   "subform" should "create a case class list field representation" in {
     // when
     object PersonMeta extends Supler[PersonManyCars] {
-      val carsField = subform(_.cars, t => carForm, false)
+      val carsField = subform(_.cars, carForm, None)
     }
 
     // then
@@ -45,7 +45,7 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
   "subform" should "create a case class vector field representation" in {
     // when
     object PersonMeta extends Supler[PersonManyCarsVector] {
-      val carsField = subform(_.cars, t => carForm, false)
+      val carsField = subform(_.cars, carForm, None)
     }
 
     // then
@@ -59,7 +59,7 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
   "subform" should "create a case class single field representation" in {
     // when
     object PersonMeta extends Supler[PersonOneCar] {
-      val carField = subform(_.car, t => carForm, false)
+      val carField = subform(_.car, carForm, None)
     }
 
     // then
@@ -73,7 +73,7 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
   "subform" should "create a case class optional field representation" in {
     // when
     object PersonMeta extends Supler[PersonOptionalCal] {
-      val carField = subform(_.car, t => carForm, false)
+      val carField = subform(_.car, carForm, None)
     }
 
     // then
@@ -91,7 +91,7 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
     import org.supler.Supler._
     val personForm = form[PersonManyCars](f => List(
       f.field(_.name),
-      f.subform(_.cars, t => carForm, false)
+      f.subform(_.cars, carForm, None)
     ))
 
     val jsonInOrder = parseJson("""
@@ -122,7 +122,7 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
     import org.supler.Supler._
     val personForm = form[PersonOneCar](f => List(
       f.field(_.name),
-      f.subform(_.car, t => carForm, false)
+      f.subform(_.car, carForm, None)
     ))
 
     val json = parseJson("""
@@ -146,7 +146,7 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
     import org.supler.Supler._
     val personForm = form[PersonOptionalCal](f => List(
       f.field(_.name),
-      f.subform(_.car, t => carForm, false)
+      f.subform(_.car, carForm, None)
     ))
 
     val json1 = parseJson("""
@@ -177,7 +177,7 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
     // given
     val personForm = form[PersonOneCar](f => List(
       f.field(_.name),
-      f.subform(_.car, t => carForm, true)
+      f.subform(_.car, carForm, Some(false))
     ))
 
     // when
@@ -189,7 +189,9 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
                                            |      "enabled":true,
                                            |      "label":"",
                                            |      "type":"subform",
-                                           |      "evaluated":false
+                                           |      "evaluated":false,
+                                           |      "modal":true,
+                                           |      "path":"car"
                                            |    }""".stripMargin)
   }
 
@@ -197,7 +199,7 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
     // given
     val personForm = form[PersonOneCar](f => List(
       f.field(_.name),
-      f.subform(_.car, t => carForm, true).lazyForm(false)
+      f.subform(_.car, carForm, None).showModalForm(Some(true))
     ))
 
     // when
@@ -210,6 +212,7 @@ class SuplerSubformTest extends FlatSpec with ShouldMatchers {
                                            |      "label":"",
                                            |      "type":"subform",
                                            |      "evaluated":true,
+                                           |      "modal":true,
                                            |      "render_hint":{
                                            |        "name":"list"
                                            |      }""".stripMargin)

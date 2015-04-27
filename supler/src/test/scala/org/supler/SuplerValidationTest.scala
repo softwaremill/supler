@@ -82,7 +82,7 @@ class SuplerValidationTest extends FlatSpec with ShouldMatchers {
     val personForm = form[Person](f => List(f.field(_.size).validate(gt(0))))
     val cityForm = form[City](f => List(
       f.field(_.name),
-      f.subform(_.people, t => personForm, false)
+      f.subform(_.people, personForm, None)
     ))
 
     val c1 = City("city1", List(Person(10), Person(20)))

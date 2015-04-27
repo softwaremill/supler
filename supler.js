@@ -148,7 +148,7 @@ var Supler;
                 case Supler.FieldTypes.SELECT:
                     return this.selectFieldFromJson(renderOptions, fieldData, fieldOptions, compact);
                 case Supler.FieldTypes.SUBFORM:
-                    return this.subformFieldFromJson(renderOptions, fieldData, formElementDictionary);
+                    return this.subformFieldFromJson(renderOptions, fieldData, fieldOptions, formElementDictionary);
                 case Supler.FieldTypes.STATIC:
                     return this.staticFieldFromJson(renderOptions, fieldData, compact);
                 case Supler.FieldTypes.ACTION:
@@ -210,42 +210,50 @@ var Supler;
                 'supler:path': elementOptions[Supler.SuplerAttributes.PATH]
             };
         };
-        CreateFormFromJson.prototype.subformFieldFromJson = function (renderOptions, fieldData, formElementDictionary) {
+        CreateFormFromJson.prototype.subformFieldFromJson = function (renderOptions, fieldData, fieldOptions, formElementDictionary) {
             var _this = this;
-            var subformHtml = '';
-            var options = {
-                'supler:fieldType': Supler.FieldTypes.SUBFORM,
-                'supler:fieldName': fieldData.name,
-                'supler:multiple': fieldData.multiple
-            };
-            var values;
-            if (typeof fieldData.value !== 'undefined') {
-                values = fieldData.multiple ? fieldData.value : [fieldData.value];
-            }
-            else
-                values = [];
-            this.propagateDisabled(fieldData, values);
-            if (fieldData.getRenderHintName() === 'list') {
-                for (var k in values) {
-                    var subformResult = this.renderForm(null, values[k], formElementDictionary);
-                    subformHtml += renderOptions.renderSubformListElement(subformResult.html, options);
+            if (fieldData.evaluated) {
+                var subformHtml = '';
+                var options = {
+                    'supler:fieldType': Supler.FieldTypes.SUBFORM,
+                    'supler:fieldName': fieldData.name,
+                    'supler:multiple': fieldData.multiple
+                };
+                var values;
+                if (typeof fieldData.value !== 'undefined') {
+                    values = fieldData.multiple ? fieldData.value : [fieldData.value];
                 }
+                else
+                    values = [];
+                this.propagateDisabled(fieldData, values);
+                if (fieldData.getRenderHintName() === 'list') {
+                    for (var k in values) {
+                        var subformResult = this.renderForm(null, values[k], formElementDictionary);
+                        subformHtml += renderOptions.renderSubformListElement(subformResult.html, options);
+                    }
+                }
+                else {
+                    var headers = this.getTableHeaderLabels(fieldData.json);
+                    var cells = [];
+                    for (var i = 0; i < values.length; i++) {
+                        var j = 0;
+                        cells[i] = [];
+                        var subfieldsJson = values[i].fields;
+                        Supler.Util.foreach(subfieldsJson, function (subfield, subfieldJson) {
+                            cells[i][j] = _this.fieldFromJson(subfieldJson, formElementDictionary, true, -1);
+                            j += 1;
+                        });
+                    }
+                    subformHtml += renderOptions.renderSubformTable(headers, cells, options);
+                }
+                return renderOptions.renderSubformDecoration(subformHtml, fieldData.label, fieldData.id, fieldData.name);
+            }
+            else if (fieldData.modal) {
+                return renderOptions.renderModalButton(fieldData, fieldOptions, false);
             }
             else {
-                var headers = this.getTableHeaderLabels(fieldData.json);
-                var cells = [];
-                for (var i = 0; i < values.length; i++) {
-                    var j = 0;
-                    cells[i] = [];
-                    var subfieldsJson = values[i].fields;
-                    Supler.Util.foreach(subfieldsJson, function (subfield, subfieldJson) {
-                        cells[i][j] = _this.fieldFromJson(subfieldJson, formElementDictionary, true, -1);
-                        j += 1;
-                    });
-                }
-                subformHtml += renderOptions.renderSubformTable(headers, cells, options);
+                return "";
             }
-            return renderOptions.renderSubformDecoration(subformHtml, fieldData.label, fieldData.id, fieldData.name);
         };
         CreateFormFromJson.prototype.propagateDisabled = function (fromFieldData, toSubforms) {
             if (!fromFieldData.enabled) {
@@ -379,6 +387,8 @@ var Supler;
             this.enabled = json.enabled;
             this.validate = json.validate || {};
             this.description = json.description;
+            this.evaluated = json.evaluated;
+            this.modal = json.modal;
         }
         FieldData.prototype.getRenderHint = function () {
             if (this.renderHintOverride) {
@@ -896,6 +906,11 @@ var Supler;
             return this.renderField(this.renderHtmlSelect(fieldData.value, possibleValues, elementOptions), fieldData, compact);
         };
         Bootstrap3RenderOptions.prototype.renderActionField = function (fieldData, options, compact) {
+            var fieldDataNoLabel = Supler.Util.copyObject(fieldData);
+            fieldDataNoLabel.label = '';
+            return this.renderField(this.renderHtmlButton(fieldData.label, options), fieldDataNoLabel, compact);
+        };
+        Bootstrap3RenderOptions.prototype.renderModalButton = function (fieldData, options, compact) {
             var fieldDataNoLabel = Supler.Util.copyObject(fieldData);
             fieldDataNoLabel.label = '';
             return this.renderField(this.renderHtmlButton(fieldData.label, options), fieldDataNoLabel, compact);

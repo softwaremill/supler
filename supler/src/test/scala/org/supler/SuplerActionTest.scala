@@ -17,10 +17,10 @@ class SuplerActionTest extends FlatSpec with ShouldMatchers {
       f.action("a") { c => ActionResult(c.copy(name = c.name + "*")) }))
 
     val fb = form[B](f => List(
-      f.subform(_.cs, t => fc, false)))
+      f.subform(_.cs, fc, None)))
 
     val fa = form[A](f => List(
-      f.subform(_.bs, t => fb, false)))
+      f.subform(_.bs, fb, None)))
 
     // when
     val Some(runnableAction) = fa.findAction(
@@ -43,10 +43,10 @@ class SuplerActionTest extends FlatSpec with ShouldMatchers {
       f.action("a") { c => callLog ::= "c"; remove(c.copy(name = c.name + "*"))}))
 
     def fb(remove: B => ActionResult[B]) = form[B](f => List(
-      f.subform(_.cs, t => fc(f.parentAction { (b, j, c) => callLog ::= s"b $j $c"; remove(b)}), false)))
+      f.subform(_.cs, fc(f.parentAction { (b, j, c) => callLog ::= s"b $j $c"; remove(b)}), None)))
 
     val fa = form[A](f => List(
-      f.subform(_.bs, t => fb(f.parentAction { (a, i, b) => callLog ::= s"a $i $b"; ActionResult(a)}), false)))
+      f.subform(_.bs, fb(f.parentAction { (a, i, b) => callLog ::= s"a $i $b"; ActionResult(a)}), None)))
 
     // when
     val Some(runnableAction) = fa.findAction(

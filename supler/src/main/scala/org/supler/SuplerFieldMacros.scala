@@ -84,14 +84,14 @@ object SuplerFieldMacros {
   }
 
   def subform_impl[T: c.WeakTypeTag, ContU, U: c.WeakTypeTag, Cont[_]](c: blackbox.Context)
-    (param: c.Expr[T => ContU], form: c.Expr[T => Form[U]], lazyForm: c.Expr[Boolean])
+    (param: c.Expr[T => ContU], form: c.Expr[Form[U]], shouldShowModal: c.Expr[Option[Boolean]])
     (container: c.Expr[SubformContainer[ContU, U, Cont]]): c.Expr[SubformField[T, ContU, U, Cont]] = {
 
-    subform_createempty_impl[T, ContU, U, Cont](c)(param, form, lazyForm, null)(container)
+    subform_createempty_impl[T, ContU, U, Cont](c)(param, form, shouldShowModal, null)(container)
   }
 
   def subform_createempty_impl[T: c.WeakTypeTag, ContU, U: c.WeakTypeTag, Cont[_]](c: blackbox.Context)
-    (param: c.Expr[T => ContU], form: c.Expr[T => Form[U]], lazyForm: c.Expr[Boolean], createEmpty: c.Expr[() => U])
+    (param: c.Expr[T => ContU], form: c.Expr[Form[U]], shouldShowModal: c.Expr[Option[Boolean]], createEmpty: c.Expr[() => U])
     (container: c.Expr[SubformContainer[ContU, U, Cont]]): c.Expr[SubformField[T, ContU, U, Cont]] = {
 
     import c.universe._
@@ -117,7 +117,7 @@ object SuplerFieldMacros {
         writeFieldValueExpr.splice,
         form.splice,
         createEmptyOpt.splice,
-        lazyForm.splice)
+        shouldShowModal.splice)
     }
   }
 
@@ -131,10 +131,10 @@ object SuplerFieldMacros {
 
     def newSubformField[T, ContU, U, Cont[_]](c: SubformContainer[ContU, U, Cont])
       (fieldName: String, read: T => Cont[U], write: (T, Cont[U]) => T,
-        embeddedForm: T => Form[U], createEmpty: Option[() => U], lazyForm: Boolean): SubformField[T, ContU, U, Cont] = {
+        embeddedForm: Form[U], createEmpty: Option[() => U], shouldShowModal: Option[Boolean]): SubformField[T, ContU, U, Cont] = {
 
       SubformField[T, ContU, U, Cont](c, fieldName, read, write, None, None, embeddedForm, createEmpty,
-        SubformListRenderHint, AlwaysCondition, AlwaysCondition, lazyForm)
+        SubformListRenderHint, AlwaysCondition, AlwaysCondition, shouldShowModal)
     }
 
     def newAlmostSelectOneField[T, U](fieldName: String, read: T => U, write: (T, U) => T, required: Boolean,

@@ -17,6 +17,12 @@ object PersonForm {
     "Lada" -> List("Niva")
   )
 
+  val carModal = form[Car](f => List(
+    f.field(_.make),
+    f.field(_.model),
+    f.field(_.year)
+  ))
+
   def carForm(deleteAction: Car => ActionResult[Car]) = form[Car](f => List(
     f.selectOneField(_.make)(identity).possibleValues(_ => carMakesAndModels.keys.toList).label("Make") ||
     f.selectOneField(_.model)(identity).possibleValues(car => carMakesAndModels.getOrElse(car.make, Nil)).label("Model"),
@@ -53,12 +59,13 @@ object PersonForm {
     f.selectOneField(_.gender)(identity).possibleValues(_ => List("Male", "Female")).label("Gender").renderHint(asRadio()) ||
     f.field(_.secret).label("Secret").renderHint(asPassword()),
     f.field(_.bio).label("Biography").renderHint(asTextarea(rows = 6)),
-    f.subform(_.cars, t => carForm(f.parentAction((person, index, car) => ActionResult(deleteCar(person, car)))), false).label("Cars"),
+    f.subform(_.cars, carForm(f.parentAction((person, index, car) => ActionResult(deleteCar(person, car)))), None).label("Cars"),
     f.action("addcar")(p => ActionResult(p.copy(cars = p.cars :+ Car("", "", 0)))).label("Add car"),
-    f.subform(_.legoSets, t => legoSetForm(f.parentAction((person, index, ls) => ActionResult(deleteLegoSet(person, ls)))), false).label("Lego sets").renderHint(asTable()),
+    f.subform(_.legoSets, legoSetForm(f.parentAction((person, index, ls) => ActionResult(deleteLegoSet(person, ls)))), None).label("Lego sets").renderHint(asTable()),
     f.action("addlegoset")(p => ActionResult(p.copy(legoSets = p.legoSets :+ LegoSet("", "", 0, 0)))).label("Add lego set"),
     f.staticField(p => Message(p.registrationDate)).label("Registration date"),
     f.field(_.id).renderHint(asHidden()),
+    f.subform(_.favoriteCar, carModal, Some(false)).label("Favorite Car"),
     f.field(_.a1) || f.field(_.a2) || f.field(_.a3) || f.field(_.a4).label("4th field") || f.field(_.a5)
       || f.field(_.a6) || f.field(_.a7) || f.field(_.a8) || f.field(_.a9) || f.field(_.a10) || f.field(_.a11)
       || f.field(_.a12) || f.field(_.a13) || f.field(_.a14) || f.field(_.a15) || f.field(_.a16)
@@ -80,6 +87,7 @@ object PersonForm {
     favoriteColors: Set[String],
     likesBroccoli: Boolean,
     cars: List[Car],
+    favoriteCar: Car,
     legoSets: List[LegoSet],
     registrationDate: DateTime,
     id : String,
@@ -104,6 +112,7 @@ object PersonForm {
     List(
       Car("Ford", "Focus", 1990),
       Car("Toyota", "Avensis", 2004)),
+    Car("Kia", "Carens", 2013),
     List(
       LegoSet("Motorcycle", "Technic", 1924, 31),
       LegoSet("Arctic Supply Plane", "City", 60064, 1),

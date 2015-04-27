@@ -12,12 +12,12 @@ case class SubformField[T, ContU, U, Cont[_]](
                                                write: (T, Cont[U]) => T,
                                                label: Option[String],
                                                description: Option[String],
-                                               embeddedForm: T => Form[U],
+                                               embeddedForm: Form[U],
                                                createEmpty: Option[() => U],
                                                renderHint: RenderHint with SubformFieldCompatible,
                                                enabledIf: (T) => Boolean,
                                                includeIf: (T) => Boolean,
-                                               lazyForm: Boolean = false) extends Field[T] {
+                                               showModalForm: Option[Boolean] = None) extends Field[T] {
 
   import c._
 
@@ -31,30 +31,33 @@ case class SubformField[T, ContU, U, Cont[_]](
 
   def includeIf(condition: T => Boolean): SubformField[T, ContU, U, Cont] = this.copy(includeIf = condition)
 
-  def lazyForm(newLazyForm: Boolean): SubformField[T, ContU, U, Cont] = this.copy(lazyForm = newLazyForm)
+  def showModalForm(shouldShow: Option[Boolean]): SubformField[T, ContU, U, Cont] = this.copy(showModalForm = shouldShow)
 
   private[supler] def generateFieldJSON(parentPath: FieldPath, obj: T) = {
-    lazyForm match {
-      case false => {
+    showModalForm match {
+      case Some(false) => {
+        import JSONFieldNames._
+        JObject(
+          JField(Type, JString(SpecialFieldTypes.Subform)),
+          JField(Evaluated, JBool(false)),
+          JField(Modal, JBool(showModalForm.isDefined)),
+          JField(Path, JString(parentPath.append(name).toString))
+        )
+      }
+      case _ => {
         val valuesAsJValue = read(obj).zipWithIndex.map { case (v, indexOpt) =>
-          embeddedForm(obj).generateJSON(pathWithOptionalIndex(parentPath, indexOpt), v)
+          embeddedForm.generateJSON(pathWithOptionalIndex(parentPath, indexOpt), v)
         }
         import JSONFieldNames._
         JObject(
           JField(Type, JString(SpecialFieldTypes.Subform)),
           JField(Evaluated, JBool(true)),
+          JField(Modal, JBool(showModalForm.isDefined)),
           JField(RenderHint, JObject(JField("name", JString(renderHint.name)) :: renderHint.extraJSON)),
           JField(Multiple, JBool(c.isMultiple)),
           JField(Label, JString(label.getOrElse(""))),
           JField(Path, JString(parentPath.append(name).toString)),
           JField(Value, c.combineJValues(valuesAsJValue))
-        )
-      }
-      case true => {
-        import JSONFieldNames._
-        JObject(
-          JField(Type, JString(SpecialFieldTypes.Subform)),
-          JField(Evaluated, JBool(false))
         )
       }
     }
@@ -63,9 +66,8 @@ case class SubformField[T, ContU, U, Cont[_]](
   override private[supler] def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     def valuesWithIndex = c.valuesWithIndexFromJSON(jsonFields.get(name))
     val paos = valuesWithIndex.map { case (formJValue, indexOpt) => {
-      val embForm = embeddedForm(obj)
-      embForm.applyJSONValues(pathWithOptionalIndex(parentPath, indexOpt),
-        createEmpty.getOrElse(embForm.createEmpty)(), formJValue)
+      embeddedForm.applyJSONValues(pathWithOptionalIndex(parentPath, indexOpt),
+        createEmpty.getOrElse(embeddedForm.createEmpty)(), formJValue)
     }
     }
 
@@ -76,7 +78,7 @@ case class SubformField[T, ContU, U, Cont[_]](
     val valuesWithIndex = read(obj).zipWithIndex
 
     val errorLists = valuesWithIndex.map { case (el, indexOpt) =>
-      embeddedForm(obj).doValidate(pathWithOptionalIndex(parentPath, indexOpt), el, scope)
+      embeddedForm.doValidate(pathWithOptionalIndex(parentPath, indexOpt), el, scope)
     }
 
     errorLists.toList.flatten
@@ -99,7 +101,7 @@ case class SubformField[T, ContU, U, Cont[_]](
       val i = indexOpt.getOrElse(0)
       val updatedCtx = ctx.push(obj, i, (v: U) => write(obj, values.update(v, i)))
       // assuming that the values matches the json (that is, that the json values were previously applied)
-      embeddedForm(obj).findAction(pathWithOptionalIndex(parentPath, indexOpt), valuesList(i), jvalue, updatedCtx)
+      embeddedForm.findAction(pathWithOptionalIndex(parentPath, indexOpt), valuesList(i), jvalue, updatedCtx)
     },
     _.isDefined).flatten
   }
