@@ -7,7 +7,8 @@ module Supler {
                 private formElementDictionary:FormElementDictionary,
                 private options:SendControllerOptions,
                 private elementSearch:ElementSearch,
-                private validation:Validation) {
+                private validation:Validation,
+                private modalPaths = new collections.Stack<string>()) {
 
       this.refreshCounter = 0;
       this.actionInProgress = false;
@@ -93,21 +94,16 @@ module Supler {
         this.actionInProgress = true;
 
         var id = htmlFormElement.id;
+        this.modalPaths.push(htmlFormElement.getAttribute(SuplerAttributes.PATH));
 
-        //var validationPassed = !this.validation.processClientSingle(id) && !this.validation.processClient(this.formElementDictionary.getElement(id).validationScope);
-        //
-        //if (validationPassed) {
-          this.options.sendFormFunction(
-            this.form.getValue(id),
-            this.sendSuccessFn(() => {
-              return true;
-            }, () => this.actionCompleted()),
-            () => this.actionCompleted(),
-            true,
-            htmlFormElement);
-        //} else {
-        //  this.actionCompleted();
-        //}
+        this.options.sendFormFunction(
+          this.form.getValue(id),
+          this.sendSuccessFn(() => {
+            return true;
+          }, () => this.actionCompleted()),
+          () => this.actionCompleted(),
+          true,
+          htmlFormElement);
       }
     }
 

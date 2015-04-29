@@ -35,6 +35,7 @@ module Supler {
     renderRow: (fields: string) => string
 
     renderForm: (rows: string) => string
+    renderModalForm: (formH: string) => string
 
     renderStaticField: (label:string, id:string, validationId:string, value:any, compact:boolean) => string
     renderStaticText: (text:string) => string
@@ -63,6 +64,26 @@ module Supler {
 
     renderForm(rows:string):string {
       return HtmlUtil.renderTag('div', {'class': 'container-fluid'}, rows);
+    }
+
+    renderModalForm(form: string):string {
+      return '<div class="modal fade" data-show="true">'+
+        '<div class="modal-dialog">'+
+      '<div class="modal-content"> '+
+      '<div class="modal-header">    '+
+      '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
+      '<h4 class="modal-title">Modal title</h4>'+
+      '</div>'+
+      '<div class="modal-body">'+
+      form +
+      '</div>'+
+      '<div class="modal-footer">'+
+      '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'+
+      '<button type="button" class="btn btn-primary">Save changes</button>'+
+      '</div>'+
+      '</div><!-- /.modal-content -->'+
+      '</div><!-- /.modal-dialog -->'+
+      '</div><!-- /.modal -->';
     }
 
     renderRow(fields:string):string {
@@ -135,6 +156,7 @@ module Supler {
     renderModalButton(fieldData, options, compact) {
       var fieldDataNoLabel = Util.copyObject(fieldData);
       fieldDataNoLabel.label = '';
+      fieldDataNoLabel.value = fieldDataNoLabel.path;
       return this.renderField(this.renderHtmlButton(fieldData.label, options), fieldDataNoLabel, compact);
     }
 

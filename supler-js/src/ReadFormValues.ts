@@ -1,6 +1,6 @@
 module Supler {
   export class ReadFormValues {
-    constructor(private fieldsOptions:FieldsOptions) {
+    constructor(private fieldsOptions:FieldsOptions, private modalPaths: collections.Stack<string>) {
     }
     /**
      * @param element Element from which to read field values
@@ -15,6 +15,14 @@ module Supler {
       if (element.disabled) {
         return result;
       }
+
+      if (!this.modalPaths.isEmpty()) {
+        this.appendFieldValue(result, FormSections.MODAL_PATH, this.modalPaths.peek(), false);
+      }
+
+      //if (modalPaths && !modalPaths.isEmpty()) {
+      //  this.appendFieldValue(result, FormSections.MODAL_PATH, modalPaths.peek(), false);
+      //}
 
       if (fieldType) {
         var fieldOptions = this.fieldsOptions.forField(element.getAttribute('name'), fieldType, null);
@@ -67,7 +75,7 @@ module Supler {
 
         case FieldTypes.MODAL:
           if (element.id === selectedActionId) {
-            this.appendFieldValue(result, fieldName, true, false);
+            this.appendFieldValue(result, fieldName, element.getAttribute(SuplerAttributes.PATH), false);
           }
           break;
 

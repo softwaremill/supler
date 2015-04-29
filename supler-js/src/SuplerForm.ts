@@ -12,7 +12,7 @@ module Supler {
     private fieldsOptions:FieldsOptions;
     private fieldOrder:string[][];
     private readFormValues:ReadFormValues;
-    private lastOpenedModal: string = null;
+    private modalPaths = new collections.Stack<string>();
 
     constructor(private container:HTMLElement, customOptions:any) {
       customOptions = customOptions || {};
@@ -44,7 +44,7 @@ module Supler {
 
       this.fieldOrder = customOptions.field_order;
 
-      this.readFormValues = new ReadFormValues(this.fieldsOptions);
+      this.readFormValues = new ReadFormValues(this.fieldsOptions, this.modalPaths);
     }
 
     render(json) {
@@ -56,10 +56,12 @@ module Supler {
         this.initializeValidation(result.formElementDictionary, json);
 
         var sendController = new SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch,
-          this.validation);
+          this.validation, this.modalPaths);
         sendController.attachRefreshListeners();
         sendController.attachActionListeners();
         sendController.attachModalListeners();
+
+        $('.modal').modal();
       }
 
       var customData = this.getCustomData(json);

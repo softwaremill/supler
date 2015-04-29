@@ -261,7 +261,13 @@ module Supler {
           subformHtml += renderOptions.renderSubformTable(headers, cells, options);
         }
 
-        return renderOptions.renderSubformDecoration(subformHtml, fieldData.label, fieldData.id, fieldData.name);
+        var html = renderOptions.renderSubformDecoration(subformHtml, fieldData.label, fieldData.id, fieldData.name);
+
+        if (fieldData.modal) {
+          return renderOptions.renderModalForm(html);
+        } else {
+          return html;
+        }
       } else if(fieldData.modal) {
         fieldOptions[SuplerAttributes.FIELD_TYPE] = FieldTypes.MODAL;
         return renderOptions.renderModalButton(fieldData, fieldOptions, false);

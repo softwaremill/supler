@@ -18,9 +18,9 @@ object PersonForm {
   )
 
   val carModal = form[Car](f => List(
-    f.field(_.make),
-    f.field(_.model),
-    f.field(_.year)
+    f.field(_.make).label("Make"),
+    f.field(_.model).label("Model"),
+    f.field(_.year).label("Year")
   ))
 
   def carForm(deleteAction: Car => ActionResult[Car]) = form[Car](f => List(
