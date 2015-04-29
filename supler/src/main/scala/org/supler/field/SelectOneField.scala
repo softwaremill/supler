@@ -39,7 +39,8 @@ case class SelectOneField[T, U](
     ValueJSONData(Some(currentValueId.map(JString).getOrElse(JNull)), Some(JNull))
   }
 
-  private[supler] override def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+  private[supler] override def applyFieldJSONValues(parentPath: FieldPath, obj: T, modalPath: Option[String],
+                                                    jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     import org.supler.validation.PartiallyAppliedObj._
 
     val value = jsonFields.get(name) match {

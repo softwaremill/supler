@@ -1,7 +1,7 @@
 package org.supler.field
 
-import org.supler.{Message, FieldPath}
-import org.supler.validation.{Validator, FieldErrorMessage, ValidationScope}
+import org.supler.validation.{FieldErrorMessage, ValidationScope, Validator}
+import org.supler.{FieldPath, Message}
 
 trait ValidateWithValidators[T, U] {
   this: Field[T] =>
@@ -11,7 +11,8 @@ trait ValidateWithValidators[T, U] {
   def emptyValue: Option[U]
   def required: Boolean
 
-  private[supler] override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): List[FieldErrorMessage] = {
+  private[supler] override def doValidate(parentPath: FieldPath, obj: T, modalPath: Option[String],
+                                          scope: ValidationScope): List[FieldErrorMessage] = {
     val v = read(obj)
     val valueMissing = v == null || v == None || Some(v) == emptyValue
 

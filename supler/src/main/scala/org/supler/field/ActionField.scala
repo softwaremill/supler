@@ -1,7 +1,7 @@
 package org.supler.field
 
+import org.json4s.JsonAST.{JField, JObject}
 import org.json4s._
-import org.json4s.JsonAST.{JObject, JField}
 import org.supler.FieldPath
 import org.supler.validation._
 
@@ -26,7 +26,7 @@ case class ActionField[T](
   def enabledIf(condition: T => Boolean): ActionField[T] = this.copy(enabledIf = condition)
   def includeIf(condition: T => Boolean): ActionField[T] = this.copy(includeIf = condition)
 
-  private[supler] override def generateFieldJSON(parentPath: FieldPath, obj: T) = {
+  private[supler] override def generateFieldJSON(parentPath: FieldPath, obj: T, modalPath: Option[String]) = {
     import JSONFieldNames._
 
     val validationScopeJSONData = actionValidationScope.toValidationScope(parentPath).generateJSONData
@@ -39,10 +39,10 @@ case class ActionField[T](
     ))
   }
 
-  private[supler] override def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
+  private[supler] override def applyFieldJSONValues(parentPath: FieldPath, obj: T, modalPath: Option[String], jsonFields: Map[String, JValue]) =
     PartiallyAppliedObj.full(obj)
 
-  private[supler] override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) = Nil
+  private[supler] override def doValidate(parentPath: FieldPath, obj: T, modalPath: Option[String], scope: ValidationScope) = Nil
 
   private[supler] override def findAction(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext) = {
     if (jsonFields.get(name) == Some(JBool(value = true))) {

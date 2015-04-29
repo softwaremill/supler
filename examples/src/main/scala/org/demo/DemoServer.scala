@@ -1,15 +1,15 @@
 package org.demo
 
 import akka.actor.ActorSystem
-import org.json4s.JsonAST.{JValue, JString}
+import org.demo.Directives._
+import org.json4s.JsonAST.{JString, JValue}
 import org.supler.Supler
 import org.supler.field.ActionResult
 import spray.http.HttpHeaders._
-import spray.http.{AllOrigins, MediaTypes}
 import spray.http.StatusCodes._
+import spray.http.{AllOrigins, MediaTypes}
 import spray.httpx.Json4sSupport
 import spray.routing.{Route, SimpleRoutingApp}
-import Directives._
 
 object DemoServer extends App with SuplerServerSupport with Json4sSupport with DocsForm {
 
@@ -27,13 +27,13 @@ object DemoServer extends App with SuplerServerSupport with Json4sSupport with D
     path("rest" / "form1.json") {
       getJson {
         complete {
-          personFormWithSave(person).generateJSON
+          personFormWithSave(person).generateJSON()
         }
       } ~
       post {
         entity(as[JValue]) { jvalue =>
           complete {
-            personFormWithSave(person).process(jvalue).generateJSON
+            personFormWithSave(person).process(jvalue).generateJSON()
           }
         }
       }
@@ -71,19 +71,19 @@ trait SuplerServerSupport extends SimpleRoutingApp {
 }
 
 trait DocsForm extends SimpleRoutingApp with Json4sSupport {
-  import DocsPersonForm._
+  import org.demo.DocsPersonForm._
 
   lazy val docsFormRoutes = corsSupport {
     path("rest" / "docsform.json") {
       getJson {
         complete {
-          docsPersonForm(aDocsPerson).generateJSON
+          docsPersonForm(aDocsPerson).generateJSON()
         }
       } ~
       post {
         entity(as[JValue]) { jvalue =>
           complete {
-            docsPersonForm(aDocsPerson).process(jvalue).generateJSON
+            docsPersonForm(aDocsPerson).process(jvalue).generateJSON()
           }
         }
       } ~

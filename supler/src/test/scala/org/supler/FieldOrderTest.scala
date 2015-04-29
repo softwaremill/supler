@@ -24,7 +24,7 @@ class FieldOrderTest extends FlatSpec with ShouldMatchers {
     // given
     val form = flatForm(o)
     // when
-    val json = form.generateJSON
+    val json = form.generateJSON()
     // then
     val orderFields = json.filterField(f => f._1 == "fieldOrder")
 
@@ -39,7 +39,7 @@ class FieldOrderTest extends FlatSpec with ShouldMatchers {
     // given
     val form = nonFlatForm(o)
     // when
-    val json = form.generateJSON
+    val json = form.generateJSON()
     // then
     val orderFields = json.filterField(f => f._1 == "fieldOrder")
 
@@ -53,11 +53,11 @@ class FieldOrderTest extends FlatSpec with ShouldMatchers {
     // given
     val formWithSubform = form[OrderTestParentClass](f => List(
       f.field(_.field1),
-      f.subform(_.obj, flatForm, None)
+      f.subform(_.obj, flatForm, false)
     ))
     val formInst = formWithSubform(OrderTestParentClass("hej", o, Nil))
     // when
-    val json = formInst.generateJSON
+    val json = formInst.generateJSON()
     // then
     val orderFields = json.filterField(f => f._1 == "fieldOrder")
 
@@ -79,11 +79,11 @@ class FieldOrderTest extends FlatSpec with ShouldMatchers {
     // given
     val formWithSubform = form[OrderTestParentClass](f => List(
       f.field(_.field1),
-      f.subform(_.objList, nonFlatForm, None)
+      f.subform(_.objList, nonFlatForm, false)
     ))
     val formInst = formWithSubform(OrderTestParentClass("hej", o, List(o, o)))
     // when
-    val json = formInst.generateJSON
+    val json = formInst.generateJSON()
     // then
     val orderFields = json.filterField(f => f._1 == "fieldOrder")
 

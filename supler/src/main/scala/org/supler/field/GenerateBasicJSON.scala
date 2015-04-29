@@ -9,7 +9,7 @@ trait GenerateBasicJSON[T] {
 
   def renderHint: Option[RenderHint]
 
-  private[supler] override def generateFieldJSON(parentPath: FieldPath, obj: T) = {
+  private[supler] override def generateFieldJSON(parentPath: FieldPath, obj: T, modalPath: Option[String]) = {
     val data = generateJSONData(obj)
 
     import JSONFieldNames._

@@ -3,7 +3,7 @@ package org.supler
 import java.util.Date
 
 import org.json4s.JValue
-import org.json4s.JsonAST.{JInt, JObject, JField}
+import org.json4s.JsonAST.{JField, JInt, JObject}
 import org.json4s.native.JsonMethods._
 import org.scalatest._
 import org.supler.Supler._
@@ -38,7 +38,7 @@ class TransformerTest extends FlatSpec with ShouldMatchers {
     val dateObj = DateObj(new Date())
 
     // when
-    val json = dateForm(dateObj).generateJSON
+    val json = dateForm(dateObj).generateJSON()
 
     // then
     compact(render(json)) should include (""""render_hint":{"name":"date"}""")
@@ -51,7 +51,7 @@ class TransformerTest extends FlatSpec with ShouldMatchers {
     ))
 
     // when
-    val json = pointForm(PointObj(Point(1, 2))).generateJSON
+    val json = pointForm(PointObj(Point(1, 2))).generateJSON()
 
     // then
     compact(render(json)) should include (""""value":{"x":1,"y":2}""")

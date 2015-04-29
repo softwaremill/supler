@@ -1,8 +1,9 @@
 package org.supler
 
-import org.scalatest.{ShouldMatchers, FlatSpec}
+import org.json4s.JValue
 import org.json4s.native.JsonMethods._
-import Supler._
+import org.scalatest.{FlatSpec, ShouldMatchers}
+import org.supler.Supler._
 
 class ConditionalFieldsTest extends FlatSpec with ShouldMatchers {
   case class Person(f1: String, f2: String, flag: Boolean)
@@ -25,8 +26,8 @@ class ConditionalFieldsTest extends FlatSpec with ShouldMatchers {
 
   it should "include a conditional field in the json depending on the entity" in {
     // when
-    val jsonWithFlagTrue = personFormIncl(Person("v1", "v2", flag = true)).generateJSON
-    val jsonWithFlagFalse = personFormIncl(Person("v1", "v2", flag = false)).generateJSON
+    val jsonWithFlagTrue: JValue = personFormIncl(Person("v1", "v2", flag = true)).generateJSON()
+    val jsonWithFlagFalse: JValue = personFormIncl(Person("v1", "v2", flag = false)).generateJSON()
 
     // then
     pretty(render(jsonWithFlagTrue)) should include ("f1")

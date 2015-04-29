@@ -65,6 +65,12 @@ module Supler {
           }
           break;
 
+        case FieldTypes.MODAL:
+          if (element.id === selectedActionId) {
+            this.appendFieldValue(result, fieldName, true, false);
+          }
+          break;
+
         case FieldTypes.SUBFORM:
           fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
           var subResult = this.getValueFromChildren(element, selectedActionId, {});

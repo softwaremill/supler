@@ -1,8 +1,8 @@
 package org.supler
 
+import org.json4s.native.JsonMethods._
 import org.scalatest._
 import org.supler.Supler._
-import org.json4s.native.JsonMethods._
 
 class SelectFieldTest extends FlatSpec with ShouldMatchers {
   case class Select1Required(field1: String)
@@ -56,7 +56,7 @@ class SelectFieldTest extends FlatSpec with ShouldMatchers {
 
   it should "use list indexes when serializing when no custom id function is provided" in {
     // when
-    val json = fReq(Select1Required("a")).generateJSON
+    val json = fReq(Select1Required("a")).generateJSON()
 
     // then
     val renderedJson = compact(render(json))
@@ -69,7 +69,7 @@ class SelectFieldTest extends FlatSpec with ShouldMatchers {
     val fReqCustomId = form[Select1Required](f => List(fReqField1.idForValue(s => s+s)))
 
     // when
-    val json = fReqCustomId(Select1Required("a")).generateJSON
+    val json = fReqCustomId(Select1Required("a")).generateJSON()
 
     // then
     val renderedJson = compact(render(json))

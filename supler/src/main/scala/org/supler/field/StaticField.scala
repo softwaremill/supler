@@ -43,8 +43,9 @@ case class StaticField[T](
     )
   }
 
-  override private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) = Nil
+  override private[supler] def doValidate(parentPath: FieldPath, obj: T, modalPath: Option[String], scope: ValidationScope) = Nil
 
-  override private[supler] def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]) =
+  override private[supler] def applyFieldJSONValues(parentPath: FieldPath, obj: T, modalPath: Option[String],
+                                                    jsonFields: Map[String, JValue]) =
     PartiallyAppliedObj.full(obj)
 }

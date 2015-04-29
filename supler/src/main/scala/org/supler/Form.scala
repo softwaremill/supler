@@ -14,20 +14,20 @@ case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
 
   def getMeta(jvalue: JValue): FormMeta = FormMeta.fromJSON(jvalue)
 
-  private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors =
-    rows.flatMap(_.doValidate(parentPath, obj, scope))
+  private[supler] def doValidate(parentPath: FieldPath, obj: T, modalPath: Option[String], scope: ValidationScope): FieldErrors =
+    rows.flatMap(_.doValidate(parentPath, obj, modalPath, scope))
 
-  private[supler] def generateJSON(parentPath: FieldPath, obj: T): JValue = {
-    val rowsJSONs = rows.map(_.generateJSON(parentPath, obj))
+  private[supler] def generateJSON(parentPath: FieldPath, obj: T, modalPath: Option[String]): JValue = {
+    val rowsJSONs = rows.map(_.generateJSON(parentPath, obj, modalPath))
     JObject(
       JField("fields", JArray(rowsJSONs.flatMap(_.fields))),
       JField("fieldOrder", JArray(rowsJSONs.map(_.fieldOrderAsJSON)))
     )
   }
 
-  private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jvalue: JValue): PartiallyAppliedObj[T] = {
+  private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, modalPath: Option[String], jvalue: JValue): PartiallyAppliedObj[T] = {
     jvalue match {
-      case JObject(jsonFields) => Row.applyJSONValues(rows, parentPath, obj, jsonFields.toMap)
+      case JObject(jsonFields) => Row.applyJSONValues(rows, parentPath, obj, modalPath, jsonFields.toMap)
       case _ => PartiallyAppliedObj.full(obj)
     }
   }

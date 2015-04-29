@@ -6,6 +6,7 @@ module Supler {
     static BOOLEAN = 'boolean';
     static SELECT = 'select';
     static SUBFORM = 'subform';
+    static MODAL = 'modal_button';
     static STATIC = 'static';
     static ACTION = 'action';
     static META = 'meta';

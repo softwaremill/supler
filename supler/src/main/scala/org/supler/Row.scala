@@ -7,21 +7,21 @@ import org.supler.validation._
 trait Row[T] {
   def ||(field: Field[T]): Row[T]
 
-  private[supler] def generateJSON(parentPath: FieldPath, obj: T): RowsJSON
+  private[supler] def generateJSON(parentPath: FieldPath, obj: T, modalPath: Option[String]): RowsJSON
 
-  private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T]
+  private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, modalPath: Option[String], jsonFields: Map[String, JValue]): PartiallyAppliedObj[T]
 
-  private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): FieldErrors
+  private[supler] def doValidate(parentPath: FieldPath, obj: T, modalPath: Option[String], scope: ValidationScope): FieldErrors
 
   private[supler] def findAction(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext): Option[RunnableAction]
 }
 
 object Row {
-  def applyJSONValues[T](toRows: Iterable[Row[T]], parentPath: FieldPath, obj: T,
+  def applyJSONValues[T](toRows: Iterable[Row[T]], parentPath: FieldPath, obj: T, modalPath: Option[String],
     jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
 
     toRows.foldLeft[PartiallyAppliedObj[T]](PartiallyAppliedObj.full(obj)) { (pao, row) =>
-      pao.flatMap(row.applyJSONValues(parentPath, _, jsonFields))
+      pao.flatMap(row.applyJSONValues(parentPath, _, modalPath, jsonFields))
     }
   }
 
@@ -38,14 +38,14 @@ object Row {
 case class MultiFieldRow[T](fields: List[Field[T]]) extends Row[T] {
   override def ||(field: Field[T]): Row[T] = MultiFieldRow(fields ++ List(field))
 
-  override def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope): List[FieldErrorMessage] =
-    fields.flatMap(_.doValidate(parentPath, obj, scope))
+  override def doValidate(parentPath: FieldPath, obj: T, modalPath: Option[String], scope: ValidationScope): List[FieldErrorMessage] =
+    fields.flatMap(_.doValidate(parentPath, obj, modalPath, scope))
 
-  override def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] =
-    Row.applyJSONValues(fields, parentPath, obj, jsonFields)
+  override def applyJSONValues(parentPath: FieldPath, obj: T, modalPath: Option[String], jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] =
+    Row.applyJSONValues(fields, parentPath, obj, modalPath, jsonFields)
 
-  override def generateJSON(parentPath: FieldPath, obj: T) = {
-    RowsJSON.combineIntoSingleRowsJSON(fields.map(_.generateJSON(parentPath, obj)))
+  override def generateJSON(parentPath: FieldPath, obj: T, modalPath: Option[String]) = {
+    RowsJSON.combineIntoSingleRowsJSON(fields.map(_.generateJSON(parentPath, obj, modalPath)))
   }
 
   override def findAction(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue], ctx: RunActionContext) =

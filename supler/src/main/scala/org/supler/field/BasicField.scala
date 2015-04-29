@@ -2,8 +2,8 @@ package org.supler.field
 
 import org.json4s.JsonAST._
 import org.supler._
-import org.supler.validation._
 import org.supler.transformation.Transformer
+import org.supler.validation._
 
 case class BasicField[T, U](
   name: String,
@@ -40,8 +40,9 @@ case class BasicField[T, U](
     )
   }
 
-  private[supler] override def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
-    import PartiallyAppliedObj._
+  private[supler] override def applyFieldJSONValues(parentPath: FieldPath, obj: T, modalPath: Option[String],
+                                                    jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+    import org.supler.validation.PartiallyAppliedObj._
     val appliedOpt = for {
       jsonValue <- jsonFields.get(name)
       value = transformer.deserialize(jsonValue)

@@ -9,6 +9,7 @@ var Supler;
         FieldTypes.BOOLEAN = 'boolean';
         FieldTypes.SELECT = 'select';
         FieldTypes.SUBFORM = 'subform';
+        FieldTypes.MODAL = 'modal_button';
         FieldTypes.STATIC = 'static';
         FieldTypes.ACTION = 'action';
         FieldTypes.META = 'meta';
@@ -249,6 +250,7 @@ var Supler;
                 return renderOptions.renderSubformDecoration(subformHtml, fieldData.label, fieldData.id, fieldData.name);
             }
             else if (fieldData.modal) {
+                fieldOptions[Supler.SuplerAttributes.FIELD_TYPE] = Supler.FieldTypes.MODAL;
                 return renderOptions.renderModalButton(fieldData, fieldOptions, false);
             }
             else {
@@ -764,6 +766,11 @@ var Supler;
                         this.appendFieldValue(result, fieldName, true, false);
                     }
                     break;
+                case Supler.FieldTypes.MODAL:
+                    if (element.id === selectedActionId) {
+                        this.appendFieldValue(result, fieldName, true, false);
+                    }
+                    break;
                 case Supler.FieldTypes.SUBFORM:
                     fieldName = element.getAttribute(Supler.SuplerAttributes.FIELD_NAME);
                     var subResult = this.getValueFromChildren(element, selectedActionId, {});
@@ -1088,6 +1095,14 @@ var Supler;
                 }
             });
         };
+        SendController.prototype.attachModalListeners = function () {
+            var _this = this;
+            this.forEachFormElement(function (htmlFormElement) {
+                if (htmlFormElement.getAttribute(Supler.SuplerAttributes.FIELD_TYPE) === Supler.FieldTypes.MODAL) {
+                    htmlFormElement.onclick = function () { return _this.modalListenerFor(htmlFormElement); };
+                }
+            });
+        };
         SendController.prototype.refreshListenerFor = function (htmlFormElement) {
             var _this = this;
             var validationResult = this.validation.processClientSingle(htmlFormElement.id);
@@ -1116,6 +1131,16 @@ var Supler;
                 else {
                     this.actionCompleted();
                 }
+            }
+        };
+        SendController.prototype.modalListenerFor = function (htmlFormElement) {
+            var _this = this;
+            if (!this.actionInProgress && this.options.sendEnabled()) {
+                this.actionInProgress = true;
+                var id = htmlFormElement.id;
+                this.options.sendFormFunction(this.form.getValue(id), this.sendSuccessFn(function () {
+                    return true;
+                }, function () { return _this.actionCompleted(); }), function () { return _this.actionCompleted(); }, true, htmlFormElement);
             }
         };
         SendController.prototype.actionCompleted = function () {
@@ -1168,6 +1193,7 @@ var Supler;
     var Form = (function () {
         function Form(container, customOptions) {
             this.container = container;
+            this.lastOpenedModal = null;
             customOptions = customOptions || {};
             this.fieldsOptions = new Supler.FieldsOptions(customOptions.field_options);
             this.i18n = new Supler.I18n();
@@ -1196,6 +1222,7 @@ var Supler;
                 var sendController = new Supler.SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, this.validation);
                 sendController.attachRefreshListeners();
                 sendController.attachActionListeners();
+                sendController.attachModalListeners();
             }
             var customData = this.getCustomData(json);
             if (customData)

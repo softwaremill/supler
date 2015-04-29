@@ -15,12 +15,12 @@ trait Field[T] extends Row[T] {
 
   override def ||(field: Field[T]): Row[T] = MultiFieldRow(this :: field :: Nil)
 
-  private[supler] override def generateJSON(parentPath: FieldPath, obj: T): RowsJSON = {
+  private[supler] override def generateJSON(parentPath: FieldPath, obj: T, modalPath: Option[String]): RowsJSON = {
     val isIncluded = includeIf(obj)
     if (isIncluded) {
       val isEnabled = enabledIf(obj)
 
-      val fieldJsonPartial = generateFieldJSON(parentPath, obj)
+      val fieldJsonPartial = generateFieldJSON(parentPath, obj, modalPath)
       val commonJson = JField(JSONFieldNames.Name, JString(name)) ::
         JField(JSONFieldNames.Enabled, JBool(isEnabled)) ::
         JField(JSONFieldNames.Label, JString(label.getOrElse(""))) ::
@@ -31,14 +31,14 @@ trait Field[T] extends Row[T] {
     } else RowsJSON.empty
   }
 
-  override private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, json4s.JValue]) = {
+  override private[supler] def applyJSONValues(parentPath: FieldPath, obj: T, modalPath: Option[String], jsonFields: Map[String, json4s.JValue]) = {
     if (includeIf(obj) && enabledIf(obj)) {
-      applyFieldJSONValues(parentPath, obj, jsonFields)
+      applyFieldJSONValues(parentPath, obj, modalPath, jsonFields)
     } else PartiallyAppliedObj.full(obj)
   }
 
-  private[supler] def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, json4s.JValue]): PartiallyAppliedObj[T]
-  private[supler] def generateFieldJSON(parentPath: FieldPath, obj: T): JObject
+  private[supler] def applyFieldJSONValues(parentPath: FieldPath, obj: T, modalPath: Option[String], jsonFields: Map[String, json4s.JValue]): PartiallyAppliedObj[T]
+  private[supler] def generateFieldJSON(parentPath: FieldPath, obj: T, modalPath: Option[String]): JObject
 
   protected object JSONFieldNames {
     val Name = "name"

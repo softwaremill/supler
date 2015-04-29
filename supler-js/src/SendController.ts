@@ -4,10 +4,10 @@ module Supler {
     private actionInProgress:boolean;
 
     constructor(private form:Form,
-      private formElementDictionary:FormElementDictionary,
-      private options:SendControllerOptions,
-      private elementSearch:ElementSearch,
-      private validation:Validation) {
+                private formElementDictionary:FormElementDictionary,
+                private options:SendControllerOptions,
+                private elementSearch:ElementSearch,
+                private validation:Validation) {
 
       this.refreshCounter = 0;
       this.actionInProgress = false;
@@ -25,6 +25,14 @@ module Supler {
       this.forEachFormElement(htmlFormElement => {
         if (htmlFormElement.getAttribute(SuplerAttributes.FIELD_TYPE) === FieldTypes.ACTION) {
           htmlFormElement.onclick = () => this.actionListenerFor(htmlFormElement)
+        }
+      });
+    }
+
+    attachModalListeners() {
+      this.forEachFormElement(htmlFormElement => {
+        if (htmlFormElement.getAttribute(SuplerAttributes.FIELD_TYPE) === FieldTypes.MODAL) {
+          htmlFormElement.onclick = () => this.modalListenerFor(htmlFormElement)
         }
       });
     }
@@ -79,6 +87,30 @@ module Supler {
       }
     }
 
+    private modalListenerFor(htmlFormElement:HTMLElement) {
+      // allowing at most one action at a time.
+      if (!this.actionInProgress && this.options.sendEnabled()) {
+        this.actionInProgress = true;
+
+        var id = htmlFormElement.id;
+
+        //var validationPassed = !this.validation.processClientSingle(id) && !this.validation.processClient(this.formElementDictionary.getElement(id).validationScope);
+        //
+        //if (validationPassed) {
+          this.options.sendFormFunction(
+            this.form.getValue(id),
+            this.sendSuccessFn(() => {
+              return true;
+            }, () => this.actionCompleted()),
+            () => this.actionCompleted(),
+            true,
+            htmlFormElement);
+        //} else {
+        //  this.actionCompleted();
+        //}
+      }
+    }
+
     private actionCompleted() {
       this.actionInProgress = false;
     }
@@ -118,7 +150,7 @@ module Supler {
 
   export class SendControllerOptions {
     sendFormFunction:(formValue:any, renderResponseFn:(data:any) => void, sendErrorFn:() => void,
-      isAction:boolean, triggeringElement:HTMLElement) => void;
+                      isAction:boolean, triggeringElement:HTMLElement) => void;
 
     constructor(options:any) {
       this.sendFormFunction = options.send_form_function;

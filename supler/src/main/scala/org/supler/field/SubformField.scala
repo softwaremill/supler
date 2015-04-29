@@ -2,8 +2,8 @@ package org.supler.field
 
 import org.json4s.JsonAST.JValue
 import org.json4s._
+import org.supler._
 import org.supler.validation._
-import org.supler.{FieldPath, Form, Id, Util}
 
 case class SubformField[T, ContU, U, Cont[_]](
                                                c: SubformContainer[ContU, U, Cont],
@@ -17,7 +17,7 @@ case class SubformField[T, ContU, U, Cont[_]](
                                                renderHint: RenderHint with SubformFieldCompatible,
                                                enabledIf: (T) => Boolean,
                                                includeIf: (T) => Boolean,
-                                               showModalForm: Option[Boolean] = None) extends Field[T] {
+                                               lazyForm: Boolean) extends Field[T] {
 
   import c._
 
@@ -31,57 +31,69 @@ case class SubformField[T, ContU, U, Cont[_]](
 
   def includeIf(condition: T => Boolean): SubformField[T, ContU, U, Cont] = this.copy(includeIf = condition)
 
-  def showModalForm(shouldShow: Option[Boolean]): SubformField[T, ContU, U, Cont] = this.copy(showModalForm = shouldShow)
+  def lazyForm(isLazy: Boolean): SubformField[T, ContU, U, Cont] = this.copy(lazyForm = isLazy)
 
-  private[supler] def generateFieldJSON(parentPath: FieldPath, obj: T) = {
-    showModalForm match {
-      case Some(false) => {
-        import JSONFieldNames._
-        JObject(
-          JField(Type, JString(SpecialFieldTypes.Subform)),
-          JField(Evaluated, JBool(false)),
-          JField(Modal, JBool(showModalForm.isDefined)),
-          JField(Path, JString(parentPath.append(name).toString))
-        )
+  def shouldEvaluate(parentPath: FieldPath, modalPath: Option[String]) = modalPath match {
+    case Some(path) => !lazyForm || path.startsWith(parentPath.append(name).toString)
+    case _ => !lazyForm
+  }
+
+  private[supler] def generateFieldJSON(parentPath: FieldPath, obj: T, modalPath: Option[String]) = {
+    if (shouldEvaluate(parentPath, modalPath)) {
+      val valuesAsJValue = read(obj).zipWithIndex.map { case (v, indexOpt) =>
+        embeddedForm.generateJSON(pathWithOptionalIndex(parentPath, indexOpt), v, modalPath)
       }
-      case _ => {
-        val valuesAsJValue = read(obj).zipWithIndex.map { case (v, indexOpt) =>
-          embeddedForm.generateJSON(pathWithOptionalIndex(parentPath, indexOpt), v)
-        }
-        import JSONFieldNames._
-        JObject(
-          JField(Type, JString(SpecialFieldTypes.Subform)),
-          JField(Evaluated, JBool(true)),
-          JField(Modal, JBool(showModalForm.isDefined)),
-          JField(RenderHint, JObject(JField("name", JString(renderHint.name)) :: renderHint.extraJSON)),
-          JField(Multiple, JBool(c.isMultiple)),
-          JField(Label, JString(label.getOrElse(""))),
-          JField(Path, JString(parentPath.append(name).toString)),
-          JField(Value, c.combineJValues(valuesAsJValue))
-        )
-      }
+      import JSONFieldNames._
+      JObject(
+        JField(Type, JString(SpecialFieldTypes.Subform)),
+        JField(Evaluated, JBool(true)),
+        JField(Modal, JBool(lazyForm)),
+        JField(RenderHint, JObject(JField("name", JString(renderHint.name)) :: renderHint.extraJSON)),
+        JField(Multiple, JBool(c.isMultiple)),
+        JField(Label, JString(label.getOrElse(""))),
+        JField(Path, JString(parentPath.append(name).toString)),
+        JField(Value, c.combineJValues(valuesAsJValue))
+      )
+    }
+    else {
+      import JSONFieldNames._
+      JObject(
+        JField(Type, JString(SpecialFieldTypes.Subform)),
+        JField(Evaluated, JBool(false)),
+        JField(Modal, JBool(lazyForm)),
+        JField(Path, JString(parentPath.append(name).toString))
+      )
     }
   }
 
-  override private[supler] def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
-    def valuesWithIndex = c.valuesWithIndexFromJSON(jsonFields.get(name))
-    val paos = valuesWithIndex.map { case (formJValue, indexOpt) => {
-      embeddedForm.applyJSONValues(pathWithOptionalIndex(parentPath, indexOpt),
-        createEmpty.getOrElse(embeddedForm.createEmpty)(), formJValue)
-    }
-    }
+  override private[supler] def applyFieldJSONValues(parentPath: FieldPath, obj: T, modalPath: Option[String],
+                                                    jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+    if (shouldEvaluate(parentPath, modalPath)) {
+      def valuesWithIndex = c.valuesWithIndexFromJSON(jsonFields.get(name))
+      val paos = valuesWithIndex.map { case (formJValue, indexOpt) => {
+        embeddedForm.applyJSONValues(pathWithOptionalIndex(parentPath, indexOpt),
+          createEmpty.getOrElse(embeddedForm.createEmpty)(), modalPath, formJValue)
+      }
+      }
 
-    c.combinePaos(paos).map(write(obj, _))
+      c.combinePaos(paos).map(write(obj, _))
+    } else {
+      PartiallyAppliedObj.full(obj)
+    }
   }
 
-  override private[supler] def doValidate(parentPath: FieldPath, obj: T, scope: ValidationScope) = {
-    val valuesWithIndex = read(obj).zipWithIndex
+  override private[supler] def doValidate(parentPath: FieldPath, obj: T, modalPath: Option[String], scope: ValidationScope) = {
+    if (shouldEvaluate(parentPath, modalPath)) {
+      val valuesWithIndex = read(obj).zipWithIndex
 
-    val errorLists = valuesWithIndex.map { case (el, indexOpt) =>
-      embeddedForm.doValidate(pathWithOptionalIndex(parentPath, indexOpt), el, scope)
+      val errorLists = valuesWithIndex.map { case (el, indexOpt) =>
+        embeddedForm.doValidate(pathWithOptionalIndex(parentPath, indexOpt), el, modalPath, scope)
+      }
+
+      errorLists.toList.flatten
+    } else {
+      Nil
     }
-
-    errorLists.toList.flatten
   }
 
   override private[supler] def findAction(

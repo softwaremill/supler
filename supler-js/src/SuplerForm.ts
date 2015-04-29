@@ -12,6 +12,7 @@ module Supler {
     private fieldsOptions:FieldsOptions;
     private fieldOrder:string[][];
     private readFormValues:ReadFormValues;
+    private lastOpenedModal: string = null;
 
     constructor(private container:HTMLElement, customOptions:any) {
       customOptions = customOptions || {};
@@ -58,6 +59,7 @@ module Supler {
           this.validation);
         sendController.attachRefreshListeners();
         sendController.attachActionListeners();
+        sendController.attachModalListeners();
       }
 
       var customData = this.getCustomData(json);

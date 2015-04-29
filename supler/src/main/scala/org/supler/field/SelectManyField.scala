@@ -42,7 +42,8 @@ case class SelectManyField[T, U](
       None)
   }
 
-  private[supler] override def applyFieldJSONValues(parentPath: FieldPath, obj: T, jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
+  private[supler] override def applyFieldJSONValues(parentPath: FieldPath, obj: T, modalPath: Option[String],
+                                                    jsonFields: Map[String, JValue]): PartiallyAppliedObj[T] = {
     import org.supler.validation.PartiallyAppliedObj._
 
     val possibleValues = valuesProvider(obj)
