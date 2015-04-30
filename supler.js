@@ -733,9 +733,8 @@ var Supler;
 var Supler;
 (function (Supler) {
     var ReadFormValues = (function () {
-        function ReadFormValues(fieldsOptions, modalPaths) {
+        function ReadFormValues(fieldsOptions) {
             this.fieldsOptions = fieldsOptions;
-            this.modalPaths = modalPaths;
         }
         ReadFormValues.prototype.getValueFrom = function (element, selectedActionId, result) {
             if (selectedActionId === void 0) { selectedActionId = null; }
@@ -743,9 +742,6 @@ var Supler;
             var fieldType = element.getAttribute(Supler.SuplerAttributes.FIELD_TYPE);
             if (element.disabled) {
                 return result;
-            }
-            if (!this.modalPaths.isEmpty()) {
-                this.appendFieldValue(result, Supler.FormSections.MODAL_PATH, this.modalPaths.peek(), false);
             }
             if (fieldType) {
                 var fieldOptions = this.fieldsOptions.forField(element.getAttribute('name'), fieldType, null);
@@ -882,8 +878,27 @@ var Supler;
         Bootstrap3RenderOptions.prototype.renderForm = function (rows) {
             return Supler.HtmlUtil.renderTag('div', { 'class': 'container-fluid' }, rows);
         };
+        Bootstrap3RenderOptions.prototype.renderModalContainer = function () {
+            return Supler.HtmlUtil.renderTag('div', { 'class': 'modal', 'data-show': 'true', 'id': 'supler-modal' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-dialog' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-content' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-header' }, Supler.HtmlUtil.renderTag('button', { 'class': 'close', 'data-dismiss': 'modal', 'aria-label': 'Close' }, Supler.HtmlUtil.renderTag('span', { 'aria-hidden': 'true' }, '&times;'))) + Supler.HtmlUtil.renderTag('div', { 'class': 'modal-body', 'id': 'modal-body' }, '') + Supler.HtmlUtil.renderTag('div', { 'class': 'modal-footer' }, Supler.HtmlUtil.renderTag('button', { 'class': 'btn btn-default', 'data-dismiss': 'modal' }, 'Close') + Supler.HtmlUtil.renderTag('button', { 'class': 'btn btn-primary' }, 'Save changes')))));
+        };
+        Bootstrap3RenderOptions.prototype.renderHtml = function (html, container) {
+            if (!container.children.namedItem('supler-modal')) {
+                container.innerHTML = this.renderModalContainer() + Supler.HtmlUtil.renderTag('div', { 'id': 'supler-form' }, '');
+            }
+            $('#supler-form').html(html);
+        };
+        Bootstrap3RenderOptions.prototype.postRender = function () {
+            if (Bootstrap3RenderOptions.modalToShow != null) {
+                $('#modal-body').html(Bootstrap3RenderOptions.modalToShow);
+                if (!Bootstrap3RenderOptions.modalShown) {
+                    $('#supler-modal').modal('show');
+                    Bootstrap3RenderOptions.modalShown = true;
+                }
+            }
+        };
         Bootstrap3RenderOptions.prototype.renderModalForm = function (form) {
-            return '<div class="modal fade" data-show="true">' + '<div class="modal-dialog">' + '<div class="modal-content"> ' + '<div class="modal-header">    ' + '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' + '<h4 class="modal-title">Modal title</h4>' + '</div>' + '<div class="modal-body">' + form + '</div>' + '<div class="modal-footer">' + '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>' + '<button type="button" class="btn btn-primary">Save changes</button>' + '</div>' + '</div><!-- /.modal-content -->' + '</div><!-- /.modal-dialog -->' + '</div><!-- /.modal -->';
+            Bootstrap3RenderOptions.modalToShow = form;
+            return "<div/>";
         };
         Bootstrap3RenderOptions.prototype.renderRow = function (fields) {
             return Supler.HtmlUtil.renderTag('div', { 'class': 'row' }, fields);
@@ -1087,6 +1102,8 @@ var Supler;
             }
             return 'text';
         };
+        Bootstrap3RenderOptions.modalToShow = null;
+        Bootstrap3RenderOptions.modalShown = false;
         return Bootstrap3RenderOptions;
     })();
     Supler.Bootstrap3RenderOptions = Bootstrap3RenderOptions;
@@ -1239,18 +1256,18 @@ var Supler;
             this.customDataHandlerFn = customOptions.custom_data_handler || (function (data) {
             });
             this.fieldOrder = customOptions.field_order;
-            this.readFormValues = new Supler.ReadFormValues(this.fieldsOptions, this.modalPaths);
+            this.readFormValues = new Supler.ReadFormValues(this.fieldsOptions);
         }
         Form.prototype.render = function (json) {
             if (this.isSuplerForm(json)) {
                 var result = new Supler.CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories, this.fieldsOptions, this.fieldOrder).renderForm(json[Supler.FormSections.META], json.main_form);
-                this.container.innerHTML = result.html;
+                this.renderOptionsGetter.defaultRenderOptions().renderHtml(result.html, this.container);
                 this.initializeValidation(result.formElementDictionary, json);
+                this.renderOptionsGetter.defaultRenderOptions().postRender();
                 var sendController = new Supler.SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, this.validation, this.modalPaths);
                 sendController.attachRefreshListeners();
                 sendController.attachActionListeners();
                 sendController.attachModalListeners();
-                $('.modal').modal();
             }
             var customData = this.getCustomData(json);
             if (customData)
@@ -1267,7 +1284,14 @@ var Supler;
         };
         Form.prototype.getValue = function (selectedActionId) {
             if (selectedActionId === void 0) { selectedActionId = null; }
-            return this.readFormValues.getValueFrom(this.container, selectedActionId);
+            return this.readFormValues.getValueFrom(this.container, selectedActionId, this.addModalPathIfNeeded());
+        };
+        Form.prototype.addModalPathIfNeeded = function () {
+            var result = {};
+            if (!this.modalPaths.isEmpty()) {
+                result[Supler.FormSections.MODAL_PATH] = this.modalPaths.peek();
+            }
+            return result;
         };
         Form.prototype.validate = function (validationScope) {
             if (validationScope === void 0) { validationScope = Supler.ValidateAll; }

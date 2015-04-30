@@ -1,6 +1,6 @@
 package org.demo
 
-import java.util.UUID
+import java.util.{Date, UUID}
 
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
@@ -20,7 +20,8 @@ object PersonForm {
   val carModal = form[Car](f => List(
     f.field(_.make).label("Make"),
     f.field(_.model).label("Model"),
-    f.field(_.year).label("Year")
+    f.field(_.year).label("Year"),
+    f.staticField(c => Message(s"${new Date()}")).label("Clock")
   ))
 
   def carForm(deleteAction: Car => ActionResult[Car]) = form[Car](f => List(

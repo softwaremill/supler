@@ -5,13 +5,16 @@ module Supler {
 
   interface RenderPossibleValuesField {
     (fieldData:FieldData,
-      possibleValues:SelectValue[],
-      containerOptions:any,
-      elementOptions:any,
-      compact:boolean): string
+     possibleValues:SelectValue[],
+     containerOptions:any,
+     elementOptions:any,
+     compact:boolean): string
   }
 
   export interface RenderOptions {
+    // render html on the form
+    renderHtml: (html:string, container:HTMLElement) => any
+
     // main field rendering entry points
     // basic types
     renderTextField: RenderAnyValueField
@@ -32,10 +35,10 @@ module Supler {
     renderDescription: (description:string) => string
     renderValidation: (validationId:string) => string
 
-    renderRow: (fields: string) => string
+    renderRow: (fields:string) => string
 
-    renderForm: (rows: string) => string
-    renderModalForm: (formH: string) => string
+    renderForm: (rows:string) => string
+    renderModalForm: (formH:string) => string
 
     renderStaticField: (label:string, id:string, validationId:string, value:any, compact:boolean) => string
     renderStaticText: (text:string) => string
@@ -55,6 +58,9 @@ module Supler {
     // misc
     additionalFieldOptions: () => any
     inputTypeFor: (fieldData:FieldData) => string
+
+    // hookups
+    postRender: () => any
   }
 
   export class Bootstrap3RenderOptions implements RenderOptions {
@@ -62,28 +68,52 @@ module Supler {
     constructor() {
     }
 
+    public static modalToShow:string = null;
+    public static modalShown:boolean = false;
+
     renderForm(rows:string):string {
       return HtmlUtil.renderTag('div', {'class': 'container-fluid'}, rows);
     }
 
-    renderModalForm(form: string):string {
-      return '<div class="modal fade" data-show="true">'+
-        '<div class="modal-dialog">'+
-      '<div class="modal-content"> '+
-      '<div class="modal-header">    '+
-      '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
-      '<h4 class="modal-title">Modal title</h4>'+
-      '</div>'+
-      '<div class="modal-body">'+
-      form +
-      '</div>'+
-      '<div class="modal-footer">'+
-      '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'+
-      '<button type="button" class="btn btn-primary">Save changes</button>'+
-      '</div>'+
-      '</div><!-- /.modal-content -->'+
-      '</div><!-- /.modal-dialog -->'+
-      '</div><!-- /.modal -->';
+    renderModalContainer() {
+      return HtmlUtil.renderTag('div', {'class': 'modal', 'data-show': 'true', 'id': 'supler-modal'},
+        HtmlUtil.renderTag('div', {'class': 'modal-dialog'},
+          HtmlUtil.renderTag('div', {'class': 'modal-content'},
+            HtmlUtil.renderTag('div', {'class': 'modal-header'},
+              HtmlUtil.renderTag('button', {'class': 'close', 'data-dismiss': 'modal', 'aria-label': 'Close'},
+                HtmlUtil.renderTag('span', {'aria-hidden': 'true'}, '&times;')
+              )
+            ) +
+            HtmlUtil.renderTag('div', {'class': 'modal-body', 'id': 'modal-body'}, '') +
+            HtmlUtil.renderTag('div', {'class': 'modal-footer'},
+              HtmlUtil.renderTag('button', {'class': 'btn btn-default', 'data-dismiss': 'modal'}, 'Close') +
+              HtmlUtil.renderTag('button', {'class': 'btn btn-primary'}, 'Save changes')
+            )
+          )
+        ));
+    }
+
+    renderHtml(html:string, container:HTMLElement) {
+      if (!container.children.namedItem('supler-modal')) {
+        container.innerHTML = this.renderModalContainer() + HtmlUtil.renderTag('div', {'id': 'supler-form'}, '');
+      }
+
+      $('#supler-form').html(html);
+    }
+
+    postRender() {
+      if (Bootstrap3RenderOptions.modalToShow != null) {
+        $('#modal-body').html(Bootstrap3RenderOptions.modalToShow);
+        if (!Bootstrap3RenderOptions.modalShown) {
+          $('#supler-modal').modal('show');
+          Bootstrap3RenderOptions.modalShown = true;
+        }
+      }
+    }
+
+    renderModalForm(form:string):string {
+      Bootstrap3RenderOptions.modalToShow = form;
+      return "<div/>";
     }
 
     renderRow(fields:string):string {
@@ -182,10 +212,10 @@ module Supler {
         this.renderValidation(fieldData.validationId) +
         '\n';
 
-      return HtmlUtil.renderTag('div', {'class': 'form-group'+this.addColumnWidthClass(fieldData)}, divBody);
+      return HtmlUtil.renderTag('div', {'class': 'form-group' + this.addColumnWidthClass(fieldData)}, divBody);
     }
 
-    private addColumnWidthClass(fieldData: FieldData) {
+    private addColumnWidthClass(fieldData:FieldData) {
       if (fieldData.fieldsPerRow > 0) {
         return ' col-md-' + (fieldData.fieldsPerRow >= 12 ? 1 : 12 / fieldData.fieldsPerRow);
       } else {
@@ -304,7 +334,7 @@ module Supler {
     }
 
     private renderCheckable(inputType:string, possibleValues:SelectValue[],
-      containerOptions:any, elementOptions:any, isChecked:(SelectValue) => boolean) {
+                            containerOptions:any, elementOptions:any, isChecked:(SelectValue) => boolean) {
 
       var html = '';
       Util.foreach(possibleValues, (i, v) => {

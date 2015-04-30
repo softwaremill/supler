@@ -44,24 +44,24 @@ module Supler {
 
       this.fieldOrder = customOptions.field_order;
 
-      this.readFormValues = new ReadFormValues(this.fieldsOptions, this.modalPaths);
+      this.readFormValues = new ReadFormValues(this.fieldsOptions);
     }
 
     render(json) {
       if (this.isSuplerForm(json)) { // might be custom-data-only result
         var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories,
           this.fieldsOptions, this.fieldOrder).renderForm(json[FormSections.META], json.main_form);
-        this.container.innerHTML = result.html;
+        this.renderOptionsGetter.defaultRenderOptions().renderHtml(result.html, this.container);
 
         this.initializeValidation(result.formElementDictionary, json);
+
+        this.renderOptionsGetter.defaultRenderOptions().postRender();
 
         var sendController = new SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch,
           this.validation, this.modalPaths);
         sendController.attachRefreshListeners();
         sendController.attachActionListeners();
         sendController.attachModalListeners();
-
-        $('.modal').modal();
       }
 
       var customData = this.getCustomData(json);
@@ -86,7 +86,15 @@ module Supler {
     }
 
     getValue(selectedActionId:string = null) {
-      return this.readFormValues.getValueFrom(this.container, selectedActionId);
+      return this.readFormValues.getValueFrom(this.container, selectedActionId, this.addModalPathIfNeeded());
+    }
+
+    addModalPathIfNeeded(): any {
+      var result = {};
+      if (!this.modalPaths.isEmpty()) {
+        result[FormSections.MODAL_PATH] = this.modalPaths.peek();
+      }
+      return result
     }
 
     /**
