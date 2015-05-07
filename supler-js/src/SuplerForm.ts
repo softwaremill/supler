@@ -12,7 +12,7 @@ module Supler {
     private fieldsOptions:FieldsOptions;
     private fieldOrder:string[][];
     private readFormValues:ReadFormValues;
-    private modalPaths = new collections.Stack<string>();
+    private modalController = new ModalController();
 
     constructor(private container:HTMLElement, customOptions:any) {
       customOptions = customOptions || {};
@@ -22,7 +22,7 @@ module Supler {
       this.i18n = new I18n();
       Util.copyProperties(this.i18n, customOptions.i18n);
 
-      var renderOptions = new Bootstrap3RenderOptions();
+      var renderOptions = new Bootstrap3RenderOptions(this.modalController);
       Util.copyProperties(renderOptions, customOptions.render_options);
       this.renderOptionsGetter = RenderOptionsGetter.parse(renderOptions, container, this.fieldsOptions,
         customOptions.field_templates);
@@ -58,7 +58,7 @@ module Supler {
         this.renderOptionsGetter.defaultRenderOptions().postRender();
 
         var sendController = new SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch,
-          this.validation, this.modalPaths);
+          this.validation, this.modalController);
         sendController.attachRefreshListeners();
         sendController.attachActionListeners();
         sendController.attachModalListeners();
@@ -91,8 +91,8 @@ module Supler {
 
     addModalPathIfNeeded(): any {
       var result = {};
-      if (!this.modalPaths.isEmpty()) {
-        result[FormSections.MODAL_PATH] = this.modalPaths.peek();
+      if (!this.modalController.isEmpty()) {
+        result[FormSections.MODAL_PATH] = this.modalController.currentModal();
       }
       return result
     }
@@ -118,6 +118,10 @@ module Supler {
 
     private isSuplerForm(json):boolean {
       return json.is_supler_form === true;
+    }
+
+    getContainer(): HTMLElement {
+      return this.container;
     }
   }
 }

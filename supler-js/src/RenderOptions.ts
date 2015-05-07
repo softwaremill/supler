@@ -12,6 +12,7 @@ module Supler {
   }
 
   export interface RenderOptions {
+
     // render html on the form
     renderHtml: (html:string, container:HTMLElement) => any
 
@@ -65,11 +66,8 @@ module Supler {
 
   export class Bootstrap3RenderOptions implements RenderOptions {
 
-    constructor() {
+    constructor(private modalController: ModalController) {
     }
-
-    public static modalToShow:string = null;
-    public static modalShown:boolean = false;
 
     renderForm(rows:string):string {
       return HtmlUtil.renderTag('div', {'class': 'container-fluid'}, rows);
@@ -80,13 +78,13 @@ module Supler {
         HtmlUtil.renderTag('div', {'class': 'modal-dialog'},
           HtmlUtil.renderTag('div', {'class': 'modal-content'},
             HtmlUtil.renderTag('div', {'class': 'modal-header'},
-              HtmlUtil.renderTag('button', {'class': 'close', 'data-dismiss': 'modal', 'aria-label': 'Close'},
+              HtmlUtil.renderTag('button', {'class': 'close close-supler-modal', 'data-dismiss': 'modal', 'aria-label': 'Close'},
                 HtmlUtil.renderTag('span', {'aria-hidden': 'true'}, '&times;')
               )
             ) +
             HtmlUtil.renderTag('div', {'class': 'modal-body', 'id': 'modal-body'}, '') +
             HtmlUtil.renderTag('div', {'class': 'modal-footer'},
-              HtmlUtil.renderTag('button', {'class': 'btn btn-default', 'data-dismiss': 'modal'}, 'Close') +
+              HtmlUtil.renderTag('button', {'class': 'btn btn-default close-supler-modal', 'data-dismiss': 'modal'}, 'Close') +
               HtmlUtil.renderTag('button', {'class': 'btn btn-primary'}, 'Save changes')
             )
           )
@@ -102,17 +100,17 @@ module Supler {
     }
 
     postRender() {
-      if (Bootstrap3RenderOptions.modalToShow != null) {
-        $('#modal-body').html(Bootstrap3RenderOptions.modalToShow);
-        if (!Bootstrap3RenderOptions.modalShown) {
+      if (this.modalController.currentModal() != null) {
+        $('#modal-body').html(this.modalController.getModalPayload());
+        if (!this.modalController.isModalShown()) {
           $('#supler-modal').modal('show');
-          Bootstrap3RenderOptions.modalShown = true;
+          this.modalController.modalShown(true);
         }
       }
     }
 
     renderModalForm(form:string):string {
-      Bootstrap3RenderOptions.modalToShow = form;
+      this.modalController.setModalPayload(form);
       return "<div/>";
     }
 

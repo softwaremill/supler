@@ -8,7 +8,7 @@ module Supler {
                 private options:SendControllerOptions,
                 private elementSearch:ElementSearch,
                 private validation:Validation,
-                private modalPaths = new collections.Stack<string>()) {
+                private modalController:ModalController) {
 
       this.refreshCounter = 0;
       this.actionInProgress = false;
@@ -36,6 +36,20 @@ module Supler {
           htmlFormElement.onclick = () => this.modalListenerFor(htmlFormElement)
         }
       });
+      var that = this;
+      $(".close-supler-modal").click(function () {
+          that.modalController.closeModal();
+          that.options.sendFormFunction(
+            that.form.getValue(),
+            that.sendSuccessFn(() => {
+              return true;
+            }, () => that.actionCompleted()),
+            () => {
+            }, // do nothing on error
+            false,
+            that.form.getContainer());
+        }
+      );
     }
 
     private refreshListenerFor(htmlFormElement:HTMLElement) {
@@ -94,7 +108,7 @@ module Supler {
         this.actionInProgress = true;
 
         var id = htmlFormElement.id;
-        this.modalPaths.push(htmlFormElement.getAttribute(SuplerAttributes.PATH));
+        this.modalController.openNewModal(htmlFormElement.getAttribute(SuplerAttributes.PATH));
 
         this.options.sendFormFunction(
           this.form.getValue(id),
