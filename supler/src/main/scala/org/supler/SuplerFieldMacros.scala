@@ -84,14 +84,14 @@ object SuplerFieldMacros {
   }
 
   def subform_impl[T: c.WeakTypeTag, ContU, U: c.WeakTypeTag, Cont[_]](c: blackbox.Context)
-    (param: c.Expr[T => ContU], form: c.Expr[Form[U]], lazyForm: c.Expr[Boolean])
+    (param: c.Expr[T => ContU], form: c.Expr[Form[U]])
     (container: c.Expr[SubformContainer[ContU, U, Cont]]): c.Expr[SubformField[T, ContU, U, Cont]] = {
 
-    subform_createempty_impl[T, ContU, U, Cont](c)(param, form, lazyForm, null)(container)
+    subform_createempty_impl[T, ContU, U, Cont](c)(param, form, null)(container)
   }
 
   def subform_createempty_impl[T: c.WeakTypeTag, ContU, U: c.WeakTypeTag, Cont[_]](c: blackbox.Context)
-    (param: c.Expr[T => ContU], form: c.Expr[Form[U]], lazyForm: c.Expr[Boolean], createEmpty: c.Expr[() => U])
+    (param: c.Expr[T => ContU], form: c.Expr[Form[U]], createEmpty: c.Expr[() => U])
     (container: c.Expr[SubformContainer[ContU, U, Cont]]): c.Expr[SubformField[T, ContU, U, Cont]] = {
 
     import c.universe._
@@ -117,7 +117,7 @@ object SuplerFieldMacros {
         writeFieldValueExpr.splice,
         form.splice,
         createEmptyOpt.splice,
-        lazyForm.splice)
+        false)
     }
   }
 

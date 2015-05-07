@@ -69,8 +69,8 @@ class ProcessTest extends FlatSpec with ShouldMatchers {
   case class WorkPlace(boss: Person, employees: List[Person])
 
   val workPlaceForm = form[WorkPlace] { f => List(
-    f.subform(_.boss, personForm, true),
-    f.subform(_.employees, personForm, false)
+    f.subform(_.boss, personForm),
+    f.subform(_.employees, personForm)
   )
   }
 
@@ -91,8 +91,12 @@ class ProcessTest extends FlatSpec with ShouldMatchers {
 
   case class Mordor(workplaces: List[WorkPlace])
 
+  val modalWorkplacesForm = form[Mordor] {f => List(
+    f.subform(_.workplaces, workPlaceForm)
+  )}
+
   val mordorForm = form[Mordor] { f => List(
-    f.subform(_.workplaces, workPlaceForm, false)
+    f.modal("mordor", m => m, (m: Mordor, mm: Mordor) => mm, modalWorkplacesForm)
   )
   }
 
@@ -104,14 +108,13 @@ class ProcessTest extends FlatSpec with ShouldMatchers {
     val json = mordorForm(mordor).process(
       parseJson(
         """{
-          |"supler_modals":"workplaces[0].boss",
+          |"supler_modals":"mordor.workplaces[0].boss",
+          |"mordor": {
           |"workplaces": [
-          |   {"boss": {"firstName": "WillShow", "lastName": "WillShow" } },
-          |   {"boss": {"firstName": "WontShow", "lastName": "WontShow" } } ] }""".stripMargin)).generateJSON()
+          |   {"boss": {"firstName": "WillShow", "lastName": "WillShow" } } ] } }""".stripMargin)).generateJSON()
 
     // then
     val textjson = pretty(render(json))
     textjson should include ("WillShow")
-    textjson should not include "WontShow"
   }
 }
