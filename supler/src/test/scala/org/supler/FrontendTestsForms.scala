@@ -32,6 +32,8 @@ object FrontendTestsForms {
 
   case class ComplexSingleSubform(field10: String, simple: Simple1)
 
+  case class Complex2LvlSubform(field100: String, subform: ComplexSingleSubform)
+
   case class ComplexOptionalSubform(field10: String, simple: Option[Simple1])
 
   case class SimpleWithDate(field1: String, field2: Date, field3: Option[Date])
@@ -220,17 +222,29 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeForm("formListEmpty", complexFormList, objEmpty)
   }
 
+  val complexForm1 = form[ComplexSingleSubform](f => List(
+    f.field(_.field10).label("Field 10"),
+    f.subform(_.simple, simple1Form)
+  ))
+
+  val complxSubformObj = ComplexSingleSubform("c1", Simple1("f11", Some("x"), 11, field4 = true))
+
   writeTestData("complexSingleSubform") { writer =>
-    val complexForm1 = form[ComplexSingleSubform](f => List(
-      f.field(_.field10).label("Field 10"),
-      f.subform(_.simple, simple1Form)
+    writer.writeForm("form1", complexForm1, complxSubformObj)
+
+    writer.writeObj("obj1", complxSubformObj, FormMeta(Map()))
+  }
+
+  writeTestData("complexSecondLevelSubform") {writer =>
+    val complex2LvlForm = form[Complex2LvlSubform](f => List(
+      f.field(_.field100).label("Field 100"),
+      f.subform(_.subform, complexForm1)
     ))
+    val obj2Lvl = Complex2LvlSubform("2lvlform", complxSubformObj)
 
-    val obj1 = ComplexSingleSubform("c1", Simple1("f11", Some("x"), 11, field4 = true))
+    writer.writeForm("form2lvl", complex2LvlForm, obj2Lvl)
 
-    writer.writeForm("form1", complexForm1, obj1)
-
-    writer.writeObj("obj1", obj1, FormMeta(Map()))
+    writer.writeObj("obj2lvl", obj2Lvl)
   }
 
   writeTestData("complexSingleSubformWithRows") { writer =>

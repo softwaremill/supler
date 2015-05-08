@@ -178,4 +178,15 @@ describe('serialization', function() {
     // then
     assert.isNull(sf.getValue().field1);
   });
+
+  it('should serialize second-level embedded form', function() {
+    // given
+    var sf = new Supler.Form(container);
+
+    // when
+    sf.render(data.complexSecondLevelSubform.form2lvl);
+
+    // then
+    sf.getValue().subform.simple.field1.should.equal('f11');
+  });
 });
