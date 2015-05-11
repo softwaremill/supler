@@ -45,6 +45,9 @@ module Supler {
       this.fieldOrder = customOptions.field_order;
 
       this.readFormValues = new ReadFormValues(this.fieldsOptions);
+
+      // reset the container contents when form is initialized
+      container.innerHTML = '';
     }
 
     render(json) {
@@ -88,7 +91,7 @@ module Supler {
     }
 
     getValue(selectedActionId:string = null) {
-      return this.readFormValues.getValueFrom(this.container.children.item('supler-form'), selectedActionId, this.addModalPathIfNeeded());
+      return this.readFormValues.getValueFrom(this.container.children.item(2), selectedActionId, this.addModalPathIfNeeded());
     }
 
     addModalPathIfNeeded(): any {

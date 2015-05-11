@@ -32,6 +32,7 @@ var Supler;
         }
         FormSections.META = 'supler_meta';
         FormSections.MODAL_PATH = 'supler_modals';
+        FormSections.MODAL_HOLDER = 'supler:modal-holder';
         return FormSections;
     })();
     Supler.FormSections = FormSections;
@@ -821,6 +822,11 @@ var Supler;
                     if (element.id === selectedActionId) {
                         this.appendFieldValue(result, fieldName, element.getAttribute(Supler.SuplerAttributes.PATH), false);
                     }
+                    var path = element.getAttribute(Supler.SuplerAttributes.PATH);
+                    var modalHolder = $('div[' + Supler.SuplerAttributes.PATH.replace(':', '\\:') + '="' + path + '"][' + Supler.FormSections.MODAL_HOLDER.replace(':', '\\:') + '=true]');
+                    if (modalHolder) {
+                        this.getValueFromChildren(modalHolder[0], selectedActionId, result);
+                    }
                     break;
                 case Supler.FieldTypes.SUBFORM:
                     fieldName = element.getAttribute(Supler.SuplerAttributes.FIELD_NAME);
@@ -940,13 +946,14 @@ var Supler;
             }
         };
         Bootstrap3RenderOptions.prototype.renderModalForm = function (form, fieldPath) {
+            var formInDiv = Supler.HtmlUtil.renderTag('div', { 'supler:path': fieldPath, 'supler:modal-holder': true }, form);
             if (this.modalController.visibleModal(fieldPath)) {
-                this.modalController.addOrAppendToContext(Bootstrap3RenderOptions.TopVisibleModal, form);
+                this.modalController.addOrAppendToContext(Bootstrap3RenderOptions.TopVisibleModal, formInDiv);
             }
             else {
-                this.modalController.addOrAppendToContext(Bootstrap3RenderOptions.NonTopModals, form);
+                this.modalController.addOrAppendToContext(Bootstrap3RenderOptions.NonTopModals, formInDiv);
             }
-            return "<div/>";
+            return Supler.HtmlUtil.renderTag("div", { 'supler:path': fieldPath, 'supler:fieldType': Supler.FieldTypes.MODAL }, "");
         };
         Bootstrap3RenderOptions.prototype.renderRow = function (fields) {
             return Supler.HtmlUtil.renderTag('div', { 'class': 'row' }, fields);
@@ -1312,6 +1319,7 @@ var Supler;
             });
             this.fieldOrder = customOptions.field_order;
             this.readFormValues = new Supler.ReadFormValues(this.fieldsOptions);
+            container.innerHTML = '';
         }
         Form.prototype.render = function (json) {
             if (this.isSuplerForm(json)) {
@@ -1340,7 +1348,7 @@ var Supler;
         };
         Form.prototype.getValue = function (selectedActionId) {
             if (selectedActionId === void 0) { selectedActionId = null; }
-            return this.readFormValues.getValueFrom(this.container, selectedActionId, this.addModalPathIfNeeded());
+            return this.readFormValues.getValueFrom(this.container.children.item(2), selectedActionId, this.addModalPathIfNeeded());
         };
         Form.prototype.addModalPathIfNeeded = function () {
             var result = {};
@@ -1366,6 +1374,9 @@ var Supler;
         };
         Form.prototype.getContainer = function () {
             return this.container;
+        };
+        Form.prototype.getModalController = function () {
+            return this.modalController;
         };
         return Form;
     })();

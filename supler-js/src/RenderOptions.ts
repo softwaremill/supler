@@ -126,7 +126,9 @@ module Supler {
     }
 
     renderModalForm(form:string, fieldPath: string):string {
-      var formInDiv = HtmlUtil.renderTag('div', {'supler:path': fieldPath, 'supler:modal-holder': true}, form);
+      var formInDiv = HtmlUtil.renderTag('div',
+        {'supler:path': fieldPath, 'supler:modal-holder': true},
+        form);
       if (this.modalController.visibleModal(fieldPath)) {
         this.modalController.addOrAppendToContext(Bootstrap3RenderOptions.TopVisibleModal, formInDiv);
       } else {
