@@ -10,6 +10,7 @@
 * [forum](https://groups.google.com/forum/#!forum/supler)
 * [the introduction blog](http://www.warski.org/blog/2014/09/introducing-supler-a-functional-reactive-form-library/)
 * [the live demo](http://supler.softwaremill.com/)
+* live-coding conference talks: [shorter (30 mins) from Scalar](https://www.youtube.com/watch?v=ex9H_pHdFZ4&list=PL8NC5lCgGs6N5_mHAx9LjOO1NBEADQ4cP&index=1&spfreload=10), [longer (90 mins) from LJC](https://skillsmatter.com/skillscasts/6342-supler-complex-web-forms-not-so-complex#video)
 
 ## Introduction
 
