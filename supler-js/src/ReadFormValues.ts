@@ -69,6 +69,13 @@ module Supler {
           if (element.id === selectedActionId) {
             this.appendFieldValue(result, fieldName, element.getAttribute(SuplerAttributes.PATH), false);
           }
+          var path = element.getAttribute(SuplerAttributes.PATH);
+          var modalHolder = $('div['+SuplerAttributes.PATH.replace(':', '\\:')+'="'+path+'"]['+FormSections.MODAL_HOLDER.replace(':', '\\:')+'=true]');
+          if (modalHolder) {
+            fieldName = element.getAttribute(SuplerAttributes.FIELD_NAME);
+            var subResult = this.getValueFromChildren(modalHolder[0], selectedActionId, {});
+            this.appendFieldValue(result, fieldName, subResult, multiple);
+          }
           break;
 
         case FieldTypes.SUBFORM:

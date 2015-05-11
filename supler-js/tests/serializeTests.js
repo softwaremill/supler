@@ -189,4 +189,17 @@ describe('serialization', function() {
     // then
     sf.getValue().subform.simple.field1.should.equal('f11');
   });
+
+  it('should serialize second-level modal form', function() {
+    // given
+    var sf = new Supler.Form(container);
+    sf.getModalController().openNewModal('subformModal');
+    sf.getModalController().openNewModal('subformModal.simpleModal');
+
+    // when
+    sf.render(data.complexSecondLevelModalSubform.complexModal2Lvl);
+
+    // then
+    sf.getValue().subformModal.simpleModal.field1.should.equal('f11');
+  });
 });

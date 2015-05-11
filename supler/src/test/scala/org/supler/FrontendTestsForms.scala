@@ -235,16 +235,35 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
     writer.writeObj("obj1", complxSubformObj, FormMeta(Map()))
   }
 
+  val obj2Lvl = Complex2LvlSubform("2lvlform", complxSubformObj)
+
   writeTestData("complexSecondLevelSubform") {writer =>
     val complex2LvlForm = form[Complex2LvlSubform](f => List(
       f.field(_.field100).label("Field 100"),
       f.subform(_.subform, complexForm1)
     ))
-    val obj2Lvl = Complex2LvlSubform("2lvlform", complxSubformObj)
-
     writer.writeForm("form2lvl", complex2LvlForm, obj2Lvl)
 
     writer.writeObj("obj2lvl", obj2Lvl)
+  }
+
+  writeTestData("complexSecondLevelModalSubform"){writer =>
+    val complexFormWithModal = form[ComplexSingleSubform](f => List(
+      f.field(_.field10).label("Field10"),
+      f.modal("simpleModal", c => c.simple, (c: ComplexSingleSubform, s: Simple1) => c.copy(simple = s), simple1Form).label("Simple Modal")
+    ))
+
+    val complex2ndLvlFormWithModal = form[Complex2LvlSubform](f => List(
+      f.field(_.field100).label("Field 100"),
+      f.modal("subformModal", c2 => c2.subform, (c2: Complex2LvlSubform, c: ComplexSingleSubform) => c2.copy(subform = c),
+        complexFormWithModal).label("Subform Modal")
+    ))
+
+    val modalPathsToRename = Map("subform" -> "subformModal", "subform.simple" -> "simpleModal")
+
+    writer.writeFormWithModals("complexModal2Lvl", complex2ndLvlFormWithModal, obj2Lvl, "subformModal.simpleModal",
+      modalPathsToRename)
+    writer.writeObj("complexModal2LvlObj", obj2Lvl, FormMeta(Map.empty), modalPathsToRename)
   }
 
   writeTestData("complexSingleSubformWithRows") { writer =>
@@ -412,14 +431,18 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
       pw.println( s""""$variableName": $toWrite,""")
     }
 
-    def writeObj(variableName: String, obj: AnyRef, meta: FormMeta = FormMeta(Map())): Unit = {
+    def writeObj(variableName: String, obj: AnyRef, meta: FormMeta = FormMeta(Map()),
+                 pathsToRename: Map[String, String] = Map.empty): Unit = {
       val withMeta =
         if (meta.isEmpty) {
-          Extraction.decompose(obj)
+          Extraction.decompose(obj) match {
+            case JObject(fields) => JObject(renameFields(pathsToRename, "", fields))
+            case _ => throw new RuntimeException(s"Got some weird unexpected object: $obj")
+          }
         }
         else {
           Extraction.decompose(obj) match {
-            case JObject(fields) => JObject(meta.toJSON :: fields)
+            case JObject(fields) => JObject(meta.toJSON :: renameFields(pathsToRename, "", fields))
             case _ => throw new RuntimeException(s"Got some weird unexpected object: $obj")
           }
         }
@@ -431,6 +454,28 @@ class FrontendTestsForms extends FlatSpec with ShouldMatchers {
       val actionField = JField(actionFieldName, JBool(value = true))
       val toWrite = pretty(render(form(obj).process(JObject(fields :+ actionField)).generateJSON()))
       pw.println( s""""$variableName": $toWrite,""")
+    }
+
+    def writeFormWithModals[T](variableName: String, form: Form[T], obj: T, modalPath: String, pathsToRename: Map[String, String]) : Unit = {
+      val JObject(fields) = Extraction.decompose(obj)
+      val modalPathJson = JField(FormModals.JsonModalsKey, JString(modalPath))
+      val jsonToApply = JObject(renameFields(pathsToRename, "", fields) :+ modalPathJson)
+      val toWrite = pretty(render(form(obj).process(jsonToApply).generateJSON()))
+      pw.println(s""""$variableName": $toWrite,""")
+    }
+
+    def renameFields(pathsToRename: Map[String, String], currentPath: String, fields: List[JField]): List[JField] = {
+      fields.map{
+        case JField(name: String, JObject(embeddedFields)) =>
+          JField(
+            renameIfNeeded(currentPath, name, pathsToRename),
+            JObject(renameFields(pathsToRename, s"${currentPath}${name}.", embeddedFields)))
+        case JField(name: String, other) => JField(renameIfNeeded(currentPath, name, pathsToRename), other)
+      }
+    }
+
+    def renameIfNeeded(path: String, name: String, pathsToRename: Map[String, String]): String = {
+      pathsToRename.getOrElse(s"${path}${name}", name)
     }
   }
 

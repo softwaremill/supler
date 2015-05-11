@@ -49,6 +49,8 @@ module Supler {
 
     render(json) {
       if (this.isSuplerForm(json)) { // might be custom-data-only result
+        this.renderOptionsGetter.defaultRenderOptions().preRender();
+
         var result = new CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories,
           this.fieldsOptions, this.fieldOrder).renderForm(json[FormSections.META], json.main_form);
         this.renderOptionsGetter.defaultRenderOptions().renderHtml(result.html, this.container);
@@ -86,7 +88,7 @@ module Supler {
     }
 
     getValue(selectedActionId:string = null) {
-      return this.readFormValues.getValueFrom(this.container, selectedActionId, this.addModalPathIfNeeded());
+      return this.readFormValues.getValueFrom(this.container.children.item('supler-form'), selectedActionId, this.addModalPathIfNeeded());
     }
 
     addModalPathIfNeeded(): any {
@@ -122,6 +124,10 @@ module Supler {
 
     getContainer(): HTMLElement {
       return this.container;
+    }
+
+    getModalController(): ModalController {
+      return this.modalController;
     }
   }
 }

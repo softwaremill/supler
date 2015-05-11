@@ -2,6 +2,7 @@ package org.demo
 
 import java.util.{Date, UUID}
 
+import org.demo.PersonForm.EngineType.EngineType
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.supler.Message
@@ -17,10 +18,16 @@ object PersonForm {
     "Lada" -> List("Niva")
   )
 
+  val engineModal = form[Engine](f => List(
+    f.field(_.size).label("Size in cm3"),
+    f.selectOneField(_.engineType)(_.toString).possibleValues(engine => EngineType.values.toList).label("Type")
+  ))
+
   val carModal = form[Car](f => List(
     f.field(_.make).label("Make"),
     f.field(_.model).label("Model"),
     f.field(_.year).label("Year"),
+    f.modal("engine", _.engine, (c: Car, e: Engine) => c.copy(engine = e), engineModal).label("Edit Engine"),
     f.staticField(c => Message(s"${new Date()}")).label("Clock")
   ))
 
@@ -61,7 +68,7 @@ object PersonForm {
     f.field(_.secret).label("Secret").renderHint(asPassword()),
     f.field(_.bio).label("Biography").renderHint(asTextarea(rows = 6)),
     f.subform(_.cars, carForm(f.parentAction((person, index, car) => ActionResult(deleteCar(person, car))))).label("Cars"),
-    f.action("addcar")(p => ActionResult(p.copy(cars = p.cars :+ Car("", "", 0)))).label("Add car"),
+    f.action("addcar")(p => ActionResult(p.copy(cars = p.cars :+ Car("", "", 0, Engine(1400, EngineType.Petrol))))).label("Add car"),
     f.subform(_.legoSets, legoSetForm(f.parentAction((person, index, ls) => ActionResult(deleteLegoSet(person, ls))))).label("Lego sets").renderHint(asTable()),
     f.action("addlegoset")(p => ActionResult(p.copy(legoSets = p.legoSets :+ LegoSet("", "", 0, 0)))).label("Add lego set"),
     f.staticField(p => Message(p.registrationDate)).label("Registration date"),
@@ -98,8 +105,18 @@ object PersonForm {
   case class Car(
     make: String,
     model: String,
-    year: Int
+    year: Int,
+    engine: Engine
     )
+
+  object EngineType extends Enumeration {
+    type EngineType = Value
+    val Petrol, Diesel = Value
+  }
+
+  case class Engine(
+                   size: Int,
+                   engineType: EngineType)
 
   case class LegoSet(
     name: String,
@@ -111,9 +128,9 @@ object PersonForm {
   val aPerson = Person("Adam", "", new DateTime(), 10, None, None, null, None, None,
     Set("red", "blue"), likesBroccoli = false,
     List(
-      Car("Ford", "Focus", 1990),
-      Car("Toyota", "Avensis", 2004)),
-    Car("Kia", "Carens", 2013),
+      Car("Ford", "Focus", 1990, Engine(1998, EngineType.Diesel)),
+      Car("Toyota", "Avensis", 2004, Engine(1584, EngineType.Petrol))),
+      Car("Kia", "Carens", 2013, Engine(1997, EngineType.Petrol)),
     List(
       LegoSet("Motorcycle", "Technic", 1924, 31),
       LegoSet("Arctic Supply Plane", "City", 60064, 1),

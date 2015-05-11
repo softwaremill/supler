@@ -39,7 +39,7 @@ module Supler {
     renderRow: (fields:string) => string
 
     renderForm: (rows:string) => string
-    renderModalForm: (formH:string) => string
+    renderModalForm: (formH:string, fieldPath: string) => string
 
     renderStaticField: (label:string, id:string, validationId:string, value:any, compact:boolean) => string
     renderStaticText: (text:string) => string
@@ -62,9 +62,13 @@ module Supler {
 
     // hookups
     postRender: () => any
+    preRender: () => any
   }
 
   export class Bootstrap3RenderOptions implements RenderOptions {
+
+    private static TopVisibleModal = 'visible-modal';
+    private static NonTopModals = 'nontop-modals';
 
     constructor(private modalController: ModalController) {
     }
@@ -74,21 +78,23 @@ module Supler {
     }
 
     renderModalContainer() {
-      return HtmlUtil.renderTag('div', {'class': 'modal', 'data-show': 'true', 'id': 'supler-modal'},
-        HtmlUtil.renderTag('div', {'class': 'modal-dialog'},
-          HtmlUtil.renderTag('div', {'class': 'modal-content'},
-            HtmlUtil.renderTag('div', {'class': 'modal-header'},
-              HtmlUtil.renderTag('button', {'class': 'close close-supler-modal', 'data-dismiss': 'modal', 'aria-label': 'Close'},
-                HtmlUtil.renderTag('span', {'aria-hidden': 'true'}, '&times;')
+      return HtmlUtil.renderTag('div', {'class': 'hidden', 'id': 'hidden-modals'}, '') +
+        HtmlUtil.renderTag('div', {'class': 'modal', 'data-show': 'true', 'id': 'supler-modal'},
+          HtmlUtil.renderTag('div', {'class': 'modal-dialog'},
+            HtmlUtil.renderTag('div', {'class': 'modal-content'},
+              HtmlUtil.renderTag('div', {'class': 'modal-header'},
+                HtmlUtil.renderTag('button', {'class': 'close close-supler-modal', 'data-dismiss': 'modal', 'aria-label': 'Close'},
+                  HtmlUtil.renderTag('span', {'aria-hidden': 'true'}, '&times;')
+                )
+              ) +
+              HtmlUtil.renderTag('div', {'class': 'modal-body', 'id': 'modal-body'}, '') +
+              HtmlUtil.renderTag('div', {'class': 'modal-footer'},
+                HtmlUtil.renderTag('button', {'class': 'btn btn-default close-supler-modal', 'data-dismiss': 'modal'}, 'Close') +
+                HtmlUtil.renderTag('button', {'class': 'btn btn-primary'}, 'Save changes')
               )
-            ) +
-            HtmlUtil.renderTag('div', {'class': 'modal-body', 'id': 'modal-body'}, '') +
-            HtmlUtil.renderTag('div', {'class': 'modal-footer'},
-              HtmlUtil.renderTag('button', {'class': 'btn btn-default close-supler-modal', 'data-dismiss': 'modal'}, 'Close') +
-              HtmlUtil.renderTag('button', {'class': 'btn btn-primary'}, 'Save changes')
             )
           )
-        ));
+        );
     }
 
     renderHtml(html:string, container:HTMLElement) {
@@ -99,19 +105,34 @@ module Supler {
       $('#supler-form').html(html);
     }
 
+    preRender() {
+      // clear previously rendered modals
+      this.modalController.getModalContext().remove(Bootstrap3RenderOptions.NonTopModals);
+      this.modalController.getModalContext().remove(Bootstrap3RenderOptions.TopVisibleModal);
+    }
+
     postRender() {
       if (this.modalController.currentModal() != null) {
-        $('#modal-body').html(this.modalController.getModalPayload());
+        $('#modal-body').html(this.modalController.getModalContext().getValue(Bootstrap3RenderOptions.TopVisibleModal));
         if (!this.modalController.isModalShown()) {
           $('#supler-modal').modal('show');
           this.modalController.modalShown(true);
         }
       }
+
+      if (this.modalController.moreThenOneModal()) {
+        $('#hidden-modals').html(this.modalController.getModalContext().getValue(Bootstrap3RenderOptions.NonTopModals));
+      }
     }
 
-    renderModalForm(form:string):string {
-      this.modalController.setModalPayload(form);
-      return "<div/>";
+    renderModalForm(form:string, fieldPath: string):string {
+      var formInDiv = HtmlUtil.renderTag('div', {'supler:path': fieldPath, 'supler:modal-holder': true}, form);
+      if (this.modalController.visibleModal(fieldPath)) {
+        this.modalController.addOrAppendToContext(Bootstrap3RenderOptions.TopVisibleModal, formInDiv);
+      } else {
+        this.modalController.addOrAppendToContext(Bootstrap3RenderOptions.NonTopModals, formInDiv);
+      }
+      return HtmlUtil.renderTag("div", {'supler:path': fieldPath, 'supler:fieldType': FieldTypes.MODAL}, "");
     }
 
     renderRow(fields:string):string {

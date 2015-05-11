@@ -264,7 +264,7 @@ module Supler {
         var html = renderOptions.renderSubformDecoration(subformHtml, fieldData.label, fieldData.id, fieldData.name);
 
         if (fieldData.modal) {
-          return renderOptions.renderModalForm(html);
+          return renderOptions.renderModalForm(html, fieldData.path);
         } else {
           return html;
         }

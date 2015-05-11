@@ -23,5 +23,6 @@ module Supler {
   export class FormSections {
     static META = 'supler_meta';
     static MODAL_PATH = 'supler_modals';
+    static MODAL_HOLDER = 'supler:modal-holder';
   }
 }
