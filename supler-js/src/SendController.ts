@@ -36,20 +36,19 @@ module Supler {
           htmlFormElement.onclick = () => this.modalListenerFor(htmlFormElement)
         }
       });
-      var that = this;
-      $(".close-supler-modal").click(function () {
-          that.modalController.closeModal();
-          that.options.sendFormFunction(
-            that.form.getValue(),
-            that.sendSuccessFn(() => {
-              return true;
-            }, () => that.actionCompleted()),
-            () => {
-            }, // do nothing on error
-            false,
-            that.form.getContainer());
-        }
-      );
+    }
+
+
+    resendCurrentForm() {
+      this.options.sendFormFunction(
+        this.form.getValue(),
+        this.sendSuccessFn(() => {
+          return true;
+        }, () => this.actionCompleted()),
+        () => {
+        }, // do nothing on error
+        false,
+        this.form.getContainer());
     }
 
     private refreshListenerFor(htmlFormElement:HTMLElement) {

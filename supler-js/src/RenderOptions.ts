@@ -63,6 +63,7 @@ module Supler {
     // hookups
     postRender: () => any
     preRender: () => any
+    registerListenersOnModalClose: (container:HTMLElement, closeModal: () => void) => void
   }
 
   export class Bootstrap3RenderOptions implements RenderOptions {
@@ -83,13 +84,13 @@ module Supler {
           HtmlUtil.renderTag('div', {'class': 'modal-dialog'},
             HtmlUtil.renderTag('div', {'class': 'modal-content'},
               HtmlUtil.renderTag('div', {'class': 'modal-header'},
-                HtmlUtil.renderTag('button', {'class': 'close close-supler-modal', 'data-dismiss': 'modal', 'aria-label': 'Close'},
+                HtmlUtil.renderTag('button', {'class': 'close close-supler-modal notregistered', 'data-dismiss': 'modal', 'aria-label': 'Close'},
                   HtmlUtil.renderTag('span', {'aria-hidden': 'true'}, '&times;')
                 )
               ) +
               HtmlUtil.renderTag('div', {'class': 'modal-body', 'id': 'modal-body'}, '') +
               HtmlUtil.renderTag('div', {'class': 'modal-footer'},
-                HtmlUtil.renderTag('button', {'class': 'btn btn-default close-supler-modal', 'data-dismiss': 'modal'}, 'Close') +
+                HtmlUtil.renderTag('button', {'class': 'btn btn-default close-supler-modal notregistered', 'data-dismiss': 'modal'}, 'Close') +
                 HtmlUtil.renderTag('button', {'class': 'btn btn-primary'}, 'Save changes')
               )
             )
@@ -123,6 +124,7 @@ module Supler {
       if (this.modalController.moreThenOneModal()) {
         $('#hidden-modals').html(this.modalController.getModalContext().getValue(Bootstrap3RenderOptions.NonTopModals));
       }
+
     }
 
     renderModalForm(form:string, fieldPath: string):string {
@@ -399,6 +401,11 @@ module Supler {
       }
 
       return 'text';
+    }
+
+    registerListenersOnModalClose(container:HTMLElement, closeModal: () => void):void {
+      $(".close-supler-modal.notregistered").click(closeModal);
+      $(".close-supler-modal.notregistered").removeClass('notregistered');
     }
   }
 }

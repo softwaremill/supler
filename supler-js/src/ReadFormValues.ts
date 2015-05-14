@@ -71,7 +71,7 @@ module Supler {
           }
           var path = element.getAttribute(SuplerAttributes.PATH);
           var modalHolder = $('div['+SuplerAttributes.PATH.replace(':', '\\:')+'="'+path+'"]['+FormSections.MODAL_HOLDER.replace(':', '\\:')+'=true]');
-          if (modalHolder) {
+          if (modalHolder[0]) {
             this.getValueFromChildren(modalHolder[0], selectedActionId, result);
           }
           break;

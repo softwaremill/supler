@@ -762,6 +762,13 @@ var Supler;
         ModalController.prototype.moreThenOneModal = function () {
             return this.modalPaths.size() > 1;
         };
+        ModalController.prototype.closeModalFunction = function (sendController) {
+            var that = this;
+            return function () {
+                that.closeModal();
+                sendController.resendCurrentForm();
+            };
+        };
         return ModalController;
     })();
     Supler.ModalController = ModalController;
@@ -824,7 +831,7 @@ var Supler;
                     }
                     var path = element.getAttribute(Supler.SuplerAttributes.PATH);
                     var modalHolder = $('div[' + Supler.SuplerAttributes.PATH.replace(':', '\\:') + '="' + path + '"][' + Supler.FormSections.MODAL_HOLDER.replace(':', '\\:') + '=true]');
-                    if (modalHolder) {
+                    if (modalHolder[0]) {
                         this.getValueFromChildren(modalHolder[0], selectedActionId, result);
                     }
                     break;
@@ -921,7 +928,7 @@ var Supler;
             return Supler.HtmlUtil.renderTag('div', { 'class': 'container-fluid' }, rows);
         };
         Bootstrap3RenderOptions.prototype.renderModalContainer = function () {
-            return Supler.HtmlUtil.renderTag('div', { 'class': 'hidden', 'id': 'hidden-modals' }, '') + Supler.HtmlUtil.renderTag('div', { 'class': 'modal', 'data-show': 'true', 'id': 'supler-modal' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-dialog' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-content' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-header' }, Supler.HtmlUtil.renderTag('button', { 'class': 'close close-supler-modal', 'data-dismiss': 'modal', 'aria-label': 'Close' }, Supler.HtmlUtil.renderTag('span', { 'aria-hidden': 'true' }, '&times;'))) + Supler.HtmlUtil.renderTag('div', { 'class': 'modal-body', 'id': 'modal-body' }, '') + Supler.HtmlUtil.renderTag('div', { 'class': 'modal-footer' }, Supler.HtmlUtil.renderTag('button', { 'class': 'btn btn-default close-supler-modal', 'data-dismiss': 'modal' }, 'Close') + Supler.HtmlUtil.renderTag('button', { 'class': 'btn btn-primary' }, 'Save changes')))));
+            return Supler.HtmlUtil.renderTag('div', { 'class': 'hidden', 'id': 'hidden-modals' }, '') + Supler.HtmlUtil.renderTag('div', { 'class': 'modal', 'data-show': 'true', 'id': 'supler-modal' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-dialog' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-content' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-header' }, Supler.HtmlUtil.renderTag('button', { 'class': 'close close-supler-modal notregistered', 'data-dismiss': 'modal', 'aria-label': 'Close' }, Supler.HtmlUtil.renderTag('span', { 'aria-hidden': 'true' }, '&times;'))) + Supler.HtmlUtil.renderTag('div', { 'class': 'modal-body', 'id': 'modal-body' }, '') + Supler.HtmlUtil.renderTag('div', { 'class': 'modal-footer' }, Supler.HtmlUtil.renderTag('button', { 'class': 'btn btn-default close-supler-modal notregistered', 'data-dismiss': 'modal' }, 'Close') + Supler.HtmlUtil.renderTag('button', { 'class': 'btn btn-primary' }, 'Save changes')))));
         };
         Bootstrap3RenderOptions.prototype.renderHtml = function (html, container) {
             if (!container.children.namedItem('supler-modal')) {
@@ -1157,6 +1164,10 @@ var Supler;
             }
             return 'text';
         };
+        Bootstrap3RenderOptions.prototype.registerListenersOnModalClose = function (container, closeModal) {
+            $(".close-supler-modal.notregistered").click(closeModal);
+            $(".close-supler-modal.notregistered").removeClass('notregistered');
+        };
         Bootstrap3RenderOptions.TopVisibleModal = 'visible-modal';
         Bootstrap3RenderOptions.NonTopModals = 'nontop-modals';
         return Bootstrap3RenderOptions;
@@ -1199,14 +1210,13 @@ var Supler;
                     htmlFormElement.onclick = function () { return _this.modalListenerFor(htmlFormElement); };
                 }
             });
-            var that = this;
-            $(".close-supler-modal").click(function () {
-                that.modalController.closeModal();
-                that.options.sendFormFunction(that.form.getValue(), that.sendSuccessFn(function () {
-                    return true;
-                }, function () { return that.actionCompleted(); }), function () {
-                }, false, that.form.getContainer());
-            });
+        };
+        SendController.prototype.resendCurrentForm = function () {
+            var _this = this;
+            this.options.sendFormFunction(this.form.getValue(), this.sendSuccessFn(function () {
+                return true;
+            }, function () { return _this.actionCompleted(); }), function () {
+            }, false, this.form.getContainer());
         };
         SendController.prototype.refreshListenerFor = function (htmlFormElement) {
             var _this = this;
@@ -1299,11 +1309,11 @@ var Supler;
     var Form = (function () {
         function Form(container, customOptions) {
             this.container = container;
-            this.modalController = new Supler.ModalController();
             customOptions = customOptions || {};
             this.fieldsOptions = new Supler.FieldsOptions(customOptions.field_options);
             this.i18n = new Supler.I18n();
             Supler.Util.copyProperties(this.i18n, customOptions.i18n);
+            this.modalController = new Supler.ModalController();
             var renderOptions = new Supler.Bootstrap3RenderOptions(this.modalController);
             Supler.Util.copyProperties(renderOptions, customOptions.render_options);
             this.renderOptionsGetter = Supler.RenderOptionsGetter.parse(renderOptions, container, this.fieldsOptions, customOptions.field_templates);
@@ -1327,8 +1337,9 @@ var Supler;
                 var result = new Supler.CreateFormFromJson(this.renderOptionsGetter, this.i18n, this.validatorFnFactories, this.fieldsOptions, this.fieldOrder).renderForm(json[Supler.FormSections.META], json.main_form);
                 this.renderOptionsGetter.defaultRenderOptions().renderHtml(result.html, this.container);
                 this.initializeValidation(result.formElementDictionary, json);
-                this.renderOptionsGetter.defaultRenderOptions().postRender();
                 var sendController = new Supler.SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, this.validation, this.modalController);
+                this.renderOptionsGetter.defaultRenderOptions().registerListenersOnModalClose(this.container, this.modalController.closeModalFunction(sendController));
+                this.renderOptionsGetter.defaultRenderOptions().postRender();
                 sendController.attachRefreshListeners();
                 sendController.attachActionListeners();
                 sendController.attachModalListeners();

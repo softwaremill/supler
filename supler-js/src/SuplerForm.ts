@@ -12,7 +12,7 @@ module Supler {
     private fieldsOptions:FieldsOptions;
     private fieldOrder:string[][];
     private readFormValues:ReadFormValues;
-    private modalController = new ModalController();
+    private modalController;
 
     constructor(private container:HTMLElement, customOptions:any) {
       customOptions = customOptions || {};
@@ -21,6 +21,8 @@ module Supler {
 
       this.i18n = new I18n();
       Util.copyProperties(this.i18n, customOptions.i18n);
+
+      this.modalController = new ModalController();
 
       var renderOptions = new Bootstrap3RenderOptions(this.modalController);
       Util.copyProperties(renderOptions, customOptions.render_options);
@@ -60,10 +62,15 @@ module Supler {
 
         this.initializeValidation(result.formElementDictionary, json);
 
-        this.renderOptionsGetter.defaultRenderOptions().postRender();
-
         var sendController = new SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch,
           this.validation, this.modalController);
+
+        this.renderOptionsGetter.defaultRenderOptions().registerListenersOnModalClose(
+          this.container,
+          this.modalController.closeModalFunction(sendController));
+
+        this.renderOptionsGetter.defaultRenderOptions().postRender();
+
         sendController.attachRefreshListeners();
         sendController.attachActionListeners();
         sendController.attachModalListeners();

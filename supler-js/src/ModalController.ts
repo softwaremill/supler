@@ -51,5 +51,13 @@ module Supler {
     public moreThenOneModal():boolean {
       return this.modalPaths.size() > 1;
     }
+
+    public closeModalFunction(sendController: SendController): () => void {
+      var that = this;
+      return function () {
+        that.closeModal();
+        sendController.resendCurrentForm();
+      }
+    }
   }
 }
