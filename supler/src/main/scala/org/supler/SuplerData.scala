@@ -17,8 +17,11 @@ sealed trait SuplerData[+T] {
 
 trait FormWithObject[T] extends SuplerData[T] {
   def obj: T
+
   def form: Form[T]
+
   def meta: FormMeta
+
   /**
    * Custom data which will be included in the generated JSON, passed to the frontend.
    * Not used or manipulated in any other way by Supler.
@@ -26,7 +29,9 @@ trait FormWithObject[T] extends SuplerData[T] {
   def customData: Option[JValue]
 
   protected def applyErrors: FieldErrors
+
   protected def validationErrors: FieldErrors
+
   protected def allErrors: FieldErrors = applyErrors ++ validationErrors
 
   def withMeta(key: String, value: String): FormWithObject[T]
@@ -88,6 +93,7 @@ trait FormWithObject[T] extends SuplerData[T] {
         runnableAction.run() match {
           case FullCompleteActionResult(t, customData) => InitialFormWithObject(form, t.asInstanceOf[T], customData, meta)
           case CustomDataCompleteActionResult(json) => CustomDataOnly(json)
+          case CloseModalCompleteActionResult() => SuplerCommand("closeModal", JNothing)
         }
       }
     }
@@ -99,7 +105,7 @@ case class InitialFormWithObject[T](form: Form[T], obj: T, customData: Option[JV
   override protected val applyErrors = Nil
   override protected val validationErrors = Nil
 
-  override def withMeta(key: String, value: String): InitialFormWithObject[T] = this.copy(meta = meta + (key, value))
+  override def withMeta(key: String, value: String): InitialFormWithObject[T] = this.copy(meta = meta +(key, value))
 }
 
 case class FormWithObjectAndErrors[T](
@@ -112,17 +118,29 @@ case class FormWithObjectAndErrors[T](
   meta: FormMeta) extends FormWithObject[T] {
 
   def errors: FieldErrors = allErrors
+
   def hasErrors: Boolean = allErrors.size > 0
 
-  override def withMeta(key: String, value: String): FormWithObjectAndErrors[T] = this.copy(meta = meta + (key, value))
+  override def withMeta(key: String, value: String): FormWithObjectAndErrors[T] = this.copy(meta = meta +(key, value))
 
   override def generateJSON(modalPath: Option[String] = None): JValue = super.generateJSON(if (modalPath.isDefined) modalPath else this.modalPath)
 
-  override def doValidate(scope: ValidationScope = ValidateAll, modalPath: Option[String]): FormWithObjectAndErrors[T] = {
+  override def doValidate(
+    scope: ValidationScope = ValidateAll,
+    modalPath: Option[String]): FormWithObjectAndErrors[T] = {
     super.doValidate(scope, modalPath).copy(modalPath = this.modalPath)
   }
 }
 
-case class CustomDataOnly private[supler] (customData: JValue) extends SuplerData[Nothing] {
+case class CustomDataOnly private[supler](customData: JValue) extends SuplerData[Nothing] {
   override def generateJSON(modalPath: Option[String]) = customData
+}
+
+case class SuplerCommand private[supler](cmdType: String, value: JValue) extends SuplerData[Nothing] {
+  val SuplerCommand = "supler_command"
+  val CommandValue = "value"
+
+  override def generateJSON(modalPath: Option[String]) = JObject(
+    JField(SuplerCommand, JString(cmdType)),
+    JField(CommandValue, value))
 }

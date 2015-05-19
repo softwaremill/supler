@@ -65,15 +65,19 @@ module Supler {
         var sendController = new SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch,
           this.validation, this.modalController);
 
-        this.renderOptionsGetter.defaultRenderOptions().registerListenersOnModalClose(
-          this.container,
-          this.modalController.closeModalFunction(sendController));
-
         this.renderOptionsGetter.defaultRenderOptions().postRender();
 
         sendController.attachRefreshListeners();
         sendController.attachActionListeners();
         sendController.attachModalListeners();
+      }
+      else if (this.isSuplerCommand(json)) {
+        if (json.supler_command == 'closeModal') {
+          var sendController = new SendController(this, new FormElementDictionary(), this.sendControllerOptions, this.elementSearch,
+            this.validation, this.modalController);
+
+          this.modalController.closeModalFunction(sendController)();
+        }
       }
 
       var customData = this.getCustomData(json);
@@ -123,9 +127,15 @@ module Supler {
     getCustomData(json):any {
       if (this.isSuplerForm(json)) {
         return json.custom_data;
+      } else if (this.isSuplerCommand(json)) {
+        return {};
       } else {
         return json
       }
+    }
+
+    private isSuplerCommand(json): boolean {
+      return json.supler_command;
     }
 
     private isSuplerForm(json):boolean {

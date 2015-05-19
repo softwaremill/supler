@@ -66,6 +66,8 @@ object ActionResult {
 
   def custom(data: JValue): ActionResult[Nothing] = CustomDataResult(data)
 
+  def closeModal: ActionResult[Nothing] = CloseModalResult()
+
   def parentAction[T, U](action: (T, Int, U) => ActionResult[T]): U => ActionResult[U] = { u =>
     new ActionResult[U] {
       private[supler] override def completeWith(ctx: RunActionContext) = {
@@ -90,9 +92,14 @@ private[supler] case class CustomDataResult(data: JValue) extends ActionResult[N
   private[supler] override def completeWith(ctx: RunActionContext) = CustomDataCompleteActionResult(data)
 }
 
+private[supler] case class CloseModalResult() extends ActionResult[Nothing] {
+  override private[supler] def completeWith(ctx: RunActionContext) = CloseModalCompleteActionResult()
+}
+
 private[supler] sealed trait CompleteActionResult
 private[supler] case class CustomDataCompleteActionResult(json: JValue) extends CompleteActionResult
 private[supler] case class FullCompleteActionResult(value: Any, customData: Option[JValue]) extends CompleteActionResult
+private[supler] case class CloseModalCompleteActionResult() extends CompleteActionResult
 
 private[supler] case class RunActionContext(parentsStack: List[(Any, Int, Function1[_, _])]) {
   def push[T, U](obj: T, i: Int, defaultUpdate: U => T): RunActionContext =

@@ -928,7 +928,7 @@ var Supler;
             return Supler.HtmlUtil.renderTag('div', { 'class': 'container-fluid' }, rows);
         };
         Bootstrap3RenderOptions.prototype.renderModalContainer = function () {
-            return Supler.HtmlUtil.renderTag('div', { 'class': 'hidden', 'id': 'hidden-modals' }, '') + Supler.HtmlUtil.renderTag('div', { 'class': 'modal', 'data-show': 'true', 'id': 'supler-modal' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-dialog' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-content' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-header' }, Supler.HtmlUtil.renderTag('button', { 'class': 'close close-supler-modal notregistered', 'data-dismiss': 'modal', 'aria-label': 'Close' }, Supler.HtmlUtil.renderTag('span', { 'aria-hidden': 'true' }, '&times;'))) + Supler.HtmlUtil.renderTag('div', { 'class': 'modal-body', 'id': 'modal-body' }, '') + Supler.HtmlUtil.renderTag('div', { 'class': 'modal-footer' }, Supler.HtmlUtil.renderTag('button', { 'class': 'btn btn-default close-supler-modal notregistered', 'data-dismiss': 'modal' }, 'Close') + Supler.HtmlUtil.renderTag('button', { 'class': 'btn btn-primary' }, 'Save changes')))));
+            return Supler.HtmlUtil.renderTag('div', { 'class': 'hidden', 'id': 'hidden-modals' }, '') + Supler.HtmlUtil.renderTag('div', { 'class': 'modal', 'data-show': 'true', 'id': 'supler-modal' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-dialog' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-content' }, Supler.HtmlUtil.renderTag('div', { 'class': 'modal-header' }, '') + Supler.HtmlUtil.renderTag('div', { 'class': 'modal-body', 'id': 'modal-body' }, '') + Supler.HtmlUtil.renderTag('div', { 'class': 'modal-footer' }, ''))));
         };
         Bootstrap3RenderOptions.prototype.renderHtml = function (html, container) {
             if (!container.children.namedItem('supler-modal')) {
@@ -939,6 +939,14 @@ var Supler;
         Bootstrap3RenderOptions.prototype.preRender = function () {
             this.modalController.getModalContext().remove(Bootstrap3RenderOptions.NonTopModals);
             this.modalController.getModalContext().remove(Bootstrap3RenderOptions.TopVisibleModal);
+            this.cleanupModals();
+        };
+        Bootstrap3RenderOptions.prototype.cleanupModals = function () {
+            $('#modal-body').html('');
+            $('#hidden-modals').html('');
+            if (this.modalController.isEmpty()) {
+                $('#supler-modal').modal('hide');
+            }
         };
         Bootstrap3RenderOptions.prototype.postRender = function () {
             if (this.modalController.currentModal() != null) {
@@ -1164,10 +1172,6 @@ var Supler;
             }
             return 'text';
         };
-        Bootstrap3RenderOptions.prototype.registerListenersOnModalClose = function (container, closeModal) {
-            $(".close-supler-modal.notregistered").click(closeModal);
-            $(".close-supler-modal.notregistered").removeClass('notregistered');
-        };
         Bootstrap3RenderOptions.TopVisibleModal = 'visible-modal';
         Bootstrap3RenderOptions.NonTopModals = 'nontop-modals';
         return Bootstrap3RenderOptions;
@@ -1338,11 +1342,16 @@ var Supler;
                 this.renderOptionsGetter.defaultRenderOptions().renderHtml(result.html, this.container);
                 this.initializeValidation(result.formElementDictionary, json);
                 var sendController = new Supler.SendController(this, result.formElementDictionary, this.sendControllerOptions, this.elementSearch, this.validation, this.modalController);
-                this.renderOptionsGetter.defaultRenderOptions().registerListenersOnModalClose(this.container, this.modalController.closeModalFunction(sendController));
                 this.renderOptionsGetter.defaultRenderOptions().postRender();
                 sendController.attachRefreshListeners();
                 sendController.attachActionListeners();
                 sendController.attachModalListeners();
+            }
+            else if (this.isSuplerCommand(json)) {
+                if (json.supler_command == 'closeModal') {
+                    var sendController = new Supler.SendController(this, new Supler.FormElementDictionary(), this.sendControllerOptions, this.elementSearch, this.validation, this.modalController);
+                    this.modalController.closeModalFunction(sendController)();
+                }
             }
             var customData = this.getCustomData(json);
             if (customData)
@@ -1376,9 +1385,15 @@ var Supler;
             if (this.isSuplerForm(json)) {
                 return json.custom_data;
             }
+            else if (this.isSuplerCommand(json)) {
+                return {};
+            }
             else {
                 return json;
             }
+        };
+        Form.prototype.isSuplerCommand = function (json) {
+            return json.supler_command;
         };
         Form.prototype.isSuplerForm = function (json) {
             return json.is_supler_form === true;
