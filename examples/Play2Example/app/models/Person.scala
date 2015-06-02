@@ -6,6 +6,7 @@ import org.demo.core._
 
 //case class Person(name:core.PersonName,
 case class Person(firstName:String,lastName:String,
+                   email:Email,
                    birthday: DateTime,
                    age: Int,
                    address1: Option[String],

@@ -1,7 +1,7 @@
 package org.demo
 
 import java.util.UUID
-import org.demo.core.PersonName
+import org.demo.core.{Email, PersonName}
 import org.demo.core.types.UserStatus
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
@@ -44,20 +44,20 @@ object PersonForm {
       case e: IllegalArgumentException => Left("error_custom_illegalDateFormat")
     }
   }
-  /*
-  implicit val userStatusTransformer = new StringTransformer[UserStatus.UserStatus] {
-    override def serialize(t: UserStatus.UserStatus) = t.toString
+  implicit val emailTransformer = new StringTransformer[Email] {
+    override def serialize(t: Email) = t.value
 
     override def deserialize(u: String) = try {
-      Right(UserStatus.withName(u))
+      Right(Email(u))
     } catch {
-      case e: IllegalArgumentException => Left("error_custom_illegalUserStatus")
+      case e: IllegalArgumentException => Left("error_custom_illegalEmail")
     }
-  }*/
+  }
 
   val personForm = form[Person](f => List(
     f.field(_.firstName).label("label_person_firstname") || f.field(_.lastName).label("label_person_lastname")
       .validate(custom((v, e) => v.length > e.firstName.length, (v, e) => Message("error_custom_lastNameLongerThanFirstName"))),
+    f.field(_.email).label("Email Address"),
     f.field(_.age).label("Age").validate(ge(0), lt(160)) || f.field(_.birthday).label("Birthday").description("Please tell us, when where you born"),
     f.field(_.likesBroccoli).label("Likes broccoli"),
     f.field(_.address1).label("Address 1"),
@@ -79,7 +79,7 @@ object PersonForm {
   def deleteCar(p: Person, c: Car): Person = p.copy(cars = p.cars diff List(c))
   def deleteLegoSet(p: Person, ls: LegoSet): Person = p.copy(legoSets = p.legoSets diff List(ls))
 
-  val aPerson = Person("Adam", "", new DateTime(), 10, None, None, null, None, None,
+  val aPerson = Person("Adam", "", Email("test@test.com"),new DateTime(), 10, None, None, null, None, None,
     Set("red", "blue"), likesBroccoli = false,
     List(
       Car("Ford", "Focus", 1990),
