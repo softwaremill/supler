@@ -1,0 +1,14 @@
+@(message: String)
+
+@views.html.main("Welcome to Play") {
+<div class="well jumbotron">
+    <div class="row">
+        <div class="col-md-12"  id="product_form_container">
+            <div supler:fieldInputTemplate supler:fieldPath="save">
+                <button class="btn btn-primary btn-lg" role="button" {{suplerFieldInputAttrs}}>Save</button>
+            </div>
+        </div>
+        <p id="feedback"></p>
+    </div>
+</div>
+}

@@ -4,8 +4,7 @@ import org.json4s.JsonAST.JObject
 import org.json4s._
 import org.supler.field._
 import org.supler.validation._
-
-case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
+case class form[T](rows: List[Row[T]], createEmpty: () => T) {
   requireFieldsUnique()
 
   def apply(obj: T): FormWithObject[T] = InitialFormWithObject(this, obj, None, FormMeta(Map()))
