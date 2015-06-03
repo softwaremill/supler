@@ -35,25 +35,6 @@ object PersonForm {
     f.action("delete")(deleteAction).label("Delete")
   ))
 
-  implicit val dateTimeTransformer = new StringTransformer[DateTime] {
-    override def serialize(t: DateTime) = ISODateTimeFormat.date().print(t)
-
-    override def deserialize(u: String) = try {
-      Right(ISODateTimeFormat.date().parseDateTime(u))
-    } catch {
-      case e: IllegalArgumentException => Left("error_custom_illegalDateFormat")
-    }
-  }
-  implicit val emailTransformer = new StringTransformer[Email] {
-    override def serialize(t: Email) = t.value
-
-    override def deserialize(u: String) = try {
-      Right(Email(u))
-    } catch {
-      case e: IllegalArgumentException => Left("error_custom_illegalEmail")
-    }
-  }
-
   val personForm = form[Person](f => List(
     f.field(_.id).renderHint(asHidden()),
     f.field(_.firstName).label("label_person_firstname") || f.field(_.lastName).label("label_person_lastname")

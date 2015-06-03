@@ -1,6 +1,9 @@
 package helpers
 
-import org.supler.transformation.{BasicTypeTransformer}
+import org.demo.core.Email
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
+import org.supler.transformation.{StringTransformer, BasicTypeTransformer}
 
 
 object JsonImplicits {
@@ -19,4 +22,23 @@ object JsonImplicits {
       case e: IllegalArgumentException => Left("error_custom_illegalUserStatus")
     }
   }
+  implicit val dateTimeTransformer = new StringTransformer[DateTime] {
+    override def serialize(t: DateTime) = ISODateTimeFormat.date().print(t)
+
+    override def deserialize(u: String) = try {
+      Right(ISODateTimeFormat.date().parseDateTime(u))
+    } catch {
+      case e: IllegalArgumentException => Left("error_custom_illegalDateFormat")
+    }
+  }
+  implicit val emailTransformer = new StringTransformer[Email] {
+    override def serialize(t: Email) = if (t == null) "" else t.value
+
+    override def deserialize(u: String) = try {
+      Right(Email(u))
+    } catch {
+      case e: IllegalArgumentException => Left("error_custom_illegalEmail")
+    }
+  }
+
 }

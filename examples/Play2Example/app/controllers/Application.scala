@@ -60,5 +60,6 @@ object TestSuplerController extends APICrudController[Person] {
   import helpers.JsonImplicits._
   import org.supler.field.ActionResult
   var entity = Option(PersonForm.aPerson)
-  val entityFormWithSave = PersonForm.personForm + saveAction
+  val entityForm = PersonForm.personForm
+  val entityFormWithSave = entityForm + saveAction
 }

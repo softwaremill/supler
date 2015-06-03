@@ -5,7 +5,7 @@ feedback.hide();
 function sendForm(formValue, renderResponseFn, sendErrorFn) {
     console.log("Sending data to server..");
     $.ajax({
-        url: '/api/test/generic/persons',
+        url: '/api/persons',
         type: 'POST',
         data: JSON.stringify(formValue),
         dataType: 'json',
@@ -39,7 +39,10 @@ var form = new Supler.Form(formContainer, {
 });
 
 $(document).ready(function() {
-    $.get('/api/test/generic/persons/1', function(data) {
+    $.get('/api/persons', function(data) {
         form.render(data);
     });
+    //$.get('/api/test/generic/persons/1', function(data) {
+    //    form.render(data);
+    //});
 });

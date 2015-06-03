@@ -7,8 +7,10 @@ GET        /                    controllers.Application.index
 
 POST          /api/test/persons             controllers.Application.saveTestPerson
 GET           /api/test/persons/:id             controllers.Application.getTestPerson(id:Long)
-POST          /api/test/generic/persons             controllers.TestSuplerController.create
-GET           /api/test/generic/persons/:id             controllers.TestSuplerController.get(id:Int)
+POST          /api/persons             controllers.TestSuplerController.create
+GET           /api/persons             controllers.TestSuplerController.getNew
+GET           /api/persons/:id             controllers.TestSuplerController.get(id:Int)
+POST           /api/persons/:id             controllers.TestSuplerController.update(id:Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET        /assets/*file        controllers.Assets.versioned(path="/public", file: Asset)
