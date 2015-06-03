@@ -5,12 +5,11 @@ import org.joda.time.DateTime
 import org.demo.core._
 
 //case class Person(name:core.PersonName,
-case class Person(firstName:String,lastName:String,
+case class Person(id:Option[Int] = None, firstName:String,lastName:String,
                    email:Email,
                    birthday: DateTime,
                    age: Int,
                    address1: Option[String],
-                   address2: Option[String],
                    gender: String,
                    secret: Option[String],
                    bio: Option[String],
@@ -19,9 +18,8 @@ case class Person(firstName:String,lastName:String,
                    cars: List[Car],
                    legoSets: List[LegoSet],
                    registrationDate: DateTime,
-                   id : String,
                    status:UserStatus,
-                   a1: String)
+                   a1: String) extends WithPrimaryKey
 
 case class Car(
                 make: String,

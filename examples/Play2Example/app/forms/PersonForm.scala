@@ -55,13 +55,13 @@ object PersonForm {
   }
 
   val personForm = form[Person](f => List(
+    f.field(_.id),
     f.field(_.firstName).label("label_person_firstname") || f.field(_.lastName).label("label_person_lastname")
       .validate(custom((v, e) => v.length > e.firstName.length, (v, e) => Message("error_custom_lastNameLongerThanFirstName"))),
     f.field(_.email).label("Email Address"),
     f.field(_.age).label("Age").validate(ge(0), lt(160)) || f.field(_.birthday).label("Birthday").description("Please tell us, when where you born"),
     f.field(_.likesBroccoli).label("Likes broccoli"),
     f.field(_.address1).label("Address 1"),
-    f.field(_.address2).label("Address 2"),
     f.selectManyField(_.favoriteColors)(identity).possibleValues(_ => List("red", "green", "blue", "magenta")).label("Favorite colors") ||
     f.selectOneField(_.gender)(identity).possibleValues(_ => List("Male", "Female")).label("Gender").renderHint(asRadio()) ||
     f.field(_.secret).label("Secret").renderHint(asPassword()),
@@ -79,7 +79,7 @@ object PersonForm {
   def deleteCar(p: Person, c: Car): Person = p.copy(cars = p.cars diff List(c))
   def deleteLegoSet(p: Person, ls: LegoSet): Person = p.copy(legoSets = p.legoSets diff List(ls))
 
-  val aPerson = Person("Adam", "", Email("test@test.com"),new DateTime(), 10, None, None, null, None, None,
+  val aPerson = Person(Some(1),"Adam", "", Email("test@test.com"),new DateTime(), 10, None, null, None, None,
     Set("red", "blue"), likesBroccoli = false,
     List(
       Car("Ford", "Focus", 1990),
@@ -88,7 +88,7 @@ object PersonForm {
       LegoSet("Motorcycle", "Technic", 1924, 31),
       LegoSet("Arctic Supply Plane", "City", 60064, 1),
       LegoSet("Princess and Horse", "Duplo", 4825, 7)),
-    new DateTime(2012, 2, 19, 0, 0), UUID.randomUUID().toString,
+    new DateTime(2012, 2, 19, 0, 0),
     UserStatus.default,
     "a")
 }

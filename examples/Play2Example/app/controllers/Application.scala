@@ -2,7 +2,7 @@ package controllers
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-import org.demo.Person
+import org.demo.{PersonForm, Person}
 import play.api._
 import play.api.mvc._
 
@@ -53,4 +53,12 @@ object Application extends Controller with Json4s{
         Ok(personFormWithSave(person).process(request.body).generateJSON)
       }
   }
+}
+
+object TestSuplerController extends APICrudController[Person] {
+  import org.supler.Supler._
+  import helpers.JsonImplicits._
+  import org.supler.field.ActionResult
+  var entity = Option(PersonForm.aPerson)
+  val entityFormWithSave = PersonForm.personForm + saveAction
 }

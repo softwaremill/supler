@@ -2,6 +2,10 @@ package org.demo.core
 
 import java.util.UUID
 
+trait WithPrimaryKey {
+  def id: Option[Int]
+}
+
 case class PK(id:UUID) {
   override def toString = id.toString
   def ===(pk:Option[PK]):Boolean = pk match {
