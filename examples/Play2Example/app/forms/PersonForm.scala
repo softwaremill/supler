@@ -55,7 +55,7 @@ object PersonForm {
   }
 
   val personForm = form[Person](f => List(
-    f.field(_.id),
+    f.field(_.id).renderHint(asHidden()),
     f.field(_.firstName).label("label_person_firstname") || f.field(_.lastName).label("label_person_lastname")
       .validate(custom((v, e) => v.length > e.firstName.length, (v, e) => Message("error_custom_lastNameLongerThanFirstName"))),
     f.field(_.email).label("Email Address"),
@@ -70,8 +70,7 @@ object PersonForm {
     f.action("addcar")(p => ActionResult(p.copy(cars = p.cars :+ Car("", "", 0)))).label("Add car"),
     f.subform(_.legoSets, legoSetForm(f.parentAction((person, index, ls) => ActionResult(deleteLegoSet(person, ls))))).label("Lego sets").renderHint(asTable()),
     f.action("addlegoset")(p => ActionResult(p.copy(legoSets = p.legoSets :+ LegoSet("", "", 0, 0)))).label("Add lego set"),
-    f.staticField(p => Message(p.registrationDate)).label("Registration date"),
-    f.field(_.id).renderHint(asHidden()),
+    //f.staticField(p => Message(p.registrationDate)).label("Registration date"),
     f.selectOneField(_.status)(p => p.toString).possibleValues(_ => UserStatus.values.toList).label("Status"),
     f.field(_.a1)
   ))

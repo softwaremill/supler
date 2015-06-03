@@ -1,11 +1,11 @@
-var formContainer = document.getElementById('product_form_container');
+var formContainer = document.getElementById('form_container');
 var feedback = $('#feedback');
 feedback.hide();
 
 function sendForm(formValue, renderResponseFn, sendErrorFn) {
     console.log("Sending data to server..");
     $.ajax({
-        url: '/api/test/products',
+        url: '/api/test/generic/persons',
         type: 'POST',
         data: JSON.stringify(formValue),
         dataType: 'json',
@@ -39,7 +39,7 @@ var form = new Supler.Form(formContainer, {
 });
 
 $(document).ready(function() {
-    $.get('/api/test/products/1', function(data) {
+    $.get('/api/test/generic/persons/1', function(data) {
         form.render(data);
     });
 });
