@@ -37,5 +37,13 @@ libraryDependencies ++= Seq(
   "com.github.tototoshi" %% "play-json4s-native" % "0.3.1" withSources(),
   "io.spray" %% "spray-httpx" % "1.3.1" withSources(),
   "com.softwaremill.supler" %% "supler" % "0.3.0-SNAPSHOT" withSources(),
-  "org.specs2" %% "specs2" % "2.4.3" % "test"
+  //"org.specs2" %% "specs2" % "2.4.3" % "test"
+  "org.specs2" %% "specs2-core" % "3.6.1" % "test",
+  "org.specs2" %% "specs2-common" % "3.6.1" % "test",
+  "org.specs2" %% "specs2-mock" % "3.6.1" % "test",
+  "org.specs2" %% "specs2-junit" % "3.6.1" % "test",
+  "org.specs2" %% "specs2-matcher" % "3.6.1" % "test",
+  "org.specs2" %% "specs2-matcher-extra" % "3.6.1" % "test"
 )
+
+scalacOptions in Test ++= Seq("-Yrangepos")

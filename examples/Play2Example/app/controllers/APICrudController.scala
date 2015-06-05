@@ -29,20 +29,25 @@ abstract class APICrudController[E <: WithPrimaryKey] extends Controller with Js
 
   def getNew = Action.async { implicit request =>
     scala.concurrent.Future {
+        println("Getting fresh object..")
         import org.supler.validation._
         import spray.httpx.Json4sSupport
         val emptyEntity = entityForm.createEmpty()
-        play.api.mvc.Results.Ok(entityForm(emptyEntity).withMeta("id","").doValidate(ValidateFilled).generateJSON)
+        println(s"Using empty entity - $emptyEntity")
+        play.api.mvc.Results.Ok(entityFormWithSave(emptyEntity).withMeta("uid","").doValidate(ValidateFilled).generateJSON)
     }
   }
 
   def create = Action.async(json) { implicit request =>
       scala.concurrent.Future {
         println(s"create:${request.body}")
-        val newEntity = entityForm.withNewEmpty.applyJSONValues(request.body).obj
+        val newEntity = entityFormWithSave.withNewEmpty.applyJSONValues(request.body).obj
         //FIXME: In reality, save this new entity and assign the new ID
         val persistedEntityID:Option[Int] = Some(1)
-        val suplerData:SuplerData[E] = entityFormWithSave(newEntity).withMeta("id",persistedEntityID.getOrElse(0).toString).process(request.body)
+        println(entityFormWithSave(newEntity).withMeta("id",persistedEntityID.getOrElse(0).toString))
+        //val suplerData:SuplerData[E] = entityFormWithSave(newEntity).withMeta("id",persistedEntityID.getOrElse(0).toString).process(request.body)
+        val suplerData:SuplerData[E] = entityFormWithSave(newEntity).withMeta("uid","1").process(request.body)
+        println(s"SuplerData for create: ${suplerData.toString}")
         play.api.mvc.Results.Created(suplerData.generateJSON)
       }
   }
@@ -51,8 +56,8 @@ abstract class APICrudController[E <: WithPrimaryKey] extends Controller with Js
     scala.concurrent.Future {
       println(s"update:${request.body}")
       //Entity can be saved in data storage here
-      val id = entityForm.getMeta(request.body)("id")
-      println(s"id:$id")
+      val id = entityFormWithSave.getMeta(request.body)("uid")
+      println(s"uid:$id")
       //Get entity based on input ID
       //FIXME: For testing using predefined object with id - 1
       val existingEntity:Option[E] = entity
@@ -66,7 +71,7 @@ abstract class APICrudController[E <: WithPrimaryKey] extends Controller with Js
 
   def get(id:Int) = Action.async { implicit request =>
       scala.concurrent.Future {
-        //Get the entity object from the data storage
+        //FIXME: Get the entity object from the data storage
         val existingEntity: Option[E] = entity
         if (existingEntity.isDefined) {
           import spray.httpx.Json4sSupport

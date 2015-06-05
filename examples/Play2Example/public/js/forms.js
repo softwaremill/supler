@@ -40,6 +40,7 @@ var form = new Supler.Form(formContainer, {
 
 $(document).ready(function() {
     $.get('/api/persons', function(data) {
+        console.log("Getting data from server for initial display..");
         form.render(data);
     });
     //$.get('/api/test/generic/persons/1', function(data) {

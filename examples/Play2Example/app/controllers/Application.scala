@@ -1,5 +1,7 @@
 package controllers
 
+import java.io.FileNotFoundException
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.demo.{PersonForm, Person}
@@ -12,6 +14,17 @@ object Application extends Controller with Json4s{
   def checkPreFlight(path: String) = Action {
     implicit request =>
       Ok("OK").withHeaders("Access-Control-Allow-Origin" -> "*", "Access-Control-Allow-Methods" -> "GET,PUT,POST,DELETE", "Access-Control-Max-Age" -> "300", "Access-Control-Allow-Headers" -> "Origin, X-Requested-With, Content-Type, Accept, X-ID-TOKEN, X-REFERER")
+  }
+
+  def serveContent(filename: String) = Action {
+    val localFilePath = "../../" + filename
+    try {
+      val f = new java.io.File(localFilePath)
+      Ok.sendFile(f)
+    } catch {
+      case e:FileNotFoundException =>
+        NotFound
+    }
   }
 
   def index = Action {

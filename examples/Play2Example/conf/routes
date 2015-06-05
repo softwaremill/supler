@@ -3,14 +3,16 @@
 # ~~~~
 
 # Home page
-GET        /                    controllers.Application.index
+GET         /                            controllers.Application.index
 
-POST          /api/test/persons             controllers.Application.saveTestPerson
-GET           /api/test/persons/:id             controllers.Application.getTestPerson(id:Long)
-POST          /api/persons             controllers.TestSuplerController.create
-GET           /api/persons             controllers.TestSuplerController.getNew
-GET           /api/persons/:id             controllers.TestSuplerController.get(id:Int)
-POST           /api/persons/:id             controllers.TestSuplerController.update(id:Int)
+POST        /api/test/persons            controllers.Application.saveTestPerson
+GET         /api/test/persons/:id        controllers.Application.getTestPerson(id:Long)
+POST        /api/persons                 controllers.TestSuplerController.create
+GET         /api/persons                 controllers.TestSuplerController.getNew
+GET         /api/persons/:id             controllers.TestSuplerController.get(id:Int)
+POST        /api/persons/:id             controllers.TestSuplerController.update(id:Int)
+
+GET         /content/*filename               controllers.Application.serveContent(filename:String)
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file        controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                controllers.Assets.versioned(path="/public", file: Asset)
