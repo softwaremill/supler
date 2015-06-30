@@ -117,4 +117,41 @@ class ProcessTest extends FlatSpec with ShouldMatchers {
     val textjson = pretty(render(json))
     textjson should include ("WillShow")
   }
+
+  val personWithActionsForm = form[Person] {f => List(
+    f.field(_.firstName),
+    f.field(_.lastName),
+    f.modal("editPerson", p => p, (p: Person, u: Person) => p, personForm)
+  )}
+
+  val workplaceWithTableAndActionsForm = form[WorkPlace] {f => List(
+    f.subform(_.employees, personWithActionsForm)
+  )}
+
+  "process" should "open modal on table" in {
+    // given
+    val workPlace = WorkPlace(Person("Boss", "Bosowski"), List(Person("Leming", "Rycki"), Person("Will", "Dissapear")))
+
+    // when
+    val json = workplaceWithTableAndActionsForm(workPlace).process(
+      parseJson(
+      """{
+        |"supler_modals": "employees[0].editPerson",
+        |"employees": [{
+        |   "firstName": "Bonifacy",
+        |   "lastName": "Pankracy",
+        |   "editPerson": "employees[0].editPerson"
+        |}]
+        |}
+      """.stripMargin
+      )
+    ).generateJSON()
+
+    // then
+    val textjson = pretty(render(json))
+    textjson should include("""value":"Bonifacy""")
+    textjson should include("""value":"Pankracy""")
+    textjson shouldNot include("""value":"Will""")
+    textjson shouldNot include("""value":"Dissapear""")
+  }
 }
