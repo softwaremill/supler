@@ -10,11 +10,11 @@ As Supler has two parts, they are deployed in different repositories. The backen
 `Sonatype’s OSS repository <https://oss.sonatype.org/content/repositories/releases/com/softwaremill/supler/supler_2.11/>`_,
 and if you have e.g. an SBT build you just need to add::
 
-  libraryDependencies += "com.softwaremill.supler" %% "supler" % "0.2.3"
+  libraryDependencies += "com.softwaremill.supler" %% "supler" % "0.3.0"
 
 The frontend is deployed to `Bower <http://bower.io/search/?q=supler>`_, and you can install it simply using
 ``bower install supler``. Or you can just grab ``supler.js`` directly from the
-`GitHub tag <https://github.com/softwaremill/supler/blob/0.2.3/supler.js>`_.
+`GitHub tag <https://github.com/softwaremill/supler/blob/0.3.0/supler.js>`_.
 
 Development version
 -------------------
@@ -27,7 +27,7 @@ Add the SNAPSHOT repository (this is SBT, but the repository is maven - you can 
 
 and then add the dependencies for both supler backend::
 
-  libraryDependencies += "com.softwaremill.supler" %% "supler" % "0.3.0-SNAPSHOT"
+  libraryDependencies += "com.softwaremill.supler" %% "supler" % "0.4.0-SNAPSHOT"
 
 and frontend (in bower.json)::
 

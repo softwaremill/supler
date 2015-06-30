@@ -4,7 +4,6 @@ import org.json4s.JsonAST.JObject
 import org.json4s._
 import org.supler.field._
 import org.supler.validation._
-
 case class Form[T](rows: List[Row[T]], createEmpty: () => T) {
   requireFieldsUnique()
 

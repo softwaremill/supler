@@ -6,7 +6,7 @@ multiple times (forms are immutable). Currently single-valued subforms, optional
 subforms are supported. For example::
 
   case class Car(make: String, year: Int)
-  case class Person(name: String, cars: List[Var])
+  case class Person(name: String, cars: List[Car])
   
   val carForm = ...
   
