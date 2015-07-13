@@ -27,13 +27,13 @@ object DemoServer extends App with SuplerServerSupport with Json4sSupport with D
     path("rest" / "form1.json") {
       getJson {
         complete {
-          personFormWithSave.withNewEmpty.generateJSON
+          personFormWithSave(person).generateJSON
         }
       } ~
       post {
         entity(as[JValue]) { jvalue =>
           complete {
-            personFormWithSave.withNewEmpty.process(jvalue).generateJSON
+            personFormWithSave(person).process(jvalue).generateJSON
           }
         }
       }
