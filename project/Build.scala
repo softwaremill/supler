@@ -18,8 +18,8 @@ object BuildSettings {
       )
     else bintraySettings ++
       Seq(
-        bintrayOrganization in bintray := Some("softwaremill"),
-        bintrayRepository in bintray := "softwaremill")
+        bintrayOrganization in ThisBuild := Some("softwaremill"),
+        bintrayRepository in ThisBuild := "softwaremill")
     ) ++ Seq(
     organization := "com.softwaremill.supler",
     version := Version,
