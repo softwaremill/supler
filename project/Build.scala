@@ -20,7 +20,7 @@ object BuildSettings {
       Seq(
         bintrayOrganization in ThisBuild := Some("softwaremill"),
         bintrayRepository in ThisBuild := "softwaremill",
-        bintrayPackage in ThisBuild := "supler"),
+        bintrayPackage in ThisBuild := "supler")
     ) ++ Seq(
     organization := "com.softwaremill.supler",
     version := Version,
