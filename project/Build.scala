@@ -1,9 +1,9 @@
-import bintray.Plugin.bintraySettings
-import bintray.Keys._
 import sbt.Keys._
 import sbt._
 import sbtassembly.Plugin.AssemblyKeys._
 import sbtassembly.Plugin._
+import bintray.BintrayPlugin.bintraySettings
+import bintray.BintrayKeys._
 
 object BuildSettings {
   val Version = "0.4.0-SNAPSHOT"
@@ -17,7 +17,7 @@ object BuildSettings {
     else bintraySettings ++
       Seq(
         bintrayOrganization in bintray := Some("softwaremill"),
-        repository in bintray := "softwaremill")
+        bintrayRepository in bintray := "softwaremill")
     ) ++ Seq(
     organization := "com.softwaremill.supler",
     version := Version,
