@@ -12,6 +12,7 @@ object BuildSettings {
     if (Version.endsWith("-SNAPSHOT"))
       Seq(
         publishTo := Some("Artifactory Realm" at "http://oss.jfrog.org/artifactory/oss-snapshot-local"),
+        bintrayReleaseOnPublish in ThisBuild := false,
         // Only setting the credentials file if it exists (#52)
         credentials := List(Path.userHome / ".bintray" / ".artifactory").filter(_.exists).map(Credentials(_))
       )
