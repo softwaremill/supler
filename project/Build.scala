@@ -6,7 +6,7 @@ import sbtassembly.Plugin.AssemblyKeys._
 import sbtassembly.Plugin._
 
 object BuildSettings {
-  val Version = "0.4.0"
+  val Version = "0.5.0-SNAPSHOT"
 
   val buildSettings = Defaults.coreDefaultSettings ++ Seq(
     version := Version,
