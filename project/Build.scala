@@ -1,4 +1,4 @@
-import bintray.BintrayPlugin.bintraySettings
+import bintray.BintrayPlugin.bintrayPublishSettings
 import bintray.BintrayKeys._
 import sbt.Keys._
 import sbt._
@@ -8,46 +8,51 @@ import sbtassembly.Plugin._
 object BuildSettings {
   val Version = "0.4.0"
 
-  val buildSettings = Defaults.coreDefaultSettings ++ (
-    if (Version.endsWith("-SNAPSHOT"))
-      Seq(
-        publishTo := Some("Artifactory Realm" at "http://oss.jfrog.org/artifactory/oss-snapshot-local"),
-        bintrayReleaseOnPublish in ThisBuild := false,
-        // Only setting the credentials file if it exists (#52)
-        credentials := List(Path.userHome / ".bintray" / ".artifactory").filter(_.exists).map(Credentials(_))
-      )
-    else bintraySettings ++
-      Seq(
-        bintrayOrganization in ThisBuild := Some("softwaremill"),
-        bintrayRepository in ThisBuild := "softwaremill",
-        bintrayPackage in ThisBuild := "supler")
-    ) ++ Seq(
-    organization := "com.softwaremill.supler",
+  val buildSettings = Defaults.coreDefaultSettings ++ Seq(
     version := Version,
     scalaVersion := "2.11.5",
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:existentials", "-language:higherKinds"),
-    publishMavenStyle := true,
-    publishArtifact in Test := false,
-    pomExtra := <scm>
-      <url>git@github.com:softwaremill/supler.git</url>
-      <connection>scm:git:git@github.com:softwaremill/supler.git</connection>
-    </scm>
-      <developers>
-        <developer>
-          <id>szimano</id>
-          <name>Tomasz Szymanski</name>
-          <url>http://www.szimano.org</url>
-        </developer>
-        <developer>
-          <id>adamw</id>
-          <name>Adam Warski</name>
-          <url>http://www.warski.org</url>
-        </developer>
-      </developers>,
-    parallelExecution := false,
-    homepage := Some(new java.net.URL("https://github.com/softwaremill/supler")),
-    licenses := ("Apache-2.0", new java.net.URL("http://www.apache.org/licenses/LICENSE-2.0.txt")) :: Nil
+    parallelExecution := false
   )
+
+  val doNotPublishSettings = Seq(publish := {})
+
+  val publishSettings =
+    (if (Version.endsWith("-SNAPSHOT"))
+      Seq(
+        publishTo := Some("Artifactory Realm" at "http://oss.jfrog.org/artifactory/oss-snapshot-local"),
+        bintrayReleaseOnPublish := false,
+        // Only setting the credentials file if it exists (#52)
+        credentials := List(Path.userHome / ".bintray" / ".artifactory").filter(_.exists).map(Credentials(_))
+      )
+    else
+      Seq(
+        bintrayOrganization := Some("softwaremill"),
+        bintrayRepository := "softwaremill")
+      ) ++ Seq(
+      organization := "com.softwaremill.supler",
+      pomExtra := <scm>
+        <url>git@github.com:softwaremill/supler.git</url>
+        <connection>scm:git:git@github.com:softwaremill/supler.git</connection>
+      </scm>
+        <developers>
+          <developer>
+            <id>szimano</id>
+            <name>Tomasz Szymanski</name>
+            <url>http://www.szimano.org</url>
+          </developer>
+          <developer>
+            <id>adamw</id>
+            <name>Adam Warski</name>
+            <url>http://www.warski.org</url>
+          </developer>
+        </developers>,
+      publishMavenStyle := false,
+      publishArtifact in Test := false,
+      homepage := Some(url("https://github.com/softwaremill/supler")),
+      resolvers += Resolver.url("supler ivy resolver", url("http://dl.bintray.com/softwaremill/maven"))(Resolver.ivyStylePatterns),
+      licenses := ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.txt")) :: Nil
+    )
 }
 
 object Dependencies {
@@ -71,7 +76,7 @@ object SuplerBuild extends Build {
   lazy val root: Project = Project(
     "root",
     file("."),
-    settings = buildSettings ++ Seq(publishArtifact := false)
+    settings = buildSettings ++ doNotPublishSettings ++ Seq(publishArtifact := false)
   ) aggregate(supler, suplerjs, examples)
 
   lazy val makeVersionSh = taskKey[Seq[File]]("Creates .run.central.synchro.sh file.")
@@ -79,7 +84,7 @@ object SuplerBuild extends Build {
   lazy val supler: Project = Project(
     "supler",
     file("supler"),
-    settings = buildSettings ++ Seq(
+    settings = buildSettings ++ publishSettings ++ Seq(
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _ % "provided"),
       libraryDependencies ++= Seq(json4sNative, scalaTest),
       makeVersionSh := {
@@ -97,7 +102,7 @@ object SuplerBuild extends Build {
   lazy val examples: Project = Project(
     "examples",
     file("examples"),
-    settings = buildSettings ++ assemblySettings ++ Seq(
+    settings = buildSettings ++ doNotPublishSettings ++ assemblySettings ++ Seq(
       libraryDependencies ++= Seq(akka, sprayCan, sprayRouting, sprayHttpx, jodaTime, jodaConvert),
       jarName in assembly := "supler-example.jar",
       mainClass in assembly := Some("org.demo.DemoServer"),
@@ -138,7 +143,7 @@ object SuplerBuild extends Build {
   lazy val suplerjs: Project = Project(
     "supler-js",
     file("supler-js"),
-    settings = buildSettings ++ Seq(
+    settings = buildSettings ++ publishSettings ++ Seq(
       test in Test <<= gruntTask("test") dependsOn (test in Test in supler))
   )
 }
