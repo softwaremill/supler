@@ -67,20 +67,13 @@ def haltOnCmdResultError(result: Int) {
   }
 }
 
+lazy val makeVersionSh = taskKey[Seq[File]]("Creates .run.central.synchro.sh file.")
+
 lazy val root: Project = Project(
   "root",
   file("."),
-  settings = buildSettings ++ doNotPublishSettings ++ Seq(publishArtifact := false)
-) aggregate(supler, suplerjs, examples)
-
-lazy val makeVersionSh = taskKey[Seq[File]]("Creates .run.central.synchro.sh file.")
-
-lazy val supler: Project = Project(
-  "supler",
-  file("supler"),
-  settings = buildSettings ++ publishSettings ++ Seq(
-    libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _ % "provided"),
-    libraryDependencies ++= Seq(json4sNative, scalaTest),
+  settings = buildSettings ++ doNotPublishSettings ++ Seq(
+    publishArtifact := false,
     makeVersionSh := {
       val pf = new java.io.File(".run.central.synchro.sh")
       val content = s"""|#!/bin/bash
@@ -88,7 +81,16 @@ lazy val supler: Project = Project(
                       """.stripMargin
       IO.write(pf, content)
       Seq(pf)
-    })
+    }
+  )
+) aggregate(supler, suplerjs, examples)
+
+lazy val supler: Project = Project(
+  "supler",
+  file("supler"),
+  settings = buildSettings ++ publishSettings ++ Seq(
+    libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _ % "provided"),
+    libraryDependencies ++= Seq(json4sNative, scalaTest))
 )
 
 lazy val createAndCopySuplerJs = taskKey[Unit]("Create and copy the supler js files.")
