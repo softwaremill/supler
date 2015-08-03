@@ -61,6 +61,12 @@ val publishSettings =
     licenses := ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.txt")) :: Nil
   )
 
+def haltOnCmdResultError(result: Int) {
+  if (result != 0) {
+    throw new Exception("Build failed.")
+  }
+}
+
 lazy val root: Project = Project(
   "root",
   file("."),
@@ -111,7 +117,7 @@ lazy val examples: Project = Project(
 
 val updateNpm = baseDirectory map { bd =>
   println("Updating NPM dependencies in " + bd)
-  if ((Process("npm install", bd) !) != 0) throw new Exception("Build failed.")
+  haltOnCmdResultError(Process("npm install", bd) !)
   println("NPM dependencies updated")
 }
 
@@ -121,7 +127,7 @@ def gruntTask(taskName: String) = (baseDirectory, streams) map { (bd, s) =>
     Process(localGruntCommand, bd).!
   }
   println("Building with Grunt.js : " + taskName)
-  if (buildGrunt() != 0) throw new Exception("Build failed.")
+  haltOnCmdResultError(buildGrunt())
 } dependsOn updateNpm
 
 lazy val suplerjs: Project = Project(
