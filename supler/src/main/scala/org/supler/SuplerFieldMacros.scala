@@ -130,9 +130,9 @@ object SuplerFieldMacros {
 
     def newSubformField[T, ContU, U, Cont[_]](c: SubformContainer[ContU, U, Cont])
       (fieldName: String, read: T => Cont[U], write: (T, Cont[U]) => T,
-        embeddedForm: Form[U], createEmpty: Option[() => U]): SubformField[T, ContU, U, Cont] = {
+        embeddedForm: => Form[U], createEmpty: Option[() => U]): SubformField[T, ContU, U, Cont] = {
 
-      SubformField[T, ContU, U, Cont](c, fieldName, read, write, None, None, embeddedForm, createEmpty,
+      SubformField[T, ContU, U, Cont](c, fieldName, read, write, None, None, () => embeddedForm, createEmpty,
         SubformListRenderHint, AlwaysCondition, AlwaysCondition)
     }
 
