@@ -12,7 +12,7 @@ case class SubformField[T, ContU, U, Cont[_]](
   write: (T, Cont[U]) => T,
   label: Option[String],
   description: Option[String],
-  embeddedForm: Form[U],
+  embeddedFormF: () => Form[U],
   // if not specified, `embeddedForm.createEmpty` will be used
   createEmpty: Option[() => U],
   renderHint: RenderHint with SubformFieldCompatible,
@@ -20,6 +20,8 @@ case class SubformField[T, ContU, U, Cont[_]](
   includeIf: T => Boolean) extends Field[T] {
   
   import c._
+  
+  lazy val embeddedForm = embeddedFormF()
   
   def label(newLabel: String): SubformField[T, ContU, U, Cont] = this.copy(label = Some(newLabel))
   def description(newDescription: String): SubformField[T, ContU, U, Cont] = this.copy(description = Some(newDescription))
