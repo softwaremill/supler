@@ -13,7 +13,7 @@ val sprayCan = "io.spray" %% "spray-can" % sprayVersion
 val sprayRouting = "io.spray" %% "spray-routing" % sprayVersion
 val sprayHttpx = "io.spray" %% "spray-httpx" % sprayVersion
 
-val Version = "0.3.1"
+val Version = "0.3.1i-SNAPSHOT"
 
 val buildSettings = Defaults.coreDefaultSettings ++ Seq(
   version := Version,
